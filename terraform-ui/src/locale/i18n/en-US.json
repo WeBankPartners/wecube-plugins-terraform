@@ -103,7 +103,7 @@
   },
   "delete_confirm": "Confirm the deletion：",
   "hr_policies": "Policies",
-  "hr_box": "Boxes",
+  "hr_box": "provider",
   "hr_enabled": "Enabled",
   "hr_description": "Description",
   "hr_name": "Name",

@@ -1,12 +1,12 @@
 <template>
   <div class=" ">
-    <DangerousPageTable :pageConfig="pageConfig"></DangerousPageTable>
+    <TerraformPageTable :pageConfig="pageConfig"></TerraformPageTable>
     <ModalComponent :modelConfig="modelConfig">
-      <template #boxes>
+      <template #provider>
         <div class="marginbottom params-each">
           <label class="col-md-2 label-name">{{ $t('hr_policies') }}:</label>
-          <Select v-model="modelConfig.addRow.policy_id" style="width: 338px">
-            <Option v-for="item in modelConfig.v_select_configs.policyOptions" :value="item.value" :key="item.value">
+          <Select v-model="modelConfig.addRow.keyconfig_id" style="width: 338px">
+            <Option v-for="item in modelConfig.v_select_configs.keyconfigOptions" :value="item.value" :key="item.value">
               {{ item.label }}
             </Option>
           </Select>
@@ -38,7 +38,7 @@
             {{ $t('detect') }}
           </button>
         </div>
-        <DangerousPageTable :pageConfig="exectPageConfig"></DangerousPageTable>
+        <TerraformPageTable :pageConfig="exectPageConfig"></TerraformPageTable>
       </template>
     </ModalComponent>
   </div>
@@ -67,7 +67,7 @@ let tableEle = [
   },
   {
     title: 'hr_policies',
-    value: 'policy.name', //
+    value: 'keyconfig.name', //
     display: true
   },
   {
@@ -106,7 +106,7 @@ export default {
   data () {
     return {
       pageConfig: {
-        CRUD: '/itsdangerous/ui/v1/boxes',
+        CRUD: '/terraform/ui/v1/provider',
         researchConfig: {
           input_conditions: [
             {
@@ -201,18 +201,18 @@ export default {
           },
           { label: 'hr_description', value: 'description', placeholder: '', disabled: false, type: 'text' },
           { label: 'hr_enabled', value: 'enabled', placeholder: '', disabled: false, type: 'checkbox' },
-          { name: 'boxes', type: 'slot' }
+          { name: 'provider', type: 'slot' }
         ],
         addRow: {
           // [通用]-保存用户新增、编辑时数据
           name: null,
           enabled: true,
           description: null,
-          policy_id: null,
+          keyconfig_id: null,
           subject_id: null
         },
         v_select_configs: {
-          policyOptions: [],
+          keyconfigOptions: [],
           subjectOptions: []
         }
       },
@@ -292,17 +292,17 @@ export default {
       }
     },
     async getConfigData () {
-      const params = '/itsdangerous/ui/v1/policies'
+      const params = '/terraform/ui/v1/policies'
       const { status, data } = await getTableData(params)
       if (status === 'OK') {
-        this.modelConfig.v_select_configs.policyOptions = data.data.map(item => {
+        this.modelConfig.v_select_configs.keyconfigOptions = data.data.map(item => {
           return {
             label: item.name,
             value: item.id
           }
         })
       }
-      const url = '/itsdangerous/ui/v1/subjects'
+      const url = '/terraform/ui/v1/subjects'
       const res = await getTableData(url)
       if (res.status === 'OK') {
         this.modelConfig.v_select_configs.subjectOptions = res.data.data.map(item => {

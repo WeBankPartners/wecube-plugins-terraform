@@ -11,7 +11,7 @@ import jquery from 'jquery'
 import zhCN from '@/locale/i18n/zh-CN.json'
 import enUS from '@/locale/i18n/en-US.json'
 
-import DangerousPageTable from '@/pages/components/table-page/page'
+import TerraformPageTable from '@/pages/components/table-page/page'
 import ModalComponent from '@/pages/components/modal'
 
 window.addOptions({
@@ -20,39 +20,23 @@ window.addOptions({
   $validate: validate
 })
 
-window.component('DangerousPageTable', DangerousPageTable)
+window.component('TerraformPageTable', TerraformPageTable)
 window.component('ModalComponent', ModalComponent)
 
 window.locale('zh-CN', zhCN)
 window.locale('en-US', enUS)
 const implicitRoute = {
-  'dangerousIndex/boxes': {
-    parentBreadcrumb: { 'zh-CN': '高危规则配置', 'en-US': 'Dangerous Config' },
-    childBreadcrumb: { 'zh-CN': '试盒', 'en-US': 'Boxes' }
+  'terraformIndex/provider': {
+    parentBreadcrumb: { 'zh-CN': 'Terraform配置', 'en-US': 'Terraform Config' },
+    childBreadcrumb: { 'zh-CN': '云厂商', 'en-US': 'provider' }
   },
-  'dangerousIndex/policy': {
-    parentBreadcrumb: { 'zh-CN': '高危规则配置', 'en-US': 'Dangerous Config' },
-    childBreadcrumb: { 'zh-CN': '策略', 'en-US': 'Policy' }
+  'terraformIndex/keyconfig': {
+    parentBreadcrumb: { 'zh-CN': 'Terraform配置', 'en-US': 'Terraform Config' },
+    childBreadcrumb: { 'zh-CN': '策略', 'en-US': 'keyconfig' }
   },
-  'dangerousIndex/rule': {
-    parentBreadcrumb: { 'zh-CN': '高危规则配置', 'en-US': 'Dangerous Config' },
-    childBreadcrumb: { 'zh-CN': '规则', 'en-US': 'Rule' }
-  },
-  'dangerousIndex/subjects': {
-    parentBreadcrumb: { 'zh-CN': '高危规则配置', 'en-US': 'Dangerous Config' },
-    childBreadcrumb: { 'zh-CN': '角色', 'en-US': 'Subjects' }
-  },
-  'dangerousIndex/targets': {
-    parentBreadcrumb: { 'zh-CN': '高危规则配置', 'en-US': 'Dangerous Config' },
-    childBreadcrumb: { 'zh-CN': '目标对象', 'en-US': 'Targets' }
-  },
-  'dangerousIndex/match-params': {
-    parentBreadcrumb: { 'zh-CN': '高危规则配置', 'en-US': 'Dangerous Config' },
-    childBreadcrumb: { 'zh-CN': '调用参数', 'en-US': 'Match Params' }
-  },
-  'dangerousIndex/plugin-params': {
-    parentBreadcrumb: { 'zh-CN': '高危规则配置', 'en-US': 'Dangerous Config' },
-    childBreadcrumb: { 'zh-CN': '插件参数', 'en-US': 'Plugin Params' }
+  'terraformIndex/resource': {
+    parentBreadcrumb: { 'zh-CN': 'Terraform配置', 'en-US': 'Terraform Config' },
+    childBreadcrumb: { 'zh-CN': '资源', 'en-US': 'resource' }
   }
 }
 window.addImplicitRoute(implicitRoute)

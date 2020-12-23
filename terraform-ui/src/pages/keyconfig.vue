@@ -1,23 +1,11 @@
 <template>
   <div class=" ">
-    <DangerousPageTable :pageConfig="pageConfig"></DangerousPageTable>
-    <ModalComponent :modelConfig="modelConfig">
-      <template #policy>
-        <div class="marginbottom params-each">
-          <label class="col-md-2 label-name">{{ $t('hr_rule') }}:</label>
-          <Select v-model="modelConfig.addRow.rules" style="width: 338px" multiple>
-            <Option v-for="item in modelConfig.v_select_configs.ruleOptions" :value="item.value" :key="item.value">
-              {{ item.label }}
-            </Option>
-          </Select>
-        </div>
-      </template>
-    </ModalComponent>
+    123123123
   </div>
 </template>
 
 <script>
-import { getTableData, addTableRow, editTableRow, deleteTableRow } from '@/api/server'
+import { getTableData, addTableRow, editTableRow, deleteTableRow, test } from '@/api/server'
 let tableEle = [
   {
     title: 'hr_name',
@@ -67,7 +55,7 @@ export default {
   data () {
     return {
       pageConfig: {
-        CRUD: '/itsdangerous/ui/v1/policies',
+        CRUD: '/terraform/ui/v1/policies',
         researchConfig: {
           input_conditions: [
             {
@@ -125,7 +113,7 @@ export default {
           },
           { label: 'hr_description', value: 'description', placeholder: '', disabled: false, type: 'text' },
           { label: 'hr_enabled', value: 'enabled', placeholder: '', disabled: false, type: 'checkbox' },
-          { name: 'policy', type: 'slot' }
+          { name: 'keyconfig', type: 'slot' }
         ],
         addRow: {
           // [通用]-保存用户新增、编辑时数据
@@ -150,15 +138,17 @@ export default {
   },
   methods: {
     async initTableData () {
-      const params = this.$itsCommonUtil.managementUrl(this)
-      const { status, data } = await getTableData(params)
-      if (status === 'OK') {
-        this.pageConfig.table.tableData = data.data
-        this.pageConfig.pagination.total = data.count
-      }
+      console.log(123)
+      const ss = await test()
+      // const params = this.$itsCommonUtil.managementUrl(this)
+      // const { status, data } = await getTableData(params)
+      // if (status === 'OK') {
+      //   this.pageConfig.table.tableData = data.data
+      //   this.pageConfig.pagination.total = data.count
+      // }
     },
     async getConfigData () {
-      const params = '/itsdangerous/ui/v1/rules'
+      const params = '/terraform/ui/v1/rules'
       const { status, data } = await getTableData(params)
       if (status === 'OK') {
         this.modelConfig.v_select_configs.ruleOptions = data.data.map(item => {

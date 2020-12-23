@@ -1,6 +1,6 @@
 <template>
   <div class=" ">
-    <DangerousPageTable :pageConfig="pageConfig"></DangerousPageTable>
+    <TerraformPageTable :pageConfig="pageConfig"></TerraformPageTable>
     <Modal v-model="showAddRulesModal" :z-index="1051" :title="$t('match_value')" @on-ok="generateExpression()">
       <Form label-position="top" label-colon>
         <FormItem
@@ -220,7 +220,7 @@ export default {
   data () {
     return {
       pageConfig: {
-        CRUD: '/itsdangerous/ui/v1/rules',
+        CRUD: '/terraform/ui/v1/rules',
         researchConfig: {
           input_conditions: [
             {
@@ -535,10 +535,10 @@ export default {
       // eslint-disable-next-line no-unused-vars
       let params = ''
       if (this.modelConfig.addRow.match_type === 'cli') {
-        params = '/itsdangerous/ui/v1/matchparams?type=cli'
+        params = '/terraform/ui/v1/matchparams?type=cli'
       }
       if (['sql', 'text', 'fulltext'].includes(this.modelConfig.addRow.match_type)) {
-        params = '/itsdangerous/ui/v1/matchparams?type=regex'
+        params = '/terraform/ui/v1/matchparams?type=regex'
       }
       const { status, data } = await getTableData(params)
       if (status === 'OK') {

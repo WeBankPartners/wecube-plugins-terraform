@@ -14,13 +14,13 @@ import 'bootstrap/dist/js/bootstrap.min.js'
 import 'font-awesome/css/font-awesome.css'
 import jquery from 'jquery'
 
-import DangerousPageTable from '@/pages/components/table-page/page'
+import TerraformPageTable from '@/pages/components/table-page/page'
 import ModalComponent from '@/pages/components/modal'
 
 Vue.prototype.$validate = validate
 Vue.prototype.$itsCommonUtil = commonUtil
 Vue.prototype.JQ = jquery
-Vue.component('DangerousPageTable', DangerousPageTable)
+Vue.component('TerraformPageTable', TerraformPageTable)
 Vue.component('ModalComponent', ModalComponent)
 
 Vue.config.productionTip = false
