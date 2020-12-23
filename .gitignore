@@ -1,0 +1,12 @@
+# Created by .ignore support plugin (hsz.mobi)
+.idea
+*.swp
+*.swo
+*.pid
+*.log
+*.pyc
+static/.DS_Store
+/.idea/*
+/conf/*
+test.py
+test/

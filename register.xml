@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package name="terraform" version="{{PLUGIN_VERSION}}">
+
+    <!-- 1.依赖分析 - 描述运行本插件包需要的其他插件包 -->
+    <packageDependencies>
+        <packageDependency name="platform" version="v2.7.0" />
+    </packageDependencies>
+
+    <!-- 2.菜单注入 - 描述运行本插件包需要注入的菜单 -->
+    <menus>
+    </menus>
+
+    <!-- 3.数据模型 - 描述本插件包的数据模型,并且描述和Framework数据模型的关系 -->
+    <dataModel>
+    </dataModel>
+
+    <!-- 4.系统参数 - 描述运行本插件包需要的系统参数 -->
+    <systemParameters>
+    </systemParameters>
+
+
+    <!-- 5.权限设定 -->
+    <authorities>
+    </authorities>
+
+    <!-- 6.运行资源 - 描述部署运行本插件包需要的基础资源(如主机、虚拟机、容器、数据库等) -->
+    <resourceDependencies>
+        <docker imageName="{{IMAGENAME}}" containerName="{{CONTAINERNAME}}" portBindings="{{ALLOCATE_PORT}}:8998" volumeBindings="/etc/localtime:/etc/localtime,{{BASE_MOUNT_PATH}}/terraform/logs:/app/wecube-plugins-terraform/logs" envVariables="JWT_SIGNING_KEY={{JWT_SIGNING_KEY}}"/>
+    </resourceDependencies>
+
+    <!-- 7.插件列表 - 描述插件包中单个插件的输入和输出 -->
+    <plugins>
+        <plugin name="service">
+            <interface action="create" path="/terraform/v1/service/create" httpMethod='POST'>
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" required="Y">terraform_url</parameter>
+                    <parameter datatype="string" sensitiveData="Y" mappingType="entity" required="N">terraform_ca</parameter>
+                    <parameter datatype="string" sensitiveData="Y" mappingType="entity" required="N">terraform_token</parameter>
+                    <parameter datatype="string" mappingType="entity" required="Y">name</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="Y">ports</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">apiversion</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">namespace</parameter>
+                    <parameter datatype="string" mappingType="entity" required="Y">podname</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string">cluster_ip</parameter>
+                    <parameter datatype="string">labels</parameter>
+                    <parameter datatype="string">uid</parameter>
+                    <parameter datatype="string">errorMessage</parameter>
+                    <parameter datatype="string">errorCode</parameter>
+                    <parameter datatype="string">created_time</parameter>
+                    <parameter datatype="string">pod</parameter>
+                    <parameter datatype="string">id</parameter>
+                    <parameter datatype="string">name</parameter>
+                    <parameter datatype="string">type</parameter>
+                    <parameter datatype="string">ports</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="detail" path="/terraform/v1/service/detail" httpMethod='POST'>
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" required="Y">terraform_url</parameter>
+                    <parameter datatype="string" sensitiveData="Y" mappingType="entity" required="N">terraform_ca</parameter>
+                    <parameter datatype="string" sensitiveData="Y" mappingType="entity" required="N">terraform_token</parameter>
+                    <parameter datatype="string" mappingType="entity" required="Y">name</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">namespace</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string">cluster_ip</parameter>
+                    <parameter datatype="string">labels</parameter>
+                    <parameter datatype="string">uid</parameter>
+                    <parameter datatype="string">errorMessage</parameter>
+                    <parameter datatype="string">errorCode</parameter>
+                    <parameter datatype="string">created_time</parameter>
+                    <parameter datatype="string">pod</parameter>
+                    <parameter datatype="string">id</parameter>
+                    <parameter datatype="string">name</parameter>
+                    <parameter datatype="string">type</parameter>
+                    <parameter datatype="string">ports</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="delete" path="/terraform/v1/service/delete" httpMethod='POST'>
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" required="Y">terraform_url</parameter>
+                    <parameter datatype="string" sensitiveData="Y" mappingType="entity" required="N">terraform_ca</parameter>
+                    <parameter datatype="string" sensitiveData="Y" mappingType="entity" required="N">terraform_token</parameter>
+                    <parameter datatype="string" mappingType="entity" required="Y">name</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">namespace</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string">name</parameter>
+                    <parameter datatype="string">id</parameter>
+                    <parameter datatype="string" >errorCode</parameter>
+                    <parameter datatype="string" >errorMessage</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
+        
+    </plugins>
+</package>

@@ -1,0 +1,15 @@
+Django==1.10.5
+ipaddress==1.0.18
+requests
+six==1.10.0
+kubernetes
+IPy
+configparser
+retrying
+apscheduler
+Crypto
+Werkzeug==0.11.15
+PyJWT
+python-terraform==0.10.1
+SQLalchemy
+PyMySQL==0.7.11
