@@ -20,8 +20,8 @@ class ResourceController(BackendController):
                                   pagesize=pagesize, orderby=orderby)
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["id", "provider", "property", "extend_info"
-                                                                    "resource_name", "resource_property"])
+        validation.allowed_key(data, ["id", "provider", "property", "extend_info",
+                                      "resource_name", "resource_property"])
         validation.not_allowed_null(data=data,
                                     keys=["provider", "property",
                                           "resource_name", "resource_property"]
@@ -45,13 +45,18 @@ class ResourceController(BackendController):
         :param kwargs:
         :return:
         '''
-        #todo 定义必要的标准property
+        # todo 定义必要的标准property
         # todo 校验property定义合法性
+
+
+        extend_info = validation.validate_dict("extend_info", data.get("extend_info")) or {}
+        resource_property = validation.validate_dict("resource_property", data.get("resource_property")) or {}
+
         create_data = {"id": get_uuid(), "provider": data["provider"],
                        "property": data.get("property"),
                        "resource_name": data.get("resource_name"),
-                       "extend_info": json.dumps(data.get("extend_info", {})),
-                       "resource_property": json.dumps(data.get("resource_property", {}))
+                       "extend_info": json.dumps(extend_info),
+                       "resource_property": json.dumps(resource_property)
                        }
 
         return self.resource.create(create_data)
@@ -65,8 +70,8 @@ class ResourceIdController(BackendIdController):
         return self.resource.show(rid)
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["provider", "property", "extend_info"
-                                                              "resource_name", "resource_property"])
+        validation.allowed_key(data, ["provider", "property", "extend_info",
+                                      "resource_name", "resource_property"])
         validation.not_allowed_null(data=data,
                                     keys=["provider", "property",
                                           "resource_name", "resource_property"]

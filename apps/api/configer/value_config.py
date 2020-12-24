@@ -1,7 +1,7 @@
 # coding: utf-8
 
 import datetime
-
+import json
 from apps.background.models.dbserver import ConfigManager
 from lib.uuid_util import get_uuid
 
@@ -15,8 +15,14 @@ class ValueConfigObject(object):
         self.resource = ConfigManager()
 
     def list(self, filters=None, page=None, pagesize=None, orderby=None):
-        return self.resource.list(filters=filters, pageAt=page,
-                                  pageSize=pagesize, orderby=orderby)
+        count, results = self.resource.list(filters=filters, pageAt=page,
+                                            pageSize=pagesize, orderby=orderby)
+        data = []
+        for res in results:
+            res["value_config"] = json.loads(res["value_config"])
+            data.append(res)
+
+        return count, data
 
     def create(self, create_data):
         create_data["id"] = create_data.get("id") or get_uuid()

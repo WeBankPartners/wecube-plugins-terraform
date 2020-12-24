@@ -68,6 +68,7 @@ class BackendResponse(object):
         if pagesize:
             pagesize = validation.validate_int("pagesize", pagesize, min=1)
             page = validation.validate_int("page", page, min=1)
+            page -= page
             PAGINATION = {'pagesize': pagesize, 'page': page}
         else:
             PAGINATION = {}
@@ -225,7 +226,7 @@ class BackendManager(BackendResponse):
         if method == "GET":
             return self.format_response(self.on_get(request, **kwargs))
         elif method == "POST":
-            self.format_response(self.on_create(request, **kwargs))
+            return self.format_response(self.on_create(request, **kwargs))
         else:
             raise exception_common.HttpMethodsNotAllowed()
 

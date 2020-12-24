@@ -101,8 +101,15 @@ class ProviderObject(object):
         self.resource = ProvidersManager()
 
     def list(self, filters=None, page=None, pagesize=None, orderby=None):
-        return self.resource.list(filters=filters, pageAt=page,
-                                  pageSize=pagesize, orderby=orderby)
+        count, results = self.resource.list(filters=filters, pageAt=page,
+                                            pageSize=pagesize, orderby=orderby)
+        data = []
+        for res in results:
+            res["extend_info"] = json.loads(res["extend_info"])
+            res["provider_property"] = json.loads(res["provider_property"])
+            data.append(res)
+
+        return count, data
 
     def create(self, create_data):
         create_data["id"] = create_data.get("id") or get_uuid()
@@ -121,7 +128,7 @@ class ProviderObject(object):
     def update(self, rid, update_data, where_data=None):
         where_data = where_data or {}
         where_data.update({"id": rid})
-        update_data["update_time"] = datetime.datetime.now()
+        update_data["updated_time"] = datetime.datetime.now()
         return self.resource.update(filters=where_data, data=update_data)
 
     def delete(self, rid, where_data=None):

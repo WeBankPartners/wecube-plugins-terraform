@@ -58,18 +58,21 @@ class ConfigController(BackendController):
         :param kwargs:
         :return:
         '''
+
+        value_config = validation.validate_dict("value_config", data.get("value_config")) or {}
+
         create_data = {"id": data.get("id") or get_uuid(),
                        "resource": data["resource"],
                        "provider": data.get("provider"),
                        "property": data.get("property"),
-                       "value_config": json.dumps(data.get("value_config", {}))
+                       "value_config": json.dumps(value_config)
                        }
 
         return self.resource.create(create_data)
 
 
 class ConfigIdController(BackendIdController):
-    Config = ValueConfigObject()
+    resource = ValueConfigObject()
 
     def show(self, request, data, **kwargs):
         '''
