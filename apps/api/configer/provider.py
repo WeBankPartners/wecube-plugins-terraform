@@ -1,10 +1,9 @@
 # coding: utf-8
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import datetime
 import json
-
 import os
-
 from apps.background.lib.commander.terraform import TerraformDriver
 from apps.background.models.dbserver import ProvidersManager
 from core import local_exceptions
@@ -135,3 +134,9 @@ class ProviderObject(object):
         where_data = where_data or {}
         where_data.update({"id": rid})
         return self.resource.delete(filters=where_data)
+
+    def provider_object(self, provider_id):
+        data = ProviderObject().show(rid=provider_id)
+        if not data:
+            raise local_exceptions.ResourceValidateError("provider", "provider %s 未注册" % provider_id)
+        return data

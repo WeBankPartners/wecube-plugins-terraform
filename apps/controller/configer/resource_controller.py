@@ -3,12 +3,14 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import json
-
+from lib.uuid_util import get_uuid
+from apps.common.convert_keys import validate_convert_key
+from apps.common.convert_keys import validate_convert_value
 from apps.api.configer.resource import ResourceObject
 from core import validation
 from core.controller import BackendController
 from core.controller import BackendIdController
-from lib.uuid_util import get_uuid
+from .model_args import property_necessary
 
 
 class ResourceController(BackendController):
@@ -45,14 +47,16 @@ class ResourceController(BackendController):
         :param kwargs:
         :return:
         '''
-        # todo 定义必要的标准property
-        # todo 校验property定义合法性
-
 
         extend_info = validation.validate_dict("extend_info", data.get("extend_info")) or {}
         resource_property = validation.validate_dict("resource_property", data.get("resource_property")) or {}
+        validate_convert_key(resource_property)
+        validate_convert_value(extend_info)
+        property_necessary(resource_name=data["resource_name"],
+                           resource_property=resource_property)
 
-        create_data = {"id": get_uuid(), "provider": data["provider"],
+        create_data = {"id": data.get("id") or get_uuid(),
+                       "provider": data["provider"],
                        "property": data.get("property"),
                        "resource_name": data.get("resource_name"),
                        "extend_info": json.dumps(extend_info),
@@ -86,10 +90,17 @@ class ResourceIdController(BackendIdController):
     def update(self, request, data, **kwargs):
         rid = kwargs.pop("rid", None)
         if data.get("extend_info") is not None:
-            data["extend_info"] = json.dumps(data.get("extend_info", {}))
+            extend_info = validation.validate_dict("extend_info", data.get("extend_info"))
+            validate_convert_value(extend_info)
+            data["extend_info"] = json.dumps(extend_info)
 
         if data.get("resource_property") is not None:
-            data["resource_property"] = json.dumps(data.get("resource_property", {}))
+            resource_property = validation.validate_dict("resource_property", data.get("resource_property")) or {}
+            validate_convert_key(resource_property)
+            property_necessary(resource_name=data["resource_name"],
+                               resource_property=resource_property)
+
+            data["resource_property"] = json.dumps(resource_property)
         return self.resource.update(rid, data)
 
     def delete(self, request, data, **kwargs):

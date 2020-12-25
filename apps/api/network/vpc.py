@@ -140,6 +140,47 @@ class VpcApi(object):
 
         return rid
 
+    def create_new(self, name, cider, provider_id,  extend_info, **kwargs):
+        '''
+
+        :param name:
+        :param cider:
+        :param extend_info:
+        :param kwargs:
+        :return:
+        '''
+
+
+        provider = data["provider"]
+        region = data["region"]
+        zone = data.get("zone")
+        extend_info = data.get("extend_info", {})
+        rid = data.get("id") or get_uuid()
+
+        create_data = {"cider": cider, "name": name}
+        create_data.update(extend_info)
+
+        _path = self.create_workpath(rid, provider, region, zone)
+
+        provider_info = ProviderApi().provider_info(provider, region=data.get("region"))
+        vpc_info = self._generate_vpc(provider, name, data=create_data)
+        vpc_info.update(provider_info)
+
+        self.save_data(rid, name=name, provider=provider, region=region,
+                       zone=zone, cider=cider, extend_info=extend_info,
+                       define_json=vpc_info, status="applying", result_json='{}')
+
+        self.write_define(rid, _path, define_json=vpc_info)
+        result = self.run(_path)
+
+        result = self.formate_result(result)
+        logger.info(format_json_dumps(result))
+        resource_id = self._fetch_id(result)
+        self.update_data(rid, data={"status": "ok",
+                                    "resource_id": resource_id,
+                                    "result_json": format_json_dumps(result)})
+
+        return rid
 
 class VpcObject(object):
     def __init__(self):

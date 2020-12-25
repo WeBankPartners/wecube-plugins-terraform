@@ -3,13 +3,14 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import json
-
+from lib.uuid_util import get_uuid
+from apps.common.convert_keys import validate_convert_key
+from apps.common.convert_keys import validate_convert_value
 from apps.api.configer.provider import ProviderApi
 from apps.api.configer.provider import ProviderObject
 from core import validation
 from core.controller import BackendController
 from core.controller import BackendIdController
-from lib.uuid_util import get_uuid
 
 
 class ProviderController(BackendController):
@@ -54,9 +55,12 @@ class ProviderController(BackendController):
         name = data.get("name")
         extend_info = validation.validate_dict("extend_info", data.get("extend_info")) or {}
         provider_property = validation.validate_dict("provider_property", data.get("provider_property")) or {}
+        validate_convert_key(provider_property)
+        validate_convert_value(extend_info)
 
         ProviderApi().create_provider_workspace(provider=name)
-        create_data = {"id": get_uuid(), "name": data["name"],
+        create_data = {"id": data.get("id") or get_uuid(),
+                       "name": data["name"],
                        "secret_id": data.get("secret_id"),
                        "secret_key": data.get("secret_key"),
                        "region": data.get("region"),
@@ -90,11 +94,16 @@ class ProviderIdController(BackendIdController):
 
     def update(self, request, data, **kwargs):
         rid = kwargs.pop("rid", None)
+
         if data.get("extend_info") is not None:
-            data["extend_info"] = json.dumps(data.get("extend_info", {}))
+            extend_info = validation.validate_dict("extend_info", data.get("extend_info"))
+            validate_convert_value(extend_info)
+            data["extend_info"] = json.dumps(extend_info)
 
         if data.get("provider_property") is not None:
-            data["provider_property"] = json.dumps(data.get("provider_property", {}))
+            provider_property = validation.validate_dict("provider_property", data.get("provider_property")) or {}
+            validate_convert_key(provider_property)
+            data["provider_property"] = json.dumps(provider_property)
 
         return self.resource.update(rid, data)
 

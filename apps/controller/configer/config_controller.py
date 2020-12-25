@@ -3,12 +3,13 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import json
-
+from lib.uuid_util import get_uuid
+from apps.common.convert_keys import validate_convert_key
+from apps.common.convert_keys import validate_convert_value
 from apps.api.configer.value_config import ValueConfigObject
 from core import validation
 from core.controller import BackendController
 from core.controller import BackendIdController
-from lib.uuid_util import get_uuid
 
 
 class ConfigController(BackendController):
@@ -60,7 +61,7 @@ class ConfigController(BackendController):
         '''
 
         value_config = validation.validate_dict("value_config", data.get("value_config")) or {}
-
+        validate_convert_value(value_config)
         create_data = {"id": data.get("id") or get_uuid(),
                        "resource": data["resource"],
                        "provider": data.get("provider"),
@@ -115,7 +116,9 @@ class ConfigIdController(BackendIdController):
 
         rid = kwargs.pop("rid", None)
         if data.get("value_config") is not None:
-            data["value_config"] = json.dumps(data.get("value_config", {}))
+            value_config = validation.validate_dict("value_config", data.get("value_config"))
+            validate_convert_value(value_config)
+            data["value_config"] = json.dumps(value_config)
 
         return self.resource.update(rid, data)
 

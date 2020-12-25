@@ -2,20 +2,21 @@
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
+from lib.uuid_util import get_uuid
+from apps.api.configer.provider import ProviderObject
 from apps.api.network.vpc import VpcApi
 from apps.api.network.vpc import VpcObject
 from core import local_exceptions as exception_common
 from core import validation
-from core.controller import BaseController
 from core.controller import BackendController
-from core.controller import BackendIdController
 
 
-class VPCBaseController(BaseController):
+class VPCBaseController(object):
     pass
 
 
 class VPCController(BackendController):
+    allow_methods = ('GET',)
     resource = VpcObject()
 
     def list(self, request, data, orderby=None, page=None, pagesize=None, **kwargs):
@@ -35,8 +36,33 @@ class VPCController(BackendController):
         return self.resource.list(filters=data, page=page,
                                   pagesize=pagesize, orderby=orderby)
 
+    def main_response(self, request, data, **kwargs):
+        result = VpcApi().create(data)
+        return {"result": result}
+
+    def before_handler(self, request, data, **kwargs):
+        validation.allowed_key(data, ["id", "name", "provider_id", "cider", "extend_info"])
+        validation.not_allowed_null(data=data,
+                                    keys=["provider_id", "name", "cider"]
+                                    )
+
+        validation.validate_string("id", data.get("id"))
+        validation.validate_string("name", data["name"])
+        validation.validate_string("provider_id", data.get("provider_id"))
+        validation.validate_string("cider", data.get("cider"))
+        validation.validate_dict("extend_info", data.get("extend_info"))
+
+
+    def create(self, request, data, **kwargs):
+        id = data.pop("id", None) or get_uuid()
+        provider_id = data.pop("provider_id", None)
+        provider_data = ProviderObject().provider_object(provider_id)
+        result = VpcApi().create(data)
+        return {"result": result}
+
 
 class VPCIdController(BackendController):
+    allow_methods = ('GET',)
     resource = VpcObject()
 
     def show(self, request, data, **kwargs):
@@ -58,14 +84,11 @@ class VPCAddController(VPCBaseController):
     allow_methods = ("POST",)
     resource = VpcObject()
 
-    def not_null_keys(self):
-        return ["provider", "region", "name", "cider"]
-
     def before_handler(self, request, data, **kwargs):
         validation.allowed_key(data, ["id", "name", "provider", "region",
                                       "zone", "cider", "extend_info"])
         validation.not_allowed_null(data=data,
-                                    keys=self.not_null_keys()
+                                    keys=["provider", "region", "name", "cider"]
                                     )
 
         validation.validate_string("id", data.get("id"))

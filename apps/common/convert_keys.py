@@ -5,6 +5,31 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import json
 
 
+def validate_convert_key(defines):
+    for key, define in defines.items():
+        if (not isinstance(define, (basestring, dict))) or isinstance(define, list):
+            raise ValueError("错误的定义 合法值为 string "
+                             "或json:{'type': <type>, 'allow_null': <0/1>,"
+                             "'convert': <value>, 'default':<value>}")
+
+        if isinstance(define, dict):
+            if define.get("type", "string") not in ["string", "json", "int", "float", "list"]:
+                raise ValueError("未知的类型约束 %s" % define.get("type"))
+            if define.get("allow_null", 1) not in [0, 1]:
+                raise ValueError("allow_null 合法值为 0/1")
+
+
+def validate_convert_value(defines):
+    for key, define in defines.items():
+        if (not isinstance(define, (basestring, dict))) or isinstance(define, list):
+            raise ValueError("错误的定义 合法值为 string "
+                             "或json:{'type': <type>, 'value':<value>}")
+
+        if isinstance(define, dict):
+            if define.get("type", "string") not in ["string", "json", "int", "float", "list"]:
+                raise ValueError("未知的类型约束 %s" % define.get("type"))
+
+
 def _validate_type(value, type):
     '''
 
@@ -55,15 +80,18 @@ def convert_key(key, value, define):
     :return:
     '''
 
-    if (value is None) and (not define.get("allow_null", 1)):
-        raise ValueError("key %s 不允许为空" % key)
-    if not value:
-        value = define.get("default") or value
+    if isinstance(define, basestring):
+        value = define or value
     else:
-        value = _validate_type(value, type=define.get("type", "string"))
+        if (value is None) and (not define.get("allow_null", 1)):
+            raise ValueError("key %s 不允许为空" % key)
+        if not value:
+            value = define.get("default") or value
+        else:
+            value = _validate_type(value, type=define.get("type", "string"))
 
-    if define.get("convert"):
-        key = define.get("convert") or key
+        if define.get("convert"):
+            key = define.get("convert") or key
 
     return {key: value}
 
@@ -81,7 +109,7 @@ def convert_datas(datas, defines):
         if defines.get(key):
             result.update(convert_key(key, value, define=defines[key]))
         else:
-            result.update({key, value})
+            result.update({key: value})
 
     return result
 
@@ -100,7 +128,7 @@ def convert_value(value, define):
     if (value is None) or (define is None):
         return value
     if isinstance(define, basestring):
-        value = define or define
+        value = define or value
     elif isinstance(define, dict):
         value = define.get("value", value) or value
         value = _validate_type(value, define.get("type", "string"))
@@ -123,4 +151,3 @@ def convert_values(data, define):
         res[key] = convert_value(value, define.get(value))
 
     return res
-
