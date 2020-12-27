@@ -3,12 +3,12 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 from lib.uuid_util import get_uuid
+from core import validation
+from core.controller import BackendController
+from core import local_exceptions as exception_common
 from apps.api.configer.provider import ProviderObject
 from apps.api.network.vpc import VpcApi
 from apps.api.network.vpc import VpcObject
-from core import local_exceptions as exception_common
-from core import validation
-from core.controller import BackendController
 
 
 class VPCBaseController(object):
@@ -52,11 +52,12 @@ class VPCController(BackendController):
         validation.validate_string("cider", data.get("cider"))
         validation.validate_dict("extend_info", data.get("extend_info"))
 
-
     def create(self, request, data, **kwargs):
         id = data.pop("id", None) or get_uuid()
+        name = data.pop("name", None)
         provider_id = data.pop("provider_id", None)
         provider_data = ProviderObject().provider_object(provider_id)
+
         result = VpcApi().create(data)
         return {"result": result}
 

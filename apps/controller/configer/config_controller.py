@@ -4,12 +4,12 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import json
 from lib.uuid_util import get_uuid
-from apps.common.convert_keys import validate_convert_key
-from apps.common.convert_keys import validate_convert_value
-from apps.api.configer.value_config import ValueConfigObject
 from core import validation
 from core.controller import BackendController
 from core.controller import BackendIdController
+from apps.common.convert_keys import validate_convert_key
+from apps.common.convert_keys import validate_convert_value
+from apps.api.configer.value_config import ValueConfigObject
 
 
 class ConfigController(BackendController):

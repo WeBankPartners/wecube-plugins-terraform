@@ -96,7 +96,7 @@ def convert_key(key, value, define):
     return {key: value}
 
 
-def convert_datas(datas, defines):
+def convert_keys(datas, defines):
     '''
 
     :param datas:

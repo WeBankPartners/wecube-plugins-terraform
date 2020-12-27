@@ -4,13 +4,14 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import json
 from lib.uuid_util import get_uuid
+from core import validation
+from core.controller import BackendController
+from core.controller import BackendIdController
 from apps.common.convert_keys import validate_convert_key
 from apps.common.convert_keys import validate_convert_value
 from apps.api.configer.provider import ProviderApi
 from apps.api.configer.provider import ProviderObject
-from core import validation
-from core.controller import BackendController
-from core.controller import BackendIdController
+from .model_args import property_necessary
 
 
 class ProviderController(BackendController):
@@ -57,6 +58,8 @@ class ProviderController(BackendController):
         provider_property = validation.validate_dict("provider_property", data.get("provider_property")) or {}
         validate_convert_key(provider_property)
         validate_convert_value(extend_info)
+        property_necessary(resource_name="provider",
+                           resource_property=provider_property)
 
         ProviderApi().create_provider_workspace(provider=name)
         create_data = {"id": data.get("id") or get_uuid(),

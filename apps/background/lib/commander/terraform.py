@@ -1,13 +1,13 @@
 # coding: utf-8
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import os
 import json
 import traceback
-from lib.command import command
 from lib.logs import logger
+from lib.command import command
 from wecube_plugins_terraform.settings import TERRAFORM_BASE_PATH
 from wecube_plugins_terraform.settings import TERRFORM_BIN_PATH
-from python_terraform import *
 
 if not os.path.exists(TERRAFORM_BASE_PATH):
     os.makedirs(TERRAFORM_BASE_PATH)
@@ -251,7 +251,6 @@ class TerraformDriver(object):
 
         code, out, err = command(self._format_cmd(exec_cmd), workdir=workdir)
         if code == 0:
-            # failed
-            pass
+            return True
         else:
             raise TerrformExecError("destroy error, msg: %s" % err)

@@ -119,16 +119,31 @@ class ProviderObject(object):
     def show(self, rid, where_data=None):
         where_data = where_data or {}
         filters = where_data.update({"id": rid})
-        return self.resource.get(filters=filters)
+        data = self.resource.get(filters=filters)
+        if data:
+            data["extend_info"] = json.loads(data["extend_info"])
+            data["provider_property"] = json.loads(data["provider_property"])
+
+        return data
 
     def query_one(self, where_data):
-        return self.resource.get(filters=where_data)
+        data = self.resource.get(filters=where_data)
+        if data:
+            data["extend_info"] = json.loads(data["extend_info"])
+            data["provider_property"] = json.loads(data["provider_property"])
+
+        return data
 
     def update(self, rid, update_data, where_data=None):
         where_data = where_data or {}
         where_data.update({"id": rid})
         update_data["updated_time"] = datetime.datetime.now()
-        return self.resource.update(filters=where_data, data=update_data)
+        count, data = self.resource.update(filters=where_data, data=update_data)
+        if data:
+            data["extend_info"] = json.loads(data["extend_info"])
+            data["provider_property"] = json.loads(data["provider_property"])
+
+        return data
 
     def delete(self, rid, where_data=None):
         where_data = where_data or {}
