@@ -1,11 +1,9 @@
 # coding: utf-8
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-import datetime
-import json
 import os
-from apps.background.lib.commander.terraform import TerraformDriver
-from apps.background.models.dbserver import ProvidersManager
+import json
+import datetime
 from core import local_exceptions
 from lib.command import command
 from lib.logs import logger
@@ -13,6 +11,9 @@ from lib.uuid_util import get_uuid
 from wecube_plugins_terraform.settings import BASE_DIR
 from wecube_plugins_terraform.settings import TERRAFORM_BASE_PATH
 from wecube_plugins_terraform.settings import TERRFORM_BIN_PATH
+from apps.background.lib.commander.terraform import TerraformDriver
+from apps.background.resource.configr.provider import ProviderObject
+from apps.common.convert_keys import convert_keys
 
 if not os.path.exists(TERRAFORM_BASE_PATH):
     os.makedirs(TERRAFORM_BASE_PATH)
@@ -29,54 +30,32 @@ class ProviderApi(object):
 
     def _generate_info(self, provider, data):
         extend_info = data.get("extend_info", {})
-        if isinstance(extend_info, basestring):
-            extend_info = json.loads(extend_info)
-
-        property = json.loads(data.get("provider_property", {}))
-        if isinstance(property, basestring):
-            property = json.loads(property)
+        provider_property = json.loads(data.get("provider_property", {}))
 
         provider_info = {}
-        region = data.get("region")
-        secret_id = data.get("secret_id")
-        secret_key = data.get("secret_key")
-        if region:
-            _region = property.get("region", "region")
-            provider_info[_region] = region
-
-        if secret_id:
-            _secret_id = property.get("secret_id", "secret_id")
-            provider_info[_secret_id] = secret_id
-
-        if secret_key:
-            _secret_key = property.get("secret_key", "secret_key")
-            provider_info[_secret_key] = secret_key
+        for key in ["region", "secret_id", "secret_key"]:
+            if data.get(key):
+                provider_info[key] = data.get(key)
 
         provider_info.update(extend_info)
+        provider_columns = convert_keys(provider_info, defines=provider_property)
 
         provider_data = {
             "provider": {
-                provider: provider_info
+                provider: provider_columns
             }
         }
 
         return provider_data
 
-    def provider_info(self, provider, region=None, zone=None):
-        where_data = {"name": provider}
-        if region:
-            where_data["region"] = region
-        if zone:
-            where_data["zone"] = zone
+    def provider_info(self, provider_id, provider_data=None):
+        if not provider_data:
+            provider_data = ProviderObject().provider_object(provider_id)
 
-        data = ProviderObject().query_one(where_data=where_data)
-        if not data:
-            raise local_exceptions.ResourceNotFoundError("provider %s 不存在" % provider)
-
-        if not data.get("is_init"):
+        if not provider_data.get("is_init"):
             raise local_exceptions.ResourceConfigError("provider 未初始化，请重新初始化")
 
-        return self._generate_info(provider, data)
+        return provider_data, self._generate_info(provider_data["name"], provider_data)
 
     def create_provider_workspace(self, provider):
         provider_path = os.path.join(TERRAFORM_BASE_PATH, provider)
@@ -94,64 +73,3 @@ class ProviderApi(object):
 
         return True
 
-
-class ProviderObject(object):
-    def __init__(self):
-        self.resource = ProvidersManager()
-
-    def list(self, filters=None, page=None, pagesize=None, orderby=None):
-        count, results = self.resource.list(filters=filters, pageAt=page,
-                                            pageSize=pagesize, orderby=orderby)
-        data = []
-        for res in results:
-            res["extend_info"] = json.loads(res["extend_info"])
-            res["provider_property"] = json.loads(res["provider_property"])
-            data.append(res)
-
-        return count, data
-
-    def create(self, create_data):
-        create_data["id"] = create_data.get("id") or get_uuid()
-        create_data["created_time"] = datetime.datetime.now()
-        create_data["updated_time"] = create_data["created_time"]
-        return self.resource.create(data=create_data)
-
-    def show(self, rid, where_data=None):
-        where_data = where_data or {}
-        filters = where_data.update({"id": rid})
-        data = self.resource.get(filters=filters)
-        if data:
-            data["extend_info"] = json.loads(data["extend_info"])
-            data["provider_property"] = json.loads(data["provider_property"])
-
-        return data
-
-    def query_one(self, where_data):
-        data = self.resource.get(filters=where_data)
-        if data:
-            data["extend_info"] = json.loads(data["extend_info"])
-            data["provider_property"] = json.loads(data["provider_property"])
-
-        return data
-
-    def update(self, rid, update_data, where_data=None):
-        where_data = where_data or {}
-        where_data.update({"id": rid})
-        update_data["updated_time"] = datetime.datetime.now()
-        count, data = self.resource.update(filters=where_data, data=update_data)
-        if data:
-            data["extend_info"] = json.loads(data["extend_info"])
-            data["provider_property"] = json.loads(data["provider_property"])
-
-        return data
-
-    def delete(self, rid, where_data=None):
-        where_data = where_data or {}
-        where_data.update({"id": rid})
-        return self.resource.delete(filters=where_data)
-
-    def provider_object(self, provider_id):
-        data = ProviderObject().show(rid=provider_id)
-        if not data:
-            raise local_exceptions.ResourceValidateError("provider", "provider %s 未注册" % provider_id)
-        return data

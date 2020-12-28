@@ -1,25 +1,24 @@
 # coding: utf-8
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-import datetime
 import json
-from apps.background.models.dbserver import ConfigManager
+import datetime
+from core import local_exceptions
 from lib.uuid_util import get_uuid
+from apps.background.models.dbserver import ProvidersManager
 
 
-class ValueConfigApi(ConfigManager):
-    pass
-
-
-class ValueConfigObject(object):
+class ProviderObject(object):
     def __init__(self):
-        self.resource = ConfigManager()
+        self.resource = ProvidersManager()
 
     def list(self, filters=None, page=None, pagesize=None, orderby=None):
         count, results = self.resource.list(filters=filters, pageAt=page,
                                             pageSize=pagesize, orderby=orderby)
         data = []
         for res in results:
-            res["value_config"] = json.loads(res["value_config"])
+            res["extend_info"] = json.loads(res["extend_info"])
+            res["provider_property"] = json.loads(res["provider_property"])
             data.append(res)
 
         return count, data
@@ -33,22 +32,20 @@ class ValueConfigObject(object):
     def show(self, rid, where_data=None):
         where_data = where_data or {}
         filters = where_data.update({"id": rid})
-        return self.query_one(filters)
+        data = self.resource.get(filters=filters)
+        if data:
+            data["extend_info"] = json.loads(data["extend_info"])
+            data["provider_property"] = json.loads(data["provider_property"])
+
+        return data
 
     def query_one(self, where_data):
         data = self.resource.get(filters=where_data)
         if data:
-            data["value_config"] = json.loads(data["value_config"])
+            data["extend_info"] = json.loads(data["extend_info"])
+            data["provider_property"] = json.loads(data["provider_property"])
+
         return data
-
-    def resource_value_configs(self, provider, resource):
-        where_data = {"provider": provider, "resource": resource}
-        count, datas = self.list(filters=where_data)
-        res = {}
-        for data in datas:
-            res[data["property"]] = data["value_config"]
-
-        return res
 
     def update(self, rid, update_data, where_data=None):
         where_data = where_data or {}
@@ -56,10 +53,18 @@ class ValueConfigObject(object):
         update_data["updated_time"] = datetime.datetime.now()
         count, data = self.resource.update(filters=where_data, data=update_data)
         if data:
-            data["value_config"] = json.loads(data["value_config"])
-        return count, data
+            data["extend_info"] = json.loads(data["extend_info"])
+            data["provider_property"] = json.loads(data["provider_property"])
+
+        return data
 
     def delete(self, rid, where_data=None):
         where_data = where_data or {}
         where_data.update({"id": rid})
         return self.resource.delete(filters=where_data)
+
+    def provider_object(self, provider_id):
+        data = ProviderObject().show(rid=provider_id)
+        if not data:
+            raise local_exceptions.ResourceValidateError("provider", "provider %s 未注册" % provider_id)
+        return data

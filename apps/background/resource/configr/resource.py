@@ -1,25 +1,22 @@
 # coding: utf-8
 
-import datetime
 import json
-from apps.background.models.dbserver import ConfigManager
+import datetime
 from lib.uuid_util import get_uuid
+from apps.background.models.dbserver import ResourceManager
 
 
-class ValueConfigApi(ConfigManager):
-    pass
-
-
-class ValueConfigObject(object):
+class ResourceObject(object):
     def __init__(self):
-        self.resource = ConfigManager()
+        self.resource = ResourceManager()
 
     def list(self, filters=None, page=None, pagesize=None, orderby=None):
         count, results = self.resource.list(filters=filters, pageAt=page,
                                             pageSize=pagesize, orderby=orderby)
         data = []
         for res in results:
-            res["value_config"] = json.loads(res["value_config"])
+            res["extend_info"] = json.loads(res["extend_info"])
+            res["resource_property"] = json.loads(res["resource_property"])
             data.append(res)
 
         return count, data
@@ -38,17 +35,10 @@ class ValueConfigObject(object):
     def query_one(self, where_data):
         data = self.resource.get(filters=where_data)
         if data:
-            data["value_config"] = json.loads(data["value_config"])
+            data["extend_info"] = json.loads(data["extend_info"])
+            data["resource_property"] = json.loads(data["resource_property"])
+
         return data
-
-    def resource_value_configs(self, provider, resource):
-        where_data = {"provider": provider, "resource": resource}
-        count, datas = self.list(filters=where_data)
-        res = {}
-        for data in datas:
-            res[data["property"]] = data["value_config"]
-
-        return res
 
     def update(self, rid, update_data, where_data=None):
         where_data = where_data or {}
@@ -56,7 +46,9 @@ class ValueConfigObject(object):
         update_data["updated_time"] = datetime.datetime.now()
         count, data = self.resource.update(filters=where_data, data=update_data)
         if data:
-            data["value_config"] = json.loads(data["value_config"])
+            data["extend_info"] = json.loads(data["extend_info"])
+            data["resource_property"] = json.loads(data["resource_property"])
+
         return count, data
 
     def delete(self, rid, where_data=None):

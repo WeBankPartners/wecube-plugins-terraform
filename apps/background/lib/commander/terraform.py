@@ -235,6 +235,8 @@ class TerraformDriver(object):
         '''
 
         workdir = dir_path or self.workdir or ''
+        if not os.path.exists(workdir):
+            return False
 
         input_options = {}
         input_options["lock"] = lock

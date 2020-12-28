@@ -27,13 +27,15 @@ class ProviderController(BackendController):
         validation.allowed_key(data, ["id", "name", "zone", "secret_id",
                                       "secret_key", "region", "enabled",
                                       "extend_info", "plugin_source",
-                                      "provider_property"])
+                                      "provider_property", "display_name"])
         validation.not_allowed_null(data=data,
-                                    keys=["name", "secret_id", "secret_key", "region"]
+                                    keys=["name", "secret_id",
+                                          "secret_key", "region", "display_name"]
                                     )
 
         validation.validate_string("id", data.get("id"))
         validation.validate_string("name", data["name"])
+        validation.validate_string("display_name", data.get("display_name"))
         validation.validate_string("region", data.get("region"))
         validation.validate_string("zone", data.get("zone"))
         validation.validate_string("secret_id", data.get("secret_id"))
@@ -64,6 +66,7 @@ class ProviderController(BackendController):
         ProviderApi().create_provider_workspace(provider=name)
         create_data = {"id": data.get("id") or get_uuid(),
                        "name": data["name"],
+                       "display_name": data.get("display_name"),
                        "secret_id": data.get("secret_id"),
                        "secret_key": data.get("secret_key"),
                        "region": data.get("region"),

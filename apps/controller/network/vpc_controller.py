@@ -5,10 +5,10 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 from lib.uuid_util import get_uuid
 from core import validation
 from core.controller import BackendController
-from core import local_exceptions as exception_common
-from apps.api.configer.provider import ProviderObject
+from core.controller import BaseController
+# from core import local_exceptions as exception_common
+# from apps.api.configer.provider import ProviderObject
 from apps.api.network.vpc import VpcApi
-from apps.api.network.vpc import VpcObject
 
 
 class VPCBaseController(object):
@@ -16,8 +16,8 @@ class VPCBaseController(object):
 
 
 class VPCController(BackendController):
-    allow_methods = ('GET',)
-    resource = VpcObject()
+    allow_methods = ('GET', 'POST')
+    resource = VpcApi()
 
     def list(self, request, data, orderby=None, page=None, pagesize=None, **kwargs):
         '''
@@ -33,12 +33,8 @@ class VPCController(BackendController):
 
         validation.allowed_key(data, ["id", "provider", "region",
                                       "zone", "name", "cider", "enabled"])
-        return self.resource.list(filters=data, page=page,
+        return self.resource.resource_object.list(filters=data, page=page,
                                   pagesize=pagesize, orderby=orderby)
-
-    def main_response(self, request, data, **kwargs):
-        result = VpcApi().create(data)
-        return {"result": result}
 
     def before_handler(self, request, data, **kwargs):
         validation.allowed_key(data, ["id", "name", "provider_id", "cider", "extend_info"])
@@ -53,18 +49,20 @@ class VPCController(BackendController):
         validation.validate_dict("extend_info", data.get("extend_info"))
 
     def create(self, request, data, **kwargs):
-        id = data.pop("id", None) or get_uuid()
+        rid = data.pop("id", None) or get_uuid()
         name = data.pop("name", None)
+        cider = data.pop("cider", None)
         provider_id = data.pop("provider_id", None)
-        provider_data = ProviderObject().provider_object(provider_id)
+        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
-        result = VpcApi().create(data)
-        return {"result": result}
+        data.update(extend_info)
+        result = self.resource.create(rid, name, cider, provider_id, extend_info=data)
+        return 1, result
 
 
 class VPCIdController(BackendController):
-    allow_methods = ('GET',)
-    resource = VpcObject()
+    allow_methods = ('GET', 'DELETE')
+    resource = VpcApi()
 
     def show(self, request, data, **kwargs):
         '''
@@ -76,18 +74,18 @@ class VPCIdController(BackendController):
         '''
 
         rid = kwargs.pop("rid", None)
-        return self.resource.show(rid)
+        return self.resource.resource_object.show(rid)
+
+    def delete(self, request, data, **kwargs):
+        rid = kwargs.pop("rid", None)
+        return self.resource.destory(rid)
 
 
-class VPCAddController(VPCBaseController):
-    name = "VPC"
-    resource_describe = "VPC"
+class VPCAddController(BaseController):
     allow_methods = ("POST",)
-    resource = VpcObject()
+    resource = VpcApi()
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["id", "name", "provider", "region",
-                                      "zone", "cider", "extend_info"])
         validation.not_allowed_null(data=data,
                                     keys=["provider", "region", "name", "cider"]
                                     )
@@ -98,54 +96,37 @@ class VPCAddController(VPCBaseController):
         validation.validate_string("region", data.get("region"))
         validation.validate_string("zone", data.get("zone"))
         validation.validate_string("cider", data.get("cider"))
-        validation.validate_dict("extend_info", data.get("extend_info"))
 
     def response_templete(self, data):
         # todo detail VPC create
         return {}
 
     def main_response(self, request, data, **kwargs):
-        result = VpcApi().create(data)
+        rid = data.pop("id", None) or get_uuid()
+        name = data.pop("name", None)
+        cider = data.pop("cider", None)
+        provider_id = data.pop("provider_id", None)
+        result = self.resource.create(rid, name, cider, provider_id, data)
         return {"result": result}
-
-
-class VPCUpdateController(VPCBaseController):
-    name = "VPC"
-    resource_describe = "VPC"
-    allow_methods = ("POST",)
-    resource = VpcObject()
-
-    def before_handler(self, request, data, **kwargs):
-        pass
-
-    def response_templete(self, data):
-        return {}
-
-    def main_response(self, request, data, **kwargs):
-        rid = kwargs.pop("rid", None)
-        result = self.resource.update(rid, data)
-        if not result:
-            raise exception_common.ResourceNotFoundError()
-
-        return result
 
 
 class VPCDeleteController(VPCBaseController):
     name = "VPC"
     resource_describe = "VPC"
     allow_methods = ("POST",)
-    resource = VpcObject()
+    resource = VpcApi()
 
     def before_handler(self, request, data, **kwargs):
-        pass
+        validation.not_allowed_null(data=data,
+                                    keys=["id"]
+                                    )
+
+        validation.validate_string("id", data.get("id"))
 
     def response_templete(self, data):
         return {}
 
     def main_response(self, request, data, **kwargs):
-        rid = kwargs.pop("rid", None)
-        result = self.resource.delete(rid)
-        if not result:
-            raise exception_common.ResourceNotFoundError()
-
-        return result
+        rid = data.pop("id", None)
+        result = self.resource.destory(rid)
+        return {"result": result}

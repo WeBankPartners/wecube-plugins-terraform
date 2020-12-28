@@ -20,7 +20,8 @@ class Providers(Base):
     __tablename__ = "cloud_providers"
 
     id = Column(String(36), primary_key=True)
-    name = Column(String(64), nullable=False, index=True)
+    name = Column(String(64), nullable=False)
+    display_name = Column(String(64), nullable=False)
     plugin_source = Column(String(64))
     secret_id = Column(String(256), nullable=False)
     secret_key = Column(String(256), nullable=False)
@@ -39,14 +40,15 @@ class Providers(Base):
         self.created_time = datetime.datetime.now()
         self.deleted_time = data.get("deleted_time")
         self.enabled = data.get("enabled")
-        self.extend_info = data.get("extend_info")
+        self.extend_info = data.get("extend_info") or '{}'
         self.id = data.get("id")
         self.is_deleted = data.get("is_deleted")
         self.is_init = data.get("is_init")
         self.region = data.get("region")
         self.zone = data.get("zone")
         self.name = data.get("name")
-        self.provider_property = data.get("provider_property")
+        self.display_name = data.get("display_name")
+        self.provider_property = data.get("provider_property") or '{}'
         self.secret_id = data.get("secret_id")
         self.secret_key = data.get("secret_key")
         self.plugin_source = data.get("plugin_source")
@@ -79,8 +81,8 @@ class Resource(Base):
         self.property = data.get("property")
         self.provider = data.get("provider")
         self.resource_name = data.get("resource_name")
-        self.extend_info = data.get("extend_info")
-        self.resource_property = data.get("resource_property")
+        self.extend_info = data.get("extend_info") or '{}'
+        self.resource_property = data.get("resource_property") or '{}'
         self.updated_time = data.get("updated_time")
 
 class CommonKeys(Base):
@@ -132,7 +134,7 @@ class Config(Base):
         self.id = data.get("id")
         self.is_deleted = data.get("is_deleted")
         self.is_locked = data.get("is_locked")
-        self.value_config = data.get("value_config")
+        self.value_config = data.get("value_config") or '{}'
         self.provider = data.get("provider")
         self.resource = data.get("resource")
         self.property = data.get("property")
@@ -165,13 +167,13 @@ class Vpc(Base):
         self.define_json = data.get("define_json")
         self.deleted_time = data.get("deleted_time")
         self.enabled = data.get("enabled")
-        self.extend_info = data.get("extend_info")
+        self.extend_info = data.get("extend_info") or '{}'
         self.id = data.get("id")
         self.is_deleted = data.get("is_deleted")
         self.region = data.get("region")
         self.zone = data.get("zone")
         self.status = data.get("status")
-        self.result_json = data.get("result_json")
+        self.result_json = data.get("result_json") or '{}'
         self.name = data.get("name")
         self.provider = data.get("provider")
         self.updated_time = data.get("updated_time")
@@ -201,16 +203,16 @@ class Subnet(Base):
     def __init__(self, data):
         self.cider = data.get("cider")
         self.created_time = datetime.datetime.now()
-        self.define_json = data.get("define_json")
+        self.define_json = data.get("define_json") or '{}'
         self.deleted_time = data.get("deleted_time")
         self.enabled = data.get("enabled")
-        self.extend_info = data.get("extend_info")
+        self.extend_info = data.get("extend_info") or '{}'
         self.id = data.get("id")
         self.is_deleted = data.get("is_deleted")
         self.region = data.get("region")
         self.zone = data.get("zone")
         self.status = data.get("status")
-        self.result_json = data.get("result_json")
+        self.result_json = data.get("result_json") or '{}'
         self.name = data.get("name")
         self.provider = data.get("provider")
         self.updated_time = data.get("updated_time")
@@ -239,16 +241,16 @@ class RouteTable(Base):
 
     def __init__(self, data):
         self.created_time = datetime.datetime.now()
-        self.define_json = data.get("define_json")
+        self.define_json = data.get("define_json") or '{}'
         self.deleted_time = data.get("deleted_time")
         self.enabled = data.get("enabled")
-        self.extend_info = data.get("extend_info")
+        self.extend_info = data.get("extend_info") or '{}'
         self.id = data.get("id")
         self.is_deleted = data.get("is_deleted")
         self.region = data.get("region")
         self.zone = data.get("zone")
         self.status = data.get("status")
-        self.result_json = data.get("result_json")
+        self.result_json = data.get("result_json") or '{}'
         self.name = data.get("name")
         self.provider = data.get("provider")
         self.updated_time = data.get("updated_time")
@@ -280,10 +282,10 @@ class RouteEntry(Base):
 
     def __init__(self, data):
         self.created_time = datetime.datetime.now()
-        self.define_json = data.get("define_json")
+        self.define_json = data.get("define_json") or '{}'
         self.deleted_time = data.get("deleted_time")
         self.enabled = data.get("enabled")
-        self.extend_info = data.get("extend_info")
+        self.extend_info = data.get("extend_info") or '{}'
         self.id = data.get("id")
         self.is_deleted = data.get("is_deleted")
         self.name = data.get("name")
@@ -292,7 +294,7 @@ class RouteEntry(Base):
         self.provider = data.get("provider")
         self.region = data.get("region")
         self.resource_id = data.get("resource_id")
-        self.result_json = data.get("result_json")
+        self.result_json = data.get("result_json") or '{}'
         self.route_table = data.get("route_table")
         self.status = data.get("status")
         self.updated_time = data.get("updated_time")
@@ -322,16 +324,16 @@ class SecGroup(Base):
 
     def __init__(self, data):
         self.created_time = datetime.datetime.now()
-        self.define_json = data.get("define_json")
+        self.define_json = data.get("define_json") or '{}'
         self.deleted_time = data.get("deleted_time")
         self.enabled = data.get("enabled")
-        self.extend_info = data.get("extend_info")
+        self.extend_info = data.get("extend_info") or '{}'
         self.id = data.get("id")
         self.is_deleted = data.get("is_deleted")
         self.region = data.get("region")
         self.zone = data.get("zone")
         self.status = data.get("status")
-        self.result_json = data.get("result_json")
+        self.result_json = data.get("result_json") or '{}'
         self.name = data.get("name")
         self.provider = data.get("provider")
         self.updated_time = data.get("updated_time")
@@ -365,10 +367,10 @@ class SecGroupRule(Base):
     def __init__(self, data):
         self.created_time = datetime.datetime.now()
         self.cider_ip = data.get("cider_ip")
-        self.define_json = data.get("define_json")
+        self.define_json = data.get("define_json") or '{}'
         self.deleted_time = data.get("deleted_time")
         self.enabled = data.get("enabled")
-        self.extend_info = data.get("extend_info")
+        self.extend_info = data.get("extend_info") or '{}'
         self.id = data.get("id")
         self.ip_protocol = data.get("ip_protocol")
         self.is_deleted = data.get("is_deleted")
@@ -377,7 +379,7 @@ class SecGroupRule(Base):
         self.provider = data.get("provider")
         self.region = data.get("region")
         self.resource_id = data.get("resource_id")
-        self.result_json = data.get("result_json")
+        self.result_json = data.get("result_json") or '{}'
         self.security_group_id = data.get("security_group_id")
         self.status = data.get("status")
         self.type = data.get("type")
@@ -409,10 +411,10 @@ class NatGateway(Base):
 
     def __init__(self, data):
         self.created_time = datetime.datetime.now()
-        self.define_json = data.get("define_json")
+        self.define_json = data.get("define_json") or '{}'
         self.deleted_time = data.get("deleted_time")
         self.enabled = data.get("enabled")
-        self.extend_info = data.get("extend_info")
+        self.extend_info = data.get("extend_info") or '{}'
         self.id = data.get("id")
         self.ipaddress = data.get("ipaddress")
         self.is_deleted = data.get("is_deleted")
@@ -420,7 +422,7 @@ class NatGateway(Base):
         self.provider = data.get("provider")
         self.region = data.get("region")
         self.resource_id = data.get("resource_id")
-        self.result_json = data.get("result_json")
+        self.result_json = data.get("result_json") or '{}'
         self.status = data.get("status")
         self.subnet = data.get("subnet")
         self.updated_time = data.get("updated_time")
@@ -449,10 +451,10 @@ class Eip(Base):
 
     def __init__(self, data):
         self.created_time = datetime.datetime.now()
-        self.define_json = data.get("define_json")
+        self.define_json = data.get("define_json") or '{}'
         self.deleted_time = data.get("deleted_time")
         self.enabled = data.get("enabled")
-        self.extend_info = data.get("extend_info")
+        self.extend_info = data.get("extend_info") or '{}'
         self.id = data.get("id")
         self.ipaddress = data.get("ipaddress")
         self.is_deleted = data.get("is_deleted")
@@ -460,7 +462,7 @@ class Eip(Base):
         self.provider = data.get("provider")
         self.region = data.get("region")
         self.resource_id = data.get("resource_id")
-        self.result_json = data.get("result_json")
+        self.result_json = data.get("result_json") or '{}'
         self.status = data.get("status")
         self.updated_time = data.get("updated_time")
         self.zone = data.get("zone")
@@ -487,17 +489,17 @@ class LoadBalance(Base):
 
     def __init__(self, data):
         self.created_time = datetime.datetime.now()
-        self.define_json = data.get("define_json")
+        self.define_json = data.get("define_json") or '{}'
         self.deleted_time = data.get("deleted_time")
         self.enabled = data.get("enabled")
-        self.extend_info = data.get("extend_info")
+        self.extend_info = data.get("extend_info") or '{}'
         self.id = data.get("id")
         self.is_deleted = data.get("is_deleted")
         self.name = data.get("name")
         self.provider = data.get("provider")
         self.region = data.get("region")
         self.resource_id = data.get("resource_id")
-        self.result_json = data.get("result_json")
+        self.result_json = data.get("result_json") or '{}'
         self.status = data.get("status")
         self.updated_time = data.get("updated_time")
         self.zone = data.get("zone")
@@ -528,10 +530,10 @@ class LBListener(Base):
     def __init__(self, data):
         self.created_time = datetime.datetime.now()
         self.backend_server = data.get("backend_server")
-        self.define_json = data.get("define_json")
+        self.define_json = data.get("define_json") or '{}'
         self.deleted_time = data.get("deleted_time")
         self.enabled = data.get("enabled")
-        self.extend_info = data.get("extend_info")
+        self.extend_info = data.get("extend_info") or '{}'
         self.id = data.get("id")
         self.is_deleted = data.get("is_deleted")
         self.name = data.get("name")
@@ -540,7 +542,7 @@ class LBListener(Base):
         self.provider = data.get("provider")
         self.region = data.get("region")
         self.resource_id = data.get("resource_id")
-        self.result_json = data.get("result_json")
+        self.result_json = data.get("result_json") or '{}'
         self.status = data.get("status")
         self.updated_time = data.get("updated_time")
         self.zone = data.get("zone")
@@ -569,17 +571,17 @@ class Disk(Base):
 
     def __init__(self, data):
         self.created_time = datetime.datetime.now()
-        self.define_json = data.get("define_json")
+        self.define_json = data.get("define_json") or '{}'
         self.deleted_time = data.get("deleted_time")
         self.enabled = data.get("enabled")
-        self.extend_info = data.get("extend_info")
+        self.extend_info = data.get("extend_info") or '{}'
         self.id = data.get("id")
         self.is_deleted = data.get("is_deleted")
         self.name = data.get("name")
         self.provider = data.get("provider")
         self.region = data.get("region")
         self.resource_id = data.get("resource_id")
-        self.result_json = data.get("result_json")
+        self.result_json = data.get("result_json") or '{}'
         self.size = data.get("size")
         self.status = data.get("status")
         self.type = data.get("type")
@@ -609,17 +611,17 @@ class DiskAttach(Base):
 
     def __init__(self, data):
         self.created_time = datetime.datetime.now()
-        self.define_json = data.get("define_json")
+        self.define_json = data.get("define_json") or '{}'
         self.deleted_time = data.get("deleted_time")
         self.enabled = data.get("enabled")
-        self.extend_info = data.get("extend_info")
+        self.extend_info = data.get("extend_info") or '{}'
         self.id = data.get("id")
         self.is_deleted = data.get("is_deleted")
         self.disk = data.get("disk")
         self.provider = data.get("provider")
         self.region = data.get("region")
         self.resource_id = data.get("resource_id")
-        self.result_json = data.get("result_json")
+        self.result_json = data.get("result_json") or '{}'
         self.instance = data.get("instance")
         self.status = data.get("status")
         self.updated_time = data.get("updated_time")
@@ -655,13 +657,13 @@ class Instance(Base):
     def __init__(self, data):
         self.created_time = datetime.datetime.now()
         self.cpu = data.get("cpu")
-        self.define_json = data.get("define_json")
+        self.define_json = data.get("define_json") or '{}'
         self.deleted_time = data.get("deleted_time")
         self.disk = data.get("disk")
         self.disk_size = data.get("disk_size")
         self.disk_type = data.get("disk_type")
         self.enabled = data.get("enabled")
-        self.extend_info = data.get("extend_info")
+        self.extend_info = data.get("extend_info") or '{}'
         self.hostname = data.get("hostname")
         self.id = data.get("id")
         self.instance_type = data.get("instance_type")
@@ -671,7 +673,7 @@ class Instance(Base):
         self.provider = data.get("provider")
         self.region = data.get("region")
         self.resource_id = data.get("resource_id")
-        self.result_json = data.get("result_json")
+        self.result_json = data.get("result_json") or '{}'
         self.status = data.get("status")
         self.updated_time = data.get("updated_time")
         self.zone = data.get("zone")
@@ -698,17 +700,17 @@ class ConnectNetwork(Base):
 
     def __init__(self, data):
         self.created_time = datetime.datetime.now()
-        self.define_json = data.get("define_json")
+        self.define_json = data.get("define_json") or '{}'
         self.deleted_time = data.get("deleted_time")
         self.enabled = data.get("enabled")
-        self.extend_info = data.get("extend_info")
+        self.extend_info = data.get("extend_info") or '{}'
         self.id = data.get("id")
         self.is_deleted = data.get("is_deleted")
         self.name = data.get("name")
         self.provider = data.get("provider")
         self.region = data.get("region")
         self.resource_id = data.get("resource_id")
-        self.result_json = data.get("result_json")
+        self.result_json = data.get("result_json") or '{}'
         self.status = data.get("status")
         self.updated_time = data.get("updated_time")
         self.zone = data.get("zone")
@@ -738,10 +740,10 @@ class ConnectNetworkAttach(Base):
     def __init__(self, data):
         self.created_time = datetime.datetime.now()
         self.connect_id = data.get("connect_id")
-        self.define_json = data.get("define_json")
+        self.define_json = data.get("define_json") or '{}'
         self.deleted_time = data.get("deleted_time")
         self.enabled = data.get("enabled")
-        self.extend_info = data.get("extend_info")
+        self.extend_info = data.get("extend_info") or '{}'
         self.id = data.get("id")
         self.instance_id = data.get("instance_id")
         self.instance_type = data.get("instance_type")
@@ -749,7 +751,7 @@ class ConnectNetworkAttach(Base):
         self.provider = data.get("provider")
         self.region = data.get("region")
         self.resource_id = data.get("resource_id")
-        self.result_json = data.get("result_json")
+        self.result_json = data.get("result_json") or '{}'
         self.status = data.get("status")
         self.updated_time = data.get("updated_time")
         self.zone = data.get("zone")
