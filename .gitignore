@@ -10,3 +10,4 @@ static/.DS_Store
 /conf/*
 test.py
 test/
+terraform-ui/node_modules
