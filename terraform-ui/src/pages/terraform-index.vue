@@ -16,11 +16,11 @@ export default {
   name: '',
   data () {
     return {
-      activeTab: '/terraformIndex/keyconfig',
+      activeTab: '/terraformIndex/provider',
       tabs: [
-        { label: 'hr_box', path: '/terraformIndex/provider' },
-        { label: 'hr_policies', path: '/terraformIndex/keyconfig' },
-        { label: 'hr_rule', path: '/terraformIndex/rule' }
+        { label: 'tf_provider', path: '/terraformIndex/provider' },
+        { label: 'tf_keyconfig', path: '/terraformIndex/keyconfig' },
+        { label: 'tf_resource', path: '/terraformIndex/resource' }
       ]
     }
   },

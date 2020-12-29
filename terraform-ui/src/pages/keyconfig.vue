@@ -1,48 +1,36 @@
 <template>
   <div class=" ">
-    123123123
+    <TerraformPageTable :pageConfig="pageConfig"></TerraformPageTable>
+    <ModalComponent :modelConfig="modelConfig"></ModalComponent>
   </div>
 </template>
 
 <script>
-import { getTableData, addTableRow, editTableRow, deleteTableRow, test } from '@/api/server'
+import { getTableData, addTableRow, editTableRow, deleteTableRow } from '@/api/server'
 let tableEle = [
   {
-    title: 'hr_name',
-    value: 'name',
+    title: 'ID',
+    value: 'id', //
     display: true
   },
   {
-    title: 'hr_description',
-    value: 'description',
+    title: 'tf_resource',
+    value: 'resource', //
     display: true
   },
   {
-    title: 'hr_enabled',
-    value: 'enabled',
-    display: true,
-    render: item => {
-      return item.enabled ? 'Yes' : 'No'
-    }
-  },
-  {
-    title: 'hr_created_by',
-    value: 'created_by', //
+    title: 'tf_provider',
+    value: 'provider', //
     display: true
   },
   {
-    title: 'hr_created_time',
-    value: 'created_time', //
+    title: 'tf_property', // 不必
+    value: 'property', //
     display: true
   },
   {
-    title: 'hr_updated_by',
-    value: 'updated_by', //
-    display: true
-  },
-  {
-    title: 'hr_updated_time',
-    value: 'updated_time', //
+    title: 'tf_provider_property',
+    value: 'value_config',
     display: true
   }
 ]
@@ -55,13 +43,25 @@ export default {
   data () {
     return {
       pageConfig: {
-        CRUD: '/terraform/ui/v1/policies',
+        CRUD: '/terraform/v1/configer/keyconfig',
         researchConfig: {
           input_conditions: [
             {
-              value: 'name__icontains',
+              value: 'provider',
               type: 'input',
-              placeholder: 'placeholder.input',
+              placeholder: 'tf_provider',
+              style: ''
+            },
+            {
+              value: 'property',
+              type: 'input',
+              placeholder: 'tf_property',
+              style: ''
+            },
+            {
+              value: 'resource',
+              type: 'input',
+              placeholder: 'tf_resource',
               style: ''
             }
           ],
@@ -79,9 +79,7 @@ export default {
               btn_icon: 'fa fa-plus'
             }
           ],
-          filters: {
-            search: ''
-          }
+          filters: {}
         },
         table: {
           tableData: [],
@@ -100,34 +98,52 @@ export default {
       },
       modelConfig: {
         modalId: 'add_edit_Modal',
-        modalTitle: 'hr_policies',
+        modalTitle: 'tf_keyconfig',
         isAdd: true,
         config: [
           {
-            label: 'hr_name',
-            value: 'name',
+            label: 'tf_resource',
+            value: 'resource',
             placeholder: 'tips.inputRequired',
             v_validate: 'required:true|min:2|max:60',
             disabled: false,
             type: 'text'
           },
-          { label: 'hr_description', value: 'description', placeholder: '', disabled: false, type: 'text' },
-          { label: 'hr_enabled', value: 'enabled', placeholder: '', disabled: false, type: 'checkbox' },
-          { name: 'keyconfig', type: 'slot' }
+          {
+            label: 'tf_provider',
+            value: 'provider',
+            placeholder: 'tips.inputRequired',
+            v_validate: 'required:true|min:2|max:60',
+            disabled: false,
+            type: 'text'
+          },
+          {
+            label: 'tf_property',
+            value: 'property',
+            placeholder: 'tips.inputRequired',
+            v_validate: 'required:true|min:2|max:60',
+            disabled: false,
+            type: 'text'
+          },
+          {
+            label: 'tf_provider_property',
+            value: 'value_config',
+            placeholder: 'tips.inputRequired',
+            v_validate: 'required:true|min:2|max:60',
+            disabled: false,
+            type: 'text'
+          }
         ],
         addRow: {
           // [通用]-保存用户新增、编辑时数据
-          name: null,
-          rules: [],
-          description: null,
-          enabled: true
-        },
-        v_select_configs: {
-          ruleOptions: []
+          resource: '',
+          provider: '',
+          property: '',
+          value_config: ''
         }
       },
       modelTip: {
-        key: 'name',
+        key: 'resource',
         value: null
       },
       id: ''
@@ -138,36 +154,20 @@ export default {
   },
   methods: {
     async initTableData () {
-      console.log(123)
-      const ss = await test()
-      // const params = this.$itsCommonUtil.managementUrl(this)
-      // const { status, data } = await getTableData(params)
-      // if (status === 'OK') {
-      //   this.pageConfig.table.tableData = data.data
-      //   this.pageConfig.pagination.total = data.count
-      // }
-    },
-    async getConfigData () {
-      const params = '/terraform/ui/v1/rules'
+      const params = this.$itsCommonUtil.managementUrl(this)
       const { status, data } = await getTableData(params)
       if (status === 'OK') {
-        this.modelConfig.v_select_configs.ruleOptions = data.data.map(item => {
-          return {
-            label: item.name,
-            value: item.id
-          }
-        })
+        this.pageConfig.table.tableData = data.data
+        this.pageConfig.pagination.total = data.count
       }
     },
-    async add () {
-      this.modelConfig.addRow.enabled = true
-      await this.getConfigData()
+    add () {
       this.modelConfig.isAdd = true
       this.$root.JQ('#add_edit_Modal').modal('show')
     },
     async addPost () {
-      this.modelConfig.addRow.enabled = Number(this.modelConfig.addRow.enabled)
-      const { status, message } = await addTableRow(this.pageConfig.CRUD, [this.modelConfig.addRow])
+      this.modelConfig.addRow.value_config = JSON.parse(this.modelConfig.addRow.value_config)
+      const { status, message } = await addTableRow(this.pageConfig.CRUD, this.modelConfig.addRow)
       if (status === 'OK') {
         this.initTableData()
         this.$Message.success(message)
@@ -179,13 +179,13 @@ export default {
       this.modelConfig.isAdd = false
       this.modelTip.value = rowData[this.modelTip.key]
       this.modelConfig.addRow = this.$itsCommonUtil.manageEditParams(this.modelConfig.addRow, rowData)
-      this.modelConfig.addRow.rules = rowData.rules.map(item => item.id)
-      await this.getConfigData()
+      this.modelConfig.addRow.value_config = JSON.stringify(this.modelConfig.addRow.value_config)
       this.$root.JQ('#add_edit_Modal').modal('show')
     },
     async editPost () {
-      this.modelConfig.addRow.enabled = Number(this.modelConfig.addRow.enabled)
-      const { status, message } = await editTableRow(this.pageConfig.CRUD, this.id, this.modelConfig.addRow)
+      let editData = JSON.parse(JSON.stringify(this.modelConfig.addRow))
+      editData.value_config = JSON.parse(editData.value_config)
+      const { status, message } = await editTableRow(this.pageConfig.CRUD, this.id, editData)
       if (status === 'OK') {
         this.initTableData()
         this.$Message.success(message)
@@ -194,7 +194,7 @@ export default {
     },
     deleteConfirmModal (rowData) {
       this.$Modal.confirm({
-        title: this.$t('delete_confirm') + rowData.name,
+        title: this.$t('delete_confirm') + rowData[this.modelTip.key],
         'z-index': 1000000,
         onOk: async () => {
           const { status, message } = await deleteTableRow(this.pageConfig.CRUD, rowData.id)
