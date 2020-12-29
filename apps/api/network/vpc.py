@@ -88,7 +88,7 @@ class VpcApi(TerraformResource):
             logger.info(traceback.format_exc())
             raise ValueError("result can not fetch id")
 
-    def create(self, rid, name, cider, provider_id, extend_info, **kwargs):
+    def create(self, rid, name, cider, provider_id, region, extend_info, **kwargs):
         '''
 
         :param rid:
@@ -100,11 +100,10 @@ class VpcApi(TerraformResource):
         :return:
         '''
 
-        provider_object, provider_info = ProviderApi().provider_info(provider_id)
+        provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
         _path = self.create_workpath(rid,
                                      provider=provider_object["name"],
-                                     region=provider_object["region"],
-                                     zone=provider_object["zone"])
+                                     region=region)
 
         create_data = {"cider": cider, "name": name}
         create_data.update(extend_info)
@@ -115,8 +114,8 @@ class VpcApi(TerraformResource):
 
         self.save_data(rid, name=name,
                        provider=provider_object["name"],
-                       region=provider_object["region"],
-                       zone=provider_object["zone"],
+                       region=region,
+                       zone="",
                        cider=cider,
                        extend_info=extend_info,
                        define_json=define_json,
@@ -138,8 +137,7 @@ class VpcApi(TerraformResource):
         resource_info = self.resource_object.show(rid)
         _path = self.create_workpath(rid,
                                      provider=resource_info["provider"],
-                                     region=resource_info["region"],
-                                     zone=resource_info["zone"])
+                                     region=resource_info["region"])
 
         status = TerraformDriver().destroy(dir_path=_path)
         if not status:

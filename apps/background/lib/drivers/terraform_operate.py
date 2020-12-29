@@ -14,10 +14,8 @@ class TerraformResource(object):
         self.resource_name = None
         self.resource_workspace = None
 
-    def create_workpath(self, rid, provider, region, zone):
-        zone = zone or ""
-        _az = "%s_%s" % (region, zone) if zone else region
-        _path = os.path.join(TERRAFORM_BASE_PATH, provider, _az, self.resource_workspace, rid)
+    def create_workpath(self, rid, provider, region, **kwargs):
+        _path = os.path.join(TERRAFORM_BASE_PATH, provider, region, self.resource_workspace, rid)
         if not os.path.exists(_path):
             os.makedirs(_path)
             self.terraformDriver.init_resource_dir(dir_path=_path, provider=provider)

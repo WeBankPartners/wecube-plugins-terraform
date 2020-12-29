@@ -2,10 +2,11 @@ DROP TABLE IF EXISTS `cloud_providers`;
 
 CREATE TABLE `cloud_providers` (
   `id` VARCHAR(36) NOT NULL,
+  `display_name` VARCHAR(64) NOT NULL,
   `name` VARCHAR(64) NOT NULL,
   `secret_id` VARCHAR(256) NOT NULL,
   `secret_key` VARCHAR(256) NOT NULL,
-  `region` VARCHAR(64) NOT NULL,
+  `region` VARCHAR(64) DEFAULT NULL,
   `zone` VARCHAR(64) DEFAULT NULL,
   `plugin_source` VARCHAR(64) DEFAULT NULL,
   `extend_info` TEXT DEFAULT NULL,

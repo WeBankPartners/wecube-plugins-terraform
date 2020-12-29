@@ -1,21 +1,21 @@
 # coding: utf-8
 
-import datetime
+import os
 import json
 import traceback
-import os
-from apps.api.configer.provider import ProviderApi
-from apps.api.configer.resource import ResourceObject
-from apps.api.configer.value_config import ValueConfigObject
-from apps.background.lib.commander.terraform import TerraformDriver
-from apps.background.models.dbserver import SecGroupManager
-from apps.background.models.dbserver import SecGroupRuleManager
-from apps.common.generate import generate_data
+
 from core import local_exceptions
 from lib.json_helper import format_json_dumps
 from lib.logs import logger
 from lib.uuid_util import get_uuid
 from wecube_plugins_terraform.settings import TERRAFORM_BASE_PATH
+from apps.common.generate import generate_data
+from apps.api.configer.provider import ProviderApi
+from apps.api.configer.resource import ResourceObject
+from apps.api.configer.value_config import ValueConfigObject
+from apps.background.lib.commander.terraform import TerraformDriver
+from apps.background.resource.network.security_group import SecGroupObject
+from apps.background.resource.network.security_group import SecGroupRuleObject
 
 
 class SecGroupApi(object):
@@ -140,46 +140,4 @@ class SecGroupApi(object):
 
         return rid
 
-
-class _SecBaseObject(object):
-    def __init__(self):
-        self.resource = None
-
-    def list(self, filters=None, page=None, pagesize=None, orderby=None):
-        return self.resource.list(filters=filters, pageAt=page,
-                                  pageSize=pagesize, orderby=orderby)
-
-    def create(self, create_data):
-        create_data["id"] = create_data.get("id") or get_uuid()
-        create_data["created_time"] = datetime.datetime.now()
-        create_data["updated_time"] = create_data["created_time"]
-        return self.resource.create(data=create_data)
-
-    def show(self, rid, where_data=None):
-        where_data = where_data or {}
-        filters = where_data.update({"id": rid})
-        return self.resource.get(filters=filters)
-
-    def update(self, rid, update_data, where_data=None):
-        where_data = where_data or {}
-        where_data.update({"id": rid})
-        update_data["updated_time"] = datetime.datetime.now()
-        return self.resource.update(filters=where_data, data=update_data)
-
-    def delete(self, rid, where_data=None):
-        where_data = where_data or {}
-        where_data.update({"id": rid})
-        return self.resource.delete(filters=where_data)
-
-
-class SecGroupObject(_SecBaseObject):
-    def __init__(self):
-        super(SecGroupObject, self).__init__()
-        self.resource = SecGroupManager()
-
-
-class SecGroupRuleObject(_SecBaseObject):
-    def __init__(self):
-        super(SecGroupRuleObject, self).__init__()
-        self.resource = SecGroupRuleManager()
 
