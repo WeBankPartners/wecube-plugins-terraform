@@ -14,23 +14,23 @@ let tableEle = [
     display: true
   },
   {
-    title: 'tf_resource',
-    value: 'resource_name', //
-    display: true
-  },
-  {
-    title: 'tf_provider_property',
-    value: 'resource_property', //
-    display: true
-  },
-  {
     title: 'tf_provider', // 不必
     value: 'provider', //
     display: true
   },
   {
+    title: 'tf_resource',
+    value: 'resource_name', //
+    display: true
+  },
+  {
     title: 'tf_property',
     value: 'property',
+    display: true
+  },
+  {
+    title: 'tf_provider_property',
+    value: 'resource_property', //
     display: true
   },
   {
