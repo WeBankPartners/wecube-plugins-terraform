@@ -19,16 +19,6 @@ let tableEle = [
     display: true
   },
   {
-    title: 'tf_zone', // 不必
-    value: 'zone', //
-    display: true
-  },
-  {
-    title: 'tf_region',
-    value: 'region',
-    display: true
-  },
-  {
     title: 'tf_secret_id',
     value: 'secret_id', //
     display: true
@@ -122,21 +112,6 @@ export default {
             type: 'text'
           },
           {
-            label: 'tf_zone',
-            value: 'zone',
-            placeholder: 'tips.inputRequired',
-            v_validate: 'required:true|min:2|max:60',
-            disabled: false,
-            type: 'text'
-          },
-          {
-            label: 'tf_region',
-            value: 'region',
-            placeholder: '',
-            disabled: false,
-            type: 'text'
-          },
-          {
             label: 'tf_secret_key',
             value: 'secret_key',
             placeholder: 'tips.inputRequired',
@@ -170,8 +145,6 @@ export default {
         addRow: {
           // [通用]-保存用户新增、编辑时数据
           name: '',
-          zone: '',
-          region: '',
           secret_key: '',
           secret_id: '',
           extend_info: '',

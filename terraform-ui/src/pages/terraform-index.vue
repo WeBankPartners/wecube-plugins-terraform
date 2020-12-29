@@ -19,8 +19,8 @@ export default {
       activeTab: '/terraformIndex/provider',
       tabs: [
         { label: 'tf_provider', path: '/terraformIndex/provider' },
-        { label: 'tf_keyconfig', path: '/terraformIndex/keyconfig' },
-        { label: 'tf_resource', path: '/terraformIndex/resource' }
+        { label: 'tf_resource', path: '/terraformIndex/resource' },
+        { label: 'tf_keyconfig', path: '/terraformIndex/keyconfig' }
       ]
     }
   },

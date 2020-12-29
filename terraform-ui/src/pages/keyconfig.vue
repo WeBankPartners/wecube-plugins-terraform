@@ -14,13 +14,13 @@ let tableEle = [
     display: true
   },
   {
-    title: 'tf_resource',
-    value: 'resource', //
+    title: 'tf_provider',
+    value: 'provider', //
     display: true
   },
   {
-    title: 'tf_provider',
-    value: 'provider', //
+    title: 'tf_resource',
+    value: 'resource', //
     display: true
   },
   {
