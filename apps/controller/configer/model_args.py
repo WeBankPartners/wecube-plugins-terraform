@@ -4,7 +4,9 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 resouce_property_models = {
     "provider": ["secret_id", "secret_key", "region"],
     "vpc": ["name", "cider"],
-    "subnet": []
+    "subnet": ["cider", "name", "vpc_id", "zone"],
+    "route_table": ["name", "vpc_id"],
+    "route_entry": []
 }
 
 

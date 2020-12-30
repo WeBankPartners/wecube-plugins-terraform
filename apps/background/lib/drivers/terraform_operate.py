@@ -3,6 +3,8 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import os
 import json
+from shutil import copyfile
+from lib.date_time import get_datetime_point_str
 from wecube_plugins_terraform.settings import TERRAFORM_BASE_PATH
 from apps.background.lib.commander.terraform import TerraformDriver
 
@@ -23,6 +25,11 @@ class TerraformResource(object):
         return _path
 
     def write_define(self, rid, path, define_json):
+        file = os.path.join(path, "%s.tf.json" % rid)
+        if os.path.exists(file):
+            backupfile = file + "_" + get_datetime_point_str()
+            copyfile(file, backupfile)
+
         with open(os.path.join(path, "%s.tf.json" % rid), 'wb+') as f:
             json.dump(define_json, f, ensure_ascii=False, indent=4)
 

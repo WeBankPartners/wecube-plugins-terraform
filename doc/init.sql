@@ -74,31 +74,17 @@ CREATE TABLE `config` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 
-DROP TABLE IF EXISTS `instance`;
-
-CREATE TABLE `instance` (
-  `id` VARCHAR(36) NOT NULL,
-  `provider` VARCHAR(32) NOT NULL,
-  `resource` VARCHAR(64) NOT NULL,
-  `define` TEXT DEFAULT NULL,
-  `created_time` DATETIME DEFAULT NULL,
-  `updated_time` DATETIME DEFAULT NULL,
-  `deleted_time` DATETIME DEFAULT NULL,
-  `enabled` BOOL DEFAULT TRUE,
-  `is_deleted` BOOL DEFAULT FALSE,
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8;
-
 DROP TABLE IF EXISTS `vpc`;
 
 CREATE TABLE `vpc` (
   `id` VARCHAR(36) NOT NULL,
-  `provider` VARCHAR(32) NOT NULL,
+  `provider_id` VARCHAR(36) DEFAULT NULL,
+  `provider` VARCHAR(32) DEFAULT NULL,
   `region` VARCHAR(64) DEFAULT NULL,
   `zone` VARCHAR(64) DEFAULT NULL,
   `resource_id` VARCHAR(64) DEFAULT NULL,
-  `name` VARCHAR(64) NOT NULL,
-  `cider` VARCHAR(128) NOT NULL,
+  `name` VARCHAR(64) DEFAULT NULL,
+  `cider` VARCHAR(128) DEFAULT NULL,
   `extend_info` text DEFAULT NULL,
   `define_json` text DEFAULT NULL,
   `status` varchar(36) DEFAULT NULL,
@@ -115,13 +101,14 @@ DROP TABLE IF EXISTS `subnet`;
 
 CREATE TABLE `subnet` (
   `id` VARCHAR(36) NOT NULL,
-  `provider` VARCHAR(32) NOT NULL,
+  `provider_id` VARCHAR(36) NOT NULL,
+  `provider` VARCHAR(32) DEFAULT NULL,
   `region` VARCHAR(64) DEFAULT NULL,
-  `zone` VARCHAR(64) NOT NULL,
+  `zone` VARCHAR(64) DEFAULT NULL,
   `resource_id` VARCHAR(64) DEFAULT NULL,
-  `name` VARCHAR(64) NOT NULL,
-  `vpc` VARCHAR(64) NOT NULL,
-  `cider` VARCHAR(128) NOT NULL,
+  `name` VARCHAR(64) DEFAULT NULL,
+  `vpc` VARCHAR(64) DEFAULT NULL,
+  `cider` VARCHAR(128) DEFAULT NULL,
   `extend_info` text DEFAULT NULL,
   `define_json` text DEFAULT NULL,
   `status` varchar(36) DEFAULT NULL,
@@ -139,12 +126,13 @@ DROP TABLE IF EXISTS `route_table`;
 
 CREATE TABLE `route_table` (
   `id` VARCHAR(36) NOT NULL,
-  `provider` VARCHAR(32) NOT NULL,
+  `provider_id` VARCHAR(36) DEFAULT NULL,
+  `provider` VARCHAR(32) DEFAULT NULL,
   `region` VARCHAR(64) DEFAULT NULL,
-  `zone` VARCHAR(64) NOT NULL,
+  `zone` VARCHAR(64) DEFAULT NULL,
   `resource_id` VARCHAR(64) DEFAULT NULL,
-  `name` VARCHAR(64) NOT NULL,
-  `vpc` VARCHAR(64) NOT NULL,
+  `name` VARCHAR(64) DEFAULT NULL,
+  `vpc` VARCHAR(64) DEFAULT NULL,
   `extend_info` text DEFAULT NULL,
   `define_json` text DEFAULT NULL,
   `status` varchar(36) DEFAULT NULL,
@@ -162,15 +150,16 @@ DROP TABLE IF EXISTS `route_entry`;
 
 CREATE TABLE `route_entry` (
   `id` VARCHAR(36) NOT NULL,
-  `provider` VARCHAR(32) NOT NULL,
+  `provider_id` VARCHAR(36) DEFAULT NULL,
+  `provider` VARCHAR(32) DEFAULT NULL,
   `region` VARCHAR(64) DEFAULT NULL,
-  `zone` VARCHAR(64) NOT NULL,
+  `zone` VARCHAR(64) DEFAULT NULL,
   `resource_id` VARCHAR(64) DEFAULT NULL,
   `name` VARCHAR(64),
   `vpc` VARCHAR(64) DEFAULT NULL,
-  `route_table` VARCHAR(64) NOT NULL,
-  `next_type` VARCHAR(64) NOT NULL,
-  `next_hub` VARCHAR(128) NOT NULL,
+  `route_table` VARCHAR(64) DEFAULT NULL,
+  `next_type` VARCHAR(64) DEFAULT NULL,
+  `next_hub` VARCHAR(128) DEFAULT NULL,
   `extend_info` text DEFAULT NULL,
   `define_json` text DEFAULT NULL,
   `status` varchar(36) DEFAULT NULL,
@@ -189,9 +178,10 @@ DROP TABLE IF EXISTS `security_group`;
 
 CREATE TABLE `security_group` (
   `id` VARCHAR(36) NOT NULL,
-  `provider` VARCHAR(32) NOT NULL,
+  `provider_id` VARCHAR(36) DEFAULT NULL,
+  `provider` VARCHAR(32) DEFAULT NULL,
   `region` VARCHAR(64) DEFAULT NULL,
-  `zone` VARCHAR(64) NOT NULL,
+  `zone` VARCHAR(64) DEFAULT NULL,
   `resource_id` VARCHAR(64) DEFAULT NULL,
   `name` VARCHAR(64) DEFAULT NULL,
   `vpc` VARCHAR(64) DEFAULT NULL,
@@ -212,9 +202,10 @@ DROP TABLE IF EXISTS `security_group_rule`;
 
 CREATE TABLE `security_group_rule` (
   `id` VARCHAR(36) NOT NULL,
-  `provider` VARCHAR(32) NOT NULL,
+  `provider_id` VARCHAR(36) DEFAULT NULL,
+  `provider` VARCHAR(32) DEFAULT NULL,
   `region` VARCHAR(64) DEFAULT NULL,
-  `zone` VARCHAR(64) NOT NULL,
+  `zone` VARCHAR(64) DEFAULT NULL,
   `resource_id` VARCHAR(64) DEFAULT NULL,
   `security_group_id` VARCHAR(64) DEFAULT NULL,
   `type` VARCHAR(64) DEFAULT NULL,
@@ -238,9 +229,10 @@ DROP TABLE IF EXISTS `nat_gateway`;
 
 CREATE TABLE `nat_gateway` (
   `id` VARCHAR(36) NOT NULL,
-  `provider` VARCHAR(32) NOT NULL,
+  `provider_id` VARCHAR(36) DEFAULT NULL,
+  `provider` VARCHAR(32) DEFAULT NULL,
   `region` VARCHAR(64) DEFAULT NULL,
-  `zone` VARCHAR(64) NOT NULL,
+  `zone` VARCHAR(64) DEFAULT NULL,
   `resource_id` VARCHAR(64) DEFAULT NULL,
   `name` VARCHAR(64) DEFAULT NULL,
   `vpc` VARCHAR(64) DEFAULT NULL,
@@ -263,9 +255,10 @@ DROP TABLE IF EXISTS `eip`;
 
 CREATE TABLE `eip` (
   `id` VARCHAR(36) NOT NULL,
-  `provider` VARCHAR(32) NOT NULL,
+  `provider_id` VARCHAR(36) DEFAULT NULL,
+  `provider` VARCHAR(32) DEFAULT NULL,
   `region` VARCHAR(64) DEFAULT NULL,
-  `zone` VARCHAR(64) NOT NULL,
+  `zone` VARCHAR(64) DEFAULT NULL,
   `resource_id` VARCHAR(64) DEFAULT NULL,
   `name` VARCHAR(64) DEFAULT NULL,
   `ipaddress` VARCHAR(64) DEFAULT NULL,
@@ -282,15 +275,14 @@ CREATE TABLE `eip` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 
-
-
 DROP TABLE IF EXISTS `load_balance`;
 
 CREATE TABLE `load_balance` (
   `id` VARCHAR(36) NOT NULL,
-  `provider` VARCHAR(32) NOT NULL,
+  `provider_id` VARCHAR(36) DEFAULT NULL,
+  `provider` VARCHAR(32) DEFAULT NULL,
   `region` VARCHAR(64) DEFAULT NULL,
-  `zone` VARCHAR(64) NOT NULL,
+  `zone` VARCHAR(64) DEFAULT NULL,
   `resource_id` VARCHAR(64) DEFAULT NULL,
   `name` VARCHAR(64) DEFAULT NULL,
   `extend_info` text DEFAULT NULL,
@@ -310,9 +302,10 @@ DROP TABLE IF EXISTS `load_balance_listener`;
 
 CREATE TABLE `load_balance_listener` (
   `id` VARCHAR(36) NOT NULL,
-  `provider` VARCHAR(32) NOT NULL,
+  `provider_id` VARCHAR(36) DEFAULT NULL,
+  `provider` VARCHAR(32) DEFAULT NULL,
   `region` VARCHAR(64) DEFAULT NULL,
-  `zone` VARCHAR(64) NOT NULL,
+  `zone` VARCHAR(64) DEFAULT NULL,
   `resource_id` VARCHAR(64) DEFAULT NULL,
   `name` VARCHAR(64) DEFAULT NULL,
   `port` INT(11) DEFAULT NULL,
@@ -335,9 +328,10 @@ DROP TABLE IF EXISTS `disk`;
 
 CREATE TABLE `disk` (
   `id` VARCHAR(36) NOT NULL,
-  `provider` VARCHAR(32) NOT NULL,
+  `provider_id` VARCHAR(36) DEFAULT NULL,
+  `provider` VARCHAR(32) DEFAULT NULL,
   `region` VARCHAR(64) DEFAULT NULL,
-  `zone` VARCHAR(64) NOT NULL,
+  `zone` VARCHAR(64) DEFAULT NULL,
   `resource_id` VARCHAR(64) DEFAULT NULL,
   `name` VARCHAR(64) DEFAULT NULL,
   `type` VARCHAR(64) DEFAULT NULL,
@@ -359,9 +353,10 @@ DROP TABLE IF EXISTS `disk_attach`;
 
 CREATE TABLE `disk_attach` (
   `id` VARCHAR(36) NOT NULL,
-  `provider` VARCHAR(32) NOT NULL,
+  `provider_id` VARCHAR(36) DEFAULT NULL,
+  `provider` VARCHAR(32) DEFAULT NULL,
   `region` VARCHAR(64) DEFAULT NULL,
-  `zone` VARCHAR(64) NOT NULL,
+  `zone` VARCHAR(64) DEFAULT NULL,
   `resource_id` VARCHAR(64) DEFAULT NULL,
   `disk` VARCHAR(64) DEFAULT NULL,
   `instance` VARCHAR(64) DEFAULT NULL,
@@ -383,9 +378,10 @@ DROP TABLE IF EXISTS `instance`;
 
 CREATE TABLE `instance` (
   `id` VARCHAR(36) NOT NULL,
-  `provider` VARCHAR(32) NOT NULL,
+  `provider_id` VARCHAR(36) DEFAULT NULL,
+  `provider` VARCHAR(32) DEFAULT NULL,
   `region` VARCHAR(64) DEFAULT NULL,
-  `zone` VARCHAR(64) NOT NULL,
+  `zone` VARCHAR(64) DEFAULT NULL,
   `resource_id` VARCHAR(64) DEFAULT NULL,
   `name` VARCHAR(64) DEFAULT NULL,
   `hostname` VARCHAR(64) DEFAULT NULL,
@@ -409,12 +405,12 @@ CREATE TABLE `instance` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 
-
 DROP TABLE IF EXISTS `connect_network`;
 
 CREATE TABLE `connect_network` (
   `id` VARCHAR(36) NOT NULL,
-  `provider` VARCHAR(32) NOT NULL,
+  `provider_id` VARCHAR(36) DEFAULT NULL,
+  `provider` VARCHAR(32) DEFAULT NULL,
   `region` VARCHAR(64) DEFAULT NULL,
   `zone` VARCHAR(64) DEFAULT NULL,
   `resource_id` VARCHAR(64) DEFAULT NULL,
@@ -435,7 +431,8 @@ DROP TABLE IF EXISTS `connect_network_attach`;
 
 CREATE TABLE `connect_network_attach` (
   `id` VARCHAR(36) NOT NULL,
-  `provider` VARCHAR(32) NOT NULL,
+  `provider_id` VARCHAR(36) DEFAULT NULL,
+  `provider` VARCHAR(32) DEFAULT NULL,
   `region` VARCHAR(64) DEFAULT NULL,
   `zone` VARCHAR(64) DEFAULT NULL,
   `resource_id` VARCHAR(64) DEFAULT NULL,

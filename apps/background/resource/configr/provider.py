@@ -56,7 +56,7 @@ class ProviderObject(object):
             data["extend_info"] = json.loads(data["extend_info"])
             data["provider_property"] = json.loads(data["provider_property"])
 
-        return data
+        return count, data
 
     def delete(self, rid, where_data=None):
         where_data = where_data or {}

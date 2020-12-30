@@ -13,6 +13,10 @@ def get_date_ymd_str():
     return time.strftime("%Y-%m-%d")
 
 
+def get_datetime_point_str():
+    return time.strftime("%Y%m%d_%H%M%S")
+
+
 def datetime_to_str(the_datetime):
     return the_datetime.strftime("%Y-%m-%d %H:%M:%S")
 

@@ -26,8 +26,8 @@ class VPCController(BackendController):
         :return:
         '''
 
-        validation.allowed_key(data, ["id", "provider", "region",
-                                      "zone", "name", "cider", "enabled"])
+        validation.allowed_key(data, ["id", "provider", "region", 'resource_id',
+                                      "provider_id", "zone", "name", "cider", "enabled"])
         return self.resource.resource_object.list(filters=data, page=page,
                                   pagesize=pagesize, orderby=orderby)
 

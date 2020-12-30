@@ -117,9 +117,9 @@ class Config(Base):
 
     id = Column(String(36), primary_key=True)
     provider = Column(String(32), nullable=False)
-    resource = Column(String(64), nullable=False)
+    resource = Column(String(64))
     property = Column(String(64))
-    value_config = Column(String(2048), nullable=False)
+    value_config = Column(String(2048))
     is_locked = Column(TINYINT(1), server_default=text("'0'"))
     created_time = Column(DateTime)
     updated_time = Column(DateTime)
@@ -145,12 +145,13 @@ class Vpc(Base):
     __tablename__ = "vpc"
 
     id = Column(String(36), primary_key=True)
+    provider_id = Column(String(36))
     provider = Column(String(32), nullable=False)
     region = Column(String(64))
     zone = Column(String(64))
     resource_id = Column(String(64))
-    name = Column(String(64), nullable=False)
-    cider = Column(String(128), nullable=False)
+    name = Column(String(64))
+    cider = Column(String(128))
     extend_info = Column(String(512))
     define_json = Column(String(512))
     status = Column(String(36))
@@ -176,6 +177,7 @@ class Vpc(Base):
         self.result_json = data.get("result_json") or '{}'
         self.name = data.get("name")
         self.provider = data.get("provider")
+        self.provider_id = data.get("provider_id")
         self.updated_time = data.get("updated_time")
 
 
@@ -183,13 +185,14 @@ class Subnet(Base):
     __tablename__ = "subnet"
 
     id = Column(String(36), primary_key=True)
+    provider_id = Column(String(36))
     provider = Column(String(32), nullable=False)
     region = Column(String(64))
-    zone = Column(String(64), nullable=False)
+    zone = Column(String(64))
     resource_id = Column(String(64))
-    name = Column(String(64), nullable=False)
-    vpc = Column(String(64), nullable=False)
-    cider = Column(String(128), nullable=False)
+    name = Column(String(64))
+    vpc = Column(String(64))
+    cider = Column(String(128))
     extend_info = Column(String(512))
     define_json = Column(String(512))
     status = Column(String(36))
@@ -215,6 +218,7 @@ class Subnet(Base):
         self.result_json = data.get("result_json") or '{}'
         self.name = data.get("name")
         self.provider = data.get("provider")
+        self.provider_id = data.get("provider_id")
         self.updated_time = data.get("updated_time")
         self.vpc = data.get("vpc")
 
@@ -223,12 +227,13 @@ class RouteTable(Base):
     __tablename__ = "route_table"
 
     id = Column(String(36), primary_key=True)
+    provider_id = Column(String(36))
     provider = Column(String(32), nullable=False)
     region = Column(String(64))
-    zone = Column(String(64), nullable=False)
+    zone = Column(String(64))
     resource_id = Column(String(64))
-    name = Column(String(64), nullable=False)
-    vpc = Column(String(64), nullable=False)
+    name = Column(String(64))
+    vpc = Column(String(64))
     extend_info = Column(String(512))
     define_json = Column(String(512))
     status = Column(String(36))
@@ -253,6 +258,7 @@ class RouteTable(Base):
         self.result_json = data.get("result_json") or '{}'
         self.name = data.get("name")
         self.provider = data.get("provider")
+        self.provider_id = data.get("provider_id")
         self.updated_time = data.get("updated_time")
         self.vpc = data.get("vpc")
 
@@ -261,15 +267,16 @@ class RouteEntry(Base):
     __tablename__ = "route_entry"
 
     id = Column(String(36), primary_key=True)
+    provider_id = Column(String(36))
     provider = Column(String(32), nullable=False)
     region = Column(String(64))
-    zone = Column(String(64), nullable=False)
+    zone = Column(String(64))
     resource_id = Column(String(64))
     name = Column(String(64))
     vpc = Column(String(64))
-    route_table = Column(String(64), nullable=False)
-    next_type = Column(String(64), nullable=False)
-    next_hub = Column(String(128), nullable=False)
+    route_table = Column(String(64))
+    next_type = Column(String(64))
+    next_hub = Column(String(128))
     extend_info = Column(String(512))
     define_json = Column(String(512))
     status = Column(String(36))
@@ -292,6 +299,7 @@ class RouteEntry(Base):
         self.next_hub = data.get("next_hub")
         self.next_type = data.get("next_type")
         self.provider = data.get("provider")
+        self.provider_id = data.get("provider_id")
         self.region = data.get("region")
         self.resource_id = data.get("resource_id")
         self.result_json = data.get("result_json") or '{}'
@@ -306,11 +314,12 @@ class SecGroup(Base):
     __tablename__ = "security_group"
 
     id = Column(String(36), primary_key=True)
+    provider_id = Column(String(36))
     provider = Column(String(32), nullable=False)
     region = Column(String(64))
-    zone = Column(String(64), nullable=False)
+    zone = Column(String(64))
     resource_id = Column(String(64))
-    name = Column(String(64), nullable=False)
+    name = Column(String(64))
     vpc = Column(String(64))
     extend_info = Column(String(512))
     define_json = Column(String(512))
@@ -336,6 +345,7 @@ class SecGroup(Base):
         self.result_json = data.get("result_json") or '{}'
         self.name = data.get("name")
         self.provider = data.get("provider")
+        self.provider_id = data.get("provider_id")
         self.updated_time = data.get("updated_time")
         self.vpc = data.get("vpc")
 
@@ -344,9 +354,10 @@ class SecGroupRule(Base):
     __tablename__ = "security_group_rule"
 
     id = Column(String(36), primary_key=True)
+    provider_id = Column(String(36))
     provider = Column(String(32), nullable=False)
     region = Column(String(64))
-    zone = Column(String(64), nullable=False)
+    zone = Column(String(64))
     resource_id = Column(String(64))
     security_group_id = Column(String(64))
     type = Column(String(64))
@@ -377,6 +388,7 @@ class SecGroupRule(Base):
         self.policy = data.get("policy")
         self.ports = data.get("ports")
         self.provider = data.get("provider")
+        self.provider_id = data.get("provider_id")
         self.region = data.get("region")
         self.resource_id = data.get("resource_id")
         self.result_json = data.get("result_json") or '{}'
@@ -391,9 +403,10 @@ class NatGateway(Base):
     __tablename__ = "nat_gateway"
 
     id = Column(String(36), primary_key=True)
+    provider_id = Column(String(36))
     provider = Column(String(32), nullable=False)
     region = Column(String(64))
-    zone = Column(String(64), nullable=False)
+    zone = Column(String(64))
     resource_id = Column(String(64))
     name = Column(String(64))
     vpc = Column(String(64))
@@ -420,6 +433,7 @@ class NatGateway(Base):
         self.is_deleted = data.get("is_deleted")
         self.name = data.get("name")
         self.provider = data.get("provider")
+        self.provider_id = data.get("provider_id")
         self.region = data.get("region")
         self.resource_id = data.get("resource_id")
         self.result_json = data.get("result_json") or '{}'
@@ -433,9 +447,10 @@ class Eip(Base):
     __tablename__ = "eip"
 
     id = Column(String(36), primary_key=True)
+    provider_id = Column(String(36))
     provider = Column(String(32), nullable=False)
     region = Column(String(64))
-    zone = Column(String(64), nullable=False)
+    zone = Column(String(64))
     resource_id = Column(String(64))
     name = Column(String(64))
     ipaddress = Column(String(64))
@@ -460,6 +475,7 @@ class Eip(Base):
         self.is_deleted = data.get("is_deleted")
         self.name = data.get("name")
         self.provider = data.get("provider")
+        self.provider_id = data.get("provider_id")
         self.region = data.get("region")
         self.resource_id = data.get("resource_id")
         self.result_json = data.get("result_json") or '{}'
@@ -472,9 +488,10 @@ class LoadBalance(Base):
     __tablename__ = "load_balance"
 
     id = Column(String(36), primary_key=True)
+    provider_id = Column(String(36))
     provider = Column(String(32), nullable=False)
     region = Column(String(64))
-    zone = Column(String(64), nullable=False)
+    zone = Column(String(64))
     resource_id = Column(String(64))
     name = Column(String(64))
     extend_info = Column(String(512))
@@ -497,6 +514,7 @@ class LoadBalance(Base):
         self.is_deleted = data.get("is_deleted")
         self.name = data.get("name")
         self.provider = data.get("provider")
+        self.provider_id = data.get("provider_id")
         self.region = data.get("region")
         self.resource_id = data.get("resource_id")
         self.result_json = data.get("result_json") or '{}'
@@ -509,9 +527,10 @@ class LBListener(Base):
     __tablename__ = "load_balance_listener"
 
     id = Column(String(36), primary_key=True)
+    provider_id = Column(String(36))
     provider = Column(String(32), nullable=False)
     region = Column(String(64))
-    zone = Column(String(64), nullable=False)
+    zone = Column(String(64))
     resource_id = Column(String(64))
     name = Column(String(64))
     port = Column(Integer())
@@ -540,6 +559,7 @@ class LBListener(Base):
         self.port = data.get("port")
         self.protocol = data.get("protocol")
         self.provider = data.get("provider")
+        self.provider_id = data.get("provider_id")
         self.region = data.get("region")
         self.resource_id = data.get("resource_id")
         self.result_json = data.get("result_json") or '{}'
@@ -552,9 +572,10 @@ class Disk(Base):
     __tablename__ = "disk"
 
     id = Column(String(36), primary_key=True)
+    provider_id = Column(String(36))
     provider = Column(String(32), nullable=False)
     region = Column(String(64))
-    zone = Column(String(64), nullable=False)
+    zone = Column(String(64))
     resource_id = Column(String(64))
     name = Column(String(64))
     size = Column(Integer())
@@ -579,6 +600,7 @@ class Disk(Base):
         self.is_deleted = data.get("is_deleted")
         self.name = data.get("name")
         self.provider = data.get("provider")
+        self.provider_id = data.get("provider_id")
         self.region = data.get("region")
         self.resource_id = data.get("resource_id")
         self.result_json = data.get("result_json") or '{}'
@@ -593,9 +615,10 @@ class DiskAttach(Base):
     __tablename__ = "disk_attach"
 
     id = Column(String(36), primary_key=True)
+    provider_id = Column(String(36))
     provider = Column(String(32), nullable=False)
     region = Column(String(64))
-    zone = Column(String(64), nullable=False)
+    zone = Column(String(64))
     resource_id = Column(String(64))
     disk = Column(String(64))
     instance = Column(String(36))
@@ -619,6 +642,7 @@ class DiskAttach(Base):
         self.is_deleted = data.get("is_deleted")
         self.disk = data.get("disk")
         self.provider = data.get("provider")
+        self.provider_id = data.get("provider_id")
         self.region = data.get("region")
         self.resource_id = data.get("resource_id")
         self.result_json = data.get("result_json") or '{}'
@@ -632,9 +656,10 @@ class Instance(Base):
     __tablename__ = "instance"
 
     id = Column(String(36), primary_key=True)
+    provider_id = Column(String(36))
     provider = Column(String(32), nullable=False)
     region = Column(String(64))
-    zone = Column(String(64), nullable=False)
+    zone = Column(String(64))
     resource_id = Column(String(64))
     disk = Column(String(64))
     hostname = Column(String(64))
@@ -671,6 +696,7 @@ class Instance(Base):
         self.is_deleted = data.get("is_deleted")
         self.memory = data.get("memory")
         self.provider = data.get("provider")
+        self.provider_id = data.get("provider_id")
         self.region = data.get("region")
         self.resource_id = data.get("resource_id")
         self.result_json = data.get("result_json") or '{}'
@@ -683,6 +709,7 @@ class ConnectNetwork(Base):
     __tablename__ = "connect_network"
 
     id = Column(String(36), primary_key=True)
+    provider_id = Column(String(36))
     provider = Column(String(32), nullable=False)
     region = Column(String(64))
     zone = Column(String(64))
@@ -708,6 +735,7 @@ class ConnectNetwork(Base):
         self.is_deleted = data.get("is_deleted")
         self.name = data.get("name")
         self.provider = data.get("provider")
+        self.provider_id = data.get("provider_id")
         self.region = data.get("region")
         self.resource_id = data.get("resource_id")
         self.result_json = data.get("result_json") or '{}'
@@ -720,6 +748,7 @@ class ConnectNetworkAttach(Base):
     __tablename__ = "connect_network_attach"
 
     id = Column(String(36), primary_key=True)
+    provider_id = Column(String(36))
     provider = Column(String(32), nullable=False)
     region = Column(String(64))
     zone = Column(String(64))
@@ -749,6 +778,7 @@ class ConnectNetworkAttach(Base):
         self.instance_type = data.get("instance_type")
         self.is_deleted = data.get("is_deleted")
         self.provider = data.get("provider")
+        self.provider_id = data.get("provider_id")
         self.region = data.get("region")
         self.resource_id = data.get("resource_id")
         self.result_json = data.get("result_json") or '{}'

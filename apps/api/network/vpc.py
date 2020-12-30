@@ -64,13 +64,15 @@ class VpcApi(TerraformResource):
         # todo 获取vpc创建信息
         return result
 
-    def save_data(self, rid, name, provider, region, zone,
+    def save_data(self, rid, name, provider,
+                  provider_id, region, zone,
                   cider, extend_info, define_json,
                   status, result_json):
         self.resource_object.create(create_data={"id": rid, "provider": provider,
                                                  "region": region, "zone": zone,
                                                  "name": name, "cider": cider,
                                                  "status": status,
+                                                 "provider_id": provider_id,
                                                  "extend_info": json.dumps(extend_info),
                                                  "define_json": json.dumps(define_json),
                                                  "result_json": json.dumps(result_json)})
@@ -113,10 +115,10 @@ class VpcApi(TerraformResource):
         define_json.update(provider_info)
 
         self.save_data(rid, name=name,
+                       provider_id=provider_id,
                        provider=provider_object["name"],
-                       region=region,
+                       region=region, cider=cider,
                        zone="",
-                       cider=cider,
                        extend_info=extend_info,
                        define_json=define_json,
                        status="applying", result_json={})

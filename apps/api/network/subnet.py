@@ -4,17 +4,18 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import json
 import traceback
-from core import local_exceptions
-from lib.json_helper import format_json_dumps
 from lib.logs import logger
+from lib.json_helper import format_json_dumps
+from core import local_exceptions
+from apps.common.convert_keys import convert_keys
+from apps.common.convert_keys import convert_value
 from apps.api.configer.provider import ProviderApi
 from apps.api.configer.resource import ResourceObject
 from apps.api.configer.value_config import ValueConfigObject
 from apps.background.lib.commander.terraform import TerraformDriver
 from apps.background.lib.drivers.terraform_operate import TerraformResource
+from apps.background.resource.network.vpc import VpcObject
 from apps.background.resource.network.subnet import SubnetObject
-from apps.common.convert_keys import convert_keys
-from apps.common.convert_keys import convert_value
 
 
 class SubnetApi(TerraformResource):
@@ -64,14 +65,16 @@ class SubnetApi(TerraformResource):
     def formate_result(self, result):
         return result
 
-    def save_data(self, rid, name, provider, region, zone,
+    def save_data(self, rid, name,
+                  provider, provider_id, region, zone,
                   cider, extend_info, define_json, vpc,
                   status, result_json):
+
         self.resource_object.create(create_data={"id": rid, "provider": provider,
                                                  "region": region, "zone": zone,
                                                  "name": name, "cider": cider,
-                                                 "vpc": vpc,
-                                                 "status": status,
+                                                 "vpc": vpc, "status": status,
+                                                 "provider_id": provider_id,
                                                  "extend_info": json.dumps(extend_info),
                                                  "define_json": json.dumps(define_json),
                                                  "result_json": json.dumps(result_json)})
@@ -102,12 +105,19 @@ class SubnetApi(TerraformResource):
         :return:
         '''
 
+        vpc_resource_id = VpcObject().vpc_resource_id(vpc_id)
+
         provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
         _path = self.create_workpath(rid,
                                      provider=provider_object["name"],
                                      region=region)
 
-        create_data = {"cider": cider, "name": name}
+        resource_zone = ProviderApi().zone_info(provider_object["name"], zone)
+
+        create_data = {"cider": cider, "name": name,
+                       "vpc_id": vpc_resource_id,
+                       "zone": resource_zone}
+
         create_data.update(extend_info)
         create_data.update(kwargs)
 
@@ -116,9 +126,9 @@ class SubnetApi(TerraformResource):
 
         self.save_data(rid, name=name,
                        provider=provider_object["name"],
-                       region=region,
-                       zone="",
-                       cider=cider,
+                       provider_id=provider_id,
+                       region=region, zone=zone,
+                       cider=cider, vpc=vpc_id,
                        extend_info=extend_info,
                        define_json=define_json,
                        status="applying", result_json={})
@@ -147,3 +157,44 @@ class SubnetApi(TerraformResource):
             TerraformDriver().destroy(dir_path=_path)
 
         return self.resource_object.delete(rid)
+
+    def update(self, rid, name):
+        vpc_resource_id = VpcObject().vpc_resource_id(vpc_id)
+
+        provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
+        _path = self.create_workpath(rid,
+                                     provider=provider_object["name"],
+                                     region=region)
+
+        resource_zone = ProviderApi().zone_info(provider_object["name"], zone)
+
+        create_data = {"cider": cider, "name": name,
+                       "vpc_id": vpc_resource_id,
+                       "zone": resource_zone}
+
+        create_data.update(extend_info)
+        create_data.update(kwargs)
+
+        define_json = self._generate_data(provider_object["name"], name, data=create_data)
+        define_json.update(provider_info)
+
+        self.save_data(rid, name=name,
+                       provider=provider_object["name"],
+                       provider_id=provider_id,
+                       region=region, zone=zone,
+                       cider=cider, vpc=vpc_id,
+                       extend_info=extend_info,
+                       define_json=define_json,
+                       status="applying", result_json={})
+
+        self.write_define(rid, _path, define_json=define_json)
+        result = self.run(_path)
+
+        result = self.formate_result(result)
+        logger.info(format_json_dumps(result))
+        resource_id = self._fetch_id(result)
+        self.update_data(rid, data={"status": "ok",
+                                    "resource_id": resource_id,
+                                    "result_json": format_json_dumps(result)})
+
+        return rid

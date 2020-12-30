@@ -54,7 +54,7 @@ class _SecBaseObject(object):
             data["define_json"] = json.loads(data["define_json"])
             data["result_json"] = json.loads(data["result_json"])
 
-        return data
+        return count, data
 
     def delete(self, rid):
         count, data = self.update(rid, update_data={"is_deleted": 1})

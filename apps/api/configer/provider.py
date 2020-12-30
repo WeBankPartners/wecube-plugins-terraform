@@ -39,7 +39,7 @@ class ProviderApi(object):
 
         return convert_value(region, _config.get(region))
 
-    def zone_info(self, provider, region):
+    def zone_info(self, provider, zone):
         '''
 
         :param provider:  provider name
@@ -54,7 +54,7 @@ class ProviderApi(object):
 
         _config = data["value_config"]
 
-        return convert_value(region, _config.get(region))
+        return convert_value(zone, _config.get(zone))
 
     def init_provider(self, provider):
         '''

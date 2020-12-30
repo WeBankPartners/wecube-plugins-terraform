@@ -4,6 +4,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import json
 import datetime
 from lib.uuid_util import get_uuid
+from core import local_exceptions
 from apps.background.models.dbserver import VpcManager
 
 
@@ -41,6 +42,12 @@ class VpcObject(object):
             data["result_json"] = json.loads(data["result_json"])
 
         return data
+
+    def vpc_resource_id(self, rid):
+        vpc = self.show(rid)
+        if not vpc:
+            raise local_exceptions.ValueValidateError("vpc_id", "vpc %s 不存在" % rid)
+        return vpc["resource_id"]
 
     def update(self, rid, update_data, where_data=None):
         where_data = where_data or {}
