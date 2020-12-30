@@ -6,12 +6,12 @@ from core import validation
 from core.controller import BackendController
 from core.controller import BaseController
 from lib.uuid_util import get_uuid
-from apps.api.network.route_table import RouteTableApi
+from apps.api.network.route_entry import RouteEntryApi
 
 
-class RouteTableController(BackendController):
+class RouteEntryController(BackendController):
     allow_methods = ('GET', 'POST')
-    resource = RouteTableApi()
+    resource = RouteEntryApi()
 
     def list(self, request, data, orderby=None, page=None, pagesize=None, **kwargs):
         '''
@@ -32,9 +32,11 @@ class RouteTableController(BackendController):
 
     def before_handler(self, request, data, **kwargs):
         validation.allowed_key(data, ["id", "name", "provider_id", "vpc_id",
+                                      "route_table_id", "next_type", "next_hub",
                                       "zone", "region", "extend_info"])
         validation.not_allowed_null(data=data,
-                                    keys=["region", "provider_id", "vpc_id", "name"]
+                                    keys=["region", "provider_id", "vpc_id", "name",
+                                          "route_table_id", "next_type", "next_hub"]
                                     )
 
         validation.validate_string("id", data.get("id"))
@@ -42,6 +44,9 @@ class RouteTableController(BackendController):
         validation.validate_string("region", data["region"])
         validation.validate_string("zone", data.get("zone"))
         validation.validate_string("vpc_id", data["vpc_id"])
+        validation.validate_string("route_table_id", data.get("route_table_id"))
+        validation.validate_string("next_type", data.get("next_type"))
+        validation.validate_string("next_hub", data.get("next_hub"))
         validation.validate_string("provider_id", data.get("provider_id"))
         validation.validate_dict("extend_info", data.get("extend_info"))
 
@@ -52,17 +57,21 @@ class RouteTableController(BackendController):
         region = data.pop("region", None)
         vpc_id = data.pop("vpc_id", None)
         provider_id = data.pop("provider_id", None)
+        route_table = data.pop("route_table_id", None)
+        next_type = data.pop("next_type", None)
+        next_hub = data.pop("next_hub", None)
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         data.update(extend_info)
-        result = self.resource.create(rid, name, provider_id, vpc_id,
-                                      zone, region, extend_info=data)
+        result = self.resource.create(rid, name, provider_id, zone, region,
+                                      vpc_id, route_table, next_type, next_hub,
+                                      extend_info=data)
         return 1, result
 
 
-class RouteTableIdController(BackendController):
+class RouteEntryIdController(BackendController):
     allow_methods = ('GET', 'DELETE', 'PATCH')
-    resource = RouteTableApi()
+    resource = RouteEntryApi()
 
     def show(self, request, data, **kwargs):
         '''
@@ -80,28 +89,18 @@ class RouteTableIdController(BackendController):
         rid = kwargs.pop("rid", None)
         return self.resource.destory(rid)
 
-    def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["name"])
-        validation.not_allowed_null(data=data,
-                                    keys=["name"]
-                                    )
 
-        validation.validate_string("name", data["name"])
-
-    def update(self, request, data, **kwargs):
-        rid = kwargs.pop("rid", None)
-        name = data.pop("name", None)
-        return self.resource.update(rid, name, extend_info={})
-
-
-class RouteTableAddController(BaseController):
+class RouteEntryAddController(BaseController):
     allow_methods = ("POST",)
-    resource = RouteTableApi()
+    resource = RouteEntryApi()
 
     def before_handler(self, request, data, **kwargs):
+        validation.allowed_key(data, ["id", "name", "provider_id", "vpc_id",
+                                      "route_table_id", "next_type", "next_hub",
+                                      "zone", "region", "extend_info"])
         validation.not_allowed_null(data=data,
-                                    keys=["region", "provider_id", "vpc_id"
-                                                                   "zone", "name", "cider"]
+                                    keys=["region", "provider_id", "vpc_id", "name",
+                                          "route_table_id", "next_type", "next_hub"]
                                     )
 
         validation.validate_string("id", data.get("id"))
@@ -109,8 +108,11 @@ class RouteTableAddController(BaseController):
         validation.validate_string("region", data["region"])
         validation.validate_string("zone", data.get("zone"))
         validation.validate_string("vpc_id", data["vpc_id"])
+        validation.validate_string("route_table_id", data.get("route_table_id"))
+        validation.validate_string("next_type", data.get("next_type"))
+        validation.validate_string("next_hub", data.get("next_hub"))
         validation.validate_string("provider_id", data.get("provider_id"))
-        validation.validate_string("cider", data.get("cider"))
+        validation.validate_dict("extend_info", data.get("extend_info"))
 
     def response_templete(self, data):
         return {}
@@ -118,24 +120,25 @@ class RouteTableAddController(BaseController):
     def main_response(self, request, data, **kwargs):
         rid = data.pop("id", None) or get_uuid()
         name = data.pop("name", None)
-        cider = data.pop("cider", None)
         zone = data.pop("zone", None)
         region = data.pop("region", None)
         vpc_id = data.pop("vpc_id", None)
         provider_id = data.pop("provider_id", None)
+        route_table = data.pop("route_table_id", None)
+        next_type = data.pop("next_type", None)
+        next_hub = data.pop("next_hub", None)
 
-        result = self.resource.create(rid, name, cider, provider_id,
-                                      vpc_id, region, zone,
+        result = self.resource.create(rid, name, provider_id, zone, region,
+                                      vpc_id, route_table, next_type, next_hub,
                                       extend_info=data)
-
         return {"result": result}
 
 
-class RouteTableDeleteController(BaseController):
-    name = "RouteTable"
-    resource_describe = "RouteTable"
+class RouteEntryDeleteController(BaseController):
+    name = "RouteEntry"
+    resource_describe = "RouteEntry"
     allow_methods = ("POST",)
-    resource = RouteTableApi()
+    resource = RouteEntryApi()
 
     def before_handler(self, request, data, **kwargs):
         validation.not_allowed_null(data=data,

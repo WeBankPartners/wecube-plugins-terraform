@@ -6,7 +6,7 @@ resouce_property_models = {
     "vpc": ["name", "cider"],
     "subnet": ["cider", "name", "vpc_id", "zone"],
     "route_table": ["name", "vpc_id"],
-    "route_entry": []
+    "route_entry": ["name", "vpc_id", "route_table_id", "next_type", "next_hub"]
 }
 
 

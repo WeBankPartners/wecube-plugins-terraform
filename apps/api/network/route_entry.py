@@ -16,14 +16,15 @@ from apps.background.lib.commander.terraform import TerraformDriver
 from apps.background.lib.drivers.terraform_operate import TerraformResource
 from apps.background.resource.network.vpc import VpcObject
 from apps.background.resource.network.route_table import RouteTableObject
+from apps.background.resource.network.route_entry import RouteEntryObject
 
 
-class RouteTableApi(TerraformResource):
+class RouteEntryApi(TerraformResource):
     def __init__(self):
-        super(RouteTableApi, self).__init__()
+        super(RouteEntryApi, self).__init__()
         self.resource_name = "route_entry"
         self.resource_workspace = "route_entry"
-        self.resource_object = RouteTableObject()
+        self.resource_object = RouteEntryObject()
 
     def resource_info(self, provider):
         resource_config = ResourceObject().query_one(where_data={"provider": provider,
@@ -112,15 +113,18 @@ class RouteTableApi(TerraformResource):
         # todo 依据不同的next type转化不同的id
 
         vpc_resource_id = VpcObject().vpc_resource_id(vpc_id)
+        route_table_id = RouteTableObject().routeTable_resource_id(route_table)
 
         provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
         _path = self.create_workpath(rid,
                                      provider=provider_object["name"],
                                      region=region)
 
-        create_data = {"name": name, "vpc_id": vpc_resource_id,
-                       "route_table": route_table_id,
-                       "next_type": "", "next_hub": ""}
+        create_data = {"name": name,
+                       "vpc_id": vpc_resource_id,
+                       "route_table_id": route_table_id,
+                       "next_type": next_type,
+                       "next_hub": next_hub}
 
         create_data.update(extend_info)
         create_data.update(kwargs)
@@ -163,42 +167,3 @@ class RouteTableApi(TerraformResource):
 
         return self.resource_object.delete(rid)
 
-    def update(self, rid, name, extend_info, **kwargs):
-        '''
-
-        :param rid:
-        :param name:
-        :param extend_info:
-        :param kwargs:
-        :return:
-        '''
-
-        _obj = self.resource_object.show(rid)
-        if not _obj:
-            raise local_exceptions.ResourceNotFoundError("Route Table %s 不存在" % rid)
-
-        vpc_resource_id = _obj.get("vpc")
-
-        provider_object, provider_info = ProviderApi().provider_info(_obj["provider_id"],
-                                                                     region=_obj["region"])
-        _path = self.create_workpath(rid,
-                                     provider=provider_object["name"],
-                                     region=_obj["region"])
-
-        create_data = {"name": name, "vpc_id": vpc_resource_id}
-
-        create_data.update(extend_info)
-        create_data.update(kwargs)
-
-        define_json = self._generate_data(provider_object["name"], name, data=create_data)
-        define_json.update(provider_info)
-
-        self.update_data(rid, data={"status": "updating"})
-        self.write_define(rid, _path, define_json=define_json)
-        result = self.run(_path)
-
-        result = self.formate_result(result)
-        logger.info(format_json_dumps(result))
-
-        return self.update_data(rid, data={"status": "ok", "name": name,
-                                           "define_json": json.dumps(define_json)})
