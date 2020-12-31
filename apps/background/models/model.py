@@ -358,7 +358,9 @@ class SecGroupRule(Base):
     provider = Column(String(32), nullable=False)
     region = Column(String(64))
     zone = Column(String(64))
+    name = Column(String(64))
     resource_id = Column(String(64))
+    description = Column(String(64))
     security_group_id = Column(String(64))
     type = Column(String(64))
     cider_ip = Column(String(64))
@@ -378,6 +380,8 @@ class SecGroupRule(Base):
     def __init__(self, data):
         self.created_time = datetime.datetime.now()
         self.cider_ip = data.get("cider_ip")
+        self.name = data.get("name")
+        self.description = data.get("description")
         self.define_json = data.get("define_json") or '{}'
         self.deleted_time = data.get("deleted_time")
         self.enabled = data.get("enabled")

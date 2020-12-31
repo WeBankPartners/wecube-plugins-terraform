@@ -4,6 +4,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import json
 import datetime
 from lib.uuid_util import get_uuid
+from core import local_exceptions
 from apps.background.models.dbserver import SecGroupManager
 from apps.background.models.dbserver import SecGroupRuleManager
 
@@ -60,14 +61,20 @@ class _SecBaseObject(object):
         count, data = self.update(rid, update_data={"is_deleted": 1})
         return count
 
+
 class SecGroupObject(_SecBaseObject):
     def __init__(self):
         super(SecGroupObject, self).__init__()
         self.resource = SecGroupManager()
+
+    def resource_id(self, rid):
+        data = self.show(rid)
+        if not data:
+            raise local_exceptions.ValueValidateError("security_group_id", "security group %s 不存在" % rid)
+        return data["resource_id"]
 
 
 class SecGroupRuleObject(_SecBaseObject):
     def __init__(self):
         super(SecGroupRuleObject, self).__init__()
         self.resource = SecGroupRuleManager()
-

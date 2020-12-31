@@ -207,6 +207,8 @@ CREATE TABLE `security_group_rule` (
   `region` VARCHAR(64) DEFAULT NULL,
   `zone` VARCHAR(64) DEFAULT NULL,
   `resource_id` VARCHAR(64) DEFAULT NULL,
+  `name` VARCHAR(64) DEFAULT NULL,
+  `description` VARCHAR(64) DEFAULT NULL,
   `security_group_id` VARCHAR(64) DEFAULT NULL,
   `type` VARCHAR(64) DEFAULT NULL,
   `cider_ip` VARCHAR(64) DEFAULT NULL,

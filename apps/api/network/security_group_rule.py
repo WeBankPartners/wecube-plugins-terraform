@@ -13,16 +13,16 @@ from apps.api.configer.resource import ResourceObject
 from apps.api.configer.value_config import ValueConfigObject
 from apps.background.lib.commander.terraform import TerraformDriver
 from apps.background.lib.drivers.terraform_operate import TerraformResource
-from apps.background.resource.network.vpc import VpcObject
 from apps.background.resource.network.security_group import SecGroupObject
+from apps.background.resource.network.security_group import SecGroupRuleObject
 
 
-class SecGroupApi(TerraformResource):
+class SecGroupRuleApi(TerraformResource):
     def __init__(self):
-        super(SecGroupApi, self).__init__()
+        super(SecGroupRuleApi, self).__init__()
         self.resource_name = "security_group"
         self.resource_workspace = "security_group"
-        self.resource_object = SecGroupObject()
+        self.resource_object = SecGroupRuleObject()
 
     def resource_info(self, provider):
         resource_config = ResourceObject().query_one(where_data={"provider": provider,
@@ -64,15 +64,21 @@ class SecGroupApi(TerraformResource):
     def formate_result(self, result):
         return result
 
-    def save_data(self, rid, name, vpc,
+    def save_data(self, rid, name, security_group_id,
+                  cider_ip, ip_protocol, type,
+                  description, ports, policy,
                   provider, provider_id, region, zone,
                   extend_info, define_json,
                   status, result_json):
 
+        description = description or "%s_%s_%s" % (type, ip_protocol, ports)
         self.resource_object.create(create_data={"id": rid, "provider": provider,
                                                  "region": region, "zone": zone,
-                                                 "name": name,
-                                                 "vpc": vpc, "status": status,
+                                                 "security_group_id": security_group_id,
+                                                 "name": name, "cider_ip": cider_ip,
+                                                 "ip_protocol": ip_protocol, "type": type,
+                                                 "ports": ports, "policy": policy,
+                                                 "status": status, "description": description,
                                                  "provider_id": provider_id,
                                                  "extend_info": json.dumps(extend_info),
                                                  "define_json": json.dumps(define_json),
@@ -91,28 +97,40 @@ class SecGroupApi(TerraformResource):
             logger.info(traceback.format_exc())
             raise ValueError("result can not fetch id")
 
-    def create(self, rid, name, provider_id, vpc_id,
+    def create(self, rid, name, provider_id,
+               security_group_id, type,
+               cider_ip, ip_protocol,
+               ports, policy, description,
                zone, region, extend_info, **kwargs):
         '''
 
         :param rid:
-        :param name:
-        :param cider:
-        :param provider_id:
+        :param security_group_id:
+        :param type:
+        :param cider_ip:
+        :param ip_protocol:
+        :param ports:
+        :param policy:
+        :param zone:
+        :param region:
         :param extend_info:
         :param kwargs:
         :return:
         '''
 
-        # todo  处理不同云厂商 的 定义  例如 vpc
-        vpc_resource_id = VpcObject().vpc_resource_id(vpc_id)
+        secGroup_object_id = SecGroupObject().resource_id(security_group_id)
 
         provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
         _path = self.create_workpath(rid,
                                      provider=provider_object["name"],
                                      region=region)
 
-        create_data = {"name": name, "vpc_id": vpc_resource_id}
+        create_data = {"description": description,
+                       "security_group_id": secGroup_object_id,
+                       "type": type, "ports": ports,
+                       "cider_ip": cider_ip,
+                       "ip_protocol": ip_protocol,
+                       "policy": policy}
 
         create_data.update(extend_info)
         create_data.update(kwargs)
@@ -122,9 +140,12 @@ class SecGroupApi(TerraformResource):
 
         self.save_data(rid, name=name,
                        provider=provider_object["name"],
+                       security_group_id=security_group_id,
+                       cider_ip=cider_ip, ip_protocol=ip_protocol,
+                       type=type, policy=policy,
+                       description=description, ports=ports,
                        provider_id=provider_id,
                        region=region, zone=zone,
-                       vpc=vpc_id,
                        extend_info=extend_info,
                        define_json=define_json,
                        status="applying", result_json={})
@@ -153,4 +174,3 @@ class SecGroupApi(TerraformResource):
             TerraformDriver().destroy(dir_path=_path)
 
         return self.resource_object.delete(rid)
-

@@ -6,7 +6,11 @@ resouce_property_models = {
     "vpc": ["name", "cider"],
     "subnet": ["cider", "name", "vpc_id", "zone"],
     "route_table": ["name", "vpc_id"],
-    "route_entry": ["name", "vpc_id", "route_table_id", "next_type", "next_hub"]
+    "route_entry": ["name", "vpc_id", "route_table_id", "next_type", "next_hub"],
+    "security_group": ["name", "vpc_id"],
+    "security_group_rule": ["vpc_id", "description", "type",
+                            "security_group_id", "cider_ip",
+                            "policy", "ip_protocol", "ports"]
 }
 
 
