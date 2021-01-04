@@ -4,6 +4,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import json
 import datetime
 from lib.uuid_util import get_uuid
+from core import local_exceptions
 from apps.background.models.dbserver import SubnetManager
 
 
@@ -42,6 +43,12 @@ class SubnetObject(object):
             data["result_json"] = json.loads(data["result_json"])
 
         return data
+
+    def subnet_resource_id(self, rid):
+        data = self.show(rid)
+        if not data:
+            raise local_exceptions.ValueValidateError("subnet_id", "subnet %s 不存在" % rid)
+        return data["resource_id"]
 
     def update(self, rid, update_data, where_data=None):
         where_data = where_data or {}

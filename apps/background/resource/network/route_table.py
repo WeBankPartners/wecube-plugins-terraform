@@ -62,7 +62,7 @@ class RouteTableObject(object):
         return count
 
     def routeTable_resource_id(self, rid):
-        vpc = self.show(rid)
-        if not vpc:
+        data = self.show(rid)
+        if not data:
             raise local_exceptions.ValueValidateError("route_table_id", "route table %s 不存在" % rid)
-        return vpc["resource_id"]
+        return data["resource_id"]

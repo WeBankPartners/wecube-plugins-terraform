@@ -13,17 +13,16 @@ from apps.api.configer.resource import ResourceObject
 from apps.api.configer.value_config import ValueConfigObject
 from apps.background.lib.commander.terraform import TerraformDriver
 from apps.background.lib.drivers.terraform_operate import TerraformResource
-from apps.background.resource.network.vpc import VpcObject
-from apps.background.resource.network.subnet import SubnetObject
-from apps.background.resource.loadbalance.lb import LBObject
+from apps.background.resource.network.eip import EipObject
+from apps.background.resource.network.eip import EipAssociationObject
 
 
-class LBApi(TerraformResource):
+class EipAssociationApi(TerraformResource):
     def __init__(self):
-        super(LBApi, self).__init__()
-        self.resource_name = "lb"
-        self.resource_workspace = "lb"
-        self.resource_object = LBObject()
+        super(EipAssociationApi, self).__init__()
+        self.resource_name = "eip_association"
+        self.resource_workspace = "eip_association"
+        self.resource_object = EipAssociationObject()
 
     def resource_info(self, provider):
         resource_config = ResourceObject().query_one(where_data={"provider": provider,
@@ -65,15 +64,15 @@ class LBApi(TerraformResource):
     def formate_result(self, result):
         return result
 
-    def save_data(self, rid, name,subnet_id,
+    def save_data(self, rid, name, eip,
                   provider, provider_id, region, zone,
                   extend_info, define_json,
                   status, result_json):
 
         self.resource_object.create(create_data={"id": rid, "provider": provider,
                                                  "region": region, "zone": zone,
-                                                 "name": name, "status": status,
-                                                 "subnet_id": subnet_id,
+                                                 "name": name, "eip_id": eip,
+                                                 "status": status,
                                                  "provider_id": provider_id,
                                                  "extend_info": json.dumps(extend_info),
                                                  "define_json": json.dumps(define_json),
@@ -92,7 +91,10 @@ class LBApi(TerraformResource):
             logger.info(traceback.format_exc())
             raise ValueError("result can not fetch id")
 
-    def create(self, rid, name, provider_id, subnet_id,
+    def _read_other_result(self, result, models):
+        return {}
+
+    def create(self, rid, name, provider_id, eip_id,
                zone, region, extend_info, **kwargs):
         '''
 
@@ -105,17 +107,13 @@ class LBApi(TerraformResource):
         :return:
         '''
 
-        subnet_resource_id = SubnetObject().subnet_resource_id(subnet_id)
-
-        if extend_info.get("vpc_id"):
-            extend_info["vpc_id"] = VpcObject().vpc_resource_id(extend_info.get("vpc_id"))
-
+        eip_resource_id = EipObject().eip_resource_id(eip_id)
         provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
         _path = self.create_workpath(rid,
                                      provider=provider_object["name"],
                                      region=region)
 
-        create_data = {"name": name, "subnet_id": subnet_resource_id}
+        create_data = {"name": name, "eip_id": eip_resource_id}
 
         create_data.update(extend_info)
         create_data.update(kwargs)
@@ -124,10 +122,10 @@ class LBApi(TerraformResource):
         define_json.update(provider_info)
 
         self.save_data(rid, name=name,
+                       eip=eip_id,
                        provider=provider_object["name"],
                        provider_id=provider_id,
                        region=region, zone=zone,
-                       subnet_id=subnet_id,
                        extend_info=extend_info,
                        define_json=define_json,
                        status="applying", result_json={})
@@ -138,6 +136,7 @@ class LBApi(TerraformResource):
         result = self.formate_result(result)
         logger.info(format_json_dumps(result))
         resource_id = self._fetch_id(result)
+
         self.update_data(rid, data={"status": "ok",
                                     "resource_id": resource_id,
                                     "result_json": format_json_dumps(result)})

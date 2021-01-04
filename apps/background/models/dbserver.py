@@ -51,6 +51,10 @@ class EipManager(_BaseManager):
     obj = model.Eip
 
 
+class EipAssociation(_BaseManager):
+    obj = model.EipAssociation
+
+
 class LBManager(_BaseManager):
     obj = model.LoadBalance
 

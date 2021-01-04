@@ -6,12 +6,12 @@ from core import validation
 from core.controller import BackendController
 from core.controller import BaseController
 from lib.uuid_util import get_uuid
-from apps.api.network.eip import EipApi
+from apps.api.network.eip_association import EipAssociationApi
 
 
-class EipController(BackendController):
+class EipAssociationController(BackendController):
     allow_methods = ('GET', 'POST')
-    resource = EipApi()
+    resource = EipAssociationApi()
 
     def list(self, request, data, orderby=None, page=None, pagesize=None, **kwargs):
         '''
@@ -26,21 +26,22 @@ class EipController(BackendController):
         '''
 
         validation.allowed_key(data, ["id", "provider", "region", 'resource_id',
-                                      "provider_id", "name", "ipaddress", "enabled"])
+                                      "provider_id", "name", "eip_id", "enabled"])
         return self.resource.resource_object.list(filters=data, page=page,
                                                   pagesize=pagesize, orderby=orderby)
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["id", "name", "provider_id",
+        validation.allowed_key(data, ["id", "name", "provider_id", "eip_id",
                                       "zone", "region", "extend_info"])
         validation.not_allowed_null(data=data,
-                                    keys=["region", "provider_id", "name"]
+                                    keys=["region", "provider_id", "name", "eip_id"]
                                     )
 
         validation.validate_string("id", data.get("id"))
         validation.validate_string("name", data["name"])
         validation.validate_string("region", data["region"])
         validation.validate_string("zone", data.get("zone"))
+        validation.validate_string("eip_id", data.get("eip_id"))
         validation.validate_string("provider_id", data.get("provider_id"))
         validation.validate_dict("extend_info", data.get("extend_info"))
 
@@ -49,18 +50,19 @@ class EipController(BackendController):
         name = data.pop("name", None)
         zone = data.pop("zone", None)
         region = data.pop("region", None)
+        eip_id = data.pop("eip_id", None)
         provider_id = data.pop("provider_id", None)
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         data.update(extend_info)
-        result = self.resource.create(rid, name, provider_id,
+        result = self.resource.create(rid, name, provider_id, eip_id,
                                       zone, region, extend_info=data)
         return 1, result
 
 
-class EipIdController(BackendController):
+class EipAssociationIdController(BackendController):
     allow_methods = ('GET', 'DELETE')
-    resource = EipApi()
+    resource = EipAssociationApi()
 
     def show(self, request, data, **kwargs):
         '''
@@ -79,24 +81,24 @@ class EipIdController(BackendController):
         return self.resource.destory(rid)
 
 
-class EipAddController(BaseController):
+class EipAssociationAddController(BaseController):
     allow_methods = ("POST",)
-    resource = EipApi()
+    resource = EipAssociationApi()
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["id", "name", "provider_id",
+        validation.allowed_key(data, ["id", "name", "provider_id", "eip_id",
                                       "zone", "region", "extend_info"])
         validation.not_allowed_null(data=data,
-                                    keys=["region", "provider_id", "name"]
+                                    keys=["region", "provider_id", "name", "eip_id"]
                                     )
 
         validation.validate_string("id", data.get("id"))
         validation.validate_string("name", data["name"])
         validation.validate_string("region", data["region"])
         validation.validate_string("zone", data.get("zone"))
+        validation.validate_string("eip_id", data.get("eip_id"))
         validation.validate_string("provider_id", data.get("provider_id"))
         validation.validate_dict("extend_info", data.get("extend_info"))
-
 
     def response_templete(self, data):
         return {}
@@ -106,21 +108,22 @@ class EipAddController(BaseController):
         name = data.pop("name", None)
         zone = data.pop("zone", None)
         region = data.pop("region", None)
+        eip_id = data.pop("eip_id", None)
         provider_id = data.pop("provider_id", None)
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         data.update(extend_info)
-        result = self.resource.create(rid, name, provider_id,
+        result = self.resource.create(rid, name, provider_id, eip_id,
                                       zone, region, extend_info=data)
 
         return {"result": result}
 
 
-class EipDeleteController(BaseController):
-    name = "Eip"
-    resource_describe = "Eip"
+class EipAssociationDeleteController(BaseController):
+    name = "EipAssociation"
+    resource_describe = "EipAssociation"
     allow_methods = ("POST",)
-    resource = EipApi()
+    resource = EipAssociationApi()
 
     def before_handler(self, request, data, **kwargs):
         validation.not_allowed_null(data=data,

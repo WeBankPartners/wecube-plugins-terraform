@@ -10,7 +10,11 @@ resouce_property_models = {
     "security_group": ["name", "vpc_id"],
     "security_group_rule": ["vpc_id", "description", "type",
                             "security_group_id", "cider_ip",
-                            "policy", "ip_protocol", "ports"]
+                            "policy", "ip_protocol", "ports"],
+    "nat": ["name", "vpc_id", "subnet_id", "eip"],
+    "eip": ["name"],
+    "eip_association": ["name", "eip_id"]
+
 }
 
 

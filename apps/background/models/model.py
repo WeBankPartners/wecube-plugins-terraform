@@ -488,6 +488,48 @@ class Eip(Base):
         self.zone = data.get("zone")
 
 
+
+class EipAssociation(Base):
+    __tablename__ = "eip_association"
+
+    id = Column(String(36), primary_key=True)
+    provider_id = Column(String(36))
+    provider = Column(String(32), nullable=False)
+    region = Column(String(64))
+    zone = Column(String(64))
+    resource_id = Column(String(64))
+    name = Column(String(64))
+    eip_id = Column(String(64))
+    extend_info = Column(String(512))
+    define_json = Column(String(512))
+    status = Column(String(36))
+    result_json = Column(String(5120))
+    created_time = Column(DateTime)
+    updated_time = Column(DateTime)
+    deleted_time = Column(DateTime)
+    enabled = Column(TINYINT(1), server_default=text("'1'"))
+    is_deleted = Column(TINYINT(1), server_default=text("'0'"))
+
+    def __init__(self, data):
+        self.created_time = datetime.datetime.now()
+        self.define_json = data.get("define_json") or '{}'
+        self.deleted_time = data.get("deleted_time")
+        self.enabled = data.get("enabled")
+        self.extend_info = data.get("extend_info") or '{}'
+        self.id = data.get("id")
+        self.eip_id = data.get("eip_id")
+        self.is_deleted = data.get("is_deleted")
+        self.name = data.get("name")
+        self.provider = data.get("provider")
+        self.provider_id = data.get("provider_id")
+        self.region = data.get("region")
+        self.resource_id = data.get("resource_id")
+        self.result_json = data.get("result_json") or '{}'
+        self.status = data.get("status")
+        self.updated_time = data.get("updated_time")
+        self.zone = data.get("zone")
+
+
 class LoadBalance(Base):
     __tablename__ = "load_balance"
 
@@ -498,6 +540,7 @@ class LoadBalance(Base):
     zone = Column(String(64))
     resource_id = Column(String(64))
     name = Column(String(64))
+    subnet_id = Column(String(64))
     extend_info = Column(String(512))
     define_json = Column(String(512))
     status = Column(String(36))
@@ -517,6 +560,7 @@ class LoadBalance(Base):
         self.id = data.get("id")
         self.is_deleted = data.get("is_deleted")
         self.name = data.get("name")
+        self.subnet_id = data.get("subnet_id")
         self.provider = data.get("provider")
         self.provider_id = data.get("provider_id")
         self.region = data.get("region")
@@ -537,6 +581,7 @@ class LBListener(Base):
     zone = Column(String(64))
     resource_id = Column(String(64))
     name = Column(String(64))
+    lb_id = Column(String(36))
     port = Column(Integer())
     protocol = Column(String(36))
     backend_server = Column(String(1024))
@@ -560,6 +605,7 @@ class LBListener(Base):
         self.id = data.get("id")
         self.is_deleted = data.get("is_deleted")
         self.name = data.get("name")
+        self.lb_id = data.get("lb_id")
         self.port = data.get("port")
         self.protocol = data.get("protocol")
         self.provider = data.get("provider")

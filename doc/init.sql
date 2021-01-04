@@ -276,6 +276,29 @@ CREATE TABLE `eip` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `eip_association`;
+
+CREATE TABLE `eip_association` (
+  `id` VARCHAR(36) NOT NULL,
+  `provider_id` VARCHAR(36) DEFAULT NULL,
+  `provider` VARCHAR(32) DEFAULT NULL,
+  `region` VARCHAR(64) DEFAULT NULL,
+  `zone` VARCHAR(64) DEFAULT NULL,
+  `resource_id` VARCHAR(64) DEFAULT NULL,
+  `name` VARCHAR(64) DEFAULT NULL,
+  `eip_id` VARCHAR(64) DEFAULT NULL,
+  `extend_info` text DEFAULT NULL,
+  `define_json` text DEFAULT NULL,
+  `status` varchar(36) DEFAULT NULL,
+  `result_json` TEXT DEFAULT NULL,
+  `created_time` DATETIME DEFAULT NULL,
+  `updated_time` DATETIME DEFAULT NULL,
+  `deleted_time` DATETIME DEFAULT NULL,
+  `enabled` BOOL DEFAULT TRUE,
+  `is_deleted` BOOL DEFAULT FALSE,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
+
 
 DROP TABLE IF EXISTS `load_balance`;
 
@@ -287,6 +310,7 @@ CREATE TABLE `load_balance` (
   `zone` VARCHAR(64) DEFAULT NULL,
   `resource_id` VARCHAR(64) DEFAULT NULL,
   `name` VARCHAR(64) DEFAULT NULL,
+  `subnet_id` VARCHAR(64) DEFAULT NULL,
   `extend_info` text DEFAULT NULL,
   `define_json` text DEFAULT NULL,
   `status` varchar(36) DEFAULT NULL,
@@ -310,6 +334,7 @@ CREATE TABLE `load_balance_listener` (
   `zone` VARCHAR(64) DEFAULT NULL,
   `resource_id` VARCHAR(64) DEFAULT NULL,
   `name` VARCHAR(64) DEFAULT NULL,
+  `lb_id` VARCHAR(36) DEFAULT NULL,
   `port` INT(11) DEFAULT NULL,
   `protocol` VARCHAR(36) DEFAULT NULL,
   `backend_server` text DEFAULT NULL,

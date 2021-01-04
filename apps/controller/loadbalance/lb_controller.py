@@ -2,102 +2,140 @@
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-import json
-
-from apps.api.configer.provider import ProviderApi
-from apps.api.configer.provider import ProviderObject
 from core import validation
 from core.controller import BackendController
-from core.controller import BackendIdController
+from core.controller import BaseController
 from lib.uuid_util import get_uuid
+from apps.api.loadbalance.lb import LBApi
 
 
-class ProviderController(BackendController):
-    allow_methods = ('GET', "POST")
-    resource = ProviderObject()
+class LBController(BackendController):
+    allow_methods = ('GET', 'POST')
+    resource = LBApi()
 
     def list(self, request, data, orderby=None, page=None, pagesize=None, **kwargs):
-        validation.allowed_key(data.keys(), ["id", "name", "region", "enabled"])
-        return self.resource.list(filters=data, page=page,
-                                  pagesize=pagesize, orderby=orderby)
-
-    def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["id", "name", "zone", "secret_id",
-                                      "secret_key", "region", "enabled",
-                                      "extend_info", "plugin_source",
-                                      "provider_property"])
-        validation.not_allowed_null(data=data,
-                                    keys=["name", "secret_id", "secret_key", "region"]
-                                    )
-
-        validation.validate_string("id", data.get("id"))
-        validation.validate_string("name", data["name"])
-        validation.validate_string("region", data.get("region"))
-        validation.validate_string("zone", data.get("zone"))
-        validation.validate_string("secret_id", data.get("secret_id"))
-        validation.validate_string("secret_key", data.get("secret_key"))
-        validation.validate_dict("extend_info", data.get("extend_info"))
-        validation.validate_dict("provider_property", data.get("provider_property"))
-
-    def create(self, request, data, **kwargs):
         '''
 
         :param request:
         :param data:
-        extend_info： {}  define example: {"version": "v1.1.0"}
-        provider_property ｛｝revert property for provider， example secret_key to key
-        define example: {"secret_key": "key"}
+        :param orderby:
+        :param page:
+        :param pagesize:
         :param kwargs:
         :return:
         '''
 
-        name = data.get("name")
-        extend_info = validation.validate_dict("extend_info", data.get("extend_info")) or {}
-        provider_property = validation.validate_dict("provider_property", data.get("provider_property")) or {}
-
-        ProviderApi().create_provider_workspace(provider=name)
-        create_data = {"id": get_uuid(), "name": data["name"],
-                       "secret_id": data.get("secret_id"),
-                       "secret_key": data.get("secret_key"),
-                       "region": data.get("region"),
-                       "zone": data.get("zone"),
-                       "extend_info": json.dumps(extend_info),
-                       "provider_property": json.dumps(provider_property),
-                       "is_init": 1
-                       }
-
-        return self.resource.create(create_data)
-
-
-class ProviderIdController(BackendIdController):
-    resource = ProviderObject()
-
-    def show(self, request, data, **kwargs):
-        rid = kwargs.pop("rid", None)
-        return self.resource.show(rid)
+        validation.allowed_key(data, ["id", "provider", "region", 'resource_id',
+                                      "provider_id", "name", "subnet_id", "enabled"])
+        return self.resource.resource_object.list(filters=data, page=page,
+                                                  pagesize=pagesize, orderby=orderby)
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["zone", "secret_id",
-                                      "secret_key", "region", "enabled",
-                                      "extend_info", "provider_property"])
+        validation.allowed_key(data, ["id", "name", "provider_id", "subnet_id",
+                                      "zone", "region", "extend_info"])
+        validation.not_allowed_null(data=data,
+                                    keys=["region", "provider_id", "subnet_id", "name"]
+                                    )
 
-        validation.validate_string("region", data.get("region"))
+        validation.validate_string("id", data.get("id"))
+        validation.validate_string("name", data["name"])
+        validation.validate_string("region", data["region"])
         validation.validate_string("zone", data.get("zone"))
-        validation.validate_string("secret_id", data.get("secret_id"))
-        validation.validate_string("secret_key", data.get("secret_key"))
+        validation.validate_string("subnet_id", data["subnet_id"])
+        validation.validate_string("provider_id", data.get("provider_id"))
         validation.validate_dict("extend_info", data.get("extend_info"))
-        validation.validate_dict("provider_property", data.get("provider_property"))
 
-    def update(self, request, data, **kwargs):
+    def create(self, request, data, **kwargs):
+        rid = data.pop("id", None) or get_uuid()
+        name = data.pop("name", None)
+        zone = data.pop("zone", None)
+        region = data.pop("region", None)
+        subnet_id = data.pop("subnet_id", None)
+        provider_id = data.pop("provider_id", None)
+        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
+
+        data.update(extend_info)
+        result = self.resource.create(rid, name, provider_id, subnet_id,
+                                      zone, region, extend_info=data)
+        return 1, result
+
+
+class LBIdController(BackendController):
+    allow_methods = ('GET', 'DELETE', 'PATCH')
+    resource = LBApi()
+
+    def show(self, request, data, **kwargs):
+        '''
+
+        :param request:
+        :param data:
+        :param kwargs:
+        :return:
+        '''
+
         rid = kwargs.pop("rid", None)
-        if data.get("extend_info") is not None:
-            data["extend_info"] = json.dumps(data.get("extend_info", {}))
-
-        if data.get("provider_property") is not None:
-            data["provider_property"] = json.dumps(data.get("provider_property", {}))
-
-        return self.resource.update(rid, data)
+        return self.resource.resource_object.show(rid)
 
     def delete(self, request, data, **kwargs):
         rid = kwargs.pop("rid", None)
-        return self.resource.delete(rid)
+        return self.resource.destory(rid)
+
+
+class LBAddController(BaseController):
+    allow_methods = ("POST",)
+    resource = LBApi()
+
+    def before_handler(self, request, data, **kwargs):
+        validation.allowed_key(data, ["id", "name", "provider_id", "subnet_id",
+                                      "zone", "region", "extend_info"])
+        validation.not_allowed_null(data=data,
+                                    keys=["region", "provider_id", "subnet_id", "name"]
+                                    )
+
+        validation.validate_string("id", data.get("id"))
+        validation.validate_string("name", data["name"])
+        validation.validate_string("region", data["region"])
+        validation.validate_string("zone", data.get("zone"))
+        validation.validate_string("subnet_id", data["subnet_id"])
+        validation.validate_string("provider_id", data.get("provider_id"))
+        validation.validate_dict("extend_info", data.get("extend_info"))
+
+    def response_templete(self, data):
+        return {}
+
+    def main_response(self, request, data, **kwargs):
+        rid = data.pop("id", None) or get_uuid()
+        name = data.pop("name", None)
+        zone = data.pop("zone", None)
+        region = data.pop("region", None)
+        subnet_id = data.pop("subnet_id", None)
+        provider_id = data.pop("provider_id", None)
+        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
+
+        data.update(extend_info)
+        result = self.resource.create(rid, name, provider_id, subnet_id,
+                                      zone, region, extend_info=data)
+
+        return {"result": result}
+
+
+class LBDeleteController(BaseController):
+    name = "LB"
+    resource_describe = "LB"
+    allow_methods = ("POST",)
+    resource = LBApi()
+
+    def before_handler(self, request, data, **kwargs):
+        validation.not_allowed_null(data=data,
+                                    keys=["id"]
+                                    )
+
+        validation.validate_string("id", data.get("id"))
+
+    def response_templete(self, data):
+        return {}
+
+    def main_response(self, request, data, **kwargs):
+        rid = data.pop("id", None)
+        result = self.resource.destory(rid)
+        return {"result": result}

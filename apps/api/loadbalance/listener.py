@@ -1,77 +1,60 @@
 # coding: utf-8
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-import os
 import json
 import traceback
-from core import local_exceptions
-from lib.json_helper import format_json_dumps
 from lib.logs import logger
-from lib.uuid_util import get_uuid
-from wecube_plugins_terraform.settings import TERRAFORM_BASE_PATH
+from lib.json_helper import format_json_dumps
+from core import local_exceptions
+from apps.common.convert_keys import convert_keys
+from apps.common.convert_keys import convert_value
 from apps.api.configer.provider import ProviderApi
 from apps.api.configer.resource import ResourceObject
 from apps.api.configer.value_config import ValueConfigObject
 from apps.background.lib.commander.terraform import TerraformDriver
-from apps.common.generate import generate_data
+from apps.background.lib.drivers.terraform_operate import TerraformResource
+from apps.background.resource.loadbalance.lb import LBObject
 from apps.background.resource.loadbalance.listener import LBListenerObject
 
-# todo 根据不同的云厂商适配listener - backend server
 
-class LBListenerApi(object):
-    terraformDriver = TerraformDriver()
-
-    def create_workpath(self, rid, provider, region, zone):
-        zone = zone or ""
-        _az = "%s_%s" % (region, zone) if zone else region
-        _path = os.path.join(TERRAFORM_BASE_PATH, provider, _az, "vpc", rid)
-        if not os.path.exists(_path):
-            os.makedirs(_path)
-
-        self.terraformDriver.init_resource_dir(dir_path=_path, provider=provider)
-        return _path
-
-    def write_define(self, rid, path, define_json):
-        with open(os.path.join(path, "%s.tf.json" % rid), 'wb+') as f:
-            json.dump(define_json, f, ensure_ascii=False, indent=4)
-
-    def run(self, path):
-        self.terraformDriver.apply(path, auto_approve="")
-        return self.terraformDriver.resource_result(path)
+class LBListenerApi(TerraformResource):
+    def __init__(self):
+        super(LBListenerApi, self).__init__()
+        self.resource_name = "lb_listener"
+        self.resource_workspace = "lb_listener"
+        self.resource_object = LBListenerObject()
 
     def resource_info(self, provider):
-        _vpc_resource = ResourceObject().query_one(where_data={"provider": provider,
-                                                               "property": "vpc"})
-        if not _vpc_resource:
-            raise local_exceptions.ResourceConfigError("vpc 资源未初始化完成配置")
+        resource_config = ResourceObject().query_one(where_data={"provider": provider,
+                                                                 "property": self.resource_name})
+        if not resource_config:
+            raise local_exceptions.ResourceConfigError("%s 资源未初始化完成配置" % self.resource_name)
 
-        return _vpc_resource
+        return resource_config
 
-    def resource_config(self, provider):
-        return ValueConfigObject().query_one(where_data={"provider": provider,
-                                                         "resource": "vpc"})
+    def values_config(self, provider):
+        return ValueConfigObject().resource_value_configs(provider, self.resource_name)
 
-    def revert(self, data, resource_property, data_modes):
-        result = {}
-        for k, v in data.items():
-            key = resource_property.get(k, k)
-            result[key] = generate_data(v, model=data_modes.get(v, {}))
+    def _generate_data(self, provider, name, data):
+        resource_keys_config = self.resource_info(provider)
+        resource_values_config = self.values_config(provider)
 
-        return result
+        resource_name = resource_keys_config["resource_name"]
+        resource_property = resource_keys_config["resource_property"]
 
-    def _generate_vpc(self, provider, name, data):
-        _vpc_resource = self.resource_info(provider)
-        _vpc_config = self.resource_config(provider)
+        resource_columns = {}
+        for key, value in data.items():
+            if resource_values_config.get(key):
+                value = convert_value(value, resource_values_config.get(key))
 
-        resource_name = _vpc_resource["resource_name"]
-        resource_property = _vpc_resource["resource_property"]
+            resource_columns[key] = value
 
-        _columns = self.revert(data, resource_property=json.loads(resource_property),
-                               data_modes=json.loads(_vpc_config.get("value_config", "{}")))
+        resource_columns = convert_keys(resource_columns, defines=resource_property)
+
         _info = {
             "resource": {
                 resource_name: {
-                    name: _columns
+                    name: resource_columns
                 }
             }
         }
@@ -79,22 +62,25 @@ class LBListenerApi(object):
         return _info
 
     def formate_result(self, result):
-        # todo 获取vpc创建信息
         return result
 
-    def save_data(self, rid, name, provider, region, zone,
-                  cider, extend_info, define_json,
+    def save_data(self, rid, name, lb_id, port, protocol,
+                  provider, provider_id, region, zone,
+                  extend_info, define_json,
                   status, result_json):
-        LBListenerObject().create(create_data={"id": rid, "provider": provider,
-                                        "region": region, "zone": zone,
-                                        "name": name, "cider": cider,
-                                        "status": status,
-                                        "extend_info": json.dumps(extend_info),
-                                        "define_json": json.dumps(define_json),
-                                        "result_json": result_json})
+
+        self.resource_object.create(create_data={"id": rid, "provider": provider,
+                                                 "region": region, "zone": zone,
+                                                 "name": name, "status": status,
+                                                 "lb_id": lb_id, "port": port,
+                                                 "protocol": protocol,
+                                                 "provider_id": provider_id,
+                                                 "extend_info": json.dumps(extend_info),
+                                                 "define_json": json.dumps(define_json),
+                                                 "result_json": json.dumps(result_json)})
 
     def update_data(self, rid, data):
-        LBListenerObject().update(rid, data)
+        return self.resource_object.update(rid, data)
 
     def _fetch_id(self, result):
         try:
@@ -106,29 +92,51 @@ class LBListenerApi(object):
             logger.info(traceback.format_exc())
             raise ValueError("result can not fetch id")
 
-    def create(self, data):
-        name = data["name"]
-        cider = data["cider"]
-        provider = data["provider"]
-        region = data["region"]
-        zone = data.get("zone")
-        extend_info = data.get("extend_info", {})
-        rid = data.get("id") or get_uuid()
+    def create(self, rid, name, provider_id,
+               lb_id, port, protocol,
+               zone, region, extend_info, **kwargs):
+        '''
 
-        create_data = {"cider": cider, "name": name}
+        :param rid:
+        :param name:
+        :param provider_id:
+        :param lb_id:
+        :param port:
+        :param protocol:
+        :param zone:
+        :param region:
+        :param extend_info:
+        :param kwargs:
+        :return:
+        '''
+
+        lb_resource_id = LBObject().lb_resource_id(lb_id)
+
+        provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
+        _path = self.create_workpath(rid,
+                                     provider=provider_object["name"],
+                                     region=region)
+
+        create_data = {"name": name, "lb_id": lb_resource_id,
+                       "port": port, "protocol": protocol}
+
         create_data.update(extend_info)
+        create_data.update(kwargs)
 
-        _path = self.create_workpath(rid, provider, region, zone)
+        define_json = self._generate_data(provider_object["name"], name, data=create_data)
+        define_json.update(provider_info)
 
-        provider_info = ProviderApi().provider_info(provider, region=data.get("region"))
-        vpc_info = self._generate_vpc(provider, name, data=create_data)
-        vpc_info.update(provider_info)
+        self.save_data(rid, name=name,
+                       provider=provider_object["name"],
+                       provider_id=provider_id,
+                       region=region, zone=zone,
+                       lb_id=lb_id, port=port,
+                       protocol=protocol,
+                       extend_info=extend_info,
+                       define_json=define_json,
+                       status="applying", result_json={})
 
-        self.save_data(rid, name=name, provider=provider, region=region,
-                       zone=zone, cider=cider, extend_info=extend_info,
-                       define_json=vpc_info, status="applying", result_json='{}')
-
-        self.write_define(rid, _path, define_json=vpc_info)
+        self.write_define(rid, _path, define_json=define_json)
         result = self.run(_path)
 
         result = self.formate_result(result)
@@ -140,3 +148,15 @@ class LBListenerApi(object):
 
         return rid
 
+    def destory(self, rid):
+        resource_info = self.resource_object.show(rid)
+        _path = self.create_workpath(rid,
+                                     provider=resource_info["provider"],
+                                     region=resource_info["region"])
+
+        status = TerraformDriver().destroy(dir_path=_path)
+        if not status:
+            self.write_define(rid, _path, define_json=resource_info["define_json"])
+            TerraformDriver().destroy(dir_path=_path)
+
+        return self.resource_object.delete(rid)

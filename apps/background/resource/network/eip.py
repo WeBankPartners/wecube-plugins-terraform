@@ -5,12 +5,14 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import json
 import datetime
 from lib.uuid_util import get_uuid
+from core import local_exceptions
 from apps.background.models.dbserver import EipManager
+from apps.background.models.dbserver import EipAssociation
 
 
-class EipObject(object):
+class _eipBase(object):
     def __init__(self):
-        self.resource = EipManager()
+        self.resource = None
 
     def list(self, filters=None, page=None, pagesize=None, orderby=None):
         filters = filters or {}
@@ -60,3 +62,20 @@ class EipObject(object):
         count, data = self.update(rid, update_data={"is_deleted": 1})
         return count
 
+
+class EipObject(_eipBase):
+    def __init__(self):
+        super(EipObject, self).__init__()
+        self.resource = EipManager()
+
+    def eip_resource_id(self, rid):
+        data = self.show(rid)
+        if not data:
+            raise local_exceptions.ValueValidateError("eip_id", "eip %s 不存在" % rid)
+        return data["resource_id"]
+
+
+class EipAssociationObject(_eipBase):
+    def __init__(self):
+        super(EipAssociationObject, self).__init__()
+        self.resource = EipAssociation()
