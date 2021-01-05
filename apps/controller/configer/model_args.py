@@ -13,8 +13,11 @@ resouce_property_models = {
                             "policy", "ip_protocol", "ports"],
     "nat": ["name", "vpc_id", "subnet_id", "eip"],
     "eip": ["name"],
-    "eip_association": ["name", "eip_id"]
-
+    "eip_association": ["name", "eip_id"],
+    "lb": [],
+    "disk": ["name", "type", "size", "zone"],
+    "disk_attach": ["disk_id", "instance_id"],
+    "instance": "",
 }
 
 

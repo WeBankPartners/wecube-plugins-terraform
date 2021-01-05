@@ -14,18 +14,17 @@ from apps.api.configer.resource import ResourceObject
 from apps.api.configer.value_config import ValueConfigObject
 from apps.background.lib.commander.terraform import TerraformDriver
 from apps.background.lib.drivers.terraform_operate import TerraformResource
-from apps.background.resource.network.vpc import VpcObject
-from apps.background.resource.network.subnet import SubnetObject
-from apps.background.resource.vm.instance_type import InstanceTypeObject
+from apps.background.resource.storage.disk import DiskObject
+from apps.background.resource.storage.disk import DiskAttachObject
 from apps.background.resource.vm.instance import InstanceObject
 
 
-class InstanceApi(TerraformResource):
+class DiskAttachApi(TerraformResource):
     def __init__(self):
-        super(InstanceApi, self).__init__()
-        self.resource_name = "instance"
-        self.resource_workspace = "instance"
-        self.resource_object = InstanceObject()
+        super(DiskAttachApi, self).__init__()
+        self.resource_name = "disk_attach"
+        self.resource_workspace = "disk_attach"
+        self.resource_object = DiskAttachObject()
 
     def resource_info(self, provider):
         resource_config = ResourceObject().query_one(where_data={"provider": provider,
@@ -67,23 +66,31 @@ class InstanceApi(TerraformResource):
     def formate_result(self, result):
         return result
 
-    def save_data(self, rid, name, hostname,
-                  instance_type, disk_type,
-                  disk_size, image, cpu, memory,
-                  provider, provider_id, region,
-                  subnet_id, zone,
+    def save_data(self, rid, name, disk, instance,
+                  provider, provider_id, region, zone,
                   extend_info, define_json,
                   status, result_json):
+        '''
+
+        :param rid:
+        :param name:
+        :param disk:  disk id
+        :param instance:  instance id
+        :param provider:
+        :param provider_id:
+        :param region:
+        :param zone:
+        :param extend_info:
+        :param define_json:
+        :param status:
+        :param result_json:
+        :return:
+        '''
 
         self.resource_object.create(create_data={"id": rid, "provider": provider,
                                                  "region": region, "zone": zone,
-                                                 "name": name, "hostname": hostname,
-                                                 "instance_type": instance_type,
-                                                 "disk_type": disk_type,
-                                                 "disk_size": disk_size,
-                                                 "subnet_id": subnet_id,
-                                                 "image": image, "cpu": cpu,
-                                                 "memory": memory, "status": status,
+                                                 "name": name, "disk": disk,
+                                                 "instance": instance, "status": status,
                                                  "provider_id": provider_id,
                                                  "extend_info": json.dumps(extend_info),
                                                  "define_json": json.dumps(define_json),
@@ -102,46 +109,33 @@ class InstanceApi(TerraformResource):
             logger.info(traceback.format_exc())
             raise ValueError("result can not fetch id")
 
-    def _read_other_result(self, result, models):
-        return {}
-
-    def create(self, rid, name, provider_id, hostname,
-               instance_type, image, disk_type,
-               subnet_id, disk_size,
+    def create(self, rid, name, provider_id,
+               disk_id, instance_id,
                zone, region, extend_info, **kwargs):
         '''
 
         :param rid:
         :param name:
-        :param cider:
         :param provider_id:
+        :param disk_id:
+        :param instance_id:
+        :param zone:
+        :param region:
         :param extend_info:
         :param kwargs:
         :return:
         '''
 
-
-        origin_type, instance_type_data = InstanceTypeObject().type_resource_id(provider_id, instance_type)
-        cpu = instance_type_data.get("cpu")
-        memory = instance_type_data.get("memory")
-
-        origin_subnet_id = SubnetObject().subnet_resource_id(subnet_id)
-
-        # todo  安全组转换
-        if extend_info.get("security_group_id"):
-            pass
+        instance_resource_id = InstanceObject().vm_resource_id(instance_id)
+        disk_resource_id = DiskObject().disk_resource_id(disk_id)
 
         provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
         _path = self.create_workpath(rid,
                                      provider=provider_object["name"],
                                      region=region)
 
-        create_data = {"name": name, "hostname": hostname,
-                       "instance_type": origin_type,
-                       "disk_type": disk_type,
-                       "disk_size": disk_size,
-                       "subnet_id": origin_subnet_id,
-                       "zone": zone, "image": image}
+        create_data = {"disk_id": disk_resource_id,
+                       "instance_id": instance_resource_id}
 
         create_data.update(extend_info)
         create_data.update(kwargs)
@@ -153,10 +147,7 @@ class InstanceApi(TerraformResource):
                        provider=provider_object["name"],
                        provider_id=provider_id,
                        region=region, zone=zone,
-                       hostname=hostname, instance_type=instance_type,
-                       disk_type=disk_type, disk_size=disk_size,
-                       image=image, cpu=cpu, memory=memory,
-                       subnet_id=subnet_id,
+                       disk=disk_id, instance=instance_id,
                        extend_info=extend_info,
                        define_json=define_json,
                        status="applying", result_json={})
@@ -167,16 +158,13 @@ class InstanceApi(TerraformResource):
         result = self.formate_result(result)
         logger.info(format_json_dumps(result))
         resource_id = self._fetch_id(result)
-
-        _update_data = {"status": "ok",
-                        "resource_id": resource_id,
-                        "result_json": format_json_dumps(result)}
-        _update_data.update(self._read_other_result(result, {}))
-        self.update_data(rid, data=_update_data)
+        self.update_data(rid, data={"status": "ok",
+                                    "resource_id": resource_id,
+                                    "result_json": format_json_dumps(result)})
 
         return rid
 
-    def destory(self, rid, force_delete=False):
+    def destory(self, rid):
         resource_info = self.resource_object.show(rid)
         _path = self.create_workpath(rid,
                                      provider=resource_info["provider"],
@@ -188,49 +176,3 @@ class InstanceApi(TerraformResource):
             TerraformDriver().destroy(dir_path=_path)
 
         return self.resource_object.delete(rid)
-
-    def update(self, rid, name, extend_info, **kwargs):
-        '''
-
-        :param rid:
-        :param name:
-        :param extend_info:
-        :param kwargs:
-        :return:
-        '''
-
-        _obj = self.resource_object.show(rid)
-        if not _obj:
-            raise local_exceptions.ResourceNotFoundError("Route Table %s 不存在" % rid)
-
-        vpc_resource_id = _obj.get("vpc")
-
-        provider_object, provider_info = ProviderApi().provider_info(_obj["provider_id"],
-                                                                     region=_obj["region"])
-        _path = self.create_workpath(rid,
-                                     provider=provider_object["name"],
-                                     region=_obj["region"])
-
-        create_data = {"name": name, "vpc_id": vpc_resource_id}
-
-        create_data.update(extend_info)
-        create_data.update(kwargs)
-
-        define_json = self._generate_data(provider_object["name"], name, data=create_data)
-        define_json.update(provider_info)
-
-        self.update_data(rid, data={"status": "updating"})
-        self.write_define(rid, _path, define_json=define_json)
-        result = self.run(_path)
-
-        result = self.formate_result(result)
-        logger.info(format_json_dumps(result))
-
-        return self.update_data(rid, data={"status": "ok", "name": name,
-                                           "define_json": json.dumps(define_json)})
-
-    def start(self, rid):
-        pass
-
-    def stop(self, rid):
-        pass

@@ -1,18 +1,16 @@
 # coding: utf-8
-
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import json
 import datetime
 from lib.uuid_util import get_uuid
 from core import local_exceptions
-from apps.background.models.dbserver import DiskAttachManager
-from apps.background.models.dbserver import DiskManager
+from apps.background.models.dbserver import InstanceTypeManager
 
 
-class _DiskBaseObject(object):
+class InstanceTypeObject(object):
     def __init__(self):
-        self.resource = None
+        self.resource = InstanceTypeManager()
 
     def list(self, filters=None, page=None, pagesize=None, orderby=None):
         filters = filters or {}
@@ -23,8 +21,6 @@ class _DiskBaseObject(object):
         data = []
         for res in results:
             res["extend_info"] = json.loads(res["extend_info"])
-            res["define_json"] = json.loads(res["define_json"])
-            res["result_json"] = json.loads(res["result_json"])
             data.append(res)
 
         return count, data
@@ -41,8 +37,6 @@ class _DiskBaseObject(object):
         data = self.resource.get(filters=filters)
         if data:
             data["extend_info"] = json.loads(data["extend_info"])
-            data["define_json"] = json.loads(data["define_json"])
-            data["result_json"] = json.loads(data["result_json"])
 
         return data
 
@@ -53,8 +47,6 @@ class _DiskBaseObject(object):
         count, data = self.resource.update(filters=where_data, data=update_data)
         if data:
             data["extend_info"] = json.loads(data["extend_info"])
-            data["define_json"] = json.loads(data["define_json"])
-            data["result_json"] = json.loads(data["result_json"])
 
         return count, data
 
@@ -62,20 +54,9 @@ class _DiskBaseObject(object):
         count, data = self.update(rid, update_data={"is_deleted": 1})
         return count
 
-
-class DiskObject(_DiskBaseObject):
-    def __init__(self):
-        super(DiskObject, self).__init__()
-        self.resource = DiskManager()
-
-    def disk_resource_id(self, rid):
-        data = self.show(rid)
+    def type_resource_id(self, provider_id, name):
+        data = self.resource.get(filters={"provider_id": provider_id,
+                                          "name": name})
         if not data:
-            raise local_exceptions.ValueValidateError("disk", "disk id %s 不存在" % rid)
-        return data["resource_id"]
-
-
-class DiskAttachObject(_DiskBaseObject):
-    def __init__(self):
-        super(DiskAttachObject, self).__init__()
-        self.resource = DiskAttachManager()
+            raise local_exceptions.ValueValidateError("instance type name", "instance type name %s 不存在" % rid)
+        return data["origin_name"], data

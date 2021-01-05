@@ -4,6 +4,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import json
 import datetime
 from lib.uuid_util import get_uuid
+from core import local_exceptions
 from apps.background.models.dbserver import InstanceManager
 
 
@@ -58,3 +59,9 @@ class InstanceObject(object):
     def delete(self, rid):
         count, data = self.update(rid, update_data={"is_deleted": 1})
         return count
+
+    def vm_resource_id(self, rid):
+        data = self.show(rid)
+        if not data:
+            raise local_exceptions.ValueValidateError("instance_id", "instance id %s 不存在" % rid)
+        return data["resource_id"]

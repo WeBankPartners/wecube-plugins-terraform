@@ -39,6 +39,7 @@ class RouteEntryManager(_BaseManager):
 class SecGroupManager(_BaseManager):
     obj = model.SecGroup
 
+
 class SecGroupRuleManager(_BaseManager):
     obj = model.SecGroupRule
 
@@ -66,8 +67,13 @@ class LBListenerManager(_BaseManager):
 class DiskManager(_BaseManager):
     obj = model.Disk
 
+
 class DiskAttachManager(_BaseManager):
     obj = model.DiskAttach
+
+
+class InstanceTypeManager(_BaseManager):
+    obj = model.InstanceType
 
 
 class InstanceManager(_BaseManager):
@@ -80,5 +86,3 @@ class ConnectNetManager(_BaseManager):
 
 class ConnectNetAttachManager(_BaseManager):
     obj = model.ConnectNetworkAttach
-
-

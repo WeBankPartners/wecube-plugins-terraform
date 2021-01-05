@@ -702,6 +702,42 @@ class DiskAttach(Base):
         self.zone = data.get("zone")
 
 
+
+class InstanceType(Base):
+    __tablename__ = "instance_type"
+
+    id = Column(String(36), primary_key=True)
+    provider_id = Column(String(36))
+    provider = Column(String(32), nullable=False)
+    name = Column(String(64))
+    origin_name = Column(String(64))
+    network = Column(String(64))
+    cpu = Column(Integer)
+    memory = Column(Integer)
+    extend_info = Column(String(512))
+    created_time = Column(DateTime)
+    updated_time = Column(DateTime)
+    deleted_time = Column(DateTime)
+    enabled = Column(TINYINT(1), server_default=text("'1'"))
+    is_deleted = Column(TINYINT(1), server_default=text("'0'"))
+
+    def __init__(self, data):
+        self.cpu = data.get("cpu")
+        self.created_time = data.get("created_time")
+        self.deleted_time = data.get("deleted_time")
+        self.enabled = data.get("enabled")
+        self.extend_info = data.get("extend_info")
+        self.id = data.get("id")
+        self.is_deleted = data.get("is_deleted")
+        self.memory = data.get("memory")
+        self.name = data.get("name")
+        self.origin_name = data.get("origin_name")
+        self.network = data.get("network")
+        self.provider = data.get("provider")
+        self.provider_id = data.get("provider_id")
+        self.updated_time = data.get("updated_time")
+
+
 class Instance(Base):
     __tablename__ = "instance"
 
@@ -712,10 +748,12 @@ class Instance(Base):
     zone = Column(String(64))
     resource_id = Column(String(64))
     disk = Column(String(64))
+    name = Column(String(64))
     hostname = Column(String(64))
     instance_type = Column(String(64))
     disk_type = Column(String(64))
     disk_size = Column(String(64))
+    subnet_id = Column(String(64))
     ipaddress = Column(String(64))
     cpu = Column(Integer)
     memory = Column(Integer)
@@ -740,7 +778,9 @@ class Instance(Base):
         self.enabled = data.get("enabled")
         self.extend_info = data.get("extend_info") or '{}'
         self.hostname = data.get("hostname")
+        self.name = data.get("name")
         self.id = data.get("id")
+        self.subnet_id = data.get("subnet_id")
         self.instance_type = data.get("instance_type")
         self.ipaddress = data.get("ipaddress")
         self.is_deleted = data.get("is_deleted")
@@ -837,8 +877,8 @@ class ConnectNetworkAttach(Base):
         self.zone = data.get("zone")
 
 
-# p = dir(ConnectNetworkAttach)
-# for x in p:
-#     if not x.startswith("_") and x not in ["to_dict", "metadata"]:
-#         print 'self.%s = data.get("%s")' %(x, x)
+p = dir(InstanceType)
+for x in p:
+    if not x.startswith("_") and x not in ["to_dict", "metadata"]:
+        print 'self.%s = data.get("%s")' %(x, x)
 

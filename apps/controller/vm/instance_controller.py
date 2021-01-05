@@ -2,102 +2,220 @@
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-import json
-
-from apps.api.configer.provider import ProviderApi
-from apps.api.configer.provider import ProviderObject
 from core import validation
+from core import local_exceptions
 from core.controller import BackendController
-from core.controller import BackendIdController
+from core.controller import BaseController
 from lib.uuid_util import get_uuid
+from apps.api.vm.instance import InstanceApi
 
 
-class ProviderController(BackendController):
-    allow_methods = ('GET', "POST")
-    resource = ProviderObject()
+class InstanceController(BackendController):
+    allow_methods = ('GET', 'POST')
+    resource = InstanceApi()
 
     def list(self, request, data, orderby=None, page=None, pagesize=None, **kwargs):
-        validation.allowed_key(data.keys(), ["id", "name", "region", "enabled"])
-        return self.resource.list(filters=data, page=page,
-                                  pagesize=pagesize, orderby=orderby)
-
-    def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["id", "name", "zone", "secret_id",
-                                      "secret_key", "region", "enabled",
-                                      "extend_info", "plugin_source",
-                                      "provider_property"])
-        validation.not_allowed_null(data=data,
-                                    keys=["name", "secret_id", "secret_key", "region"]
-                                    )
-
-        validation.validate_string("id", data.get("id"))
-        validation.validate_string("name", data["name"])
-        validation.validate_string("region", data.get("region"))
-        validation.validate_string("zone", data.get("zone"))
-        validation.validate_string("secret_id", data.get("secret_id"))
-        validation.validate_string("secret_key", data.get("secret_key"))
-        validation.validate_dict("extend_info", data.get("extend_info"))
-        validation.validate_dict("provider_property", data.get("provider_property"))
-
-    def create(self, request, data, **kwargs):
         '''
 
         :param request:
         :param data:
-        extend_info： {}  define example: {"version": "v1.1.0"}
-        provider_property ｛｝revert property for provider， example secret_key to key
-        define example: {"secret_key": "key"}
+        :param orderby:
+        :param page:
+        :param pagesize:
         :param kwargs:
         :return:
         '''
 
-        name = data.get("name")
-        extend_info = validation.validate_dict("extend_info", data.get("extend_info")) or {}
-        provider_property = validation.validate_dict("provider_property", data.get("provider_property")) or {}
+        validation.allowed_key(data, ["id", "provider", "region", 'resource_id',
+                                      "provider_id", "name", "enabled",
+                                      "hostname", "instance_type", "image",
+                                      "cpu", "memory", "ipaddress",
+                                      "disk_type", "disk_size"])
 
-        ProviderApi().create_provider_workspace(provider=name)
-        create_data = {"id": get_uuid(), "name": data["name"],
-                       "secret_id": data.get("secret_id"),
-                       "secret_key": data.get("secret_key"),
-                       "region": data.get("region"),
-                       "zone": data.get("zone"),
-                       "extend_info": json.dumps(extend_info),
-                       "provider_property": json.dumps(provider_property),
-                       "is_init": 1
-                       }
-
-        return self.resource.create(create_data)
-
-
-class ProviderIdController(BackendIdController):
-    resource = ProviderObject()
-
-    def show(self, request, data, **kwargs):
-        rid = kwargs.pop("rid", None)
-        return self.resource.show(rid)
+        return self.resource.resource_object.list(filters=data, page=page,
+                                                  pagesize=pagesize, orderby=orderby)
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["zone", "secret_id",
-                                      "secret_key", "region", "enabled",
-                                      "extend_info", "provider_property"])
+        validation.allowed_key(data, ["id", "name", "provider_id", "subnet_id",
+                                      "hostname", "image", "instance_type",
+                                      "disk_type", "disk_size",
+                                      "zone", "region", "extend_info"])
+        validation.not_allowed_null(data=data,
+                                    keys=["region", "provider_id", "zone", "name",
+                                          "hostname", "subnet_id", "image", "instance_type"]
+                                    )
 
-        validation.validate_string("region", data.get("region"))
+        validation.validate_string("id", data.get("id"))
+        validation.validate_string("name", data["name"])
+        validation.validate_string("region", data["region"])
         validation.validate_string("zone", data.get("zone"))
-        validation.validate_string("secret_id", data.get("secret_id"))
-        validation.validate_string("secret_key", data.get("secret_key"))
+        validation.validate_string("subnet_id", data["subnet_id"])
+        validation.validate_string("hostname", data.get("hostname"))
+        validation.validate_string("image", data.get("image"))
+        validation.validate_string("instance_type", data.get("instance_type"))
+        validation.validate_string("disk_type", data.get("disk_type"))
+        validation.validate_int("disk_size", data.get("disk_size"))
+        validation.validate_string("provider_id", data.get("provider_id"))
         validation.validate_dict("extend_info", data.get("extend_info"))
-        validation.validate_dict("provider_property", data.get("provider_property"))
 
-    def update(self, request, data, **kwargs):
+    def create(self, request, data, **kwargs):
+        rid = data.pop("id", None) or get_uuid()
+        name = data.pop("name", None)
+        zone = data.pop("zone", None)
+        region = data.pop("region", None)
+        subnet_id = data.pop("subnet_id", None)
+        hostname = data.pop("hostname", None)
+        image = data.pop("image", None)
+        disk_type = data.pop("disk_type")
+        disk_size = data.pop("disk_size", 40)
+        instance_type = data.pop("instance_type")
+        provider_id = data.pop("provider_id", None)
+        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
+
+        data.update(extend_info)
+        result = self.resource.create(rid, name=name, provider_id=provider_id,
+                                      hostname=hostname, image=image,
+                                      instance_type=instance_type,
+                                      disk_type=disk_type, disk_size=disk_size,
+                                      subnet_id=subnet_id, zone=zone,
+                                      region=region, extend_info=data)
+        return 1, result
+
+
+class InstanceIdController(BackendController):
+    allow_methods = ('GET', 'DELETE', 'PATCH')
+    resource = InstanceApi()
+
+    def show(self, request, data, **kwargs):
+        '''
+
+        :param request:
+        :param data:
+        :param kwargs:
+        :return:
+        '''
+
         rid = kwargs.pop("rid", None)
-        if data.get("extend_info") is not None:
-            data["extend_info"] = json.dumps(data.get("extend_info", {}))
-
-        if data.get("provider_property") is not None:
-            data["provider_property"] = json.dumps(data.get("provider_property", {}))
-
-        return self.resource.update(rid, data)
+        return self.resource.resource_object.show(rid)
 
     def delete(self, request, data, **kwargs):
         rid = kwargs.pop("rid", None)
-        return self.resource.delete(rid)
+        force_delete = data.get("force_delete", False)
+        return self.resource.destory(rid, force_delete=force_delete)
+
+    def before_handler(self, request, data, **kwargs):
+        validation.allowed_key(data, ["name"])
+        validation.not_allowed_null(data=data,
+                                    keys=["name"]
+                                    )
+
+        validation.validate_string("name", data["name"])
+
+    def update(self, request, data, **kwargs):
+        rid = kwargs.pop("rid", None)
+        name = data.pop("name", None)
+        return self.resource.update(rid, name, extend_info={})
+
+
+class InstanceActionController(BackendController):
+    allow_methods = ('PATCH',)
+    resource = InstanceApi()
+
+    def before_handler(self, request, data, **kwargs):
+        validation.allowed_key(data, ["action"])
+        validation.not_allowed_null(data=data,
+                                    keys=["action"]
+                                    )
+
+        validation.validate_string("action", data["action"])
+
+    def update(self, request, data, **kwargs):
+        # todo 开关机操作
+        rid = kwargs.pop("rid", None)
+        action = data.get("action", None)
+        if action.lower() == "start":
+            pass
+        elif action.lower == "stop":
+            pass
+        else:
+            raise local_exceptions.ValueValidateError("action", "VM 开关机操作，请使用合法值 start/stop")
+
+        return self.resource.update(rid, name, extend_info={})
+
+
+class InstanceAddController(BaseController):
+    allow_methods = ("POST",)
+    resource = InstanceApi()
+
+    def before_handler(self, request, data, **kwargs):
+        validation.allowed_key(data, ["id", "name", "provider_id", "subnet_id",
+                                      "hostname", "image", "instance_type",
+                                      "disk_type", "disk_size",
+                                      "zone", "region", "extend_info"])
+        validation.not_allowed_null(data=data,
+                                    keys=["region", "provider_id", "zone", "name",
+                                          "hostname", "subnet_id", "image", "instance_type"]
+                                    )
+
+        validation.validate_string("id", data.get("id"))
+        validation.validate_string("name", data["name"])
+        validation.validate_string("region", data["region"])
+        validation.validate_string("zone", data.get("zone"))
+        validation.validate_string("subnet_id", data["subnet_id"])
+        validation.validate_string("hostname", data.get("hostname"))
+        validation.validate_string("image", data.get("image"))
+        validation.validate_string("instance_type", data.get("instance_type"))
+        validation.validate_string("disk_type", data.get("disk_type"))
+        validation.validate_int("disk_size", data.get("disk_size"))
+        validation.validate_string("provider_id", data.get("provider_id"))
+        validation.validate_dict("extend_info", data.get("extend_info"))
+
+    def response_templete(self, data):
+        return {}
+
+    def main_response(self, request, data, **kwargs):
+        rid = data.pop("id", None) or get_uuid()
+        name = data.pop("name", None)
+        zone = data.pop("zone", None)
+        region = data.pop("region", None)
+        subnet_id = data.pop("subnet_id", None)
+        hostname = data.pop("hostname", None)
+        image = data.pop("image", None)
+        disk_type = data.pop("disk_type")
+        disk_size = data.pop("disk_size", 40)
+        instance_type = data.pop("instance_type")
+        provider_id = data.pop("provider_id", None)
+        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
+
+        data.update(extend_info)
+        result = self.resource.create(rid, name=name, provider_id=provider_id,
+                                      hostname=hostname, image=image,
+                                      instance_type=instance_type,
+                                      disk_type=disk_type, disk_size=disk_size,
+                                      subnet_id=subnet_id, zone=zone,
+                                      region=region, extend_info=data)
+
+        return {"result": result}
+
+
+class InstanceDeleteController(BaseController):
+    name = "Instance"
+    resource_describe = "Instance"
+    allow_methods = ("POST",)
+    resource = InstanceApi()
+
+    def before_handler(self, request, data, **kwargs):
+        validation.not_allowed_null(data=data,
+                                    keys=["id"]
+                                    )
+
+        validation.validate_string("id", data.get("id"))
+
+    def response_templete(self, data):
+        return {}
+
+    def main_response(self, request, data, **kwargs):
+        rid = data.pop("id", None)
+        force_delete = data.get("force_delete", False)
+        result = self.resource.destory(rid, force_delete=force_delete)
+        return {"result": result}
