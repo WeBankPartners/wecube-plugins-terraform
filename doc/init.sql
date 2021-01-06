@@ -420,6 +420,7 @@ CREATE TABLE `instance` (
   `image` VARCHAR(64) DEFAULT NULL,
   `cpu` int(11) DEFAULT NULL,
   `memory` int(11) DEFAULT NULL,
+  `power_state` varchar(36) DEFAULT NULL,
   `extend_info` text DEFAULT NULL,
   `define_json` text DEFAULT NULL,
   `status` varchar(36) DEFAULT NULL,

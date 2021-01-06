@@ -30,7 +30,7 @@ class InstanceController(BackendController):
                                       "provider_id", "name", "enabled",
                                       "hostname", "instance_type", "image",
                                       "cpu", "memory", "ipaddress",
-                                      "disk_type", "disk_size"])
+                                      "disk_type", "disk_size", "power_state"])
 
         return self.resource.resource_object.list(filters=data, page=page,
                                                   pagesize=pagesize, orderby=orderby)
@@ -104,17 +104,23 @@ class InstanceIdController(BackendController):
         return self.resource.destory(rid, force_delete=force_delete)
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["name"])
-        validation.not_allowed_null(data=data,
-                                    keys=["name"]
-                                    )
+        if not data:
+            raise ValueError("没有需要更新的配置")
 
-        validation.validate_string("name", data["name"])
+        validation.allowed_key(data, ["name", "instance_type", "image", "extend_info"])
+        validation.validate_string("name", data.get("name"))
+        validation.validate_string("instance_type", data.get("instance_type"))
+        validation.validate_string("image", data.get("image"))
+        validation.validate_dict("extend_info", data.get("extend_info"))
 
     def update(self, request, data, **kwargs):
         rid = kwargs.pop("rid", None)
         name = data.pop("name", None)
-        return self.resource.update(rid, name, extend_info={})
+        instance_type = data.pop("instance_tpe")
+        image = data.pop("image")
+        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
+
+        return self.resource.update(rid, name, instance_type, image, extend_info)
 
 
 class InstanceActionController(BackendController):
@@ -130,17 +136,14 @@ class InstanceActionController(BackendController):
         validation.validate_string("action", data["action"])
 
     def update(self, request, data, **kwargs):
-        # todo 开关机操作
         rid = kwargs.pop("rid", None)
         action = data.get("action", None)
         if action.lower() == "start":
-            pass
+            return self.resource.start(rid)
         elif action.lower == "stop":
-            pass
+            return self.resource.stop(rid)
         else:
             raise local_exceptions.ValueValidateError("action", "VM 开关机操作，请使用合法值 start/stop")
-
-        return self.resource.update(rid, name, extend_info={})
 
 
 class InstanceAddController(BaseController):

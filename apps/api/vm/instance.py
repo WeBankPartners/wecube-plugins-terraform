@@ -14,7 +14,6 @@ from apps.api.configer.resource import ResourceObject
 from apps.api.configer.value_config import ValueConfigObject
 from apps.background.lib.commander.terraform import TerraformDriver
 from apps.background.lib.drivers.terraform_operate import TerraformResource
-from apps.background.resource.network.vpc import VpcObject
 from apps.background.resource.network.subnet import SubnetObject
 from apps.background.resource.vm.instance_type import InstanceTypeObject
 from apps.background.resource.vm.instance import InstanceObject
@@ -38,7 +37,7 @@ class InstanceApi(TerraformResource):
     def values_config(self, provider):
         return ValueConfigObject().resource_value_configs(provider, self.resource_name)
 
-    def _generate_data(self, provider, name, data):
+    def _generate_data(self, provider, rid, data):
         resource_keys_config = self.resource_info(provider)
         resource_values_config = self.values_config(provider)
 
@@ -57,7 +56,40 @@ class InstanceApi(TerraformResource):
         _info = {
             "resource": {
                 resource_name: {
-                    name: resource_columns
+                    rid: resource_columns
+                }
+            }
+        }
+        logger.info(format_json_dumps(_info))
+        return _info
+
+    def _generate_update_data(self, rid, provider, define_json, update_data):
+        resource_keys_config = self.resource_info(provider)
+        resource_values_config = self.values_config(provider)
+
+        resource_name = resource_keys_config["resource_name"]
+        resource_property = resource_keys_config["resource_property"]
+
+        resource_columns = {}
+        for key, value in update_data.items():
+            if resource_values_config.get(key):
+                value = convert_value(value, resource_values_config.get(key))
+
+            resource_columns[key] = value
+
+        resource_columns = convert_keys(resource_columns,
+                                        defines=resource_property,
+                                        is_update=True)
+
+        _t = define_json["resource"][resource_name]
+        origin_columns = _t[rid]
+
+        origin_columns.update(resource_columns)
+
+        _info = {
+            "resource": {
+                resource_name: {
+                    rid: origin_columns
                 }
             }
         }
@@ -82,6 +114,7 @@ class InstanceApi(TerraformResource):
                                                  "disk_type": disk_type,
                                                  "disk_size": disk_size,
                                                  "subnet_id": subnet_id,
+                                                 "power_state": "start",
                                                  "image": image, "cpu": cpu,
                                                  "memory": memory, "status": status,
                                                  "provider_id": provider_id,
@@ -120,7 +153,6 @@ class InstanceApi(TerraformResource):
         :return:
         '''
 
-
         origin_type, instance_type_data = InstanceTypeObject().type_resource_id(provider_id, instance_type)
         cpu = instance_type_data.get("cpu")
         memory = instance_type_data.get("memory")
@@ -146,7 +178,7 @@ class InstanceApi(TerraformResource):
         create_data.update(extend_info)
         create_data.update(kwargs)
 
-        define_json = self._generate_data(provider_object["name"], name, data=create_data)
+        define_json = self._generate_data(provider_object["name"], rid, data=create_data)
         define_json.update(provider_info)
 
         self.save_data(rid, name=name,
@@ -177,19 +209,34 @@ class InstanceApi(TerraformResource):
         return rid
 
     def destory(self, rid, force_delete=False):
+        '''
+
+        :param rid:
+        :param force_delete:
+        :return:
+        '''
+
         resource_info = self.resource_object.show(rid)
         _path = self.create_workpath(rid,
                                      provider=resource_info["provider"],
                                      region=resource_info["region"])
+        if force_delete:
+            update_data = {"force_delete": "true"}
+            define_json = self._generate_update_data(rid, resource_info["provider"],
+                                                     define_json=resource_info["define_json"],
+                                                     update_data=update_data)
+
+            self.write_define(rid, _path, define_json=define_json)
 
         status = TerraformDriver().destroy(dir_path=_path)
         if not status:
             self.write_define(rid, _path, define_json=resource_info["define_json"])
             TerraformDriver().destroy(dir_path=_path)
 
-        return self.resource_object.delete(rid)
+        return self.resource_object.delete(rid, update_data={"status": "deleted",
+                                                             "power_state": "stop"})
 
-    def update(self, rid, name, extend_info, **kwargs):
+    def update(self, rid, name, instance_type, image, extend_info, **kwargs):
         '''
 
         :param rid:
@@ -199,38 +246,100 @@ class InstanceApi(TerraformResource):
         :return:
         '''
 
+        # todo 更新安全组
+
         _obj = self.resource_object.show(rid)
         if not _obj:
-            raise local_exceptions.ResourceNotFoundError("Route Table %s 不存在" % rid)
+            raise local_exceptions.ResourceNotFoundError("instance %s 不存在" % rid)
 
-        vpc_resource_id = _obj.get("vpc")
+        update_data = {}
+        if name:
+            update_data["name"] = name
+        if instance_type:
+            update_data["instance_type"] = instance_type
+        if image:
+            update_data["image"] = image
 
-        provider_object, provider_info = ProviderApi().provider_info(_obj["provider_id"],
-                                                                     region=_obj["region"])
+        update_data.update(extend_info)
         _path = self.create_workpath(rid,
-                                     provider=provider_object["name"],
+                                     provider=_obj["provider"],
                                      region=_obj["region"])
 
-        create_data = {"name": name, "vpc_id": vpc_resource_id}
+        define_json = self._generate_update_data(rid, _obj["provider"],
+                                                 define_json=_obj["define_json"],
+                                                 update_data=update_data)
 
-        create_data.update(extend_info)
-        create_data.update(kwargs)
-
-        define_json = self._generate_data(provider_object["name"], name, data=create_data)
-        define_json.update(provider_info)
-
-        self.update_data(rid, data={"status": "updating"})
+        update_data["status"] = "updating"
+        self.update_data(rid, data=update_data)
         self.write_define(rid, _path, define_json=define_json)
         result = self.run(_path)
 
         result = self.formate_result(result)
         logger.info(format_json_dumps(result))
 
-        return self.update_data(rid, data={"status": "ok", "name": name,
-                                           "define_json": json.dumps(define_json)})
+        _update_data = {"status": "ok",
+                        "result_json": format_json_dumps(result)}
+        _update_data.update(self._read_other_result(result, {}))
+        return self.update_data(rid, data=_update_data)
 
     def start(self, rid):
-        pass
+        '''
+        power_action " start
+        :param rid:
+        :return:
+        '''
+
+        _obj = self.resource_object.show(rid)
+        if not _obj:
+            raise local_exceptions.ResourceNotFoundError("instance %s 不存在" % rid)
+
+        update_data = {"power_action": "start"}
+
+        _path = self.create_workpath(rid,
+                                     provider=_obj["provider"],
+                                     region=_obj["region"])
+
+        define_json = self._generate_update_data(rid, _obj["provider"],
+                                                 define_json=_obj["define_json"],
+                                                 update_data=update_data)
+
+        self.update_data(rid, data={"status": "starting"})
+        self.write_define(rid, _path, define_json=define_json)
+        result = self.run(_path)
+
+        result = self.formate_result(result)
+        logger.info(format_json_dumps(result))
+
+        return self.update_data(rid, data={"status": "ok", "power_state": "start",
+                                           "define_json": json.dumps(define_json)})
 
     def stop(self, rid):
-        pass
+        '''
+        power_action: stop
+        :param rid:
+        :return:
+        '''
+
+        _obj = self.resource_object.show(rid)
+        if not _obj:
+            raise local_exceptions.ResourceNotFoundError("instance %s 不存在" % rid)
+
+        update_data = {"power_action": "stop"}
+
+        _path = self.create_workpath(rid,
+                                     provider=_obj["provider"],
+                                     region=_obj["region"])
+
+        define_json = self._generate_update_data(rid, _obj["provider"],
+                                                 define_json=_obj["define_json"],
+                                                 update_data=update_data)
+
+        self.update_data(rid, data={"status": "stopping"})
+        self.write_define(rid, _path, define_json=define_json)
+        result = self.run(_path)
+
+        result = self.formate_result(result)
+        logger.info(format_json_dumps(result))
+
+        return self.update_data(rid, data={"status": "ok", "power_state": "stop",
+                                           "define_json": json.dumps(define_json)})

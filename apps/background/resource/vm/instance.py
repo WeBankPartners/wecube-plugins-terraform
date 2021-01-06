@@ -56,8 +56,10 @@ class InstanceObject(object):
 
         return count, data
 
-    def delete(self, rid):
-        count, data = self.update(rid, update_data={"is_deleted": 1})
+    def delete(self, rid, update_data=None):
+        update_data = update_data or {}
+        update_data.update({"is_deleted": 1})
+        count, data = self.update(rid, update_data=update_data)
         return count
 
     def vm_resource_id(self, rid):

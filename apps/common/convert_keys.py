@@ -57,7 +57,18 @@ def _validate_type(value, type):
             raise ValueError("%s 不是json" % value)
     elif (type == "list") and (not isinstance(value, list)):
         try:
-            value = json.loads(value)
+            if isinstance(value, basestring):
+                if value.startswith("["):
+                    value = json.loads(value)
+                elif "," in value:
+                    value = value.split(",")
+                elif ";" in value:
+                    value = value.split(";")
+                else:
+                    _v = " ".join(value.split())
+                    value = _v.split()
+            else:
+                raise ValueError()
         except:
             raise ValueError("%s 不是list类型" % value)
     else:
@@ -93,10 +104,11 @@ def convert_key(key, value, define):
         if define.get("convert"):
             key = define.get("convert") or key
 
-    return {key: value}
+    if value:
+        return {key: value}
 
 
-def convert_keys(datas, defines):
+def convert_keys(datas, defines, is_update=False):
     '''
 
     :param datas:
@@ -105,11 +117,19 @@ def convert_keys(datas, defines):
     '''
 
     result = {}
-    for key, value in datas.items():
-        if defines.get(key):
-            result.update(convert_key(key, value, define=defines[key]))
-        else:
-            result.update({key: value})
+    if is_update:
+        for key, value in datas.items():
+            if defines.get(key) is not None:
+                result.update(convert_key(key, value, define=defines[key]))
+            else:
+                raise ValueError("未定义的关键词 %s"% key)
+
+        return result
+
+    for key, define in defines.items():
+        _t = convert_key(key, datas.get(key), define=define)
+        if _t:
+            result.update(_t)
 
     return result
 
