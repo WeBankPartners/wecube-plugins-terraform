@@ -80,6 +80,18 @@ class InstanceManager(_BaseManager):
     obj = model.Instance
 
 
+class RdsDbManager(_BaseManager):
+    obj = model.RdsDb
+
+
+class NosqlManager(_BaseManager):
+    obj = model.Nosql
+
+
+class KVStoreManager(_BaseManager):
+    obj = model.KVStore
+
+
 class ConnectNetManager(_BaseManager):
     obj = model.ConnectNetwork
 

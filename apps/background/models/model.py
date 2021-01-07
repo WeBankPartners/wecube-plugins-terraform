@@ -1,4 +1,5 @@
 # coding: utf-8
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import datetime
 from sqlalchemy import Column, DateTime, Index, String, text, Text
@@ -84,6 +85,7 @@ class Resource(Base):
         self.extend_info = data.get("extend_info") or '{}'
         self.resource_property = data.get("resource_property") or '{}'
         self.updated_time = data.get("updated_time")
+
 
 class CommonKeys(Base):
     __tablename__ = "common_keys"
@@ -447,6 +449,7 @@ class NatGateway(Base):
         self.vpc = data.get("vpc")
         self.zone = data.get("zone")
 
+
 class Eip(Base):
     __tablename__ = "eip"
 
@@ -486,7 +489,6 @@ class Eip(Base):
         self.status = data.get("status")
         self.updated_time = data.get("updated_time")
         self.zone = data.get("zone")
-
 
 
 class EipAssociation(Base):
@@ -702,7 +704,6 @@ class DiskAttach(Base):
         self.zone = data.get("zone")
 
 
-
 class InstanceType(Base):
     __tablename__ = "instance_type"
 
@@ -879,8 +880,170 @@ class ConnectNetworkAttach(Base):
         self.zone = data.get("zone")
 
 
-p = dir(InstanceType)
-for x in p:
-    if not x.startswith("_") and x not in ["to_dict", "metadata"]:
-        print 'self.%s = data.get("%s")' %(x, x)
+class RdsDb(Base):
+    __tablename__ = "rds_db"
 
+    id = Column(String(36), primary_key=True)
+    provider_id = Column(String(36))
+    provider = Column(String(32), nullable=False)
+    region = Column(String(64))
+    zone = Column(String(64))
+    resource_id = Column(String(64))
+    name = Column(String(64))
+    engine = Column(String(64))
+    version = Column(String(32))
+    instance_type = Column(String(64))
+    disk_type = Column(String(64))
+    disk_size = Column(String(64))
+    subnet_id = Column(String(64))
+    ipaddress = Column(String(64))
+    port = Column(String(32))
+    extend_info = Column(String(512))
+    define_json = Column(String(512))
+    status = Column(String(36))
+    result_json = Column(String(5120))
+    created_time = Column(DateTime)
+    updated_time = Column(DateTime)
+    deleted_time = Column(DateTime)
+    enabled = Column(TINYINT(1), server_default=text("'1'"))
+    is_deleted = Column(TINYINT(1), server_default=text("'0'"))
+
+    def __init__(self, data):
+        self.created_time = data.get("created_time") or datetime.datetime.now()
+        self.define_json = data.get("define_json")
+        self.deleted_time = data.get("deleted_time")
+        self.disk_size = data.get("disk_size")
+        self.disk_type = data.get("disk_type")
+        self.enabled = data.get("enabled")
+        self.engine = data.get("engine")
+        self.extend_info = data.get("extend_info")
+        self.id = data.get("id")
+        self.instance_type = data.get("instance_type")
+        self.ipaddress = data.get("ipaddress")
+        self.is_deleted = data.get("is_deleted")
+        self.name = data.get("name")
+        self.port = data.get("port")
+        self.provider = data.get("provider")
+        self.provider_id = data.get("provider_id")
+        self.region = data.get("region")
+        self.resource_id = data.get("resource_id")
+        self.result_json = data.get("result_json")
+        self.status = data.get("status")
+        self.subnet_id = data.get("subnet_id")
+        self.updated_time = data.get("updated_time")
+        self.version = data.get("version")
+        self.zone = data.get("zone")
+
+
+class Nosql(Base):
+    __tablename__ = "nosql"
+
+    id = Column(String(36), primary_key=True)
+    provider_id = Column(String(36))
+    provider = Column(String(32), nullable=False)
+    region = Column(String(64))
+    zone = Column(String(64))
+    resource_id = Column(String(64))
+    name = Column(String(64))
+    engine = Column(String(64))
+    version = Column(String(32))
+    instance_type = Column(String(64))
+    disk_type = Column(String(64))
+    disk_size = Column(String(64))
+    subnet_id = Column(String(64))
+    ipaddress = Column(String(64))
+    port = Column(String(32))
+    extend_info = Column(String(512))
+    define_json = Column(String(512))
+    status = Column(String(36))
+    result_json = Column(String(5120))
+    created_time = Column(DateTime)
+    updated_time = Column(DateTime)
+    deleted_time = Column(DateTime)
+    enabled = Column(TINYINT(1), server_default=text("'1'"))
+    is_deleted = Column(TINYINT(1), server_default=text("'0'"))
+
+    def __init__(self, data):
+        self.created_time = data.get("created_time") or datetime.datetime.now()
+        self.define_json = data.get("define_json")
+        self.deleted_time = data.get("deleted_time")
+        self.disk_size = data.get("disk_size")
+        self.disk_type = data.get("disk_type")
+        self.enabled = data.get("enabled")
+        self.engine = data.get("engine")
+        self.extend_info = data.get("extend_info")
+        self.id = data.get("id")
+        self.instance_type = data.get("instance_type")
+        self.ipaddress = data.get("ipaddress")
+        self.is_deleted = data.get("is_deleted")
+        self.name = data.get("name")
+        self.port = data.get("port")
+        self.provider = data.get("provider")
+        self.provider_id = data.get("provider_id")
+        self.region = data.get("region")
+        self.resource_id = data.get("resource_id")
+        self.result_json = data.get("result_json")
+        self.status = data.get("status")
+        self.subnet_id = data.get("subnet_id")
+        self.updated_time = data.get("updated_time")
+        self.version = data.get("version")
+        self.zone = data.get("zone")
+
+
+class KVStore(Base):
+    __tablename__ = "kvstore"
+
+    id = Column(String(36), primary_key=True)
+    provider_id = Column(String(36))
+    provider = Column(String(32), nullable=False)
+    region = Column(String(64))
+    zone = Column(String(64))
+    resource_id = Column(String(64))
+    name = Column(String(64))
+    engine = Column(String(64))
+    version = Column(String(32))
+    instance_type = Column(String(64))
+    subnet_id = Column(String(64))
+    ipaddress = Column(String(64))
+    port = Column(String(32))
+    extend_info = Column(String(512))
+    define_json = Column(String(512))
+    status = Column(String(36))
+    result_json = Column(String(5120))
+    created_time = Column(DateTime)
+    updated_time = Column(DateTime)
+    deleted_time = Column(DateTime)
+    enabled = Column(TINYINT(1), server_default=text("'1'"))
+    is_deleted = Column(TINYINT(1), server_default=text("'0'"))
+
+    def __init__(self, data):
+        self.created_time = data.get("created_time") or datetime.datetime.now()
+        self.define_json = data.get("define_json")
+        self.deleted_time = data.get("deleted_time")
+        self.disk_size = data.get("disk_size")
+        self.disk_type = data.get("disk_type")
+        self.enabled = data.get("enabled")
+        self.engine = data.get("engine")
+        self.extend_info = data.get("extend_info")
+        self.id = data.get("id")
+        self.instance_type = data.get("instance_type")
+        self.ipaddress = data.get("ipaddress")
+        self.is_deleted = data.get("is_deleted")
+        self.name = data.get("name")
+        self.port = data.get("port")
+        self.provider = data.get("provider")
+        self.provider_id = data.get("provider_id")
+        self.region = data.get("region")
+        self.resource_id = data.get("resource_id")
+        self.result_json = data.get("result_json")
+        self.status = data.get("status")
+        self.subnet_id = data.get("subnet_id")
+        self.updated_time = data.get("updated_time")
+        self.version = data.get("version")
+        self.zone = data.get("zone")
+
+# p = dir(RdsDb)
+# for x in p:
+#     if not x.startswith("_") and x not in ["to_dict", "metadata"]:
+#         print
+#         'self.%s = data.get("%s")' % (x, x)

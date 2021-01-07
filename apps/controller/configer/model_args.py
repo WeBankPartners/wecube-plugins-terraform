@@ -79,6 +79,16 @@ resouce_property_models = {
         "power_action",
         "force_delete"
     ],
+    "redis": [
+        "name",
+        "engine",
+        "zone",
+        "version",
+        "instance_type",
+        "subnet_id",
+        "port",
+        "password"
+    ],
 
 }
 
