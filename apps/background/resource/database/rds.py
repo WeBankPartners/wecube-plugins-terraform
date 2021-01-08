@@ -33,7 +33,7 @@ class _RdsDbBase(object):
         return count, data
 
     def create(self, create_data):
-        if self.engine:
+        if (not create_data.get("engine")) and self.engine:
             create_data["engine"] = self.engine
 
         create_data["id"] = create_data.get("id") or get_uuid()
@@ -72,8 +72,10 @@ class _RdsDbBase(object):
 
         return count, data
 
-    def delete(self, rid):
-        count, data = self.update(rid, update_data={"is_deleted": 1})
+    def delete(self, rid, update_data=None):
+        update_data = update_data or {}
+        update_data["is_deleted"] = 1
+        count, data = self.update(rid, update_data=update_data)
         return count
 
     def object_resource_id(self, rid):
