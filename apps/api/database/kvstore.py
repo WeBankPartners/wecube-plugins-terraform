@@ -22,8 +22,8 @@ from apps.background.resource.database.kvstore import RedisObject
 class KvStoreApi(TerraformResource):
     def __init__(self):
         super(KvStoreApi, self).__init__()
-        self.resource_name = "redis"
-        self.resource_workspace = "redis"
+        self.resource_name = "kvstore"
+        self.resource_workspace = "kvstore"
         self.resource_object = RedisObject()
 
     def resource_info(self, provider):

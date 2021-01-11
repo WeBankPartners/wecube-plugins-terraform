@@ -122,7 +122,7 @@ def convert_keys(datas, defines, is_update=False):
             if defines.get(key) is not None:
                 result.update(convert_key(key, value, define=defines[key]))
             else:
-                raise ValueError("未定义的关键词 %s"% key)
+                raise ValueError("未定义的关键词 %s" % key)
 
         return result
 
@@ -171,3 +171,57 @@ def convert_values(data, define):
         res[key] = convert_value(value, define.get(value))
 
     return res
+
+
+def _format_type(value, type):
+    if type == "string":
+        value = str(value)
+    elif type == "json":
+        if not isinstance(value, list):
+            try:
+                value = json.loads(value)
+            except Exception, e:
+                raise ValueError("value is not json")
+    elif type == "list":
+        if not isinstance(value, list):
+            value = [value]
+    elif type == "int":
+        try:
+            value = int(value)
+        except Exception, e:
+            raise ValueError("value is not int")
+
+    elif type == "float":
+        try:
+            value = float(value)
+        except Exception, e:
+            raise ValueError("value is not float")
+    else:
+        raise ValueError("不支持的output类型")
+
+    return value
+
+
+def output_value(define, result):
+    '''
+
+    :param value:
+    :param define:  string or json
+    example: cider replace cider_block
+    define:  cider_block
+            or: {"value": "cider_block", "type": "string"}
+    :return:
+    '''
+
+    if (define is None):
+        return None
+    if isinstance(define, basestring):
+        value = result.get(define)
+    elif isinstance(define, dict):
+        key = define.get("value")
+        value = result.get(key)
+        value = _format_type(value, type=define.get("type", "string"))
+    else:
+        raise ValueError("转换配置错误， 类型错误")
+
+    return value

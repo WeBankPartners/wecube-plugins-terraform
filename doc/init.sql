@@ -30,6 +30,7 @@ CREATE TABLE `resource` (
   `resource_name` VARCHAR(64) NOT NULL,
   `extend_info` text NOT NULL,
   `resource_property` text NOT NULL,
+  `output_property` text DEFAULT NULL,
   `is_locked` BOOL DEFAULT FALSE,
   `created_time` DATETIME DEFAULT NULL,
   `updated_time` DATETIME DEFAULT NULL,

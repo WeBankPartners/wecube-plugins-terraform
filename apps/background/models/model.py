@@ -65,6 +65,7 @@ class Resource(Base):
     resource_name = Column(String(64), nullable=False)
     extend_info = Column(String(512))
     resource_property = Column(String(1024), nullable=False)
+    output_property = Column(String(1024), nullable=False)
     is_locked = Column(TINYINT(1), server_default=text("'0'"))
     created_time = Column(DateTime)
     updated_time = Column(DateTime)
@@ -84,6 +85,7 @@ class Resource(Base):
         self.resource_name = data.get("resource_name")
         self.extend_info = data.get("extend_info") or '{}'
         self.resource_property = data.get("resource_property") or '{}'
+        self.output_property = data.get("outout_property") or '{}'
         self.updated_time = data.get("updated_time")
 
 
