@@ -14,13 +14,14 @@ from wecube_plugins_terraform.settings import MYSQL_DATABASE
 
 Base = declarative_base()
 
-_Session = sessionmaker(bind=create_engine("mysql+pymysql://%(user)s:%(password)s@%(service)s/%(database)s"
+_Session = sessionmaker(bind=create_engine("mysql+pymysql://%(user)s:%(password)s@%(service)s/%(database)s?charset=utf8"
                                            % ({"user": MYSQL_USERNAME,
                                                "password": MYSQL_PASSWORD,
                                                "service": MYSQL_SERVER,
                                                "database": MYSQL_DATABASE}),
                                            # echo=True,
                                            pool_size=20,
+                                           encoding="utf-8",
                                            pool_recycle=60 * 9
                                            ),
                         autocommit=True

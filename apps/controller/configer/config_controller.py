@@ -43,6 +43,9 @@ class ConfigController(BackendController):
         validation.allowed_key(data, ["id", "provider", "resource", "property", "value_config"])
         validation.not_allowed_null(data=data,
                                     keys=["provider", "property", "resource"]
+
+
+
                                     )
 
         validation.validate_string("id", data.get("id"))

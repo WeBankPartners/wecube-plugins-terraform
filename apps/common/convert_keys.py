@@ -3,7 +3,7 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import json
-
+from lib.logs import logger
 
 def validate_convert_key(defines):
     for key, define in defines.items():
@@ -21,8 +21,8 @@ def validate_convert_key(defines):
 
 def validate_convert_value(defines):
     for key, define in defines.items():
-        if (not isinstance(define, (basestring, dict))) or isinstance(define, list):
-            raise ValueError("错误的定义 合法值为 string "
+        if not isinstance(define, (basestring, (basestring, bool, int, dict))):
+            raise ValueError("错误的定义 合法值为 string/bool/int "
                              "或json:{'type': <type>, 'value':<value>}")
 
         if isinstance(define, dict):
@@ -119,6 +119,7 @@ def convert_keys(datas, defines, is_update=False):
     result = {}
     if is_update:
         for key, value in datas.items():
+            # 依据data数据进行字段， 如果字段未定义则异常
             if defines.get(key) is not None:
                 result.update(convert_key(key, value, define=defines[key]))
             else:
@@ -127,6 +128,7 @@ def convert_keys(datas, defines, is_update=False):
         return result
 
     for key, define in defines.items():
+        # 依据定义字段转换，只转换defines中的字段，检查必要字段的传入，未定义字段移除
         _t = convert_key(key, datas.get(key), define=define)
         if _t:
             result.update(_t)
@@ -147,7 +149,7 @@ def convert_value(value, define):
 
     if (value is None) or (define is None):
         return value
-    if isinstance(define, basestring):
+    if isinstance(define, (basestring, bool, int)):
         value = define or value
     elif isinstance(define, dict):
         value = define.get("value", value) or value
@@ -171,6 +173,36 @@ def convert_values(data, define):
         res[key] = convert_value(value, define.get(value))
 
     return res
+
+
+def convert_extend_propertys(datas, extend_info):
+    '''
+
+    :param datas:
+    :param extend_info:
+    :return:
+    '''
+    if not extend_info:
+        logger.info("extend info define is null, so extend keys will be removed")
+        return {}
+
+    update_data = {}
+    for key, value in extend_info:
+        if key not in datas.keys():
+            # data 未传入，则使用extend 定义的值， 若为dict， 没有定义value， 则为null不传入
+            if isinstance(value, basestring):
+                update_data[key] = value
+            elif isinstance(value, dict):
+                if value.get("value") is not None:
+                    update_data[key] = value.get("value")
+        else:
+            # data中传入key， 则使用key的value， 则校验类型
+            if isinstance(value, dict):
+                _validate_type(datas.get(key), type=value.get("type", "string"))
+
+
+    datas.update(update_data)
+    return datas
 
 
 def _format_type(value, type):
@@ -202,7 +234,7 @@ def _format_type(value, type):
     return value
 
 
-def output_value(define, result):
+def output_value(key, define, result):
     '''
 
     :param value:
@@ -214,14 +246,22 @@ def output_value(define, result):
     '''
 
     if (define is None):
-        return None
+        logger.info("output %s define is null" % key)
+        return {}
     if isinstance(define, basestring):
         value = result.get(define)
     elif isinstance(define, dict):
-        key = define.get("value")
-        value = result.get(key)
+        value = result.get(define.get("value"))
         value = _format_type(value, type=define.get("type", "string"))
     else:
         raise ValueError("转换配置错误， 类型错误")
 
-    return value
+    return {key: value}
+
+
+def output_values(defines, result):
+    res = {}
+    for key, define in defines.items():
+        res.update(output_value(key, define, result))
+
+    return res

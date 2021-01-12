@@ -17,7 +17,8 @@ CREATE TABLE `cloud_providers` (
   `deleted_time` DATETIME DEFAULT NULL,
   `enabled` BOOL DEFAULT TRUE,
   `is_deleted` BOOL DEFAULT FALSE,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `idx_name` (`name`, `is_deleted`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 
@@ -37,7 +38,8 @@ CREATE TABLE `resource` (
   `deleted_time` DATETIME DEFAULT NULL,
   `enabled` BOOL DEFAULT TRUE,
   `is_deleted` BOOL DEFAULT FALSE,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `idx_property` (`provider`, `property`, `is_deleted`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 
@@ -63,7 +65,7 @@ CREATE TABLE `config` (
   `id` VARCHAR(36) NOT NULL,
   `provider` VARCHAR(32) NOT NULL,
   `resource` VARCHAR(64) NOT NULL,
-  `property` VARCHAR(64) NOT NULL,
+  `property` VARCHAR(64) DEFAULT NULL,
   `value_config` text NOT NULL,
   `is_locked` BOOL DEFAULT FALSE,
   `created_time` DATETIME DEFAULT NULL,
@@ -71,7 +73,8 @@ CREATE TABLE `config` (
   `deleted_time` DATETIME DEFAULT NULL,
   `enabled` BOOL DEFAULT TRUE,
   `is_deleted` BOOL DEFAULT FALSE,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `idx_pro_res` (`provider`, `resource`, `property`, `is_deleted`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 

@@ -18,6 +18,7 @@ class ResourceObject(object):
         for res in results:
             res["extend_info"] = json.loads(res["extend_info"])
             res["resource_property"] = json.loads(res["resource_property"])
+            res["output_property"] = json.loads(res["output_property"]) if res["output_property"] else {}
             data.append(res)
 
         return count, data
@@ -38,7 +39,7 @@ class ResourceObject(object):
         if data:
             data["extend_info"] = json.loads(data["extend_info"])
             data["resource_property"] = json.loads(data["resource_property"])
-
+            data["output_property"] = json.loads(data["output_property"]) if data["output_property"] else {}
         return data
 
     def update(self, rid, update_data, where_data=None):
@@ -49,7 +50,7 @@ class ResourceObject(object):
         if data:
             data["extend_info"] = json.loads(data["extend_info"])
             data["resource_property"] = json.loads(data["resource_property"])
-
+            data["output_property"] = json.loads(data["output_property"]) if data["output_property"] else {}
         return count, data
 
     def delete(self, rid, where_data=None):

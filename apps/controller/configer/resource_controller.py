@@ -10,6 +10,7 @@ from core.controller import BackendIdController
 from apps.common.convert_keys import validate_convert_key
 from apps.common.convert_keys import validate_convert_value
 from apps.api.configer.resource import ResourceObject
+from apps.api.configer.provider import ProviderObject
 from .model_args import property_necessary
 from .model_args import output_necessary
 
@@ -62,6 +63,7 @@ class ResourceController(BackendController):
         output_necessary(resource_name=data["resource_name"],
                         output_property=output_property)
 
+        ProviderObject().provider_name_object(data["provider"])
         create_data = {"id": data.get("id") or get_uuid(),
                        "provider": data["provider"],
                        "property": data.get("property"),
@@ -114,6 +116,10 @@ class ResourceIdController(BackendIdController):
                              output_property=output_property)
 
             data["output_property"] = json.dumps(output_property)
+        if "provider" in data.keys():
+            if not data.get("provider"):
+                raise ValueError("provider 不能为空")
+            ProviderObject().provider_name_object(data["provider"])
 
         return self.resource.update(rid, data)
 

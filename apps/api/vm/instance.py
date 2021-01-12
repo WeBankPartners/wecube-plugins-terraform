@@ -9,7 +9,8 @@ from lib.json_helper import format_json_dumps
 from core import local_exceptions
 from apps.common.convert_keys import convert_keys
 from apps.common.convert_keys import convert_value
-from apps.common.convert_keys import output_value
+from apps.common.convert_keys import output_values
+from apps.common.convert_keys import convert_extend_propertys
 from apps.api.configer.provider import ProviderApi
 from apps.api.configer.resource import ResourceObject
 from apps.api.configer.value_config import ValueConfigObject
@@ -26,24 +27,24 @@ class InstanceApi(TerraformResource):
         self.resource_name = "instance"
         self.resource_workspace = "instance"
         self.resource_object = InstanceObject()
+        self.resource_keys_config = None
 
     def resource_info(self, provider):
-        resource_config = ResourceObject().query_one(where_data={"provider": provider,
-                                                                 "property": self.resource_name})
-        if not resource_config:
+        self.resource_keys_config = ResourceObject().query_one(where_data={"provider": provider,
+                                                                           "property": self.resource_name})
+        if not self.resource_keys_config:
             raise local_exceptions.ResourceConfigError("%s 资源未初始化完成配置" % self.resource_name)
-
-        return resource_config
 
     def values_config(self, provider):
         return ValueConfigObject().resource_value_configs(provider, self.resource_name)
 
-    def _generate_data(self, provider, rid, data):
-        resource_keys_config = self.resource_info(provider)
+    def _generate_data(self, provider, rid, data, extend_info):
+        self.resource_info(provider)
         resource_values_config = self.values_config(provider)
 
-        resource_name = resource_keys_config["resource_name"]
-        resource_property = resource_keys_config["resource_property"]
+        resource_name = self.resource_keys_config["resource_name"]
+        resource_property = self.resource_keys_config["resource_property"]
+        resource_extend_info = self.resource_keys_config["extend_info"]
 
         resource_columns = {}
         for key, value in data.items():
@@ -53,6 +54,9 @@ class InstanceApi(TerraformResource):
             resource_columns[key] = value
 
         resource_columns = convert_keys(resource_columns, defines=resource_property)
+
+        _extend_columns = convert_extend_propertys(datas=extend_info, extend_info=resource_extend_info)
+        resource_columns.update(_extend_columns)
 
         _info = {
             "resource": {
@@ -136,7 +140,13 @@ class InstanceApi(TerraformResource):
             logger.info(traceback.format_exc())
             raise ValueError("result can not fetch id")
 
-    def _read_other_result(self, result, models):
+    def _read_other_result(self, result):
+        models = self.resource_keys_config["output_property"]
+        if models:
+            _data = result.get("resources")[0]
+            result = _data.get("instances")[0]
+            logger.info(result)
+            return output_values(models, result)
         return {}
 
     def create(self, rid, name, provider_id, hostname,
@@ -153,6 +163,8 @@ class InstanceApi(TerraformResource):
         :param kwargs:
         :return:
         '''
+
+        extend_info = extend_info or {}
 
         origin_type, instance_type_data = InstanceTypeObject().type_resource_id(provider_id, instance_type)
         cpu = instance_type_data.get("cpu")
@@ -176,10 +188,10 @@ class InstanceApi(TerraformResource):
                        "subnet_id": origin_subnet_id,
                        "zone": zone, "image": image}
 
-        create_data.update(extend_info)
-        create_data.update(kwargs)
+        extend_info.update(extend_info)
 
-        define_json = self._generate_data(provider_object["name"], rid, data=create_data)
+        define_json = self._generate_data(provider_object["name"], rid,
+                                          data=create_data, extend_info=extend_info)
         define_json.update(provider_info)
 
         self.save_data(rid, name=name,
@@ -204,7 +216,7 @@ class InstanceApi(TerraformResource):
         _update_data = {"status": "ok",
                         "resource_id": resource_id,
                         "result_json": format_json_dumps(result)}
-        _update_data.update(self._read_other_result(result, {}))
+        _update_data.update(self._read_other_result(result))
         self.update_data(rid, data=_update_data)
 
         return rid

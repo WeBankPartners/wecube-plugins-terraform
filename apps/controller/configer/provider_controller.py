@@ -29,8 +29,7 @@ class ProviderController(BackendController):
                                       "extend_info", "plugin_source",
                                       "provider_property", "display_name"])
         validation.not_allowed_null(data=data,
-                                    keys=["name", "secret_id",
-                                          "secret_key", "display_name"]
+                                    keys=["name", "secret_id", "secret_key"]
                                     )
 
         validation.validate_string("id", data.get("id"))

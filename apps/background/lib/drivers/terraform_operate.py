@@ -34,5 +34,9 @@ class TerraformResource(object):
             json.dump(define_json, f, ensure_ascii=False, indent=4)
 
     def run(self, path):
+        _statefile = os.path.join(path, "terraform.tfstate")
+        if os.path.exists(_statefile):
+            backupfile = _statefile + "_" + get_datetime_point_str()
+            copyfile(_statefile, backupfile)
         self.terraformDriver.apply(path, auto_approve="")
         return self.terraformDriver.resource_result(path)

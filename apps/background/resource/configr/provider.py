@@ -13,6 +13,9 @@ class ProviderObject(object):
         self.resource = ProvidersManager()
 
     def list(self, filters=None, page=None, pagesize=None, orderby=None):
+        filters = filters or {}
+        filters["is_deleted"] = 0
+
         count, results = self.resource.list(filters=filters, pageAt=page,
                                             pageSize=pagesize, orderby=orderby)
         data = []
@@ -31,7 +34,8 @@ class ProviderObject(object):
 
     def show(self, rid, where_data=None):
         where_data = where_data or {}
-        filters = where_data.update({"id": rid})
+        filters = where_data.update({"id": rid, "is_deleted": 0})
+
         data = self.resource.get(filters=filters)
         if data:
             data["extend_info"] = json.loads(data["extend_info"])
@@ -49,7 +53,7 @@ class ProviderObject(object):
 
     def update(self, rid, update_data, where_data=None):
         where_data = where_data or {}
-        where_data.update({"id": rid})
+        where_data.update({"id": rid, "is_deleted": 0})
         update_data["updated_time"] = datetime.datetime.now()
         count, data = self.resource.update(filters=where_data, data=update_data)
         if data:
@@ -67,4 +71,10 @@ class ProviderObject(object):
         data = ProviderObject().show(rid=provider_id)
         if not data:
             raise local_exceptions.ResourceValidateError("provider", "provider %s 未注册" % provider_id)
+        return data
+
+    def provider_name_object(self, provider):
+        data = ProviderObject().query_one(where_data={"name": provider})
+        if not data:
+            raise local_exceptions.ResourceValidateError("provider", "provider %s 未注册" % provider)
         return data

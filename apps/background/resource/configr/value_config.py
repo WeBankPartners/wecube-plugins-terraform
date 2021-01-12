@@ -46,6 +46,11 @@ class ValueConfigObject(object):
         for data in datas:
             res[data["property"]] = data["value_config"]
 
+        if "zone" not in res.keys():
+            _zone = self.query_one(where_data={"provider": provider, "resource": "zone"})
+            if _zone:
+                res["zone"] = _zone["value_config"]
+
         return res
 
     def update(self, rid, update_data, where_data=None):

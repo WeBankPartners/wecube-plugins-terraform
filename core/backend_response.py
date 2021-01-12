@@ -51,8 +51,6 @@ class BackendResponse(object):
         except:
             raise exception_common.RequestValidateError("请求参数不为json")
 
-        self.requestId = data.get("requestId") or "req_%s" % get_uuid()
-        self._trace_req(request)
         self._validate_column(data)
 
         self.before_handler(request, data, **kwargs)
@@ -160,6 +158,8 @@ class BackendResponse(object):
             return HttpResponse(str(self.allow_methods))
         else:
             if request.method.upper() in self.allow_methods:
+                self.requestId = "req_%s" % get_uuid()
+                self._trace_req(request)
                 res = self._request_response(request, **kwargs)
                 res.setdefault("ReqID", self.requestId)
                 self.trace_log(request, res)
@@ -205,6 +205,10 @@ class BackendResponse(object):
         elif e.__class__.__name__ in ['ValueError', 'TypeError', "KeyError"]:
             status_code = 400
             errmsg = self.format_err(400, "ValueError", "字符错误， 原因：%s" % e.message)
+            response_res = HttpResponse(status=status_code, content=errmsg, content_type=content_type)
+        elif e.__class__.__name__ in ['IntegrityError']:
+            status_code = 400
+            errmsg = self.format_err(400, "ValueError", "资源值已存在或缺少必填项，请检查")
             response_res = HttpResponse(status=status_code, content=errmsg, content_type=content_type)
         elif e.__class__.__name__ in ['AuthFailedError']:
             status_code = 401
