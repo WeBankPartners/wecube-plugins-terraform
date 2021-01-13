@@ -21,8 +21,8 @@ class CommonKeyObject(object):
 
     def show(self, rid, where_data=None):
         where_data = where_data or {}
-        filters = where_data.update({"id": rid})
-        return self.resource.get(filters=filters)
+        where_data.update({"id": rid})
+        return self.resource.get(filters=where_data)
 
     def query_one(self, where_data):
         return self.resource.get(filters=where_data)

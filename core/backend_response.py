@@ -210,6 +210,10 @@ class BackendResponse(object):
             status_code = 400
             errmsg = self.format_err(400, "ValueError", "资源值已存在或缺少必填项，请检查")
             response_res = HttpResponse(status=status_code, content=errmsg, content_type=content_type)
+        elif e.__class__.__name__ in ['TerrformExecError']:
+            status_code = 400
+            errmsg = self.format_err(400, "ExecError", "资源执行异常， 请检查")
+            response_res = HttpResponse(status=status_code, content=errmsg, content_type=content_type)
         elif e.__class__.__name__ in ['AuthFailedError']:
             status_code = 401
             errmsg = self.format_err(401, "UserAuthError", e)

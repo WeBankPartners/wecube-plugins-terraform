@@ -26,7 +26,8 @@ resouce_property_models = {
         "vpc_id",
         "route_table_id",
         "next_type",
-        "next_hub"
+        "next_hub",
+        "destination"
     ],
     "security_group": [
         "name",

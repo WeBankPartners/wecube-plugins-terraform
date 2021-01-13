@@ -4,6 +4,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 from core import validation
 from core.controller import BackendController
+from core.controller import BackendIdController
 from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.storage.disk_attach import DiskAttachApi
@@ -64,7 +65,7 @@ class DiskAttachController(BackendController):
         return 1, result
 
 
-class DiskAttachIdController(BackendController):
+class DiskAttachIdController(BackendIdController):
     allow_methods = ('GET', 'DELETE', 'PATCH')
     resource = DiskAttachApi()
 

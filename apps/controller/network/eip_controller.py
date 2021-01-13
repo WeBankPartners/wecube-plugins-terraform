@@ -4,6 +4,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 from core import validation
 from core.controller import BackendController
+from core.controller import BackendIdController
 from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.network.eip import EipApi
@@ -58,7 +59,7 @@ class EipController(BackendController):
         return 1, result
 
 
-class EipIdController(BackendController):
+class EipIdController(BackendIdController):
     allow_methods = ('GET', 'DELETE')
     resource = EipApi()
 

@@ -4,6 +4,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 from core import validation
 from core.controller import BackendController
+from core.controller import BackendIdController
 from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.network.subnet import SubnetApi
@@ -35,8 +36,8 @@ class SubnetController(BackendController):
         validation.allowed_key(data, ["id", "name", "provider_id", "vpc_id",
                                       "zone", "region", "cider", "extend_info"])
         validation.not_allowed_null(data=data,
-                                    keys=["region", "provider_id", "vpc_id"
-                                                                   "zone", "name", "cider"]
+                                    keys=["region", "provider_id", "vpc_id",
+                                          "zone", "name", "cider"]
                                     )
 
         validation.validate_string("id", data.get("id"))
@@ -65,7 +66,7 @@ class SubnetController(BackendController):
         return 1, result
 
 
-class SubnetIdController(BackendController):
+class SubnetIdController(BackendIdController):
     allow_methods = ('GET', 'DELETE')
     resource = SubnetApi()
 

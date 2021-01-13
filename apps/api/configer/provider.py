@@ -30,8 +30,7 @@ class ProviderApi(object):
         '''
 
         data = ValueConfigObject().query_one(where_data={"provider": provider,
-                                                         "property": "region",
-                                                         "resource": "name"})
+                                                         "resource": "region"})
         if not data:
             raise local_exceptions.RequestValidateError("config region 未进行定义")
 
@@ -47,8 +46,7 @@ class ProviderApi(object):
         :return:
         '''
         data = ValueConfigObject().query_one(where_data={"provider": provider,
-                                                         "property": "zone",
-                                                         "resource": "name"})
+                                                         "resource": "zone"})
         if not data:
             raise local_exceptions.RequestValidateError("zone 未进行定义")
 
@@ -79,7 +77,7 @@ class ProviderApi(object):
         '''
 
         extend_info = data.get("extend_info", {})
-        provider_property = json.loads(data.get("provider_property", {}))
+        provider_property = data.get("provider_property", {})
 
         region = self.region_info(provider, region)
 

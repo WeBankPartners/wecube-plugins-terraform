@@ -4,6 +4,8 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import os
 import json
 from shutil import copyfile
+from lib.logs import logger
+from lib.json_helper import format_json_dumps
 from lib.date_time import get_datetime_point_str
 from wecube_plugins_terraform.settings import TERRAFORM_BASE_PATH
 from apps.background.lib.commander.terraform import TerraformDriver
@@ -33,6 +35,8 @@ class TerraformResource(object):
         with open(os.path.join(path, "%s.tf.json" % rid), 'wb+') as f:
             json.dump(define_json, f, ensure_ascii=False, indent=4)
 
+        logger.info(format_json_dumps(define_json))
+
     def run(self, path):
         _statefile = os.path.join(path, "terraform.tfstate")
         if os.path.exists(_statefile):
@@ -40,3 +44,16 @@ class TerraformResource(object):
             copyfile(_statefile, backupfile)
         self.terraformDriver.apply(path, auto_approve="")
         return self.terraformDriver.resource_result(path)
+
+    def run_destory(self, path):
+        '''
+
+        :param path:
+        :return:
+        '''
+
+        if not os.path.exists(path):
+            logger.info("resource path %s not exists" % path)
+            return 2021
+
+        return TerraformDriver().destroy(dir_path=path, auto_approve="")

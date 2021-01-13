@@ -34,8 +34,8 @@ class VpcObject(object):
 
     def show(self, rid, where_data=None):
         where_data = where_data or {}
-        filters = where_data.update({"id": rid, "is_deleted": 0})
-        data = self.resource.get(filters=filters)
+        where_data.update({"id": rid, "is_deleted": 0})
+        data = self.resource.get(filters=where_data)
         if data:
             data["extend_info"] = json.loads(data["extend_info"])
             data["define_json"] = json.loads(data["define_json"])
@@ -43,10 +43,10 @@ class VpcObject(object):
 
         return data
 
-    def vpc_resource_id(self, rid):
-        vpc = self.show(rid)
+    def vpc_resource_id(self, rid, where_data=None):
+        vpc = self.show(rid, where_data)
         if not vpc:
-            raise local_exceptions.ValueValidateError("vpc_id", "vpc %s 不存在" % rid)
+            raise local_exceptions.ValueValidateError("vpc_id", "vpc %s 不存在 或 不在同一区域" % rid)
         return vpc["resource_id"]
 
     def update(self, rid, update_data, where_data=None):
@@ -67,5 +67,5 @@ class VpcObject(object):
         return self.resource.delete(filters=where_data)
 
     def delete(self, rid):
-        count, data = self.update(rid, update_data={"is_deleted": 1})
+        count, data = self.update(rid, update_data={"is_deleted": 1, "deleted_time": datetime.datetime.now()})
         return count

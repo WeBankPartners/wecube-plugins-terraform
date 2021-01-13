@@ -34,9 +34,9 @@ class ProviderObject(object):
 
     def show(self, rid, where_data=None):
         where_data = where_data or {}
-        filters = where_data.update({"id": rid, "is_deleted": 0})
+        where_data.update({"id": rid, "is_deleted": 0})
 
-        data = self.resource.get(filters=filters)
+        data = self.resource.get(filters=where_data)
         if data:
             data["extend_info"] = json.loads(data["extend_info"])
             data["provider_property"] = json.loads(data["provider_property"])
@@ -68,13 +68,13 @@ class ProviderObject(object):
         return self.resource.delete(filters=where_data)
 
     def provider_object(self, provider_id):
-        data = ProviderObject().show(rid=provider_id)
+        data = self.show(rid=provider_id)
         if not data:
             raise local_exceptions.ResourceValidateError("provider", "provider %s 未注册" % provider_id)
         return data
 
     def provider_name_object(self, provider):
-        data = ProviderObject().query_one(where_data={"name": provider})
+        data = self.query_one(where_data={"name": provider})
         if not data:
             raise local_exceptions.ResourceValidateError("provider", "provider %s 未注册" % provider)
         return data

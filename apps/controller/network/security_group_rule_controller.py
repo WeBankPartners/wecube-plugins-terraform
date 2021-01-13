@@ -4,6 +4,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 from core import validation
 from core.controller import BackendController
+from core.controller import BackendIdController
 from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.network.security_group_rule import SecGroupRuleApi
@@ -84,7 +85,7 @@ class SecGroupRuleController(BackendController):
         return 1, result
 
 
-class SecGroupRuleIdController(BackendController):
+class SecGroupRuleIdController(BackendIdController):
     allow_methods = ('GET', 'DELETE')
     resource = SecGroupRuleApi()
 

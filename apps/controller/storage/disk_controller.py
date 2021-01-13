@@ -4,6 +4,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 from core import validation
 from core.controller import BackendController
+from core.controller import BackendIdController
 from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.storage.disk import DiskApi
@@ -63,7 +64,7 @@ class DiskController(BackendController):
         return 1, result
 
 
-class DiskIdController(BackendController):
+class DiskIdController(BackendIdController):
     allow_methods = ('GET', 'DELETE', 'PATCH')
     resource = DiskApi()
 

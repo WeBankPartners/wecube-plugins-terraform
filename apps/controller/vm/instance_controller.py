@@ -6,6 +6,7 @@ from core import validation
 from core import local_exceptions
 from core.controller import BackendController
 from core.controller import BaseController
+from core.controller import BackendIdController
 from lib.uuid_util import get_uuid
 from apps.api.vm.instance import InstanceApi
 
@@ -82,7 +83,7 @@ class InstanceController(BackendController):
         return 1, result
 
 
-class InstanceIdController(BackendController):
+class InstanceIdController(BackendIdController):
     allow_methods = ('GET', 'DELETE', 'PATCH')
     resource = InstanceApi()
 

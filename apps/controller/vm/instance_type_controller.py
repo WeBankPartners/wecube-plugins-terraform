@@ -6,6 +6,7 @@ import json
 from lib.uuid_util import get_uuid
 from core import validation
 from core.controller import BackendController
+from core.controller import BackendIdController
 from apps.api.vm.instance_type import InstanceTypeApi
 
 
@@ -69,7 +70,7 @@ class InstanceTypeController(BackendController):
         return self.resource.resource_object.create(create_data)
 
 
-class InstanceTypeIdController(BackendController):
+class InstanceTypeIdController(BackendIdController):
     allow_methods = ('GET', 'DELETE', 'PATCH')
     resource = InstanceTypeApi()
 

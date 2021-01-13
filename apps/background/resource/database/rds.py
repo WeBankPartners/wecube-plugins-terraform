@@ -43,12 +43,12 @@ class _RdsDbBase(object):
 
     def show(self, rid, where_data=None):
         where_data = where_data or {}
-        filters = where_data.update({"id": rid, "is_deleted": 0})
+        where_data.update({"id": rid, "is_deleted": 0})
 
         if self.engine:
-            filters["engine"] = self.engine
+            where_data["engine"] = self.engine
 
-        data = self.resource.get(filters=filters)
+        data = self.resource.get(filters=where_data)
         if data:
             data["extend_info"] = json.loads(data["extend_info"])
             data["define_json"] = json.loads(data["define_json"])
@@ -75,6 +75,7 @@ class _RdsDbBase(object):
     def delete(self, rid, update_data=None):
         update_data = update_data or {}
         update_data["is_deleted"] = 1
+        update_data["deleted_time"] = datetime.datetime.now()
         count, data = self.update(rid, update_data=update_data)
         return count
 

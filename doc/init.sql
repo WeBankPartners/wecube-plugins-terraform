@@ -164,6 +164,7 @@ CREATE TABLE `route_entry` (
   `route_table` VARCHAR(64) DEFAULT NULL,
   `next_type` VARCHAR(64) DEFAULT NULL,
   `next_hub` VARCHAR(128) DEFAULT NULL,
+  `destination` VARCHAR(128) DEFAULT NULL,
   `extend_info` text DEFAULT NULL,
   `define_json` text DEFAULT NULL,
   `status` varchar(36) DEFAULT NULL,

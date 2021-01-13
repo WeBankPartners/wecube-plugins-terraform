@@ -31,8 +31,8 @@ class ResourceObject(object):
 
     def show(self, rid, where_data=None):
         where_data = where_data or {}
-        filters = where_data.update({"id": rid})
-        return self.query_one(filters)
+        where_data.update({"id": rid})
+        return self.query_one(where_data)
 
     def query_one(self, where_data):
         data = self.resource.get(filters=where_data)

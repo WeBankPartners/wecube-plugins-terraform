@@ -31,7 +31,7 @@ class InstanceApi(TerraformResource):
 
     def resource_info(self, provider):
         self.resource_keys_config = ResourceObject().query_one(where_data={"provider": provider,
-                                                                           "property": self.resource_name})
+                                                                           "resource_name": self.resource_name})
         if not self.resource_keys_config:
             raise local_exceptions.ResourceConfigError("%s 资源未初始化完成配置" % self.resource_name)
 
@@ -187,8 +187,6 @@ class InstanceApi(TerraformResource):
                        "disk_size": disk_size,
                        "subnet_id": origin_subnet_id,
                        "zone": zone, "image": image}
-
-        extend_info.update(extend_info)
 
         define_json = self._generate_data(provider_object["name"], rid,
                                           data=create_data, extend_info=extend_info)

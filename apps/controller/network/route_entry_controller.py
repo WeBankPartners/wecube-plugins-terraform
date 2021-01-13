@@ -4,6 +4,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 from core import validation
 from core.controller import BackendController
+from core.controller import BackendIdController
 from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.network.route_entry import RouteEntryApi
@@ -25,18 +26,18 @@ class RouteEntryController(BackendController):
         :return:
         '''
 
-        validation.allowed_key(data, ["id", "provider", "region", 'resource_id',
+        validation.allowed_key(data, ["id", "provider", "region", 'resource_id', 'destination',
                                       "provider_id", "name", "enabled"])
         return self.resource.resource_object.list(filters=data, page=page,
                                                   pagesize=pagesize, orderby=orderby)
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["id", "name", "provider_id", "vpc_id",
+        validation.allowed_key(data, ["id", "name", "provider_id", "vpc_id", "destination",
                                       "route_table_id", "next_type", "next_hub",
                                       "zone", "region", "extend_info"])
         validation.not_allowed_null(data=data,
                                     keys=["region", "provider_id", "vpc_id", "name",
-                                          "route_table_id", "next_type", "next_hub"]
+                                          "route_table_id", "next_type", "next_hub", "destination"]
                                     )
 
         validation.validate_string("id", data.get("id"))
@@ -48,6 +49,7 @@ class RouteEntryController(BackendController):
         validation.validate_string("next_type", data.get("next_type"))
         validation.validate_string("next_hub", data.get("next_hub"))
         validation.validate_string("provider_id", data.get("provider_id"))
+        validation.validate_string("destination", data.get("destination"))
         validation.validate_dict("extend_info", data.get("extend_info"))
 
     def create(self, request, data, **kwargs):
@@ -60,16 +62,17 @@ class RouteEntryController(BackendController):
         route_table = data.pop("route_table_id", None)
         next_type = data.pop("next_type", None)
         next_hub = data.pop("next_hub", None)
+        destination = data.pop("destination", None)
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         data.update(extend_info)
         result = self.resource.create(rid, name, provider_id, zone, region,
                                       vpc_id, route_table, next_type, next_hub,
-                                      extend_info=data)
+                                      destination=destination, extend_info=data)
         return 1, result
 
 
-class RouteEntryIdController(BackendController):
+class RouteEntryIdController(BackendIdController):
     allow_methods = ('GET', 'DELETE', 'PATCH')
     resource = RouteEntryApi()
 
@@ -112,6 +115,7 @@ class RouteEntryAddController(BaseController):
         validation.validate_string("next_type", data.get("next_type"))
         validation.validate_string("next_hub", data.get("next_hub"))
         validation.validate_string("provider_id", data.get("provider_id"))
+        validation.validate_string("destination", data.get("destination"))
         validation.validate_dict("extend_info", data.get("extend_info"))
 
     def response_templete(self, data):
@@ -127,10 +131,11 @@ class RouteEntryAddController(BaseController):
         route_table = data.pop("route_table_id", None)
         next_type = data.pop("next_type", None)
         next_hub = data.pop("next_hub", None)
+        destination = data.pop("destination", None)
 
         result = self.resource.create(rid, name, provider_id, zone, region,
                                       vpc_id, route_table, next_type, next_hub,
-                                      extend_info=data)
+                                      destination=destination, extend_info=data)
         return {"result": result}
 
 

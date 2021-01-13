@@ -5,6 +5,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 from core import validation
 from core.controller import BackendController
 from core.controller import BaseController
+from core.controller import BackendIdController
 from lib.uuid_util import get_uuid
 from apps.api.network.nat_gateway import NatGatewayApi
 
@@ -67,7 +68,7 @@ class NatGatewayController(BackendController):
         return 1, result
 
 
-class NatGatewayIdController(BackendController):
+class NatGatewayIdController(BackendIdController):
     allow_methods = ('GET', 'DELETE')
     resource = NatGatewayApi()
 

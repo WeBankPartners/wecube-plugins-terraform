@@ -74,7 +74,7 @@ class ResponseController(object):
                 if e.__class__.__name__ in ['UnicodeDecodeError', 'ValueError', 'TypeError', "KeyError",
                                             'ResourceNotCompleteError', "ResourceNotSearchError",
                                             'AllowedForbidden', 'RequestDataTooBig', 'DataToolangError',
-                                            'ResourceNotFoundError', 'AuthFailedError', ]:
+                                            'ResourceNotFoundError', 'AuthFailedError', 'TerrformExecError']:
                     response_data["resultMessage"] = "type: %s, info: %s" % (e.__class__.__name__, e.message)
                 elif e.__class__.__name__ in exception_common_classes:
                     response_data["resultMessage"] = "type: %s, info: %s" % (e.__class__.__name__, e.message)

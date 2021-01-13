@@ -5,6 +5,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import json
 from lib.logs import logger
 
+
 def validate_convert_key(defines):
     for key, define in defines.items():
         if (not isinstance(define, (basestring, dict))) or isinstance(define, list):
@@ -72,7 +73,7 @@ def _validate_type(value, type):
         except:
             raise ValueError("%s 不是list类型" % value)
     else:
-        raise ValueError("未知的类型约束 %s" % type)
+        pass
 
     return value
 
@@ -92,7 +93,9 @@ def convert_key(key, value, define):
     '''
 
     if isinstance(define, basestring):
-        value = define or value
+        if define == '-':
+            return {}
+        key = define or key
     else:
         if (value is None) and (not define.get("allow_null", 1)):
             raise ValueError("key %s 不允许为空" % key)
@@ -123,7 +126,7 @@ def convert_keys(datas, defines, is_update=False):
             if defines.get(key) is not None:
                 result.update(convert_key(key, value, define=defines[key]))
             else:
-                raise ValueError("未定义的关键词 %s" % key)
+                raise ValueError("未定义的关键词 %s, 若需移除关键词，则定义为 'key': '-'" % key)
 
         return result
 
@@ -182,27 +185,29 @@ def convert_extend_propertys(datas, extend_info):
     :param extend_info:
     :return:
     '''
+
+    def allowed_key(keys, data):
+        for key in keys:
+            if key not in data:
+                raise ValueError("不合法的参数%s" % key)
+
     if not extend_info:
         logger.info("extend info define is null, so extend keys will be removed")
         return {}
 
-    update_data = {}
-    for key, value in extend_info:
-        if key not in datas.keys():
-            # data 未传入，则使用extend 定义的值， 若为dict， 没有定义value， 则为null不传入
-            if isinstance(value, basestring):
-                update_data[key] = value
-            elif isinstance(value, dict):
-                if value.get("value") is not None:
-                    update_data[key] = value.get("value")
-        else:
-            # data中传入key， 则使用key的value， 则校验类型
-            if isinstance(value, dict):
-                _validate_type(datas.get(key), type=value.get("type", "string"))
+    ora_ext_info = {}
+    allowed_key(datas.keys(), extend_info.keys())
+    for key, define in extend_info.items():
+        if isinstance(define, (int, basestring, int, float, bool)):
+            ora_ext_info[key] = define
+        elif isinstance(define, dict):
+            if define.get("value") is not None:
+                ora_ext_info[key] = define.get("value")
+            if define.get("type") is not None and (key in datas.keys()):
+                _validate_type(datas.get(key), type=define.get("type", "string"))
 
-
-    datas.update(update_data)
-    return datas
+    ora_ext_info.update(datas)
+    return ora_ext_info
 
 
 def _format_type(value, type):
@@ -265,3 +270,22 @@ def output_values(defines, result):
         res.update(output_value(key, define, result))
 
     return res
+
+
+def define_relations_key(key, value, define):
+    '''
+
+    :param key:
+    :param value:
+    :param define:
+    :return:
+    '''
+
+    if isinstance(define, basestring):
+        if define == '-':
+            return True
+    else:
+        if (not value) and (not define.get("allow_null", 1)):
+            raise ValueError("key %s 不允许为空" % key)
+
+    return False

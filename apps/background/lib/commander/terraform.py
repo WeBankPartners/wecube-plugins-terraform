@@ -236,7 +236,7 @@ class TerraformDriver(object):
 
         workdir = dir_path or self.workdir or ''
         if not os.path.exists(workdir):
-            return False
+            raise TerrformExecError("resource workpath not exists, not permit delete")
 
         input_options = {}
         input_options["lock"] = lock

@@ -37,8 +37,8 @@ class _eipBase(object):
 
     def show(self, rid, where_data=None):
         where_data = where_data or {}
-        filters = where_data.update({"id": rid, "is_deleted": 0})
-        data = self.resource.get(filters=filters)
+        where_data.update({"id": rid, "is_deleted": 0})
+        data = self.resource.get(filters=where_data)
         if data:
             data["extend_info"] = json.loads(data["extend_info"])
             data["define_json"] = json.loads(data["define_json"])
@@ -59,7 +59,7 @@ class _eipBase(object):
         return count, data
 
     def delete(self, rid):
-        count, data = self.update(rid, update_data={"is_deleted": 1})
+        count, data = self.update(rid, update_data={"is_deleted": 1, "deleted_time": datetime.datetime.now()})
         return count
 
 

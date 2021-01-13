@@ -5,6 +5,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 from core import validation
 from core import local_exceptions
 from core.controller import BackendController
+from core.controller import BackendIdController
 from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.database.nosql import NosqlApi
@@ -87,7 +88,7 @@ class NosqlController(BackendController):
         return 1, result
 
 
-class NosqlIdController(BackendController):
+class NosqlIdController(BackendIdController):
     allow_methods = ('GET', 'DELETE', 'PATCH')
     resource = NosqlApi()
 

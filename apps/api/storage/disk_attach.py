@@ -28,7 +28,7 @@ class DiskAttachApi(TerraformResource):
 
     def resource_info(self, provider):
         resource_config = ResourceObject().query_one(where_data={"provider": provider,
-                                                                 "property": self.resource_name})
+                                                                 "resource_name": self.resource_name})
         if not resource_config:
             raise local_exceptions.ResourceConfigError("%s 资源未初始化完成配置" % self.resource_name)
 

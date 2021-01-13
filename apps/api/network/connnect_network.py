@@ -40,7 +40,7 @@ class ConnectNetApi(object):
 
     def resource_info(self, provider):
         _vpc_resource = ResourceObject().query_one(where_data={"provider": provider,
-                                                               "property": "vpc"})
+                                                               "resource_name": "vpc"})
         if not _vpc_resource:
             raise local_exceptions.ResourceConfigError("vpc 资源未初始化完成配置")
 
