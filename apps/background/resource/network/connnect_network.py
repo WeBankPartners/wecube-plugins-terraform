@@ -9,9 +9,9 @@ from apps.background.models.dbserver import ConnectNetManager
 from apps.background.models.dbserver import ConnectNetAttachManager
 
 
-class ConnectNetObject(object):
+class _ConnectNetBase(object):
     def __init__(self):
-        self.resource = ConnectNetManager()
+        self.resource = None
 
     def list(self, filters=None, page=None, pagesize=None, orderby=None):
         filters = filters or {}
@@ -60,3 +60,15 @@ class ConnectNetObject(object):
     def delete(self, rid):
         count, data = self.update(rid, update_data={"is_deleted": 1, "deleted_time": datetime.datetime.now()})
         return count
+
+
+class ConnectNetObject(_ConnectNetBase):
+    def __init__(self):
+        super(ConnectNetObject, self).__init__()
+        self.resource = ConnectNetManager()
+
+
+class ConnectNetAttachObject(_ConnectNetBase):
+    def __init__(self):
+        super(ConnectNetAttachObject, self).__init__()
+        self.resource = ConnectNetAttachManager()

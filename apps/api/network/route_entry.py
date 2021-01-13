@@ -52,7 +52,7 @@ class RouteEntryApi(ApiBase):
         ext_info = {}
         if vpc_id and (not _vpc_status):
             ext_info["vpc_id"] = VpcObject().vpc_resource_id(vpc_id)
-        if route_table_id and (not _rt_status) :
+        if route_table_id and (not _rt_status):
             ext_info["route_table_id"] = RouteTableObject().routeTable_resource_id(route_table_id)
 
         return ext_info
@@ -73,9 +73,6 @@ class RouteEntryApi(ApiBase):
         # todo 依据不同的next type转化不同的id
 
         extend_info = extend_info or {}
-
-
-
         provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
 
         _relations_id_dict = self.before_keys_checks(provider_object["name"], vpc_id, route_table)
