@@ -28,7 +28,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'wecube_plugins_terraform.logger_middleware',
+    'wecube_plugins_terraform.logger_middleware.logger_middleware',
     'django.middleware.security.SecurityMiddleware'
 ]
 
