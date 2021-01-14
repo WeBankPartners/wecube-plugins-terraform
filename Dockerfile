@@ -11,9 +11,7 @@ COPY . .
 
 RUN mkdir -p /usr/local/share/terraform/plugins && \
     tar -xvf /app/wecube_plugins_terraform/plugins/registry.terraform.io.tar  -C /usr/local/share/terraform/plugins && \
-    cd /app/wecube_plugins_terraform/bin && \
-    unzip terraform_0.13.5_linux_amd64.zip && \
-    cd /app/wecube_plugins_terraform && \
+    ls /app/wecube_plugins_terraform/bin && \
     ls -la && \
     pip install -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com -r /app/wecube_plugins_terraform/requirements.txt && \
     chmod +x /app/wecube_plugins_terraform/bin/*.sh
