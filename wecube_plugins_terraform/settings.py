@@ -28,11 +28,14 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'wecube_plugins_terraform.logmiddleware.logger_middleware',
+    'wecube_plugins_terraform.logger_middleware.logger_middleware',
     'django.middleware.security.SecurityMiddleware'
 ]
 
 from ._config import *
+
+if not os.path.exists(TERRFORM_BIN_PATH):
+    TERRFORM_BIN_PATH = "/usr/bin/terraform"
 
 if not os.path.exists(TERRFORM_BIN_PATH):
     TERRFORM_BIN_PATH = "terraform"
