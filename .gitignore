@@ -7,7 +7,6 @@
 *.pyc
 static/.DS_Store
 /.idea/*
-/conf/*
 test.py
 test/
 terraform-ui/node_modules

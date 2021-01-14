@@ -39,6 +39,7 @@ class RouteEntryManager(_BaseManager):
 class SecGroupManager(_BaseManager):
     obj = model.SecGroup
 
+
 class SecGroupRuleManager(_BaseManager):
     obj = model.SecGroupRule
 
@@ -49,6 +50,10 @@ class NatGatewayManager(_BaseManager):
 
 class EipManager(_BaseManager):
     obj = model.Eip
+
+
+class EipAssociation(_BaseManager):
+    obj = model.EipAssociation
 
 
 class LBManager(_BaseManager):
@@ -62,12 +67,29 @@ class LBListenerManager(_BaseManager):
 class DiskManager(_BaseManager):
     obj = model.Disk
 
+
 class DiskAttachManager(_BaseManager):
     obj = model.DiskAttach
 
 
+class InstanceTypeManager(_BaseManager):
+    obj = model.InstanceType
+
+
 class InstanceManager(_BaseManager):
     obj = model.Instance
+
+
+class RdsDbManager(_BaseManager):
+    obj = model.RdsDb
+
+
+class NosqlManager(_BaseManager):
+    obj = model.Nosql
+
+
+class KVStoreManager(_BaseManager):
+    obj = model.KVStore
 
 
 class ConnectNetManager(_BaseManager):
@@ -76,5 +98,3 @@ class ConnectNetManager(_BaseManager):
 
 class ConnectNetAttachManager(_BaseManager):
     obj = model.ConnectNetworkAttach
-
-

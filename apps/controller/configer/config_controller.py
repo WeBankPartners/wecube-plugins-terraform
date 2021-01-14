@@ -3,12 +3,13 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import json
-
-from apps.api.configer.value_config import ValueConfigObject
+from lib.uuid_util import get_uuid
 from core import validation
 from core.controller import BackendController
 from core.controller import BackendIdController
-from lib.uuid_util import get_uuid
+from apps.common.convert_keys import validate_convert_key
+from apps.common.convert_keys import validate_convert_value
+from apps.api.configer.value_config import ValueConfigObject
 
 
 class ConfigController(BackendController):
@@ -42,6 +43,9 @@ class ConfigController(BackendController):
         validation.allowed_key(data, ["id", "provider", "resource", "property", "value_config"])
         validation.not_allowed_null(data=data,
                                     keys=["provider", "property", "resource"]
+
+
+
                                     )
 
         validation.validate_string("id", data.get("id"))
@@ -58,18 +62,21 @@ class ConfigController(BackendController):
         :param kwargs:
         :return:
         '''
+
+        value_config = validation.validate_dict("value_config", data.get("value_config")) or {}
+        validate_convert_value(value_config)
         create_data = {"id": data.get("id") or get_uuid(),
                        "resource": data["resource"],
                        "provider": data.get("provider"),
                        "property": data.get("property"),
-                       "value_config": json.dumps(data.get("value_config", {}))
+                       "value_config": json.dumps(value_config)
                        }
 
         return self.resource.create(create_data)
 
 
 class ConfigIdController(BackendIdController):
-    Config = ValueConfigObject()
+    resource = ValueConfigObject()
 
     def show(self, request, data, **kwargs):
         '''
@@ -112,7 +119,9 @@ class ConfigIdController(BackendIdController):
 
         rid = kwargs.pop("rid", None)
         if data.get("value_config") is not None:
-            data["value_config"] = json.dumps(data.get("value_config", {}))
+            value_config = validation.validate_dict("value_config", data.get("value_config"))
+            validate_convert_value(value_config)
+            data["value_config"] = json.dumps(value_config)
 
         return self.resource.update(rid, data)
 

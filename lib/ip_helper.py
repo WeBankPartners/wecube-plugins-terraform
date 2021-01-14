@@ -25,28 +25,28 @@ def check_ip(ip):
         return False, "ip is null"
 
 
-def check_cider(cider):
-    if cider is None:
-        return False, "cider is null"
-    if not isinstance(cider, basestring):
+def check_cidr(cidr):
+    if cidr is None:
+        return False, "cidr is null"
+    if not isinstance(cidr, basestring):
         raise False, "not cinder"
-    if cider.strip():
-        if "/" not in cider:
-            return False, "not cider"
+    if cidr.strip():
+        if "/" not in cidr:
+            return False, "not cidr"
         else:
             try:
-                IPy.IP(cider).strNormal()
+                IPy.IP(cidr).strNormal()
                 return True, "ok"
             except:
-                return False, "not cider"
+                return False, "not cidr"
 
     else:
-        return False, "cider is null"
+        return False, "cidr is null"
 
 
-def check_cider_ip(cider, ip):
+def check_cidr(cidr, ip):
     try:
-        return ip in IPy.IP(cider)
+        return ip in IPy.IP(cidr)
     except:
         return False
 

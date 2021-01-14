@@ -118,6 +118,11 @@ def validate_list(key, value, minlen=None, maxlen=None):
 def validate_dict(key, value, minlen=None, maxlen=None):
     if value is None:
         return {}
+    try:
+        if isinstance(value, basestring):
+            value = json.loads(value)
+    except:
+        raise ValueError("%s 不是json" % key)
 
     if not isinstance(value, dict):
         raise ValueError("%s 不是合法类型json" % key)
