@@ -73,12 +73,12 @@ class SubnetApi(TerraformResource):
 
     def save_data(self, rid, name,
                   provider, provider_id, region, zone,
-                  cider, extend_info, define_json, vpc,
+                  cidr, extend_info, define_json, vpc,
                   status, result_json):
 
         self.resource_object.create(create_data={"id": rid, "provider": provider,
                                                  "region": region, "zone": zone,
-                                                 "name": name, "cider": cider,
+                                                 "name": name, "cidr": cidr,
                                                  "vpc": vpc, "status": status,
                                                  "provider_id": provider_id,
                                                  "extend_info": json.dumps(extend_info),
@@ -107,13 +107,13 @@ class SubnetApi(TerraformResource):
             return output_values(models, result)
         return {}
 
-    def create(self, rid, name, cider, provider_id,
+    def create(self, rid, name, cidr, provider_id,
                vpc_id, region, zone, extend_info, **kwargs):
         '''
 
         :param rid:
         :param name:
-        :param cider:
+        :param cidr:
         :param provider_id:
         :param extend_info:
         :param kwargs:
@@ -125,7 +125,7 @@ class SubnetApi(TerraformResource):
 
         provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
 
-        create_data = {"cider": cider, "name": name,
+        create_data = {"cidr": cidr, "name": name,
                        "vpc_id": vpc_resource_id,
                        "zone": zone}
 
@@ -141,7 +141,7 @@ class SubnetApi(TerraformResource):
                        provider=provider_object["name"],
                        provider_id=provider_id,
                        region=region, zone=zone,
-                       cider=cider, vpc=vpc_id,
+                       cidr=cidr, vpc=vpc_id,
                        extend_info=extend_info,
                        define_json=define_json,
                        status="applying", result_json={})

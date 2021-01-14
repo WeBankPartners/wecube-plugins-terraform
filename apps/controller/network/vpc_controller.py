@@ -27,33 +27,33 @@ class VPCController(BackendController):
         '''
 
         validation.allowed_key(data, ["id", "provider", "region", 'resource_id',
-                                      "provider_id", "zone", "name", "cider", "enabled"])
+                                      "provider_id", "zone", "name", "cidr", "enabled"])
         return self.resource.resource_object.list(filters=data, page=page,
                                                   pagesize=pagesize, orderby=orderby)
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["id", "name", "provider_id", "region", "cider", "extend_info"])
+        validation.allowed_key(data, ["id", "name", "provider_id", "region", "cidr", "extend_info"])
         validation.not_allowed_null(data=data,
-                                    keys=["region", "provider_id", "name", "cider"]
+                                    keys=["region", "provider_id", "name", "cidr"]
                                     )
 
         validation.validate_string("id", data.get("id"))
         validation.validate_string("name", data["name"])
         validation.validate_string("region", data["region"])
         validation.validate_string("provider_id", data.get("provider_id"))
-        validation.validate_string("cider", data.get("cider"))
+        validation.validate_string("cidr", data.get("cidr"))
         validation.validate_dict("extend_info", data.get("extend_info"))
 
     def create(self, request, data, **kwargs):
         rid = data.pop("id", None) or get_uuid()
         name = data.pop("name", None)
-        cider = data.pop("cider", None)
+        cidr = data.pop("cidr", None)
         region = data.pop("region", None)
         provider_id = data.pop("provider_id", None)
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         data.update(extend_info)
-        result = self.resource.create(rid, name, cider, provider_id, region=region, extend_info=data)
+        result = self.resource.create(rid, name, cidr, provider_id, region=region, extend_info=data)
         return 1, result
 
 
@@ -84,15 +84,15 @@ class VPCAddController(BaseController):
 
     def before_handler(self, request, data, **kwargs):
         validation.not_allowed_null(data=data,
-                                    keys=["provider_id", "region", "name", "cider"]
+                                    keys=["region", "provider_id", "name", "cidr"]
                                     )
 
         validation.validate_string("id", data.get("id"))
         validation.validate_string("name", data["name"])
+        validation.validate_string("region", data["region"])
         validation.validate_string("provider_id", data.get("provider_id"))
-        validation.validate_string("region", data.get("region"))
-        validation.validate_string("zone", data.get("zone"))
-        validation.validate_string("cider", data.get("cider"))
+        validation.validate_string("cidr", data.get("cidr"))
+        validation.validate_dict("extend_info", data.get("extend_info"))
 
     def response_templete(self, data):
         return {}
@@ -100,10 +100,11 @@ class VPCAddController(BaseController):
     def main_response(self, request, data, **kwargs):
         rid = data.pop("id", None) or get_uuid()
         name = data.pop("name", None)
-        cider = data.pop("cider", None)
+        cidr = data.pop("cidr", None)
         region = data.pop("region", None)
         provider_id = data.pop("provider_id", None)
-        result = self.resource.create(rid, name, cider, provider_id, region, data)
+
+        result = self.resource.create(rid, name, cidr, provider_id, region=region, extend_info=data)
         return {"result": result}
 
 

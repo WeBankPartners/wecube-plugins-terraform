@@ -144,9 +144,9 @@ def convert_value(value, define):
 
     :param value:
     :param define:  string or json
-    example: cider replace cider_block
-    define:  cider_block
-            or: {"value": "cider_block", "type": "string"}
+    example: cidr replace cidr_block
+    define:  cidr_block
+            or: {"value": "cidr_block", "type": "string"}
     :return:
     '''
 
@@ -166,8 +166,8 @@ def convert_value(value, define):
 def convert_values(data, define):
     '''
 
-    :param data: example: {"cider"： "cider_8"}
-    :param define: {"cider_8": {"type": "string", "vlue": "192.168.8.0/20"}}
+    :param data: example: {"cidr"： "cidr_8"}
+    :param define: {"cidr_8": {"type": "string", "vlue": "192.168.8.0/20"}}
     :return:
     '''
 
@@ -244,9 +244,9 @@ def output_value(key, define, result):
 
     :param value:
     :param define:  string or json
-    example: cider replace cider_block
-    define:  cider_block
-            or: {"value": "cider_block", "type": "string"}
+    example: cidr replace cidr_block
+    define:  cidr_block
+            or: {"value": "cidr_block", "type": "string"}
     :return:
     '''
 

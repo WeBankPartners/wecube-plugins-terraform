@@ -21,6 +21,16 @@ from route_entry_controller import RouteEntryIdController
 from route_entry_controller import RouteEntryAddController
 from route_entry_controller import RouteEntryDeleteController
 
+from security_group_controller import SecGroupController
+from security_group_controller import SecGroupIdController
+from security_group_controller import SecGroupAddController
+from security_group_controller import SecGroupDeleteController
+
+from security_group_rule_controller import SecGroupRuleController
+from security_group_rule_controller import SecGroupRuleIdController
+from security_group_rule_controller import SecGroupRuleAddController
+from security_group_rule_controller import SecGroupRuleDeleteController
+
 urlpatterns = [
     url(r'^vpc$', VPCController()),
     url(r'^vpc/(?P<rid>[\w-]+)$', VPCIdController()),
@@ -41,4 +51,14 @@ urlpatterns = [
     url(r'^route_entry/(?P<rid>[\w-]+)$', RouteEntryIdController()),
     url(r'^backend/route_entry/create$', RouteEntryAddController()),
     url(r'^backend/route_entry/delete$', RouteEntryDeleteController()),
+
+    url(r'^security_group$', SecGroupController()),
+    url(r'^security_group/(?P<rid>[\w-]+)$', SecGroupIdController()),
+    url(r'^backend/security_group/create$', SecGroupAddController()),
+    url(r'^backend/security_group/delete$', SecGroupDeleteController()),
+
+    url(r'^security_group_rule$', SecGroupRuleController()),
+    url(r'^security_group_rule/(?P<rid>[\w-]+)$', SecGroupRuleIdController()),
+    url(r'^backend/security_group_rule/create$', SecGroupRuleAddController()),
+    url(r'^backend/security_group_rule/delete$', SecGroupRuleDeleteController()),
 ]

@@ -98,12 +98,9 @@ class RouteEntryAddController(BaseController):
     resource = RouteEntryApi()
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["id", "name", "provider_id", "vpc_id",
-                                      "route_table_id", "next_type", "next_hub",
-                                      "zone", "region", "extend_info"])
         validation.not_allowed_null(data=data,
                                     keys=["region", "provider_id", "vpc_id", "name",
-                                          "route_table_id", "next_type", "next_hub"]
+                                          "route_table_id", "next_type", "next_hub", "destination"]
                                     )
 
         validation.validate_string("id", data.get("id"))
@@ -116,7 +113,6 @@ class RouteEntryAddController(BaseController):
         validation.validate_string("next_hub", data.get("next_hub"))
         validation.validate_string("provider_id", data.get("provider_id"))
         validation.validate_string("destination", data.get("destination"))
-        validation.validate_dict("extend_info", data.get("extend_info"))
 
     def response_templete(self, data):
         return {}

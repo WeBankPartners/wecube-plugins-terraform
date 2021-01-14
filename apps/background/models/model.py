@@ -155,7 +155,7 @@ class Vpc(Base):
     zone = Column(String(64))
     resource_id = Column(String(64))
     name = Column(String(64))
-    cider = Column(String(128))
+    cidr = Column(String(128))
     extend_info = Column(String(512))
     define_json = Column(String(512))
     status = Column(String(36))
@@ -167,7 +167,7 @@ class Vpc(Base):
     is_deleted = Column(TINYINT(1), server_default=text("'0'"))
 
     def __init__(self, data):
-        self.cider = data.get("cider")
+        self.cidr = data.get("cidr")
         self.created_time = datetime.datetime.now()
         self.define_json = data.get("define_json")
         self.deleted_time = data.get("deleted_time")
@@ -196,7 +196,7 @@ class Subnet(Base):
     resource_id = Column(String(64))
     name = Column(String(64))
     vpc = Column(String(64))
-    cider = Column(String(128))
+    cidr = Column(String(128))
     extend_info = Column(String(512))
     define_json = Column(String(512))
     status = Column(String(36))
@@ -208,7 +208,7 @@ class Subnet(Base):
     is_deleted = Column(TINYINT(1), server_default=text("'0'"))
 
     def __init__(self, data):
-        self.cider = data.get("cider")
+        self.cidr = data.get("cidr")
         self.created_time = datetime.datetime.now()
         self.define_json = data.get("define_json") or '{}'
         self.deleted_time = data.get("deleted_time")
@@ -369,7 +369,7 @@ class SecGroupRule(Base):
     description = Column(String(64))
     security_group_id = Column(String(64))
     type = Column(String(64))
-    cider_ip = Column(String(64))
+    cidr_ip = Column(String(64))
     ip_protocol = Column(String(64))
     ports = Column(String(64))
     policy = Column(String(64))
@@ -385,7 +385,7 @@ class SecGroupRule(Base):
 
     def __init__(self, data):
         self.created_time = datetime.datetime.now()
-        self.cider_ip = data.get("cider_ip")
+        self.cidr_ip = data.get("cidr_ip")
         self.name = data.get("name")
         self.description = data.get("description")
         self.define_json = data.get("define_json") or '{}'

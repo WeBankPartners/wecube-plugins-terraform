@@ -97,7 +97,7 @@ class DiskApi(TerraformResource):
 
         :param rid:
         :param name:
-        :param cider:
+        :param cidr:
         :param provider_id:
         :param extend_info:
         :param kwargs:

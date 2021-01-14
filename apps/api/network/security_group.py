@@ -5,8 +5,8 @@ import json
 import traceback
 from lib.logs import logger
 from lib.json_helper import format_json_dumps
+from apps.common.convert_keys import define_relations_key
 from apps.api.configer.provider import ProviderApi
-from apps.background.lib.commander.terraform import TerraformDriver
 from apps.background.resource.network.vpc import VpcObject
 from apps.background.resource.network.security_group import SecGroupObject
 from apps.api.apibase import ApiBase
@@ -37,6 +37,16 @@ class SecGroupApi(ApiBase):
                                                  "define_json": json.dumps(define_json),
                                                  "result_json": json.dumps(result_json)})
 
+    def before_keys_checks(self, provider, vpc_id):
+        self.resource_info(provider)
+        resource_property = self.resource_keys_config["resource_property"]
+        _vpc_status = define_relations_key("vpc_id", vpc_id, resource_property.get("vpc_id"))
+
+        ext_info = {}
+        if vpc_id and (not _vpc_status):
+            ext_info["vpc_id"] = VpcObject().vpc_resource_id(vpc_id)
+
+        return ext_info
 
     def create(self, rid, name, provider_id, vpc_id,
                zone, region, extend_info, **kwargs):
@@ -44,19 +54,21 @@ class SecGroupApi(ApiBase):
 
         :param rid:
         :param name:
-        :param cider:
+        :param cidr:
         :param provider_id:
         :param extend_info:
         :param kwargs:
         :return:
         '''
 
-        # todo  处理不同云厂商 的 定义  例如 vpc
-        vpc_resource_id = VpcObject().vpc_resource_id(vpc_id)
 
         provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
 
-        create_data = {"name": name, "vpc_id": vpc_resource_id}
+        # todo  处理不同云厂商 的 定义  例如 vpc
+        _relations_id_dict = self.before_keys_checks(provider_object["name"], vpc_id)
+
+        create_data = {"name": name}
+        create_data.update(_relations_id_dict)
 
         define_json = self._generate_data(provider_object["name"], rid,
                                           data=create_data, extend_info=extend_info)

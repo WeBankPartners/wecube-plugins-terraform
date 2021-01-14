@@ -9,10 +9,10 @@ resouce_property_models = {
     ],
     "vpc": [
         "name",
-        "cider"
+        "cidr"
     ],
     "subnet": [
-        "cider",
+        "cidr",
         "name",
         "vpc_id",
         "zone"
@@ -34,11 +34,10 @@ resouce_property_models = {
         "vpc_id"
     ],
     "security_group_rule": [
-        "vpc_id",
         "description",
         "type",
         "security_group_id",
-        "cider_ip",
+        "cidr_ip",
         "policy",
         "ip_protocol",
         "ports"

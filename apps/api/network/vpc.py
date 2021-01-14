@@ -72,11 +72,11 @@ class VpcApi(TerraformResource):
 
     def save_data(self, rid, name, provider,
                   provider_id, region, zone,
-                  cider, extend_info, define_json,
+                  cidr, extend_info, define_json,
                   status, result_json):
         self.resource_object.create(create_data={"id": rid, "provider": provider,
                                                  "region": region, "zone": zone,
-                                                 "name": name, "cider": cider,
+                                                 "name": name, "cidr": cidr,
                                                  "status": status,
                                                  "provider_id": provider_id,
                                                  "extend_info": json.dumps(extend_info),
@@ -105,12 +105,12 @@ class VpcApi(TerraformResource):
             return output_values(models, result)
         return {}
 
-    def create(self, rid, name, cider, provider_id, region, extend_info, **kwargs):
+    def create(self, rid, name, cidr, provider_id, region, extend_info, **kwargs):
         '''
 
         :param rid:
         :param name:
-        :param cider:
+        :param cidr:
         :param provider_id:
         :param extend_info:
         :param kwargs:
@@ -119,7 +119,7 @@ class VpcApi(TerraformResource):
         extend_info = extend_info or {}
 
         provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
-        create_data = {"cider": cider, "name": name}
+        create_data = {"cidr": cidr, "name": name}
 
         define_json = self._generate_data(provider_object["name"], rid,
                                           data=create_data, extend_info=extend_info)
@@ -132,7 +132,7 @@ class VpcApi(TerraformResource):
         self.save_data(rid, name=name,
                        provider_id=provider_id,
                        provider=provider_object["name"],
-                       region=region, cider=cider,
+                       region=region, cidr=cidr,
                        zone="",
                        extend_info=extend_info,
                        define_json=define_json,

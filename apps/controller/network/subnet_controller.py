@@ -27,17 +27,17 @@ class SubnetController(BackendController):
         '''
 
         validation.allowed_key(data, ["id", "provider", "region", 'resource_id',
-                                      "provider_id", "zone", "name", "cider",
+                                      "provider_id", "zone", "name", "cidr",
                                       "vpc", "enabled"])
         return self.resource.resource_object.list(filters=data, page=page,
                                                   pagesize=pagesize, orderby=orderby)
 
     def before_handler(self, request, data, **kwargs):
         validation.allowed_key(data, ["id", "name", "provider_id", "vpc_id",
-                                      "zone", "region", "cider", "extend_info"])
+                                      "zone", "region", "cidr", "extend_info"])
         validation.not_allowed_null(data=data,
                                     keys=["region", "provider_id", "vpc_id",
-                                          "zone", "name", "cider"]
+                                          "zone", "name", "cidr"]
                                     )
 
         validation.validate_string("id", data.get("id"))
@@ -46,13 +46,13 @@ class SubnetController(BackendController):
         validation.validate_string("zone", data.get("zone"))
         validation.validate_string("vpc_id", data["vpc_id"])
         validation.validate_string("provider_id", data.get("provider_id"))
-        validation.validate_string("cider", data.get("cider"))
+        validation.validate_string("cidr", data.get("cidr"))
         validation.validate_dict("extend_info", data.get("extend_info"))
 
     def create(self, request, data, **kwargs):
         rid = data.pop("id", None) or get_uuid()
         name = data.pop("name", None)
-        cider = data.pop("cider", None)
+        cidr = data.pop("cidr", None)
         zone = data.pop("zone", None)
         region = data.pop("region", None)
         vpc_id = data.pop("vpc_id", None)
@@ -60,7 +60,7 @@ class SubnetController(BackendController):
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         data.update(extend_info)
-        result = self.resource.create(rid, name, cider, provider_id,
+        result = self.resource.create(rid, name, cidr, provider_id,
                                       vpc_id, region, zone,
                                       extend_info=data)
         return 1, result
@@ -93,8 +93,8 @@ class SubnetAddController(BaseController):
 
     def before_handler(self, request, data, **kwargs):
         validation.not_allowed_null(data=data,
-                                    keys=["region", "provider_id", "vpc_id"
-                                                                   "zone", "name", "cider"]
+                                    keys=["region", "provider_id", "vpc_id",
+                                          "zone", "name", "cidr"]
                                     )
 
         validation.validate_string("id", data.get("id"))
@@ -103,7 +103,7 @@ class SubnetAddController(BaseController):
         validation.validate_string("zone", data.get("zone"))
         validation.validate_string("vpc_id", data["vpc_id"])
         validation.validate_string("provider_id", data.get("provider_id"))
-        validation.validate_string("cider", data.get("cider"))
+        validation.validate_string("cidr", data.get("cidr"))
 
     def response_templete(self, data):
         return {}
@@ -111,12 +111,13 @@ class SubnetAddController(BaseController):
     def main_response(self, request, data, **kwargs):
         rid = data.pop("id", None) or get_uuid()
         name = data.pop("name", None)
-        cider = data.pop("cider", None)
+        cidr = data.pop("cidr", None)
         zone = data.pop("zone", None)
         region = data.pop("region", None)
         vpc_id = data.pop("vpc_id", None)
         provider_id = data.pop("provider_id", None)
-        result = self.resource.create(rid, name, cider, provider_id,
+
+        result = self.resource.create(rid, name, cidr, provider_id,
                                       vpc_id, region, zone,
                                       extend_info=data)
 

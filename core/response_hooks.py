@@ -43,13 +43,13 @@ class ResponseController(object):
         return self.on_create(request, data, **kwargs)
 
     def on_create(self, request, datas, **kwargs):
-        response_data = {"resultCode": 0, "resultMessage": "success", "results": {"outputs": []}}
+        response_data = {"resultCode": "0", "resultMessage": "success", "results": {"outputs": []}}
         outputs = []
         for data in datas:
             self.before_handler(request, data, **kwargs)
 
         for data in datas:
-            _res = {"errorCode": 0, "errorMessage": ""}
+            _res = {"errorCode": "0", "errorMessage": ""}
             _res["callbackParameter"] = data.pop("callbackParameter", "")
             try:
                 res = self.main_response(request, data, **kwargs)
@@ -68,9 +68,9 @@ class ResponseController(object):
                     _res.update(res)
                     outputs.append(format_string(_res))
             except Exception, e:
-                _res["errorCode"] = 1
+                _res["errorCode"] = "1"
                 _res["errorMessage"] = e.__class__.__name__
-                response_data["resultCode"] = 1
+                response_data["resultCode"] = "1"
                 if e.__class__.__name__ in ['UnicodeDecodeError', 'ValueError', 'TypeError', "KeyError",
                                             'ResourceNotCompleteError', "ResourceNotSearchError",
                                             'AllowedForbidden', 'RequestDataTooBig', 'DataToolangError',
@@ -138,7 +138,7 @@ class ResponseController(object):
         else:
             errorMessage = "type: %s, info: %s" % (errtype, errinfo)
 
-        msg = {"resultCode": 1,
+        msg = {"resultCode": "1",
                "resultMessage": errorMessage,
                "results": {"outputs": []}
                }

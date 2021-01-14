@@ -14,8 +14,8 @@ from apps.api.apibase import ApiBase
 class SecGroupRuleApi(ApiBase):
     def __init__(self):
         super(SecGroupRuleApi, self).__init__()
-        self.resource_name = "security_group"
-        self.resource_workspace = "security_group"
+        self.resource_name = "security_group_rule"
+        self.resource_workspace = "security_group_rule"
         self.resource_object = SecGroupRuleObject()
         self.resource_keys_config = None
 
@@ -23,7 +23,7 @@ class SecGroupRuleApi(ApiBase):
         return result
 
     def save_data(self, rid, name, security_group_id,
-                  cider_ip, ip_protocol, type,
+                  cidr_ip, ip_protocol, type,
                   description, ports, policy,
                   provider, provider_id, region, zone,
                   extend_info, define_json,
@@ -32,7 +32,7 @@ class SecGroupRuleApi(ApiBase):
         self.resource_object.create(create_data={"id": rid, "provider": provider,
                                                  "region": region, "zone": zone,
                                                  "security_group_id": security_group_id,
-                                                 "name": name, "cider_ip": cider_ip,
+                                                 "name": name, "cidr_ip": cidr_ip,
                                                  "ip_protocol": ip_protocol, "type": type,
                                                  "ports": ports, "policy": policy,
                                                  "status": status, "description": description,
@@ -43,7 +43,7 @@ class SecGroupRuleApi(ApiBase):
 
     def create(self, rid, name, provider_id,
                security_group_id, type,
-               cider_ip, ip_protocol,
+               cidr_ip, ip_protocol,
                ports, policy, description,
                zone, region, extend_info, **kwargs):
         '''
@@ -51,7 +51,7 @@ class SecGroupRuleApi(ApiBase):
         :param rid:
         :param security_group_id:
         :param type:
-        :param cider_ip:
+        :param cidr_ip:
         :param ip_protocol:
         :param ports:
         :param policy:
@@ -69,7 +69,7 @@ class SecGroupRuleApi(ApiBase):
         create_data = {"description": description,
                        "security_group_id": secGroup_object_id,
                        "type": type, "ports": ports,
-                       "cider_ip": cider_ip,
+                       "cidr_ip": cidr_ip,
                        "ip_protocol": ip_protocol,
                        "policy": policy}
 
@@ -85,7 +85,7 @@ class SecGroupRuleApi(ApiBase):
         self.save_data(rid, name=name,
                        provider=provider_object["name"],
                        security_group_id=security_group_id,
-                       cider_ip=cider_ip, ip_protocol=ip_protocol,
+                       cidr_ip=cidr_ip, ip_protocol=ip_protocol,
                        type=type, policy=policy,
                        description=description, ports=ports,
                        provider_id=provider_id,
@@ -102,7 +102,7 @@ class SecGroupRuleApi(ApiBase):
         resource_id = self._fetch_id(result)
 
         _update_data = {"status": "ok",
-                        "resource_id": resource_id,
+                        "resource_id": resource_id[:36],
                         "result_json": format_json_dumps(result)}
         _update_data.update(self._read_other_result(result))
         self.update_data(rid, data=_update_data)

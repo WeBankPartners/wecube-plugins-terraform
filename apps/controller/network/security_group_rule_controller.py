@@ -40,11 +40,11 @@ class SecGroupRuleController(BackendController):
         '''
 
         validation.allowed_key(data, ["id", "name", "provider_id", "security_group_id",
-                                      "zone", "region", "type", "cider_ip", "ip_protocol",
+                                      "zone", "region", "type", "cidr_ip", "ip_protocol",
                                       "ports", "policy", "description", "extend_info"])
         validation.not_allowed_null(data=data,
                                     keys=["region", "provider_id", "security_group_id",
-                                          "type", "cider_ip", "ip_protocol", "ports", "policy"
+                                          "type", "cidr_ip", "ip_protocol", "ports", "policy"
                                           ]
                                     )
 
@@ -54,7 +54,7 @@ class SecGroupRuleController(BackendController):
         validation.validate_string("zone", data.get("zone"))
         validation.validate_string("type", data["type"])
         validation.validate_string("provider_id", data.get("provider_id"))
-        validation.validate_string("cider_ip", data.get("cider_ip"))
+        validation.validate_string("cidr_ip", data.get("cidr_ip"))
         validation.validate_string("ip_protocol", data.get("ip_protocol"))
         validation.validate_string("ports", data.get("ports"))
         validation.validate_string("policy", data.get("policy"))
@@ -68,7 +68,7 @@ class SecGroupRuleController(BackendController):
         region = data.pop("region", None)
         security_group_id = data.pop("security_group_id", None)
         type = data.pop("type", None)
-        cider_ip = data.pop("cider_ip", None)
+        cidr_ip = data.pop("cidr_ip", None)
         ip_protocol = data.pop("ip_protocol", None)
         ports = data.pop("ports", None)
         policy = data.pop("policy", None)
@@ -79,7 +79,7 @@ class SecGroupRuleController(BackendController):
         data.update(extend_info)
         result = self.resource.create(rid, name, provider_id,
                                       security_group_id, type,
-                                      cider_ip, ip_protocol,
+                                      cidr_ip, ip_protocol,
                                       ports, policy, description,
                                       zone, region, extend_info=data)
         return 1, result
@@ -120,7 +120,7 @@ class SecGroupRuleAddController(BaseController):
 
         validation.not_allowed_null(data=data,
                                     keys=["region", "provider_id", "security_group_id",
-                                          "type", "cider_ip", "ip_protocol", "ports", "policy"
+                                          "type", "cidr_ip", "ip_protocol", "ports", "policy"
                                           ]
                                     )
 
@@ -130,7 +130,7 @@ class SecGroupRuleAddController(BaseController):
         validation.validate_string("zone", data.get("zone"))
         validation.validate_string("type", data["type"])
         validation.validate_string("provider_id", data.get("provider_id"))
-        validation.validate_string("cider_ip", data.get("cider_ip"))
+        validation.validate_string("cidr_ip", data.get("cidr_ip"))
         validation.validate_string("ip_protocol", data.get("ip_protocol"))
         validation.validate_string("ports", data.get("ports"))
         validation.validate_string("policy", data.get("policy"))
@@ -146,7 +146,7 @@ class SecGroupRuleAddController(BaseController):
         region = data.pop("region", None)
         security_group_id = data.pop("security_group_id", None)
         type = data.pop("type", None)
-        cider_ip = data.pop("cider_ip", None)
+        cidr_ip = data.pop("cidr_ip", None)
         ip_protocol = data.pop("ip_protocol", None)
         ports = data.pop("ports", None)
         policy = data.pop("policy", None)
@@ -155,7 +155,7 @@ class SecGroupRuleAddController(BaseController):
 
         result = self.resource.create(rid, name, provider_id,
                                       security_group_id, type,
-                                      cider_ip, ip_protocol,
+                                      cidr_ip, ip_protocol,
                                       ports, policy, description,
                                       zone, region, extend_info=data)
 

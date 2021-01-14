@@ -88,8 +88,7 @@ class SecGroupAddController(BaseController):
 
     def before_handler(self, request, data, **kwargs):
         validation.not_allowed_null(data=data,
-                                    keys=["region", "provider_id", "vpc_id"
-                                                                   "zone", "name", "cider"]
+                                    keys=["region", "provider_id", "vpc_id", "name"]
                                     )
 
         validation.validate_string("id", data.get("id"))
@@ -98,7 +97,7 @@ class SecGroupAddController(BaseController):
         validation.validate_string("zone", data.get("zone"))
         validation.validate_string("vpc_id", data["vpc_id"])
         validation.validate_string("provider_id", data.get("provider_id"))
-        validation.validate_string("cider", data.get("cider"))
+
 
     def response_templete(self, data):
         return {}
@@ -106,15 +105,13 @@ class SecGroupAddController(BaseController):
     def main_response(self, request, data, **kwargs):
         rid = data.pop("id", None) or get_uuid()
         name = data.pop("name", None)
-        cider = data.pop("cider", None)
         zone = data.pop("zone", None)
         region = data.pop("region", None)
         vpc_id = data.pop("vpc_id", None)
         provider_id = data.pop("provider_id", None)
 
-        result = self.resource.create(rid, name, cider, provider_id,
-                                      vpc_id, region, zone,
-                                      extend_info=data)
+        result = self.resource.create(rid, name, provider_id, vpc_id,
+                                      zone, region, extend_info=data)
 
         return {"result": result}
 

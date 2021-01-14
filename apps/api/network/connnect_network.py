@@ -82,11 +82,11 @@ class ConnectNetApi(object):
         return result
 
     def save_data(self, rid, name, provider, region, zone,
-                  cider, extend_info, define_json,
+                  cidr, extend_info, define_json,
                   status, result_json):
         ConnectNetObject().create(create_data={"id": rid, "provider": provider,
                                         "region": region, "zone": zone,
-                                        "name": name, "cider": cider,
+                                        "name": name, "cidr": cidr,
                                         "status": status,
                                         "extend_info": json.dumps(extend_info),
                                         "define_json": json.dumps(define_json),
@@ -107,14 +107,14 @@ class ConnectNetApi(object):
 
     def create(self, data):
         name = data["name"]
-        cider = data["cider"]
+        cidr = data["cidr"]
         provider = data["provider"]
         region = data["region"]
         zone = data.get("zone")
         extend_info = data.get("extend_info", {})
         rid = data.get("id") or get_uuid()
 
-        create_data = {"cider": cider, "name": name}
+        create_data = {"cidr": cidr, "name": name}
         create_data.update(extend_info)
 
         _path = self.create_workpath(rid, provider, region, zone)
@@ -124,7 +124,7 @@ class ConnectNetApi(object):
         vpc_info.update(provider_info)
 
         self.save_data(rid, name=name, provider=provider, region=region,
-                       zone=zone, cider=cider, extend_info=extend_info,
+                       zone=zone, cidr=cidr, extend_info=extend_info,
                        define_json=vpc_info, status="applying", result_json='{}')
 
         self.write_define(rid, _path, define_json=vpc_info)
