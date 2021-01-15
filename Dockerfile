@@ -3,7 +3,7 @@ LABEL maintainer = "Webank CTB Team"
 
 RUN sed -i 's/deb.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list && \
     sed -i 's/security.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list && \
-    mkdir -p /app/wecube_plugins_terraform
+    mkdir /data && mkdir -p /app/wecube_plugins_terraform
 
 WORKDIR /app/wecube_plugins_terraform/
 
@@ -14,7 +14,7 @@ RUN mkdir -p /usr/local/share/terraform/plugins && \
     ls /app/wecube_plugins_terraform/bin && \
     \cp /app/wecube_plugins_terraform/bin/terraform /usr/bin/terraform && \
     ls -la && \
-    apt update && apt-get -y install gcc python-dev && \
+    apt-get -y install gcc python-dev && \
     pip install -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com -r /app/wecube_plugins_terraform/requirements.txt && \
     chmod +x /app/wecube_plugins_terraform/bin/*.sh
 
