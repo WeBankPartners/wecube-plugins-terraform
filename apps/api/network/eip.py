@@ -50,7 +50,7 @@ class EipApi(ApiBase):
         provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
 
         create_data = {"name": name}
-        define_json = self._generate_data(provider_object["name"], rid,
+        define_json = self._generate_resource(provider_object["name"], rid,
                                           data=create_data, extend_info=extend_info)
         define_json.update(provider_info)
 

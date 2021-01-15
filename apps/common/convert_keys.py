@@ -272,6 +272,31 @@ def output_values(defines, result):
     return res
 
 
+def  read_output(key, define, result):
+    '''
+
+    :param key:
+    :param define:
+    example: cidr replace cidr_block
+    define:  cidr_block
+            or: {"value": "cidr_block", "type": "string"}
+    :param result:
+    :return:
+    '''
+
+    if (define is None):
+        logger.info("output %s define is null" % key)
+        return {}
+    if isinstance(define, basestring):
+        value = result
+    elif isinstance(define, dict):
+        value = _format_type(result, type=define.get("type", "string"))
+    else:
+        raise ValueError("转换配置错误， 类型错误")
+
+    return {key: value}
+
+
 def define_relations_key(key, value, define):
     '''
 
@@ -289,3 +314,15 @@ def define_relations_key(key, value, define):
             raise ValueError("key %s 不允许为空" % key)
 
     return False
+
+
+def output_line(key, define):
+    if isinstance(define, basestring):
+        if define == "-":
+            return {}
+    elif isinstance(define, dict):
+        define = define.get("value") or key
+    else:
+        raise ValueError("output define error")
+
+    return {key: define}

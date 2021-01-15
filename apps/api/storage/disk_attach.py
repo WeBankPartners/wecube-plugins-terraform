@@ -37,7 +37,7 @@ class DiskAttachApi(TerraformResource):
     def values_config(self, provider):
         return ValueConfigObject().resource_value_configs(provider, self.resource_name)
 
-    def _generate_data(self, provider, name, data):
+    def _generate_resource(self, provider, name, data):
         resource_keys_config = self.resource_info(provider)
         resource_values_config = self.values_config(provider)
 
@@ -140,7 +140,7 @@ class DiskAttachApi(TerraformResource):
         create_data.update(extend_info)
         create_data.update(kwargs)
 
-        define_json = self._generate_data(provider_object["name"], name, data=create_data)
+        define_json = self._generate_resource(provider_object["name"], name, data=create_data)
         define_json.update(provider_info)
 
         self.save_data(rid, name=name,

@@ -35,7 +35,7 @@ class VpcApi(TerraformResource):
     def values_config(self, provider):
         return ValueConfigObject().resource_value_configs(provider, self.resource_name)
 
-    def _generate_data(self, provider, rid, data, extend_info):
+    def _generate_resource(self, provider, rid, data, extend_info):
         self.resource_info(provider)
         resource_values_config = self.values_config(provider)
 
@@ -121,7 +121,7 @@ class VpcApi(TerraformResource):
         provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
         create_data = {"cidr": cidr, "name": name}
 
-        define_json = self._generate_data(provider_object["name"], rid,
+        define_json = self._generate_resource(provider_object["name"], rid,
                                           data=create_data, extend_info=extend_info)
         define_json.update(provider_info)
 

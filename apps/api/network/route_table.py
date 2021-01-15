@@ -56,7 +56,7 @@ class RouteTableApi(ApiBase):
         provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
 
         create_data = {"name": name, "vpc_id": vpc_resource_id}
-        define_json = self._generate_data(provider_object["name"], rid,
+        define_json = self._generate_resource(provider_object["name"], rid,
                                           data=create_data, extend_info=extend_info)
 
         define_json.update(provider_info)
@@ -113,7 +113,7 @@ class RouteTableApi(ApiBase):
 
         create_data = {"name": name, "vpc_id": vpc_resource_id}
 
-        define_json = self._generate_data(provider_object["name"], rid,
+        define_json = self._generate_resource(provider_object["name"], rid,
                                           data=create_data, extend_info=extend_info)
         define_json.update(provider_info)
 

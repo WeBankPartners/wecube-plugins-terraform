@@ -62,7 +62,7 @@ class NatGatewayApi(ApiBase):
         create_data = {"name": name, "vpc_id": vpc_resource_id,
                        "subnet_id": subnet_resource_id, "eip": eip}
 
-        define_json = self._generate_data(provider_object["name"], rid,
+        define_json = self._generate_resource(provider_object["name"], rid,
                                           data=create_data, extend_info=extend_info)
 
         define_json.update(provider_info)

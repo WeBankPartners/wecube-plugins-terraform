@@ -53,7 +53,7 @@ class EipAssociationApi(ApiBase):
 
         create_data = {"name": name, "eip_id": eip_resource_id}
 
-        define_json = self._generate_data(provider_object["name"], rid,
+        define_json = self._generate_resource(provider_object["name"], rid,
                                           data=create_data, extend_info=extend_info)
 
         define_json.update(provider_info)

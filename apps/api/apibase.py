@@ -8,7 +8,9 @@ from lib.json_helper import format_json_dumps
 from core import local_exceptions
 from apps.common.convert_keys import convert_keys
 from apps.common.convert_keys import convert_value
+from apps.common.convert_keys import read_output
 from apps.common.convert_keys import output_values
+from apps.common.convert_keys import output_line
 from apps.common.convert_keys import convert_extend_propertys
 from apps.api.configer.resource import ResourceObject
 from apps.api.configer.value_config import ValueConfigObject
@@ -35,7 +37,21 @@ class ApiBase(TerraformResource):
     def values_config(self, provider):
         return ValueConfigObject().resource_value_configs(provider, self.resource_name)
 
-    def _generate_data(self, provider, rid, data, extend_info):
+    def _generate_output(self, create_name):
+        output_configs = self.resource_keys_config["output_property"]
+        resource_name = self.resource_keys_config["property"]
+
+        _ext_output = {}
+        for key, define in output_configs.items():
+            _ext_output.update(output_line(key, define))
+
+        ext_output_config = {}
+        for column, ora_column in _ext_output.keys():
+            ext_output_config[column] = {"value": "${%s.%s.%s}" % (resource_name, create_name, ora_column)}
+
+        return {"output": ext_output_config}
+
+    def _generate_resource(self, provider, rid, data, extend_info):
         self.resource_info(provider)
         resource_values_config = self.values_config(provider)
 
@@ -88,10 +104,17 @@ class ApiBase(TerraformResource):
     def _read_other_result(self, result):
         models = self.resource_keys_config["output_property"]
         if models:
-            _data = result.get("resources")[0]
-            result = _data.get("instances")[0]
-            logger.info(result)
-            return output_values(models, result)
+            result_output = result.get("outputs")
+
+            ext_result = {}
+            for column, res in result_output.items():
+                _out_dict = read_output(key=column, define=models.get(column),
+                                        result=res.get("value"))
+                ext_result.update(_out_dict)
+
+            logger.info(ext_result)
+            return ext_result
+
         return {}
 
     def create(self, **kwargs):
