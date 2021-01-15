@@ -1,7 +1,11 @@
 # coding : utf-8
 
 import os
+import base64
 from lib.ConfigReader import Config
+from helper import decode_passwd
+
+RSA_FILE = "/app/rsa_key"
 
 # ---------------------default setting --------------------
 DEBUG = Config.getBool("DEFAULT", "debug", default=False)
@@ -27,6 +31,7 @@ else:
     MYSQL_USERNAME = os.environ.get("MYSQL_USERNAME")
     MYSQL_PASSWORD = os.environ.get("MYSQL_PASSWORD")
     MYSQL_DATABASE = os.environ.get("MYSQL_DATABASE")
+    MYSQL_PASSWORD = decode_passwd(RSA_FILE, MYSQL_PASSWORD)
 
 USER_HOME = os.environ.get("USER_HOME", "/root")
 JWT_KEY = os.environ.get("JWT_SIGNING_KEY", "secret")

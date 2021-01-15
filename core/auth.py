@@ -15,7 +15,7 @@ def b64decode_key(key):
     while max_padding > 0:
         try:
             return base64.b64decode(new_key)
-        except binascii.Error as e:
+        except (binascii.Error, TypeError) as e:
             new_key += '='
             max_padding -= 1
             if max_padding <= 0:
