@@ -89,5 +89,123 @@
                 </outputParameters>
             </interface>
         </plugin>
+        <plugin name="route_table">
+            <interface action="create" path="/terraform/v1/network/backend/route_table/create" httpMethod='POST'>
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" required="N">id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="Y">name</parameter>
+                    <parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">zone</parameter>
+                    <parameter datatype="string" mappingType="entity" required="Y">vpc_id</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string">result</parameter>
+                    <parameter datatype="string">errorMessage</parameter>
+                    <parameter datatype="string">errorCode</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="delete" path="/terraform/v1/network/backend/route_table/delete" httpMethod='POST'>
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string">result</parameter>
+                    <parameter datatype="string">errorMessage</parameter>
+                    <parameter datatype="string">errorCode</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
+        <plugin name="route_entry">
+            <interface action="create" path="/terraform/v1/network/backend/route_entry/create" httpMethod='POST'>
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" required="N">id</parameter>
+										<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
+										<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+										<parameter datatype="string" mappingType="entity" required="Y">vpc_id</parameter>
+										<parameter datatype="string" mappingType="entity" required="Y">destination</parameter>
+										<parameter datatype="string" mappingType="entity" required="Y">route_table_id</parameter>
+										<parameter datatype="string" mappingType="entity" required="Y">next_type</parameter>
+										<parameter datatype="string" mappingType="entity" required="Y">next_hub</parameter>
+										<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
+										<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string">result</parameter>
+                    <parameter datatype="string">errorMessage</parameter>
+                    <parameter datatype="string">errorCode</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="delete" path="/terraform/v1/network/backend/route_entry/delete" httpMethod='POST'>
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string">result</parameter>
+                    <parameter datatype="string">errorMessage</parameter>
+                    <parameter datatype="string">errorCode</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
+        <plugin name="security_group">
+            <interface action="create" path="/terraform/v1/network/backend/security_group/create" httpMethod='POST'>
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" required="N">id</parameter>
+										<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
+										<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+										<parameter datatype="string" mappingType="entity" required="Y">vpc_id</parameter>
+										<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
+										<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string">result</parameter>
+                    <parameter datatype="string">errorMessage</parameter>
+                    <parameter datatype="string">errorCode</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="delete" path="/terraform/v1/network/backend/security_group/delete" httpMethod='POST'>
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string">result</parameter>
+                    <parameter datatype="string">errorMessage</parameter>
+                    <parameter datatype="string">errorCode</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
+        <plugin name="security_group_rule">
+            <interface action="create" path="/terraform/v1/network/backend/security_group_rule/create" httpMethod='POST'>
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+										<parameter datatype="string" mappingType="entity" required="N">name</parameter>
+										<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+										<parameter datatype="string" mappingType="entity" required="Y">security_group_id</parameter>
+										<parameter datatype="string" mappingType="entity" required="Y">zone</parameter>
+										<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+										<parameter datatype="string" mappingType="entity" required="Y">type</parameter>
+										<parameter datatype="string" mappingType="entity" required="Y">cidr_ip</parameter>
+										<parameter datatype="string" mappingType="entity" required="Y">ip_protocol</parameter>
+										<parameter datatype="string" mappingType="entity" required="Y">ports</parameter>
+										<parameter datatype="string" mappingType="entity" required="Y">policy</parameter>
+										<parameter datatype="string" mappingType="entity" required="N">description</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string">result</parameter>
+                    <parameter datatype="string">errorMessage</parameter>
+                    <parameter datatype="string">errorCode</parameter>
+                </outputParameters>
+            </interface>
+            <interface action="delete" path="/terraform/v1/network/backend/security_group/delete" httpMethod='POST'>
+                <inputParameters>
+                    <parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+                </inputParameters>
+                <outputParameters>
+                    <parameter datatype="string">result</parameter>
+                    <parameter datatype="string">errorMessage</parameter>
+                    <parameter datatype="string">errorCode</parameter>
+                </outputParameters>
+            </interface>
+        </plugin>
     </plugins>
 </package>
