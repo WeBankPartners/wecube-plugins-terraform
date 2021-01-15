@@ -13,7 +13,7 @@ image: clean
 package: image
 	rm -rf package
 	mkdir -p package
-    cd terraform-ui && npm --registry https://registry.npm.taobao.org  install --unsafe-perm
+	cd terraform-ui && npm --registry https://registry.npm.taobao.org  install --unsafe-perm
 	cd terraform-ui && npm rebuild node-sass
 	cd terraform-ui && npm run plugin
 	cd terraform-ui/dist && zip -9 -r ui.zip .
