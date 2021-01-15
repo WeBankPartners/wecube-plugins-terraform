@@ -25,7 +25,7 @@ package: image
 	cd package && sed -i 's/{{CONTAINERNAME}}/$(project_name)-$(version)/g' ../register.xml
 	cd package && docker save -o image.tar $(project_name):$(version)
 	cp register.xml  package/
-	cd package && zip -9 $(project_name)-$(version).zip image.tar register.xml init.sql
+	cd package && zip -9 $(project_name)-$(version).zip image.tar register.xml init.sql ui.zip
 	cd package && rm -f image.tar
 	docker rmi $(project_name):$(version)
 
