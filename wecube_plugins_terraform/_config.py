@@ -5,7 +5,7 @@ import base64
 from lib.ConfigReader import Config
 from helper import decode_passwd
 
-RSA_FILE = "/app/rsa_key"
+RSA_FILE = "/data/rsa_key"
 
 # ---------------------default setting --------------------
 DEBUG = Config.getBool("DEFAULT", "debug", default=False)
