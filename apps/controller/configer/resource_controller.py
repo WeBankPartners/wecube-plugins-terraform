@@ -61,7 +61,7 @@ class ResourceController(BackendController):
                            resource_property=resource_property)
 
         output_necessary(resource_name=data["resource_name"],
-                        output_property=output_property)
+                         output_property=output_property)
 
         ProviderObject().provider_name_object(data["provider"])
         create_data = {"id": data.get("id") or get_uuid(),

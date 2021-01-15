@@ -193,9 +193,91 @@ resouce_property_models = {
 }
 
 output_property_models = {
+    "vpc": [
+        "resource_id"
+    ],
+    "subnet": [
+        "resource_id"
+    ],
+    "route_table": [
+        "resource_id"
+    ],
+    "route_entry": [
+        "resource_id"
+    ],
+    "security_group": [
+        "resource_id"
+    ],
+    "security_group_rule": [
+        "resource_id"
+    ],
+    "nat": [
+        "resource_id"
+    ],
+    "eip": [
+        "name"
+    ],
+    "eip_association": [
+        "resource_id"
+    ],
+    "lb": [
+        "resource_id"
+    ],
+    "disk": [
+        "resource_id"
+    ],
+    "disk_attach": [
+        "resource_id"
+    ],
     "instance": [
+        "resource_id",
         "ipaddress"
     ],
+    "mysql": [
+        "resource_id",
+        "ipaddress",
+        "port"
+    ],
+    "mariadb": [
+        "resource_id",
+        "ipaddress",
+        "port"
+    ],
+    "postgreSQL": [
+        "resource_id",
+        "ipaddress",
+        "port"
+    ],
+    "rds": [
+        "resource_id",
+        "ipaddress",
+        "port"
+    ],
+    "nosql": [
+        "resource_id",
+        "ipaddress",
+        "port"
+    ],
+    "mongodb": [
+        "resource_id",
+        "ipaddress",
+        "port"
+    ],
+    "kvstore": [
+        "resource_id",
+        "ipaddress",
+        "port"
+    ],
+    "redis": [
+        "resource_id",
+        "ipaddress",
+        "port"
+    ],
+    "memcached": [
+        "resource_id",
+        "ipaddress",
+        "port"
+    ]
 }
 
 
