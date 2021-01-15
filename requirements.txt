@@ -13,3 +13,4 @@ PyJWT
 python-terraform==0.10.1
 SQLalchemy
 PyMySQL==0.7.11
+pycrypto
