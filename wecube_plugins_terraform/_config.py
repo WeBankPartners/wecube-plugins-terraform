@@ -21,11 +21,12 @@ if DEBUG:
     MYSQL_PASSWORD = Config.get("DATABASE", "password")
     MYSQL_DATABASE = Config.get("DATABASE", "database")
 else:
-    MYSQL_SERVER = os.environ.get("MYSQL_SERVER")
+    MYSQL_HOST = os.environ.get("MYSQL_HOST")
+    MYSQL_PORT = os.environ.get("MYSQL_PORT")
+    MYSQL_SERVER = "%s:%s" % (MYSQL_HOST, MYSQL_PORT)
     MYSQL_USERNAME = os.environ.get("MYSQL_USERNAME")
     MYSQL_PASSWORD = os.environ.get("MYSQL_PASSWORD")
     MYSQL_DATABASE = os.environ.get("MYSQL_DATABASE")
 
 USER_HOME = os.environ.get("USER_HOME", "/root")
 JWT_KEY = os.environ.get("JWT_SIGNING_KEY", "secret")
-
