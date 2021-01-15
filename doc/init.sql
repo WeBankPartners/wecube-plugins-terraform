@@ -2,7 +2,7 @@ DROP TABLE IF EXISTS `cloud_providers`;
 
 CREATE TABLE `cloud_providers` (
   `id` VARCHAR(36) NOT NULL,
-  `display_name` VARCHAR(64) NOT NULL,
+  `display_name` VARCHAR(64) DEFAULT NULL,
   `name` VARCHAR(64) NOT NULL,
   `secret_id` VARCHAR(256) NOT NULL,
   `secret_key` VARCHAR(256) NOT NULL,
