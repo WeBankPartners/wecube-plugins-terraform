@@ -18,9 +18,10 @@ from apps.background.lib.commander.terraform import TerraformDriver
 from apps.background.lib.drivers.terraform_operate import TerraformResource
 from apps.background.resource.network.vpc import VpcObject
 from apps.background.resource.network.subnet import SubnetObject
+from apps.api.apibase import ApiBase
 
 
-class SubnetApi(TerraformResource):
+class SubnetApi(ApiBase):
     def __init__(self):
         super(SubnetApi, self).__init__()
         self.resource_name = "subnet"
