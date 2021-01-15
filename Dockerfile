@@ -14,7 +14,7 @@ RUN mkdir -p /usr/local/share/terraform/plugins && \
     ls /app/wecube_plugins_terraform/bin && \
     \cp /app/wecube_plugins_terraform/bin/terraform /usr/bin/terraform && \
     ls -la && \
-    apt-get -y install gcc python-dev && \
+    apt update && apt-get -y install gcc python-dev && \
     pip install -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com -r /app/wecube_plugins_terraform/requirements.txt && \
     chmod +x /app/wecube_plugins_terraform/bin/*.sh
 
