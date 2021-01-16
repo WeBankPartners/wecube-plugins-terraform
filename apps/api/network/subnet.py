@@ -23,6 +23,13 @@ class SubnetApi(ApiBase):
         self.resource_keys_config = None
 
     def before_keys_checks(self, provider, vpc_id):
+        '''
+
+        :param provider:
+        :param vpc_id:
+        :return:
+        '''
+
         self.resource_info(provider)
         resource_property = self.resource_keys_config["resource_property"]
         _vpc_status = define_relations_key("vpc_id", vpc_id, resource_property.get("vpc_id"))
