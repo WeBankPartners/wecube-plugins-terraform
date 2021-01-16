@@ -99,7 +99,7 @@ class SubnetApi(ApiBase):
             logger.info(traceback.format_exc())
             raise ValueError("result can not fetch id")
 
-    def _read_other_result(self, result):
+    def _read_output_result(self, result):
         models = self.resource_keys_config["output_property"]
         if models:
             _data = result.get("resources")[0]
@@ -157,7 +157,7 @@ class SubnetApi(ApiBase):
         _update_data = {"status": "ok",
                         "resource_id": resource_id,
                         "result_json": format_json_dumps(result)}
-        _update_data.update(self._read_other_result(result))
+        _update_data.update(self._read_output_result(result))
         self.update_data(rid, data=_update_data)
 
         return rid

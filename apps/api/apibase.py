@@ -49,10 +49,10 @@ class ApiBase(TerraformResource):
 
         return ValueConfigObject().resource_value_configs(provider, self.resource_name)
 
-    def _generate_output(self, create_name):
+    def _generate_output(self, lable_name):
         '''
         转换output 输出参数，生成配置
-        :param create_name:
+        :param lable_name:
         :return:
         '''
 
@@ -65,15 +65,15 @@ class ApiBase(TerraformResource):
 
         ext_output_config = {}
         for column, ora_column in _ext_output.keys():
-            ext_output_config[column] = {"value": "${%s.%s.%s}" % (resource_name, create_name, ora_column)}
+            ext_output_config[column] = {"value": "${%s.%s.%s}" % (resource_name, lable_name, ora_column)}
 
         return {"output": ext_output_config} if ext_output_config else {}
 
-    def _generate_resource(self, provider, rid, data, extend_info):
+    def _generate_resource(self, provider, lable_name, data, extend_info):
         '''
         转换resource 资源属性， 生成配置
         :param provider:
-        :param rid:
+        :param lable_name: 资源的标签名称
         :param data:
         :param extend_info:
         :return:
@@ -98,11 +98,10 @@ class ApiBase(TerraformResource):
         _extend_columns = convert_extend_propertys(datas=extend_info, extend_info=resource_extend_info)
         resource_columns.update(_extend_columns)
 
-        _name = self.resource_name + "_" + rid
         _info = {
             "resource": {
                 resource_name: {
-                    _name: resource_columns
+                    lable_name: resource_columns
                 }
             }
         }
@@ -111,7 +110,7 @@ class ApiBase(TerraformResource):
 
     def formate_result(self, result):
         '''
-
+        对 result 做处理
         :param result:
         :return:
         '''
@@ -152,7 +151,7 @@ class ApiBase(TerraformResource):
             logger.info(traceback.format_exc())
             raise ValueError("result can not fetch id")
 
-    def _read_other_result(self, result):
+    def _read_output_result(self, result):
         '''
         对于设置了output的属性， 则提取output输出值
         :param result:
