@@ -26,6 +26,12 @@ class ApiBase(TerraformResource):
         self.resource_keys_config = None
 
     def resource_info(self, provider):
+        '''
+
+        :param provider:
+        :return:
+        '''
+
         if self.resource_keys_config:
             return
 
@@ -35,9 +41,21 @@ class ApiBase(TerraformResource):
             raise local_exceptions.ResourceConfigError("%s 资源未初始化完成配置" % self.resource_name)
 
     def values_config(self, provider):
+        '''
+
+        :param provider:
+        :return:
+        '''
+
         return ValueConfigObject().resource_value_configs(provider, self.resource_name)
 
     def _generate_output(self, create_name):
+        '''
+        转换output 输出参数，生成配置
+        :param create_name:
+        :return:
+        '''
+
         output_configs = self.resource_keys_config["output_property"]
         resource_name = self.resource_keys_config["property"]
 
@@ -49,9 +67,18 @@ class ApiBase(TerraformResource):
         for column, ora_column in _ext_output.keys():
             ext_output_config[column] = {"value": "${%s.%s.%s}" % (resource_name, create_name, ora_column)}
 
-        return {"output": ext_output_config}
+        return {"output": ext_output_config} if ext_output_config else {}
 
     def _generate_resource(self, provider, rid, data, extend_info):
+        '''
+        转换resource 资源属性， 生成配置
+        :param provider:
+        :param rid:
+        :param data:
+        :param extend_info:
+        :return:
+        '''
+
         self.resource_info(provider)
         resource_values_config = self.values_config(provider)
 
@@ -83,15 +110,39 @@ class ApiBase(TerraformResource):
         return _info
 
     def formate_result(self, result):
+        '''
+
+        :param result:
+        :return:
+        '''
+
         return result
 
     def save_data(self, **kwargs):
+        '''
+        save data to db
+        :param kwargs:
+        :return:
+        '''
         raise NotImplementedError()
 
     def update_data(self, rid, data):
+        '''
+
+        :param rid:
+        :param data:
+        :return:
+        '''
+
         self.resource_object.update(rid, data)
 
     def _fetch_id(self, result):
+        '''
+
+        :param result:
+        :return:
+        '''
+
         try:
             _data = result.get("resources")[0]
             _instances = _data.get("instances")[0]
@@ -102,6 +153,12 @@ class ApiBase(TerraformResource):
             raise ValueError("result can not fetch id")
 
     def _read_other_result(self, result):
+        '''
+        对于设置了output的属性， 则提取output输出值
+        :param result:
+        :return:
+        '''
+
         models = self.resource_keys_config["output_property"]
         if models:
             result_output = result.get("outputs")
@@ -112,26 +169,37 @@ class ApiBase(TerraformResource):
                                         result=res.get("value"))
                 ext_result.update(_out_dict)
 
-            logger.info(ext_result)
+            logger.info(format_json_dumps(ext_result))
             return ext_result
 
         return {}
 
     def create(self, **kwargs):
+        '''
+        main    create resource and save info into db
+        :param kwargs:
+        :return:
+        '''
         raise NotImplementedError()
 
     def destory(self, rid):
+        '''
+
+        :param rid:
+        :return:
+        '''
+
         resource_info = self.resource_object.show(rid)
         _path = self.create_workpath(rid,
                                      provider=resource_info["provider"],
                                      region=resource_info["region"])
 
-        status = self.run_destory(_path)
-        if status == 2021:
+        if not self.destory_ensure_file(rid, path=_path):
             self.write_define(rid, _path, define_json=resource_info["define_json"])
-            status = self.run_destory(_path)
-            if not status:
-                raise local_exceptions.ResourceOperateException(self.resource_name,
-                                                                msg="delete %s %s failed" % (self.resource_name, rid))
+
+        status = self.run_destory(_path)
+        if not status:
+            raise local_exceptions.ResourceOperateException(self.resource_name,
+                                                            msg="delete %s %s failed" % (self.resource_name, rid))
 
         return self.resource_object.delete(rid)

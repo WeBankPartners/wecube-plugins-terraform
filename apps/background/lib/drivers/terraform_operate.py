@@ -19,6 +19,15 @@ class TerraformResource(object):
         self.resource_workspace = None
 
     def create_workpath(self, rid, provider, region, **kwargs):
+        '''
+
+        :param rid:
+        :param provider:
+        :param region:
+        :param kwargs:
+        :return:
+        '''
+
         _path = os.path.join(TERRAFORM_BASE_PATH, provider, region, self.resource_workspace, rid)
         if not os.path.exists(_path):
             os.makedirs(_path)
@@ -27,6 +36,14 @@ class TerraformResource(object):
         return _path
 
     def write_define(self, rid, path, define_json):
+        '''
+
+        :param rid:
+        :param path:
+        :param define_json:
+        :return:
+        '''
+
         file = os.path.join(path, "%s.tf.json" % rid)
         if os.path.exists(file):
             backupfile = file + "_" + get_datetime_point_str()
@@ -38,6 +55,12 @@ class TerraformResource(object):
         logger.info(format_json_dumps(define_json))
 
     def run(self, path):
+        '''
+
+        :param path:
+        :return:
+        '''
+
         _statefile = os.path.join(path, "terraform.tfstate")
         if os.path.exists(_statefile):
             backupfile = _statefile + "_" + get_datetime_point_str()
@@ -45,15 +68,25 @@ class TerraformResource(object):
         self.terraformDriver.apply(path, auto_approve="")
         return self.terraformDriver.resource_result(path)
 
+    def destory_ensure_file(self, rid, path):
+        '''
+
+        :param rid:
+        :param path:
+        :return:
+        '''
+
+        file = os.path.join(path, "%s.tf.json" % rid)
+        if os.path.exists(file):
+            return True
+
+        return False
+
     def run_destory(self, path):
         '''
 
         :param path:
         :return:
         '''
-
-        if not os.path.exists(path):
-            logger.info("resource path %s not exists" % path)
-            return 2021
 
         return TerraformDriver().destroy(dir_path=path, auto_approve="")
