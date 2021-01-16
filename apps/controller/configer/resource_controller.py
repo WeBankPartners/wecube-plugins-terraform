@@ -53,7 +53,7 @@ class ResourceController(BackendController):
 
         extend_info = validation.validate_dict("extend_info", data.get("extend_info")) or {}
         resource_property = validation.validate_dict("resource_property", data.get("resource_property")) or {}
-        output_property = validation.validate_dict("output_property", data.get("resource_property")) or {}
+        output_property = validation.validate_dict("output_property", data.get("output_property")) or {}
         validate_convert_key(resource_property)
         validate_convert_value(extend_info)
         validate_convert_value(output_property)

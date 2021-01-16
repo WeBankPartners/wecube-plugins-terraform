@@ -85,7 +85,7 @@ class Resource(Base):
         self.resource_name = data.get("resource_name")
         self.extend_info = data.get("extend_info") or '{}'
         self.resource_property = data.get("resource_property") or '{}'
-        self.output_property = data.get("outout_property") or '{}'
+        self.output_property = data.get("output_property") or '{}'
         self.updated_time = data.get("updated_time")
 
 
