@@ -79,6 +79,7 @@ class RouteEntryApi(ApiBase):
         if route_table_id and (not _rt_status):
             ext_info["route_table_id"] = RouteTableObject().routeTable_resource_id(route_table_id)
 
+        logger.info("before_keys_checks add info: %s" % (format_json_dumps(ext_info)))
         return ext_info
 
     def create(self, rid, name, provider_id, zone, region,
