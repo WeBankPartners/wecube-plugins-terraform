@@ -216,7 +216,7 @@ output_property_models = {
         "ipaddress"
     ],
     "eip": [
-        "name",
+        "resource_id",
         "ipaddress"
     ],
     "eip_association": [

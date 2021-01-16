@@ -54,9 +54,11 @@ class EipController(BackendController):
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         data.update(extend_info)
-        result = self.resource.create(rid, name, provider_id,
-                                      zone, region, extend_info=data)
-        return 1, result
+        rid, result = self.resource.create(rid, name, provider_id,
+                                           zone, region, extend_info=data)
+
+        res = {"id": rid, "ipaddress": result.get("ipaddress")}
+        return 1, res
 
 
 class EipIdController(BackendIdController):
@@ -85,8 +87,6 @@ class EipAddController(BaseController):
     resource = EipApi()
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["id", "name", "provider_id",
-                                      "zone", "region", "extend_info"])
         validation.not_allowed_null(data=data,
                                     keys=["region", "provider_id", "name"]
                                     )
@@ -96,8 +96,6 @@ class EipAddController(BaseController):
         validation.validate_string("region", data["region"])
         validation.validate_string("zone", data.get("zone"))
         validation.validate_string("provider_id", data.get("provider_id"))
-        validation.validate_dict("extend_info", data.get("extend_info"))
-
 
     def response_templete(self, data):
         return {}
@@ -108,13 +106,11 @@ class EipAddController(BaseController):
         zone = data.pop("zone", None)
         region = data.pop("region", None)
         provider_id = data.pop("provider_id", None)
-        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
-        data.update(extend_info)
-        result = self.resource.create(rid, name, provider_id,
-                                      zone, region, extend_info=data)
+        rid, result = self.resource.create(rid, name, provider_id,
+                                           zone, region, extend_info=data)
 
-        return {"result": result}
+        return {"result": rid, "ipaddress": result.get("ipaddress")}
 
 
 class EipDeleteController(BaseController):
