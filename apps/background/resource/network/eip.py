@@ -46,6 +46,16 @@ class _eipBase(object):
 
         return data
 
+    def query_one(self, where_data):
+        where_data.update({"is_deleted": 0})
+        data = self.resource.get(filters=where_data)
+        if data:
+            data["extend_info"] = json.loads(data["extend_info"])
+            data["define_json"] = json.loads(data["define_json"])
+            data["result_json"] = json.loads(data["result_json"])
+
+        return data
+
     def update(self, rid, update_data, where_data=None):
         where_data = where_data or {}
         where_data.update({"id": rid, "is_deleted": 0})
@@ -72,6 +82,13 @@ class EipObject(_eipBase):
         data = self.show(rid)
         if not data:
             raise local_exceptions.ValueValidateError("eip_id", "eip %s 不存在" % rid)
+        return data["resource_id"]
+
+    def eip_resource_ipaddress(self, ipaddress):
+        data = self.query_one(where_data={"ipaddress": ipaddress})
+        if not data:
+            raise local_exceptions.ValueValidateError("eip", "eip ipaddress %s 不存在" % ipaddress)
+
         return data["resource_id"]
 
 
