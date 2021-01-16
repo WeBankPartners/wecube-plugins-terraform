@@ -153,7 +153,7 @@ class RouteTableApi(ApiBase):
         create_data = {"name": name, "vpc_id": vpc_resource_id}
 
         define_json = self._generate_resource(provider_object["name"], rid,
-                                          data=create_data, extend_info=extend_info)
+                                              data=create_data, extend_info=extend_info)
         define_json.update(provider_info)
 
         self.update_data(rid, data={"status": "updating"})

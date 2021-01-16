@@ -38,7 +38,7 @@ class SubnetApi(ApiBase):
         if vpc_id and (not _vpc_status):
             ext_info["vpc_id"] = VpcObject().vpc_resource_id(vpc_id)
 
-        logger.info("before_keys_checks add info: %s" %(format_json_dumps(ext_info)))
+        logger.info("before_keys_checks add info: %s" % (format_json_dumps(ext_info)))
         return ext_info
 
     def save_data(self, rid, name,

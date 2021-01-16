@@ -122,7 +122,6 @@ class RouteEntryApi(ApiBase):
         define_json.update(provider_info)
         define_json.update(output_json)
 
-
         _path = self.create_workpath(rid,
                                      provider=provider_object["name"],
                                      region=region)
