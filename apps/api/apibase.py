@@ -11,6 +11,7 @@ from apps.common.convert_keys import convert_value
 from apps.common.convert_keys import read_output
 from apps.common.convert_keys import output_values
 from apps.common.convert_keys import output_line
+from apps.common.convert_keys import define_relations_key
 from apps.common.convert_keys import convert_extend_propertys
 from apps.api.configer.resource import ResourceObject
 from apps.api.configer.value_config import ValueConfigObject
@@ -48,6 +49,16 @@ class ApiBase(TerraformResource):
         '''
 
         return ValueConfigObject().resource_value_configs(provider, self.resource_name)
+
+    def before_keys_checks(self, **kwargs):
+        '''
+        校验依赖的id的合法性
+        :param kwargs:
+        :return:
+        '''
+
+        # self.resource_info(provider)
+        return {}
 
     def _generate_output(self, lable_name):
         '''

@@ -19,6 +19,16 @@ class VpcApi(ApiBase):
         self.resource_object = VpcObject()
         self.resource_keys_config = None
 
+    def before_keys_checks(self, provider):
+        '''
+
+        :param provider:
+        :return:
+        '''
+
+        self.resource_info(provider)
+        return {}
+
     def save_data(self, rid, name, provider,
                   provider_id, region, zone,
                   cidr, extend_info, define_json,
@@ -66,7 +76,9 @@ class VpcApi(ApiBase):
         lable_name = self.resource_name + "_" + rid
 
         provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
+        _relations_id_dict = self.before_keys_checks(provider_object["name"])
 
+        create_data.update(_relations_id_dict)
         define_json = self._generate_resource(provider_object["name"], lable_name=lable_name,
                                               data=create_data, extend_info=extend_info)
 
@@ -104,17 +116,23 @@ class VpcApi(ApiBase):
         return rid
 
     def destory(self, rid):
+        '''
+
+        :param rid:
+        :return:
+        '''
+
         resource_info = self.resource_object.show(rid)
         _path = self.create_workpath(rid,
                                      provider=resource_info["provider"],
                                      region=resource_info["region"])
 
-        status = self.run_destory(_path)
-        if status == 2021:
+        if not self.destory_ensure_file(rid, path=_path):
             self.write_define(rid, _path, define_json=resource_info["define_json"])
-            status = self.run_destory(_path)
-            if not status:
-                raise local_exceptions.ResourceOperateException(self.resource_name,
-                                                                msg="delete %s %s failed" % (self.resource_name, rid))
+
+        status = self.run_destory(_path)
+        if not status:
+            raise local_exceptions.ResourceOperateException(self.resource_name,
+                                                            msg="delete %s %s failed" % (self.resource_name, rid))
 
         return self.resource_object.delete(rid)
