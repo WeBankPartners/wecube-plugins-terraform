@@ -321,7 +321,9 @@ def output_line(key, define):
         if define == "-":
             return {}
     elif isinstance(define, dict):
-        define = define.get("value") or key
+        define = define.get("value")
+        if not define:
+            return {}
     else:
         raise ValueError("output define error")
 
