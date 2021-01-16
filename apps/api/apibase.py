@@ -60,10 +60,10 @@ class ApiBase(TerraformResource):
         # self.resource_info(provider)
         return {}
 
-    def _generate_output(self, lable_name):
+    def _generate_output(self, label_name):
         '''
         转换output 输出参数，生成配置
-        :param lable_name:
+        :param label_name:
         :return:
         '''
 
@@ -76,15 +76,15 @@ class ApiBase(TerraformResource):
 
         ext_output_config = {}
         for column, ora_column in _ext_output.items():
-            ext_output_config[column] = {"value": "${%s.%s.%s}" % (resource_name, lable_name, ora_column)}
+            ext_output_config[column] = {"value": "${%s.%s.%s}" % (resource_name, label_name, ora_column)}
 
         return {"output": ext_output_config} if ext_output_config else {}
 
-    def _generate_resource(self, provider, lable_name, data, extend_info):
+    def _generate_resource(self, provider, label_name, data, extend_info):
         '''
         转换resource 资源属性， 生成配置
         :param provider:
-        :param lable_name: 资源的标签名称
+        :param label_name: 资源的标签名称
         :param data:
         :param extend_info:
         :return:
@@ -112,7 +112,7 @@ class ApiBase(TerraformResource):
         _info = {
             "resource": {
                 resource_name: {
-                    lable_name: resource_columns
+                    label_name: resource_columns
                 }
             }
         }

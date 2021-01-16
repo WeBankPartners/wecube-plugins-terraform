@@ -88,17 +88,17 @@ class SubnetApi(ApiBase):
 
         extend_info = extend_info or {}
         create_data = {"cidr": cidr, "name": name, "zone": zone}
-        lable_name = self.resource_name + "_" + rid
+        label_name = self.resource_name + "_" + rid
 
         provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
         _relations_id_dict = self.before_keys_checks(provider_object["name"], vpc_id)
 
         create_data.update(_relations_id_dict)
         define_json = self._generate_resource(provider_object["name"],
-                                              lable_name=lable_name,
+                                              label_name=label_name,
                                               data=create_data, extend_info=extend_info)
 
-        output_json = self._generate_output(lable_name=lable_name)
+        output_json = self._generate_output(label_name=label_name)
         define_json.update(provider_info)
         define_json.update(output_json)
 
