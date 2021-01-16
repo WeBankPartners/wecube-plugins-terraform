@@ -208,7 +208,7 @@ class BackendResponse(object):
             response_res = HttpResponse(status=status_code, content=errmsg, content_type=content_type)
         elif e.__class__.__name__ in ['IntegrityError']:
             status_code = 400
-            errmsg = self.format_err(400, "ValueError", "资源值已存在或缺少必填项，请检查")
+            errmsg = self.format_err(400, "ValueError", "资源值已存在或缺少必填项(或空字段)，请检查")
             response_res = HttpResponse(status=status_code, content=errmsg, content_type=content_type)
         elif e.__class__.__name__ in ['TerrformExecError']:
             status_code = 400
