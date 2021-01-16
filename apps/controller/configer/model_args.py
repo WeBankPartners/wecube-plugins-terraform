@@ -212,10 +212,12 @@ output_property_models = {
         "resource_id"
     ],
     "nat": [
-        "resource_id"
+        "resource_id",
+        "ipaddress"
     ],
     "eip": [
-        "name"
+        "name",
+        "ipaddress"
     ],
     "eip_association": [
         "resource_id"

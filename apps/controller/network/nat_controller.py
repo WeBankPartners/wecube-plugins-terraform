@@ -37,7 +37,7 @@ class NatGatewayController(BackendController):
                                       "subnet_id", "eip",
                                       "zone", "region", "extend_info"])
         validation.not_allowed_null(data=data,
-                                    keys=["region", "provider_id", "name"]
+                                    keys=["region", "provider_id", "name", "vpc_id"]
                                     )
 
         validation.validate_string("id", data.get("id"))
@@ -62,10 +62,11 @@ class NatGatewayController(BackendController):
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         data.update(extend_info)
-        result = self.resource.create(rid, name, provider_id,
-                                      vpc_id, subnet_id, eip,
-                                      zone, region, extend_info=data)
-        return 1, result
+        rid, result = self.resource.create(rid, name, provider_id,
+                                           vpc_id, subnet_id, eip,
+                                           zone, region, extend_info=data)
+        res = {"id": rid, "ipaddress": result.get("ipaddress")}
+        return 1, res
 
 
 class NatGatewayIdController(BackendIdController):
@@ -103,7 +104,7 @@ class NatGatewayAddController(BaseController):
 
     def before_handler(self, request, data, **kwargs):
         validation.not_allowed_null(data=data,
-                                    keys=["region", "provider_id", "name"]
+                                    keys=["region", "provider_id", "name", "vpc_id"]
                                     )
 
         validation.validate_string("id", data.get("id"))
@@ -127,14 +128,12 @@ class NatGatewayAddController(BaseController):
         subnet_id = data.pop("subnet_id", None)
         eip = data.pop("eip", None)
         provider_id = data.pop("provider_id", None)
-        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
-        data.update(extend_info)
-        result = self.resource.create(rid, name, provider_id,
-                                      vpc_id, subnet_id, eip,
-                                      zone, region, extend_info=data)
+        rid, result = self.resource.create(rid, name, provider_id,
+                                           vpc_id, subnet_id, eip,
+                                           zone, region, extend_info=data)
 
-        return {"result": result}
+        return {"result": rid, "ipaddress": result.get("ipaddress")}
 
 
 class NatGatewayDeleteController(BaseController):
