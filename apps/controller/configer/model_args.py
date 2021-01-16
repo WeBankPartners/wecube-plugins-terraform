@@ -299,3 +299,7 @@ def output_necessary(resource_name, output_property):
     for column in columns_property:
         if column not in output_property.keys():
             raise ValueError("缺少必要的output property: %s" % column)
+
+    for key in output_property.keys():
+        if key not in columns_property:
+            raise ValueError("不合法的output property: %s， 允许值：%s" % (key, ",".join(columns_property)))
