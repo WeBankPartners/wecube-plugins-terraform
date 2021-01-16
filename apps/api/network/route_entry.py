@@ -113,12 +113,14 @@ class RouteEntryApi(ApiBase):
         _relations_id_dict = self.before_keys_checks(provider_object["name"], vpc_id, route_table)
 
         create_data.update(_relations_id_dict)
-        define_json = self._generate_resource(provider_object["name"], rid,
+        define_json = self._generate_resource(provider_object["name"],
+                                              label_name=label_name,
                                               data=create_data, extend_info=extend_info)
 
         output_json = self._generate_output(label_name=label_name)
         define_json.update(provider_info)
         define_json.update(output_json)
+
 
         _path = self.create_workpath(rid,
                                      provider=provider_object["name"],
