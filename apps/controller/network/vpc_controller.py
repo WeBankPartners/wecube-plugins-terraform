@@ -5,6 +5,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 from lib.uuid_util import get_uuid
 from core import validation
 from core.controller import BackendController
+from core.controller import BackendIdController
 from core.controller import BaseController
 from core import local_exceptions as exception_common
 from apps.api.network.vpc import VpcApi
@@ -57,7 +58,7 @@ class VPCController(BackendController):
         return 1, result
 
 
-class VPCIdController(BackendController):
+class VPCIdController(BackendIdController):
     allow_methods = ('GET', 'DELETE')
     resource = VpcApi()
 

@@ -64,7 +64,7 @@ class ApiBase(TerraformResource):
             _ext_output.update(output_line(key, define))
 
         ext_output_config = {}
-        for column, ora_column in _ext_output.keys():
+        for column, ora_column in _ext_output.items():
             ext_output_config[column] = {"value": "${%s.%s.%s}" % (resource_name, lable_name, ora_column)}
 
         return {"output": ext_output_config} if ext_output_config else {}
