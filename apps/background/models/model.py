@@ -506,6 +506,7 @@ class EipAssociation(Base):
     resource_id = Column(String(64))
     name = Column(String(64))
     eip_id = Column(String(64))
+    instance_id = Column(String(64))
     extend_info = Column(String(512))
     define_json = Column(String(512))
     status = Column(String(36))
@@ -524,6 +525,7 @@ class EipAssociation(Base):
         self.extend_info = data.get("extend_info") or '{}'
         self.id = data.get("id")
         self.eip_id = data.get("eip_id")
+        self.instance_id = data.get("instance_id")
         self.is_deleted = data.get("is_deleted")
         self.name = data.get("name")
         self.provider = data.get("provider")

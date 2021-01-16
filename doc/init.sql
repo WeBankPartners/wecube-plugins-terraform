@@ -292,6 +292,7 @@ CREATE TABLE `eip_association` (
   `resource_id` VARCHAR(64) DEFAULT NULL,
   `name` VARCHAR(64) DEFAULT NULL,
   `eip_id` VARCHAR(64) DEFAULT NULL,
+  `instance_id` VARCHAR(64) DEFAULT NULL,
   `extend_info` text DEFAULT NULL,
   `define_json` text DEFAULT NULL,
   `status` varchar(36) DEFAULT NULL,

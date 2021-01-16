@@ -53,7 +53,10 @@ resouce_property_models = {
     ],
     "eip_association": [
         "name",
-        "eip_id"
+        "eip_id",
+        "instance_id",
+        "eni_id",
+        "private_ip"
     ],
     "lb": [
     ],

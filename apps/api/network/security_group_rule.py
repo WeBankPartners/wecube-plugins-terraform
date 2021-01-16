@@ -107,6 +107,7 @@ class SecGroupRuleApi(ApiBase):
         label_name = self.resource_name + "_" + rid
 
         description = description or "%s_%s_%s" % (type, ip_protocol, ports)
+        name = name or description
         create_data = {"description": description,
                        "type": type, "ports": ports,
                        "cidr_ip": cidr_ip,
