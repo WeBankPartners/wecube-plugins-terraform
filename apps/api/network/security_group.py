@@ -6,10 +6,10 @@ import traceback
 from lib.logs import logger
 from lib.json_helper import format_json_dumps
 from apps.common.convert_keys import define_relations_key
+from apps.api.apibase import ApiBase
 from apps.api.configer.provider import ProviderApi
 from apps.background.resource.network.vpc import VpcObject
 from apps.background.resource.network.security_group import SecGroupObject
-from apps.api.apibase import ApiBase
 
 
 class SecGroupApi(ApiBase):
@@ -20,13 +20,25 @@ class SecGroupApi(ApiBase):
         self.resource_object = SecGroupObject()
         self.resource_keys_config = None
 
-    def formate_result(self, result):
-        return result
-
     def save_data(self, rid, name, vpc,
                   provider, provider_id, region, zone,
                   extend_info, define_json,
                   status, result_json):
+        '''
+
+        :param rid:
+        :param name:
+        :param vpc:
+        :param provider:
+        :param provider_id:
+        :param region:
+        :param zone:
+        :param extend_info:
+        :param define_json:
+        :param status:
+        :param result_json:
+        :return:
+        '''
 
         self.resource_object.create(create_data={"id": rid, "provider": provider,
                                                  "region": region, "zone": zone,
@@ -38,6 +50,13 @@ class SecGroupApi(ApiBase):
                                                  "result_json": json.dumps(result_json)})
 
     def before_keys_checks(self, provider, vpc_id):
+        '''
+
+        :param provider:
+        :param vpc_id:
+        :return:
+        '''
+
         self.resource_info(provider)
         resource_property = self.resource_keys_config["resource_property"]
         _vpc_status = define_relations_key("vpc_id", vpc_id, resource_property.get("vpc_id"))
@@ -46,34 +65,38 @@ class SecGroupApi(ApiBase):
         if vpc_id and (not _vpc_status):
             ext_info["vpc_id"] = VpcObject().vpc_resource_id(vpc_id)
 
+        logger.info("before_keys_checks add info: %s" %(format_json_dumps(ext_info)))
         return ext_info
 
     def create(self, rid, name, provider_id, vpc_id,
-               zone, region, extend_info, **kwargs):
+               zone, region, extend_info):
         '''
 
         :param rid:
         :param name:
-        :param cidr:
         :param provider_id:
+        :param vpc_id:
+        :param zone:
+        :param region:
         :param extend_info:
-        :param kwargs:
         :return:
         '''
-
+        extend_info = extend_info or {}
+        create_data = {"name": name}
+        label_name = self.resource_name + "_" + rid
 
         provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
-
         # todo  处理不同云厂商 的 定义  例如 vpc
         _relations_id_dict = self.before_keys_checks(provider_object["name"], vpc_id)
 
-        create_data = {"name": name}
         create_data.update(_relations_id_dict)
+        define_json = self._generate_resource(provider_object["name"],
+                                              label_name=label_name,
+                                              data=create_data, extend_info=extend_info)
 
-        define_json = self._generate_resource(provider_object["name"], rid,
-                                          data=create_data, extend_info=extend_info)
-
+        output_json = self._generate_output(label_name=label_name)
         define_json.update(provider_info)
+        define_json.update(output_json)
 
         _path = self.create_workpath(rid,
                                      provider=provider_object["name"],
@@ -93,12 +116,13 @@ class SecGroupApi(ApiBase):
 
         result = self.formate_result(result)
         logger.info(format_json_dumps(result))
-        resource_id = self._fetch_id(result)
 
-        _update_data = {"status": "ok",
-                        "resource_id": resource_id,
-                        "result_json": format_json_dumps(result)}
+        _update_data = {"status": "ok", "result_json": format_json_dumps(result)}
         _update_data.update(self._read_output_result(result))
+
+        if not _update_data.get("resource_id"):
+            _update_data["resource_id"] = self._fetch_id(result)
+
         self.update_data(rid, data=_update_data)
 
         return rid
