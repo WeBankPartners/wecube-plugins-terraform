@@ -27,7 +27,7 @@ class DiskController(BackendController):
         '''
 
         validation.allowed_key(data, ["id", "provider", "region", 'resource_id',
-                                      "provider_id", "name", "enabled"])
+                                      "provider_id", "name", "zone", "type", "enabled"])
         return self.resource.resource_object.list(filters=data, page=page,
                                                   pagesize=pagesize, orderby=orderby)
 
@@ -65,7 +65,7 @@ class DiskController(BackendController):
 
 
 class DiskIdController(BackendIdController):
-    allow_methods = ('GET', 'DELETE', 'PATCH')
+    allow_methods = ('GET', 'DELETE')
     resource = DiskApi()
 
     def show(self, request, data, **kwargs):
@@ -119,7 +119,6 @@ class DiskAddController(BaseController):
                                       zone, region, extend_info=data)
 
         return {"result": result}
-
 
 class DiskDeleteController(BaseController):
     name = "Disk"

@@ -12,62 +12,51 @@ from apps.common.convert_keys import convert_value
 from apps.api.configer.provider import ProviderApi
 from apps.api.configer.resource import ResourceObject
 from apps.api.configer.value_config import ValueConfigObject
+from apps.api.apibase import ApiBase
 from apps.background.lib.commander.terraform import TerraformDriver
 from apps.background.lib.drivers.terraform_operate import TerraformResource
 from apps.background.resource.storage.disk import DiskObject
 
 
-class DiskApi(TerraformResource):
+class DiskApi(ApiBase):
     def __init__(self):
         super(DiskApi, self).__init__()
         self.resource_name = "disk"
         self.resource_workspace = "disk"
         self.resource_object = DiskObject()
+        self.resource_keys_config = None
 
-    def resource_info(self, provider):
-        resource_config = ResourceObject().query_one(where_data={"provider": provider,
-                                                                 "resource_name": self.resource_name})
-        if not resource_config:
-            raise local_exceptions.ResourceConfigError("%s 资源未初始化完成配置" % self.resource_name)
+    def before_keys_checks(self, provider):
+        '''
 
-        return resource_config
+        :param provider:
+        :param vpc_id:
+        :return:
+        '''
 
-    def values_config(self, provider):
-        return ValueConfigObject().resource_value_configs(provider, self.resource_name)
-
-    def _generate_resource(self, provider, name, data):
-        resource_keys_config = self.resource_info(provider)
-        resource_values_config = self.values_config(provider)
-
-        resource_name = resource_keys_config["resource_name"]
-        resource_property = resource_keys_config["resource_property"]
-
-        resource_columns = {}
-        for key, value in data.items():
-            if resource_values_config.get(key):
-                value = convert_value(value, resource_values_config.get(key))
-
-            resource_columns[key] = value
-
-        resource_columns = convert_keys(resource_columns, defines=resource_property)
-
-        _info = {
-            "resource": {
-                resource_name: {
-                    name: resource_columns
-                }
-            }
-        }
-        logger.info(format_json_dumps(_info))
-        return _info
-
-    def formate_result(self, result):
-        return result
+        self.resource_info(provider)
+        return {}
 
     def save_data(self, rid, name, type, size,
                   provider, provider_id, region, zone,
                   extend_info, define_json,
                   status, result_json):
+        '''
+
+        :param rid:
+        :param name:
+        :param type:
+        :param size:
+        :param provider:
+        :param provider_id:
+        :param region:
+        :param zone:
+        :param extend_info:
+        :param define_json:
+        :param status:
+        :param result_json:
+        :return:
+        '''
 
         self.resource_object.create(create_data={"id": rid, "provider": provider,
                                                  "region": region, "zone": zone,
@@ -78,44 +67,41 @@ class DiskApi(TerraformResource):
                                                  "define_json": json.dumps(define_json),
                                                  "result_json": json.dumps(result_json)})
 
-    def update_data(self, rid, data):
-        return self.resource_object.update(rid, data)
-
-    def _fetch_id(self, result):
-        try:
-            _data = result.get("resources")[0]
-            _instances = _data.get("instances")[0]
-            _attributes = _instances.get("attributes")
-            return _attributes["id"]
-        except:
-            logger.info(traceback.format_exc())
-            raise ValueError("result can not fetch id")
-
     def create(self, rid, name, provider_id, type, size,
-               zone, region, extend_info, **kwargs):
+               zone, region, extend_info):
+
         '''
 
         :param rid:
         :param name:
-        :param cidr:
         :param provider_id:
+        :param type:
+        :param size:
+        :param zone:
+        :param region:
         :param extend_info:
-        :param kwargs:
         :return:
         '''
 
+        extend_info = extend_info or {}
+        create_data = {"name": name, "type": type, "size": size, "zone": zone}
+        label_name = self.resource_name + "_" + rid
+
         provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
+        _relations_id_dict = self.before_keys_checks(provider_object["name"])
+
+        create_data.update(_relations_id_dict)
+        define_json = self._generate_resource(provider_object["name"],
+                                              label_name=label_name,
+                                              data=create_data, extend_info=extend_info)
+
+        output_json = self._generate_output(label_name=label_name)
+        define_json.update(provider_info)
+        define_json.update(output_json)
+
         _path = self.create_workpath(rid,
                                      provider=provider_object["name"],
                                      region=region)
-
-        create_data = {"name": name, "type": type, "size": size, "zone": zone}
-
-        create_data.update(extend_info)
-        create_data.update(kwargs)
-
-        define_json = self._generate_resource(provider_object["name"], name, data=create_data)
-        define_json.update(provider_info)
 
         self.save_data(rid, name=name,
                        provider=provider_object["name"],
@@ -131,22 +117,37 @@ class DiskApi(TerraformResource):
 
         result = self.formate_result(result)
         logger.info(format_json_dumps(result))
-        resource_id = self._fetch_id(result)
-        self.update_data(rid, data={"status": "ok",
-                                    "resource_id": resource_id,
-                                    "result_json": format_json_dumps(result)})
+
+        _update_data = {"status": "ok", "result_json": format_json_dumps(result)}
+        _update_data.update(self._read_output_result(result))
+
+        if not _update_data.get("resource_id"):
+            _update_data["resource_id"] = self._fetch_id(result)
+
+        self.update_data(rid, data=_update_data)
 
         return rid
 
     def destory(self, rid):
+        '''
+
+        :param rid:
+        :return:
+        '''
+
+        # todo 校验disk 没有attach到主机/没有被使用
         resource_info = self.resource_object.show(rid)
         _path = self.create_workpath(rid,
                                      provider=resource_info["provider"],
                                      region=resource_info["region"])
 
-        status = TerraformDriver().destroy(dir_path=_path)
-        if not status:
+        if not self.destory_ensure_file(rid, path=_path):
             self.write_define(rid, _path, define_json=resource_info["define_json"])
-            TerraformDriver().destroy(dir_path=_path)
+
+        status = self.run_destory(_path)
+        if not status:
+            raise local_exceptions.ResourceOperateException(self.resource_name,
+                                                            msg="delete %s %s failed" % (self.resource_name, rid))
 
         return self.resource_object.delete(rid)
+
