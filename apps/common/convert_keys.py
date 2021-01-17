@@ -31,7 +31,7 @@ def validate_convert_value(defines):
                 raise ValueError("未知的类型约束 %s" % define.get("type"))
 
 
-def _validate_type(value, type):
+def validate_type(value, type):
     '''
 
     :param value:
@@ -102,7 +102,7 @@ def convert_key(key, value, define):
         if not value:
             value = define.get("default") or value
         else:
-            value = _validate_type(value, type=define.get("type", "string"))
+            value = validate_type(value, type=define.get("type", "string"))
 
         if define.get("convert"):
             key = define.get("convert") or key
@@ -156,7 +156,7 @@ def convert_value(value, define):
         value = define or value
     elif isinstance(define, dict):
         value = define.get("value", value) or value
-        value = _validate_type(value, define.get("type", "string"))
+        value = validate_type(value, define.get("type", "string"))
     else:
         raise ValueError("转换配置错误， 类型错误")
 
@@ -178,7 +178,7 @@ def convert_values(data, define):
     return res
 
 
-def convert_extend_propertys(datas, extend_info):
+def convert_extend_propertys(datas, extend_info, is_update=False):
     '''
 
     :param datas:
@@ -197,6 +197,21 @@ def convert_extend_propertys(datas, extend_info):
 
     ora_ext_info = {}
     allowed_key(datas.keys(), extend_info.keys())
+
+    if is_update:
+        for key, define in extend_info.items():
+            if isinstance(define, (int, basestring, int, float, bool)):
+                if key in datas.keys():
+                    ora_ext_info[key] = define
+            elif isinstance(define, dict):
+                if define.get("value") is not None:
+                    if key in datas.keys():
+                        ora_ext_info[key] = datas.get(key)
+                if define.get("type") is not None and (key in datas.keys()):
+                    validate_type(datas.get(key), type=define.get("type", "string"))
+
+        return ora_ext_info
+
     for key, define in extend_info.items():
         if isinstance(define, (int, basestring, int, float, bool)):
             ora_ext_info[key] = define
@@ -204,7 +219,7 @@ def convert_extend_propertys(datas, extend_info):
             if define.get("value") is not None:
                 ora_ext_info[key] = define.get("value")
             if define.get("type") is not None and (key in datas.keys()):
-                _validate_type(datas.get(key), type=define.get("type", "string"))
+                validate_type(datas.get(key), type=define.get("type", "string"))
 
     ora_ext_info.update(datas)
     return ora_ext_info
@@ -272,7 +287,7 @@ def output_values(defines, result):
     return res
 
 
-def  read_output(key, define, result):
+def read_output(key, define, result):
     '''
 
     :param key:

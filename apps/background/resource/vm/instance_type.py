@@ -58,5 +58,5 @@ class InstanceTypeObject(object):
         data = self.resource.get(filters={"provider_id": provider_id,
                                           "name": name})
         if not data:
-            raise local_exceptions.ValueValidateError("instance type name", "instance type name %s 不存在" % rid)
+            raise local_exceptions.ValueValidateError("instance type name", "instance type name %s 不存在" % name)
         return data["origin_name"], data

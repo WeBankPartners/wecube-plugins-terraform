@@ -39,7 +39,8 @@ class InstanceController(BackendController):
     def before_handler(self, request, data, **kwargs):
         validation.allowed_key(data, ["id", "name", "provider_id", "subnet_id",
                                       "hostname", "image", "instance_type",
-                                      "disk_type", "disk_size",
+                                      "disk_type", "disk_size", "password",
+                                      "security_group_id", "vpc_id", "data_disks",
                                       "zone", "region", "extend_info"])
         validation.not_allowed_null(data=data,
                                     keys=["region", "provider_id", "zone", "name",
@@ -57,6 +58,10 @@ class InstanceController(BackendController):
         validation.validate_string("disk_type", data.get("disk_type"))
         validation.validate_int("disk_size", data.get("disk_size"))
         validation.validate_string("provider_id", data.get("provider_id"))
+        validation.validate_string("password", data.get("password"))
+        validation.validate_list("security_group_id", data.get("security_group_id"))
+        validation.validate_string("vpc_id", data.get("vpc_id"))
+        validation.validate_dict("data_disks", data.get("data_disks"))
         validation.validate_dict("extend_info", data.get("extend_info"))
 
     def create(self, request, data, **kwargs):
@@ -69,14 +74,21 @@ class InstanceController(BackendController):
         image = data.pop("image", None)
         disk_type = data.pop("disk_type")
         disk_size = data.pop("disk_size", 40)
-        instance_type = data.pop("instance_type")
+        instance_type = data.pop("instance_type", None)
         provider_id = data.pop("provider_id", None)
+        password = data.pop("password", None)
+        vpc_id = data.pop("vpc_id", None)
+        security_group_id = validation.validate_list("security_group_id", data.get("security_group_id"))
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
+        data_disks = validation.validate_dict("data_disks", data.pop("data_disks", None))
 
         data.update(extend_info)
         result = self.resource.create(rid, name=name, provider_id=provider_id,
                                       hostname=hostname, image=image,
                                       instance_type=instance_type,
+                                      password=password, vpc_id=vpc_id,
+                                      security_group_id=security_group_id,
+                                      data_disks=data_disks,
                                       disk_type=disk_type, disk_size=disk_size,
                                       subnet_id=subnet_id, zone=zone,
                                       region=region, extend_info=data)
@@ -108,10 +120,11 @@ class InstanceIdController(BackendIdController):
         if not data:
             raise ValueError("没有需要更新的配置")
 
-        validation.allowed_key(data, ["name", "instance_type", "image", "extend_info"])
+        validation.allowed_key(data, ["name", "instance_type", "image", "extend_info", "security_group_id"])
         validation.validate_string("name", data.get("name"))
         validation.validate_string("instance_type", data.get("instance_type"))
         validation.validate_string("image", data.get("image"))
+        validation.validate_list("security_group_id", data.get("security_group_id"))
         validation.validate_dict("extend_info", data.get("extend_info"))
 
     def update(self, request, data, **kwargs):
@@ -119,9 +132,10 @@ class InstanceIdController(BackendIdController):
         name = data.pop("name", None)
         instance_type = data.pop("instance_tpe")
         image = data.pop("image")
+        security_group_id = validation.validate_list("security_group_id", data.get("security_group_id"))
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
-        return self.resource.update(rid, name, instance_type, image, extend_info)
+        return self.resource.update(rid, name, instance_type, image, security_group_id, extend_info)
 
 
 class InstanceActionController(BackendController):
@@ -152,10 +166,6 @@ class InstanceAddController(BaseController):
     resource = InstanceApi()
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["id", "name", "provider_id", "subnet_id",
-                                      "hostname", "image", "instance_type",
-                                      "disk_type", "disk_size",
-                                      "zone", "region", "extend_info"])
         validation.not_allowed_null(data=data,
                                     keys=["region", "provider_id", "zone", "name",
                                           "hostname", "subnet_id", "image", "instance_type"]
@@ -172,7 +182,10 @@ class InstanceAddController(BaseController):
         validation.validate_string("disk_type", data.get("disk_type"))
         validation.validate_int("disk_size", data.get("disk_size"))
         validation.validate_string("provider_id", data.get("provider_id"))
-        validation.validate_dict("extend_info", data.get("extend_info"))
+        validation.validate_string("password", data.get("password"))
+        validation.validate_list("security_group_id", data.get("security_group_id"))
+        validation.validate_string("vpc_id", data.get("vpc_id"))
+        validation.validate_dict("data_disks", data.get("data_disks"))
 
     def response_templete(self, data):
         return {}
@@ -187,14 +200,19 @@ class InstanceAddController(BaseController):
         image = data.pop("image", None)
         disk_type = data.pop("disk_type")
         disk_size = data.pop("disk_size", 40)
-        instance_type = data.pop("instance_type")
+        instance_type = data.pop("instance_type", None)
         provider_id = data.pop("provider_id", None)
-        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
+        password = data.pop("password", None)
+        vpc_id = data.pop("vpc_id", None)
+        security_group_id = validation.validate_list("security_group_id", data.get("security_group_id"))
+        data_disks = validation.validate_dict("data_disks", data.pop("data_disks", None))
 
-        data.update(extend_info)
         result = self.resource.create(rid, name=name, provider_id=provider_id,
                                       hostname=hostname, image=image,
                                       instance_type=instance_type,
+                                      password=password, vpc_id=vpc_id,
+                                      security_group_id=security_group_id,
+                                      data_disks=data_disks,
                                       disk_type=disk_type, disk_size=disk_size,
                                       subnet_id=subnet_id, zone=zone,
                                       region=region, extend_info=data)
@@ -223,3 +241,65 @@ class InstanceDeleteController(BaseController):
         force_delete = data.get("force_delete", False)
         result = self.resource.destory(rid, force_delete=force_delete)
         return {"result": result}
+
+
+class InstanceUpdateController(BaseController):
+    allow_methods = ('POST',)
+    resource = InstanceApi()
+
+    def before_handler(self, request, data, **kwargs):
+        if not data:
+            raise ValueError("没有需要更新的配置")
+
+        validation.allowed_key(data, ["name", "instance_type", "image", "extend_info", "security_group_id"])
+        validation.validate_string("name", data.get("name"))
+        validation.validate_string("instance_type", data.get("instance_type"))
+        validation.validate_string("image", data.get("image"))
+        validation.validate_list("security_group_id", data.get("security_group_id"))
+        validation.validate_dict("extend_info", data.get("extend_info"))
+
+    def response_templete(self, data):
+        return {}
+
+    def main_response(self, request, data, **kwargs):
+        rid = kwargs.pop("rid", None)
+        name = data.pop("name", None)
+        instance_type = data.pop("instance_tpe")
+        image = data.pop("image")
+        security_group_id = validation.validate_list("security_group_id", data.get("security_group_id"))
+        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
+
+        count, result = self.resource.update(rid, name, instance_type, image, security_group_id, extend_info)
+
+        result.update({"result": count})
+        return result
+
+
+class InstanceStartController(BaseController):
+    allow_methods = ('POST',)
+    resource = InstanceApi()
+
+    def before_handler(self, request, data, **kwargs):
+        validation.allowed_key(data, ["action"])
+        validation.not_allowed_null(data=data,
+                                    keys=["action"]
+                                    )
+
+        validation.validate_string("action", data["action"])
+
+    def response_templete(self, data):
+        return {}
+
+    def main_response(self, request, data, **kwargs):
+        rid = data.pop("id", None)
+
+        action = data.get("action", None)
+        if action.lower() == "start":
+            count, result = self.resource.start(rid)
+        elif action.lower == "stop":
+            count, result = self.resource.stop(rid)
+        else:
+            raise local_exceptions.ValueValidateError("action", "VM 开关机操作，请使用合法值 start/stop")
+
+        result.update({"result": count})
+        return result

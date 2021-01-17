@@ -73,6 +73,10 @@ resouce_property_models = {
     "instance": [
         "name",
         "hostname",
+        "password",
+        "vpc_id",
+        "security_group_id",
+        "data_disks",
         "instance_type",
         "disk_type",
         "disk_size",
@@ -236,7 +240,8 @@ output_property_models = {
     ],
     "instance": [
         "resource_id",
-        "ipaddress"
+        "ipaddress",
+        "public_ip"
     ],
     "mysql": [
         "resource_id",
