@@ -157,7 +157,7 @@ class ApiBase(TerraformResource):
             _data = result.get("resources")[0]
             _instances = _data.get("instances")[0]
             _attributes = _instances.get("attributes")
-            return _attributes["id"]
+            return _attributes.get("id") or "0000000"
         except:
             logger.info(traceback.format_exc())
             raise ValueError("result can not fetch id")
