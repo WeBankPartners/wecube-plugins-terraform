@@ -1,6 +1,11 @@
 # _ coding:utf-8 _*_
 
 from django.conf.urls import include, url
+
+import nat_controller
+import eip_controller
+import eip_association_controller
+
 from vpc_controller import VPCController
 from vpc_controller import VPCAddController
 from vpc_controller import VPCIdController
@@ -61,4 +66,19 @@ urlpatterns = [
     url(r'^security_group_rule/(?P<rid>[\w-]+)$', SecGroupRuleIdController()),
     url(r'^backend/security_group_rule/create$', SecGroupRuleAddController()),
     url(r'^backend/security_group_rule/delete$', SecGroupRuleDeleteController()),
+
+    url(r'^nat$', nat_controller.NatGatewayController()),
+    url(r'^nat/(?P<rid>[\w-]+)$', nat_controller.NatGatewayIdController()),
+    url(r'^backend/nat/create$', nat_controller.NatGatewayAddController()),
+    url(r'^backend/nat/delete$', nat_controller.NatGatewayDeleteController()),
+
+    url(r'^eip$', eip_controller.EipController()),
+    url(r'^eip/(?P<rid>[\w-]+)$', eip_controller.EipIdController()),
+    url(r'^backend/eip/create$', eip_controller.EipAddController()),
+    url(r'^backend/eip/delete$', eip_controller.EipDeleteController()),
+
+    url(r'^eip_association$', eip_association_controller.EipAssociationController()),
+    url(r'^eip_association/(?P<rid>[\w-]+)$', eip_association_controller.EipAssociationIdController()),
+    url(r'^backend/eip_association/create$', eip_association_controller.EipAssociationAddController()),
+    url(r'^backend/eip_association/delete$', eip_association_controller.EipAssociationIdController()),
 ]
