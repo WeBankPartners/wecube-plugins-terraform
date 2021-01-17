@@ -27,7 +27,7 @@ class DiskAttachController(BackendController):
         '''
 
         validation.allowed_key(data, ["id", "provider", "region", 'resource_id',
-                                      "provider_id", "disk", "instance", "enabled"])
+                                      "provider_id", "disk_id", "instance_id", "enabled"])
         return self.resource.resource_object.list(filters=data, page=page,
                                                   pagesize=pagesize, orderby=orderby)
 
@@ -59,7 +59,7 @@ class DiskAttachController(BackendController):
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         data.update(extend_info)
-        result = self.resource.create(rid, name=name, provider_id=provider_id,
+        result = self.resource.attach(rid, name=name, provider_id=provider_id,
                                       disk_id=disk_id, instance_id=instance_id,
                                       zone=zone, region=region, extend_info=data)
         return 1, result
@@ -83,7 +83,7 @@ class DiskAttachIdController(BackendIdController):
 
     def delete(self, request, data, **kwargs):
         rid = kwargs.pop("rid", None)
-        return self.resource.destory(rid)
+        return self.resource.detach(rid)
 
 
 class DiskAttachAddController(BaseController):
@@ -91,8 +91,6 @@ class DiskAttachAddController(BaseController):
     resource = DiskAttachApi()
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["id", "name", "provider_id", "disk_id", "instance_id",
-                                      "zone", "region", "extend_info"])
         validation.not_allowed_null(data=data,
                                     keys=["region", "provider_id", "zone",
                                           "disk_id", "instance_id", "name"]
@@ -105,7 +103,6 @@ class DiskAttachAddController(BaseController):
         validation.validate_string("disk_id", data["disk_id"])
         validation.validate_int("instance_id", data.get("instance_id"))
         validation.validate_string("provider_id", data.get("provider_id"))
-        validation.validate_dict("extend_info", data.get("extend_info"))
 
     def response_templete(self, data):
         return {}
@@ -118,19 +115,17 @@ class DiskAttachAddController(BaseController):
         disk_id = data.pop("disk_id", None)
         instance_id = data.pop("instance_id", None)
         provider_id = data.pop("provider_id", None)
-        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
-        data.update(extend_info)
-        result = self.resource.create(rid, name=name, provider_id=provider_id,
+        result = self.resource.attach(rid, name=name, provider_id=provider_id,
                                       disk_id=disk_id, instance_id=instance_id,
                                       zone=zone, region=region, extend_info=data)
 
         return {"result": result}
 
 
-class DiskAttachDeleteController(BaseController):
-    name = "DiskAttach"
-    resource_describe = "DiskAttach"
+class DiskDetachController(BaseController):
+    name = "DiskDetach"
+    resource_describe = "DiskDetach"
     allow_methods = ("POST",)
     resource = DiskAttachApi()
 
@@ -146,5 +141,5 @@ class DiskAttachDeleteController(BaseController):
 
     def main_response(self, request, data, **kwargs):
         rid = data.pop("id", None)
-        result = self.resource.destory(rid)
+        result = self.resource.detach(rid)
         return {"result": result}
