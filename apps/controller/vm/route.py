@@ -3,6 +3,8 @@
 from django.conf.urls import include, url
 import instance_controller
 import instance_type_controller
+import eni_controller
+import eni_attach_controller
 
 urlpatterns = [
     url(r'^instance$', instance_controller.InstanceController()),
@@ -15,4 +17,15 @@ urlpatterns = [
 
     url(r'^instance_type$', instance_type_controller.InstanceTypeController()),
     url(r'^instance_type/(?P<rid>[\w-]+)$', instance_type_controller.InstanceTypeIdController()),
+
+    url(r'^network_interface$', eni_controller.EniController()),
+    url(r'^network_interface/(?P<rid>[\w-]+)$', eni_controller.EniIdController()),
+    url(r'^backend/network_interface/create$', eni_controller.EniAddController()),
+    url(r'^backend/network_interface/delete$', eni_controller.EniDeleteController()),
+
+    url(r'^network_interface_attach$', eni_attach_controller.EniAttachController()),
+    url(r'^network_interface_attach/(?P<rid>[\w-]+)$', eni_attach_controller.EniAttachIdController()),
+    url(r'^backend/network_interface/attach$', eni_attach_controller.EniAttachAddController()),
+    url(r'^backend/network_interface/detach$', eni_attach_controller.EniDetachController()),
+
 ]

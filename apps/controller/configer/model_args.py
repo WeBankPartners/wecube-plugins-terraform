@@ -70,6 +70,17 @@ resouce_property_models = {
         "disk_id",
         "instance_id"
     ],
+    "network_interface": [
+        "name",
+        "ipaddress",
+        "vpc_id",
+        "subnet_id",
+        "security_group_id"
+    ],
+    "network_interface_attach": [
+        "network_interface_id",
+        "instance_id"
+    ],
     "instance": [
         "name",
         "hostname",
@@ -244,6 +255,13 @@ output_property_models = {
         "resource_id"
     ],
     "disk_attach": [
+        "resource_id"
+    ],
+    "network_interface": [
+        "resource_id",
+        "ipaddress"
+    ],
+    "network_interface_attach": [
         "resource_id"
     ],
     "instance": [

@@ -710,6 +710,92 @@ class DiskAttach(Base):
         self.zone = data.get("zone")
 
 
+
+class NetworkInterface(Base):
+    __tablename__ = "network_interface"
+
+    id = Column(String(36), primary_key=True)
+    provider_id = Column(String(36))
+    provider = Column(String(32), nullable=False)
+    region = Column(String(64))
+    zone = Column(String(64))
+    resource_id = Column(String(64))
+    name = Column(String(64))
+    subnet_id = Column(String(36))
+    ipaddress = Column(String(36))
+    type = Column(String(36))
+    extend_info = Column(String(512))
+    define_json = Column(String(512))
+    status = Column(String(36))
+    result_json = Column(String(5120))
+    created_time = Column(DateTime)
+    updated_time = Column(DateTime)
+    deleted_time = Column(DateTime)
+    enabled = Column(TINYINT(1), server_default=text("'1'"))
+    is_deleted = Column(TINYINT(1), server_default=text("'0'"))
+
+    def __init__(self, data):
+        self.created_time = datetime.datetime.now()
+        self.define_json = data.get("define_json") or '{}'
+        self.deleted_time = data.get("deleted_time")
+        self.enabled = data.get("enabled")
+        self.extend_info = data.get("extend_info") or '{}'
+        self.id = data.get("id")
+        self.is_deleted = data.get("is_deleted")
+        self.name = data.get("name")
+        self.provider = data.get("provider")
+        self.provider_id = data.get("provider_id")
+        self.region = data.get("region")
+        self.resource_id = data.get("resource_id")
+        self.result_json = data.get("result_json") or '{}'
+        self.subnet_id = data.get("subnet_id")
+        self.status = data.get("status")
+        self.ipaddress = data.get("ipaddress")
+        self.updated_time = data.get("updated_time")
+        self.zone = data.get("zone")
+
+
+class NetworkInterfaceAttach(Base):
+    __tablename__ = "network_interface_attach"
+
+    id = Column(String(36), primary_key=True)
+    provider_id = Column(String(36))
+    provider = Column(String(32), nullable=False)
+    region = Column(String(64))
+    zone = Column(String(64))
+    resource_id = Column(String(64))
+    network_interface_id = Column(String(64))
+    instance_id = Column(String(36))
+    extend_info = Column(String(512))
+    define_json = Column(String(512))
+    status = Column(String(36))
+    result_json = Column(String(5120))
+    created_time = Column(DateTime)
+    updated_time = Column(DateTime)
+    deleted_time = Column(DateTime)
+    enabled = Column(TINYINT(1), server_default=text("'1'"))
+    is_deleted = Column(TINYINT(1), server_default=text("'0'"))
+
+    def __init__(self, data):
+        self.created_time = datetime.datetime.now()
+        self.define_json = data.get("define_json") or '{}'
+        self.deleted_time = data.get("deleted_time")
+        self.enabled = data.get("enabled")
+        self.extend_info = data.get("extend_info") or '{}'
+        self.id = data.get("id")
+        self.is_deleted = data.get("is_deleted")
+        self.network_interface_id = data.get("network_interface_id")
+        self.provider = data.get("provider")
+        self.provider_id = data.get("provider_id")
+        self.region = data.get("region")
+        self.resource_id = data.get("resource_id")
+        self.result_json = data.get("result_json") or '{}'
+        self.instance_id = data.get("instance_id")
+        self.status = data.get("status")
+        self.updated_time = data.get("updated_time")
+        self.zone = data.get("zone")
+
+
 class InstanceType(Base):
     __tablename__ = "instance_type"
 

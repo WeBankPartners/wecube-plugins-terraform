@@ -72,6 +72,14 @@ class DiskAttachManager(_BaseManager):
     obj = model.DiskAttach
 
 
+class NetworkInterfaceManager(_BaseManager):
+    obj = model.NetworkInterface
+
+
+class NetworkInterfaceAttachManager(_BaseManager):
+    obj = model.NetworkInterfaceAttach
+
+
 class InstanceTypeManager(_BaseManager):
     obj = model.InstanceType
 
