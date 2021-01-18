@@ -7,12 +7,12 @@ from core.controller import BackendController
 from core.controller import BackendIdController
 from core.controller import BaseController
 from lib.uuid_util import get_uuid
-from apps.api.storage.object_storage import ObjectStorageApi
+from apps.api.storage.bucket_object import BucketObjectApi
 
 
-class ObjectStorageController(BackendController):
+class BucketObjectController(BackendController):
     allow_methods = ('GET', 'POST')
-    resource = ObjectStorageApi()
+    resource = BucketObjectApi()
 
     def list(self, request, data, orderby=None, page=None, pagesize=None, **kwargs):
         '''
@@ -27,15 +27,16 @@ class ObjectStorageController(BackendController):
         '''
 
         validation.allowed_key(data, ["id", "provider", "region", 'resource_id',
-                                      "provider_id", "name", "url", "enabled"])
+                                      "provider_id", "bucket_id", "enabled"])
         return self.resource.resource_object.list(filters=data, page=page,
                                                   pagesize=pagesize, orderby=orderby)
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["id", "name", "provider_id", "acl", "appid",
+        validation.allowed_key(data, ["id", "name", "provider_id", "bucket_id",
+                                      "key", "content", "source",
                                       "zone", "region", "extend_info"])
         validation.not_allowed_null(data=data,
-                                    keys=["region", "provider_id", "name"]
+                                    keys=["region", "provider_id", "bucket_id"]
                                     )
 
         validation.validate_string("id", data.get("id"))
@@ -44,6 +45,8 @@ class ObjectStorageController(BackendController):
         validation.validate_string("zone", data.get("zone"))
         validation.validate_string("appid", data.get("appid"))
         validation.validate_string("acl", data.get("acl"))
+        validation.validate_string("content", data.get("content"))
+        validation.validate_string("source", data.get("source"))
         validation.validate_string("provider_id", data.get("provider_id"))
         validation.validate_dict("extend_info", data.get("extend_info"))
 
@@ -52,20 +55,27 @@ class ObjectStorageController(BackendController):
         name = data.pop("name", None)
         zone = data.pop("zone", None)
         region = data.pop("region", None)
-        acl = data.pop("acl", None)
-        appid = data.pop("appid", None)
+        bucket_id = data.pop("bucket_id", None)
+        key = data.pop("appid", None)
+        content = data.pop("content", None)
+        source = data.pop("source", None)
         provider_id = data.pop("provider_id", None)
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         data.update(extend_info)
-        result = self.resource.create(rid, name, provider_id, acl, appid,
+
+        if source is None and content is None:
+            raise ValueError("source 和 content 不能同时为null")
+
+        result = self.resource.create(rid, name, provider_id, bucket_id,
+                                      key, content, source,
                                       zone, region, extend_info=data)
         return 1, result
 
 
-class ObjectStorageIdController(BackendIdController):
+class BucketObjectIdController(BackendIdController):
     allow_methods = ('GET', 'DELETE')
-    resource = ObjectStorageApi()
+    resource = BucketObjectApi()
 
     def show(self, request, data, **kwargs):
         '''
@@ -84,13 +94,13 @@ class ObjectStorageIdController(BackendIdController):
         return self.resource.destory(rid)
 
 
-class ObjectStorageAddController(BaseController):
+class BucketObjectAddController(BaseController):
     allow_methods = ("POST",)
-    resource = ObjectStorageApi()
+    resource = BucketObjectApi()
 
     def before_handler(self, request, data, **kwargs):
         validation.not_allowed_null(data=data,
-                                    keys=["region", "provider_id", "name"]
+                                    keys=["region", "provider_id", "bucket_id"]
                                     )
 
         validation.validate_string("id", data.get("id"))
@@ -99,6 +109,8 @@ class ObjectStorageAddController(BaseController):
         validation.validate_string("zone", data.get("zone"))
         validation.validate_string("appid", data.get("appid"))
         validation.validate_string("acl", data.get("acl"))
+        validation.validate_string("content", data.get("content"))
+        validation.validate_string("source", data.get("source"))
         validation.validate_string("provider_id", data.get("provider_id"))
 
     def response_templete(self, data):
@@ -109,23 +121,29 @@ class ObjectStorageAddController(BaseController):
         name = data.pop("name", None)
         zone = data.pop("zone", None)
         region = data.pop("region", None)
-        acl = data.pop("acl", None)
-        appid = data.pop("appid", None)
+        bucket_id = data.pop("bucket_id", None)
+        key = data.pop("appid", None)
+        content = data.pop("content", None)
+        source = data.pop("source", None)
         provider_id = data.pop("provider_id", None)
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         data.update(extend_info)
-        result = self.resource.create(rid, name, provider_id, acl, appid,
-                                      zone, region, extend_info=data)
 
+        if source is None and content is None:
+            raise ValueError("source 和 content 不能同时为null")
+
+        result = self.resource.create(rid, name, provider_id, bucket_id,
+                                      key, content, source,
+                                      zone, region, extend_info=data)
         return {"result": result}
 
 
-class ObjectStorageDeleteController(BaseController):
-    name = "ObjectStorage"
-    resource_describe = "ObjectStorage"
+class BucketObjectDeleteController(BaseController):
+    name = "BucketObject"
+    resource_describe = "BucketObject"
     allow_methods = ("POST",)
-    resource = ObjectStorageApi()
+    resource = BucketObjectApi()
 
     def before_handler(self, request, data, **kwargs):
         validation.not_allowed_null(data=data,

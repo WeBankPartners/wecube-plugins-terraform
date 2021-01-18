@@ -80,6 +80,16 @@ resouce_property_models = {
         "network_interface_id",
         "instance_id"
     ],
+    "object_storage": [
+        "name",
+        "acl"
+    ],
+    "bucket_object": [
+        "key",
+        "context",
+        "source",
+        "bucket_id"
+    ],
     "instance": [
         "name",
         "hostname",
@@ -261,6 +271,13 @@ output_property_models = {
         "ipaddress"
     ],
     "network_interface_attach": [
+        "resource_id"
+    ],
+    "object_storage": [
+        "resource_id",
+        "url"
+    ],
+    "bucket_object": [
         "resource_id"
     ],
     "instance": [
