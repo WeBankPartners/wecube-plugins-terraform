@@ -80,6 +80,14 @@ class NetworkInterfaceAttachManager(_BaseManager):
     obj = model.NetworkInterfaceAttach
 
 
+class ObjectStorageManager(_BaseManager):
+    obj = model.ObjectStorage
+
+
+class BucketObjectManager(_BaseManager):
+    obj = model.BucketObject
+
+
 class InstanceTypeManager(_BaseManager):
     obj = model.InstanceType
 

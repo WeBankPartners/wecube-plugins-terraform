@@ -710,6 +710,89 @@ class DiskAttach(Base):
         self.zone = data.get("zone")
 
 
+class ObjectStorage(Base):
+    __tablename__ = "object_storage"
+
+    id = Column(String(36), primary_key=True)
+    provider_id = Column(String(36))
+    provider = Column(String(32), nullable=False)
+    region = Column(String(64))
+    zone = Column(String(64))
+    resource_id = Column(String(64))
+    name = Column(String(64))
+    acl = Column(String(36))
+    url = Column(String(128))
+    extend_info = Column(String(512))
+    define_json = Column(String(512))
+    status = Column(String(36))
+    result_json = Column(String(5120))
+    created_time = Column(DateTime)
+    updated_time = Column(DateTime)
+    deleted_time = Column(DateTime)
+    enabled = Column(TINYINT(1), server_default=text("'1'"))
+    is_deleted = Column(TINYINT(1), server_default=text("'0'"))
+
+    def __init__(self, data):
+        self.created_time = datetime.datetime.now()
+        self.define_json = data.get("define_json") or '{}'
+        self.deleted_time = data.get("deleted_time")
+        self.enabled = data.get("enabled")
+        self.extend_info = data.get("extend_info") or '{}'
+        self.id = data.get("id")
+        self.is_deleted = data.get("is_deleted")
+        self.name = data.get("name")
+        self.provider = data.get("provider")
+        self.provider_id = data.get("provider_id")
+        self.region = data.get("region")
+        self.resource_id = data.get("resource_id")
+        self.result_json = data.get("result_json") or '{}'
+        self.url = data.get("url")
+        self.status = data.get("status")
+        self.acl = data.get("acl")
+        self.updated_time = data.get("updated_time")
+        self.zone = data.get("zone")
+
+
+class BucketObject(Base):
+    __tablename__ = "bucket_object"
+
+    id = Column(String(36), primary_key=True)
+    provider_id = Column(String(36))
+    provider = Column(String(32), nullable=False)
+    region = Column(String(64))
+    zone = Column(String(64))
+    resource_id = Column(String(64))
+    bucket_id = Column(String(64))
+    key = Column(String(128))
+    extend_info = Column(String(512))
+    define_json = Column(String(512))
+    status = Column(String(36))
+    result_json = Column(String(5120))
+    created_time = Column(DateTime)
+    updated_time = Column(DateTime)
+    deleted_time = Column(DateTime)
+    enabled = Column(TINYINT(1), server_default=text("'1'"))
+    is_deleted = Column(TINYINT(1), server_default=text("'0'"))
+
+    def __init__(self, data):
+        self.created_time = datetime.datetime.now()
+        self.define_json = data.get("define_json") or '{}'
+        self.deleted_time = data.get("deleted_time")
+        self.enabled = data.get("enabled")
+        self.extend_info = data.get("extend_info") or '{}'
+        self.id = data.get("id")
+        self.is_deleted = data.get("is_deleted")
+        self.bucket_id = data.get("bucket_id")
+        self.provider = data.get("provider")
+        self.provider_id = data.get("provider_id")
+        self.region = data.get("region")
+        self.resource_id = data.get("resource_id")
+        self.result_json = data.get("result_json") or '{}'
+        self.key = data.get("key")
+        self.status = data.get("status")
+        self.updated_time = data.get("updated_time")
+        self.zone = data.get("zone")
+
 
 class NetworkInterface(Base):
     __tablename__ = "network_interface"

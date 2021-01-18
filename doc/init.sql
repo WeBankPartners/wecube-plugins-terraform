@@ -405,6 +405,53 @@ CREATE TABLE `disk_attach` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `object_storage`;
+
+CREATE TABLE `object_storage` (
+  `id` VARCHAR(36) NOT NULL,
+  `provider` VARCHAR(32) NOT NULL,
+  `region` VARCHAR(64) DEFAULT NULL,
+  `zone` VARCHAR(64) NOT NULL,
+  `resource_id` VARCHAR(64) DEFAULT NULL,
+  `name` VARCHAR(64) DEFAULT NULL,
+  `acl` VARCHAR(64) DEFAULT NULL,
+  `url` VARCHAR(128) DEFAULT NULL,
+  `extend_info` text DEFAULT NULL,
+  `define_json` text DEFAULT NULL,
+  `status` varchar(36) DEFAULT NULL,
+  `result_json` TEXT DEFAULT NULL,
+  `created_time` DATETIME DEFAULT NULL,
+  `updated_time` DATETIME DEFAULT NULL,
+  `deleted_time` DATETIME DEFAULT NULL,
+  `enabled` BOOL DEFAULT TRUE,
+  `is_deleted` BOOL DEFAULT FALSE,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
+
+
+DROP TABLE IF EXISTS `bucket_object`;
+
+CREATE TABLE `bucket_object` (
+  `id` VARCHAR(36) NOT NULL,
+  `provider` VARCHAR(32) NOT NULL,
+  `region` VARCHAR(64) DEFAULT NULL,
+  `zone` VARCHAR(64) NOT NULL,
+  `resource_id` VARCHAR(64) DEFAULT NULL,
+  `bucket_id` VARCHAR(64) DEFAULT NULL,
+  `key` VARCHAR(128) DEFAULT NULL,
+  `extend_info` text DEFAULT NULL,
+  `define_json` text DEFAULT NULL,
+  `status` varchar(36) DEFAULT NULL,
+  `result_json` TEXT DEFAULT NULL,
+  `created_time` DATETIME DEFAULT NULL,
+  `updated_time` DATETIME DEFAULT NULL,
+  `deleted_time` DATETIME DEFAULT NULL,
+  `enabled` BOOL DEFAULT TRUE,
+  `is_deleted` BOOL DEFAULT FALSE,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
+
+
 DROP TABLE IF EXISTS `vm_network_interface`;
 
 CREATE TABLE `vm_network_interface` (
