@@ -15,6 +15,7 @@ from apps.api.configer.provider import ProviderApi
 from apps.api.apibase import ApiBase
 from apps.background.resource.network.subnet import SubnetObject
 from apps.background.resource.database.rds import RdsDBObject
+from apps.background.resource.vm.instance_type import InstanceTypeObject
 
 
 class RdsDBApi(ApiBase):
@@ -46,7 +47,7 @@ class RdsDBApi(ApiBase):
 
     def save_data(self, rid, name, subnet_id,
                   version, instance_type, port,
-                  user, password,
+                  user, password, cpu, memory,
                   disk_type, disk_size,
                   provider, provider_id, region, zone,
                   extend_info, define_json,
@@ -86,6 +87,7 @@ class RdsDBApi(ApiBase):
                                                  "disk_type": disk_type, "disk_size": disk_size,
                                                  "subnet_id": subnet_id, "status": status,
                                                  "provider_id": provider_id,
+                                                 "cpu": cpu, "memory": memory,
                                                  "extend_info": json.dumps(extend_info),
                                                  "define_json": json.dumps(define_json),
                                                  "result_json": json.dumps(result_json)})
@@ -93,7 +95,7 @@ class RdsDBApi(ApiBase):
     def create(self, rid, name, provider_id, version,
                instance_type, subnet_id, port, password,
                user, disk_type, disk_size,
-               zone, region, extend_info):
+               zone, region, extend_info, **kwargs):
 
         '''
 
@@ -121,6 +123,11 @@ class RdsDBApi(ApiBase):
                        "disk_type": disk_type, "disk_size": disk_size}
         label_name = self.resource_name + "_" + rid
 
+        origin_type, instance_type_data = InstanceTypeObject().type_resource_id(provider_id, instance_type)
+        cpu = instance_type_data.get("cpu")
+        memory = instance_type_data.get("memory")
+
+        create_data["instance_type"] = origin_type
         provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
         _relations_id_dict = self.before_keys_checks(provider_object["name"], subnet_id)
 
@@ -146,6 +153,7 @@ class RdsDBApi(ApiBase):
                        port=port, password=password,
                        user=user, disk_type=disk_type,
                        disk_size=disk_size,
+                       cpu=cpu, memory=memory,
                        extend_info=extend_info,
                        define_json=define_json,
                        status="applying", result_json={})

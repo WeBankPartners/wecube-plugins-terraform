@@ -107,6 +107,8 @@ def validate_string(key, value, minlen=None, maxlen=None):
 
 
 def validate_list(key, value, minlen=None, maxlen=None):
+    if not value:
+        return []
     if not isinstance(value, list):
         raise ValueError("%s 不是合法类型list" % key)
     if minlen and len(value) < minlen:

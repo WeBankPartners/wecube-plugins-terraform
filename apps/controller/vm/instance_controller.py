@@ -78,7 +78,7 @@ class InstanceController(BackendController):
         provider_id = data.pop("provider_id", None)
         password = data.pop("password", None)
         vpc_id = data.pop("vpc_id", None)
-        security_group_id = validation.validate_list("security_group_id", data.get("security_group_id"))
+        security_group_id = validation.validate_list("security_group_id", data.pop("security_group_id", None))
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
         data_disks = validation.validate_dict("data_disks", data.pop("data_disks", None))
 
@@ -204,7 +204,7 @@ class InstanceAddController(BaseController):
         provider_id = data.pop("provider_id", None)
         password = data.pop("password", None)
         vpc_id = data.pop("vpc_id", None)
-        security_group_id = validation.validate_list("security_group_id", data.get("security_group_id"))
+        security_group_id = validation.validate_list("security_group_id", data.pop("security_group_id", None))
         data_disks = validation.validate_dict("data_disks", data.pop("data_disks", None))
 
         result = self.resource.create(rid, name=name, provider_id=provider_id,
@@ -266,7 +266,7 @@ class InstanceUpdateController(BaseController):
         name = data.pop("name", None)
         instance_type = data.pop("instance_tpe")
         image = data.pop("image")
-        security_group_id = validation.validate_list("security_group_id", data.get("security_group_id"))
+        security_group_id = validation.validate_list("security_group_id", data.pop("security_group_id", None))
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         count, result = self.resource.update(rid, name, instance_type, image, security_group_id, extend_info)

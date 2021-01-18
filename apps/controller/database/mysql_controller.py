@@ -40,10 +40,11 @@ class MysqlController(BackendController):
         validation.allowed_key(data, ["id", "name", "provider_id", "subnet_id",
                                       "user", "password", "port", "disk_type",
                                       "disk_size", "version", "instance_type",
+                                      "vpc_id", "security_group_id",
                                       "zone", "region", "extend_info"])
         validation.not_allowed_null(data=data,
                                     keys=["region", "provider_id", "zone", "name",
-                                          "version", "subnet_id",  "instance_type"]
+                                          "version", "subnet_id", "instance_type"]
                                     )
 
         validation.validate_string("id", data.get("id"))
@@ -56,6 +57,8 @@ class MysqlController(BackendController):
         validation.validate_string("password", data.get("password"))
         validation.validate_string("instance_type", data.get("instance_type"))
         validation.validate_string("disk_type", data.get("disk_type"))
+        validation.validate_list("security_group_id", data.get("security_group_id"))
+        validation.validate_string("vpc_id", data.get("vpc_id"))
         validation.validate_int("disk_size", data.get("disk_size"))
         validation.validate_string("provider_id", data.get("provider_id"))
         validation.validate_dict("extend_info", data.get("extend_info"))
@@ -74,6 +77,8 @@ class MysqlController(BackendController):
         disk_size = data.pop("disk_size", None)
         instance_type = data.pop("instance_type", None)
         provider_id = data.pop("provider_id", None)
+        vpc_id = data.pop("vpc_id", None)
+        security_group_id = validation.validate_list("security_group_id", data.pop("security_group_id", None))
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         data.update(extend_info)
@@ -82,6 +87,8 @@ class MysqlController(BackendController):
                                       version=version, port=port,
                                       password=password, user=user,
                                       instance_type=instance_type,
+                                      vpc_id=vpc_id,
+                                      security_group_id=security_group_id,
                                       disk_type=disk_type, disk_size=disk_size,
                                       subnet_id=subnet_id, zone=zone,
                                       region=region, extend_info=data)
@@ -130,6 +137,8 @@ class MysqlAddController(BaseController):
         validation.validate_string("password", data.get("password"))
         validation.validate_string("instance_type", data.get("instance_type"))
         validation.validate_string("disk_type", data.get("disk_type"))
+        validation.validate_list("security_group_id", data.get("security_group_id"))
+        validation.validate_string("vpc_id", data.get("vpc_id"))
         validation.validate_int("disk_size", data.get("disk_size"))
         validation.validate_string("provider_id", data.get("provider_id"))
 
@@ -150,11 +159,15 @@ class MysqlAddController(BaseController):
         disk_size = data.pop("disk_size", None)
         instance_type = data.pop("instance_type", None)
         provider_id = data.pop("provider_id", None)
+        vpc_id = data.pop("vpc_id", None)
+        security_group_id = validation.validate_list("security_group_id", data.pop("security_group_id", None))
 
         result = self.resource.create(rid, name=name, provider_id=provider_id,
                                       version=version, port=port,
                                       password=password, user=user,
                                       instance_type=instance_type,
+                                      vpc_id=vpc_id,
+                                      security_group_id=security_group_id,
                                       disk_type=disk_type, disk_size=disk_size,
                                       subnet_id=subnet_id, zone=zone,
                                       region=region, extend_info=data)
