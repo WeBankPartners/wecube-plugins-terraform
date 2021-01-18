@@ -180,9 +180,7 @@ class BackendResponse(object):
         raise NotImplementedError()
 
     def _is_platform(self, jwt_info):
-        if jwt_info.get("sub") != "SYS_PLATFORM":
-            raise exception_common.AllowedForbidden("AllowedForbidden")
-        if "SUB_SYSTEM" not in jwt_info.get("authority"):
+        if ("SUB_SYSTEM" not in jwt_info.get("authority")) and ("ADMIN_TERRAFORM_CONFIG" not in jwt_info.get("authority")):
             raise exception_common.AllowedForbidden("AllowedForbidden")
 
     def _request_response(self, request, **kwargs):
