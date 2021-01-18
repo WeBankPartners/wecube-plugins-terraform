@@ -58,16 +58,8 @@ class InstanceTypeController(BackendController):
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         data.update(extend_info)
-
-        create_data = {"id": rid,
-                       "name": name,
-                       "origin_name": origin_name,
-                       "cpu": cpu, "memory": memory,
-                       "network": network,
-                       "extend_info": json.dumps(extend_info),
-                       }
-
-        return self.resource.resource_object.create(create_data)
+        return self.resource.create(rid, name, provider_id, origin_name,
+                                    cpu, memory, network, extend_info=data)
 
 
 class InstanceTypeIdController(BackendIdController):
@@ -98,7 +90,7 @@ class InstanceTypeIdController(BackendIdController):
             extend_info = validation.validate_dict("extend_info", data.get("extend_info"))
             data["extend_info"] = json.dumps(extend_info)
 
-        return self.resource.resource_object.update(rid, data)
+        return self.resource.update(rid, data)
 
     def delete(self, request, data, **kwargs):
         rid = kwargs.pop("rid", None)
