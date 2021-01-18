@@ -7,7 +7,7 @@ import traceback
 
 from django.http import HttpResponse
 from django.http import HttpResponseNotAllowed
-
+from wecube_plugins_terraform.settings import DEBUG
 from core import local_exceptions as exception_common
 from core import validation
 from core.validation import validate_column_line
@@ -15,8 +15,7 @@ from lib.classtools import get_all_class_for_module
 from lib.json_helper import format_json_dumps
 from lib.logs import logger
 from lib.uuid_util import get_uuid
-
-# from .auth import jwt_request
+from .auth import jwt_request
 
 content_type = 'application/json,charset=utf-8'
 exception_common_classes = get_all_class_for_module(exception_common)
@@ -25,6 +24,7 @@ exception_common_classes = get_all_class_for_module(exception_common)
 class BackendResponse(object):
     allow_methods = tuple()
     requestId = ""
+    requestUser = "Unknown"
     resource = None
 
     def list(self, request, data, orderby=None, page=None, pagesize=None, **kwargs):
@@ -137,7 +137,8 @@ class BackendResponse(object):
             data = request.body if request.method.upper() in ['POST', 'PATCH'] else request.GET
             if isinstance(data, (dict, list)):
                 data = format_json_dumps(data)
-            logger.info("[%s] [RE] - %s %s %s " % (self.requestId, request.method.upper(), request.path, data))
+            logger.info("[%s] [RE] [%s]- %s %s %s " % (self.requestId, self.requestUser,
+                                                       request.method.upper(), request.path, data))
         except:
             logger.info(traceback.format_exc())
 
@@ -158,6 +159,11 @@ class BackendResponse(object):
             return HttpResponse(str(self.allow_methods))
         else:
             if request.method.upper() in self.allow_methods:
+                if not DEBUG:
+                    jwt_info = jwt_request(request)
+                    self._is_platform(jwt_info)
+                    self.requestUser = jwt_info.get("sub")
+
                 self.requestId = "req_%s" % get_uuid()
                 self._trace_req(request)
                 res = self._request_response(request, **kwargs)
@@ -173,9 +179,14 @@ class BackendResponse(object):
     def handler_http(self, request, **kwargs):
         raise NotImplementedError()
 
+    def _is_platform(self, jwt_info):
+        if jwt_info.get("sub") != "SYS_PLATFORM":
+            raise exception_common.AllowedForbidden("AllowedForbidden")
+        if "SUB_SYSTEM" not in jwt_info.get("authority"):
+            raise exception_common.AllowedForbidden("AllowedForbidden")
+
     def _request_response(self, request, **kwargs):
         try:
-            # jwt_request(request)
             res = HttpResponse(content=self.handler_http(request=request, **kwargs),
                                status=200,
                                content_type=content_type)
@@ -192,8 +203,9 @@ class BackendResponse(object):
             _traceres = res.content
 
         try:
-            logger.info("[%s] [RP] - %s %s %s" % (self.requestId, request.method.upper(),
-                                                  request.path, (str(res.status_code) + " data: %s " % _traceres)))
+            logger.info("[%s] [RP] [%s]- %s %s %s" % (self.requestId, self.requestUser,
+                                                      request.method.upper(),
+                                                      request.path, (str(res.status_code) + " data: %s " % _traceres)))
         except:
             logger.info(traceback.format_exc())
 

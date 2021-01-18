@@ -6,7 +6,7 @@ import traceback
 import jwt
 import local_exceptions
 from lib.logs import logger
-from wecube_plugins_terraform.settings import JWT_KEY
+from wecube_plugins_terraform.settings import JWT_KEY, DEBUG
 
 
 def b64decode_key(key):
@@ -22,7 +22,10 @@ def b64decode_key(key):
                 raise e
 
 
-jwt_key = b64decode_key(JWT_KEY)
+if not DEBUG:
+    jwt_key = b64decode_key(JWT_KEY)
+else:
+    jwt_key = ''
 
 
 def jwt_request(request):
@@ -30,7 +33,7 @@ def jwt_request(request):
     if _token:
         token = _token.split(" ")[1]
         try:
-            jwt.decode(token, jwt_key, verify=True)
+            return jwt.decode(token, jwt_key, verify=True)
         except Exception, e:
             logger.info(traceback.format_exc())
             raise local_exceptions.AuthExceptionError("认证失败")

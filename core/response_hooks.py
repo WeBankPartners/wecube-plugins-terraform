@@ -7,13 +7,14 @@ import json
 import traceback
 from django.http import HttpResponse
 from django.http import HttpResponseNotAllowed
+from wecube_plugins_terraform.settings import DEBUG
 from core import local_exceptions as exception_common
 from core.validation import validate_column_line
 from lib.classtools import get_all_class_for_module
 from lib.json_helper import format_json_dumps
 from lib.logs import logger
 from lib.uuid_util import get_uuid
-# from .auth import jwt_request
+from .auth import jwt_request
 
 content_type = 'application/json,charset=utf-8'
 exception_common_classes = get_all_class_for_module(exception_common)
@@ -34,6 +35,7 @@ class ResponseController(object):
     name = None
     allow_methods = tuple()
     requestId = ""
+    requestUser = "Unknown"
     resource = None
 
     def run_post(self, request, data, **kwargs):
@@ -150,7 +152,8 @@ class ResponseController(object):
             data = request.body if request.method.upper() in ['POST', 'PATCH'] else request.GET
             if isinstance(data, (dict, list)):
                 data = format_json_dumps(data)
-            logger.info("[%s] [RE] - %s %s %s " % (self.requestId, request.method.upper(), request.path, data))
+            logger.info("[%s] [RE] [%s]- %s %s %s " % (self.requestId, self.requestUser,
+                                                       request.method.upper(), request.path, data))
         except:
             logger.info(traceback.format_exc())
 
@@ -159,7 +162,8 @@ class ResponseController(object):
             if isinstance(msg, (dict, list)):
                 msg = format_json_dumps(msg)
 
-            logger.info("[%s] [RP] - %s %s %s" % (self.requestId, request.method.upper(), request.path, msg))
+            logger.info("[%s] [RP] [%s]- %s %s %s" % (self.requestId, self.requestUser,
+                                                      request.method.upper(), request.path, msg))
         except:
             logger.info(traceback.format_exc())
 
@@ -175,6 +179,10 @@ class ResponseController(object):
         elif e.__class__.__name__ in ['AuthFailedError']:
             status_code = 401
             errmsg = self.format_err(401, "UserAuthError", e)
+            response_res = HttpResponse(status=status_code, content=errmsg, content_type=content_type)
+        elif e.__class__.__name__ in ['AllowedForbidden']:
+            status_code = 403
+            errmsg = self.format_err(403, "AllowedForbidden", e)
             response_res = HttpResponse(status=status_code, content=errmsg, content_type=content_type)
         elif e.__class__.__name__ in exception_common_classes:
             errmsg = self.format_err(e.status_code, e.__class__.__name__, e)
@@ -206,9 +214,19 @@ class ResponseController(object):
                                               content=self.format_err(405, "HttpMethodsNotAllowed", "POST"),
                                               content_type=content_type)
 
+    def _is_platform(self, jwt_info):
+        if jwt_info.get("sub") != "SYS_PLATFORM":
+            raise exception_common.AllowedForbidden("AllowedForbidden")
+        if "SUB_SYSTEM" not in jwt_info.get("authority"):
+            raise exception_common.AllowedForbidden("AllowedForbidden")
+
     def _request_response(self, request, **kwargs):
         try:
-            # jwt_request(request)
+            if not DEBUG:
+                jwt_info = jwt_request(request)
+                self._is_platform(jwt_info)
+                self.requestUser = jwt_info.get("sub")
+
             res = HttpResponse(content=self.handler_http(request=request, **kwargs),
                                status=200,
                                content_type=content_type)
