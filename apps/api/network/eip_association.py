@@ -44,6 +44,7 @@ class EipAssociationApi(ApiBase):
         if instance_id and (not _instance_status):
             ext_info["instance_id"] = InstanceObject().vm_resource_id(instance_id)
         if eni_id:
+            # 统一不使用eni
             pass
 
         logger.info("before_keys_checks add info: %s" % (format_json_dumps(ext_info)))

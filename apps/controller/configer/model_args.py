@@ -55,7 +55,6 @@ resouce_property_models = {
         "name",
         "eip_id",
         "instance_id",
-        "eni_id",
         "private_ip"
     ],
     "lb": [
