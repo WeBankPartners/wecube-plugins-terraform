@@ -11,7 +11,7 @@ from lib.uuid_util import get_uuid
 from apps.api.database.rds import RdsDBApi
 
 
-class InstanceController(BackendController):
+class RdsDBController(BackendController):
     allow_methods = ('GET', 'POST')
     resource = RdsDBApi()
 
@@ -74,11 +74,6 @@ class InstanceController(BackendController):
 
         data.update(extend_info)
 
-        rid, name, provider_id, version,
-        instance_type, subnet_id, port, password,
-        user, disk_type, disk_size,
-        zone, region, extend_info
-
         result = self.resource.create(rid, name=name, provider_id=provider_id,
                                       version=version, image=image,
                                       instance_type=instance_type,
@@ -88,9 +83,9 @@ class InstanceController(BackendController):
         return 1, result
 
 
-class InstanceIdController(BackendIdController):
+class RdsDBIdController(BackendIdController):
     allow_methods = ('GET', 'DELETE', 'PATCH')
-    resource = InstanceApi()
+    resource = RdsDBApi()
 
     def show(self, request, data, **kwargs):
         '''
@@ -129,9 +124,9 @@ class InstanceIdController(BackendIdController):
         return self.resource.update(rid, name, instance_type, image, extend_info)
 
 
-class InstanceActionController(BackendController):
+class RdsDBActionController(BackendController):
     allow_methods = ('PATCH',)
-    resource = InstanceApi()
+    resource = RdsDBApi()
 
     def before_handler(self, request, data, **kwargs):
         validation.allowed_key(data, ["action"])
@@ -152,9 +147,9 @@ class InstanceActionController(BackendController):
             raise local_exceptions.ValueValidateError("action", "VM 开关机操作，请使用合法值 start/stop")
 
 
-class InstanceAddController(BaseController):
+class RdsDBAddController(BaseController):
     allow_methods = ("POST",)
-    resource = InstanceApi()
+    resource = RdsDBApi()
 
     def before_handler(self, request, data, **kwargs):
         validation.allowed_key(data, ["id", "name", "provider_id", "subnet_id",
@@ -207,11 +202,11 @@ class InstanceAddController(BaseController):
         return {"result": result}
 
 
-class InstanceDeleteController(BaseController):
-    name = "Instance"
-    resource_describe = "Instance"
+class RdsDBDeleteController(BaseController):
+    name = "RdsDB"
+    resource_describe = "RdsDB"
     allow_methods = ("POST",)
-    resource = InstanceApi()
+    resource = RdsDBApi()
 
     def before_handler(self, request, data, **kwargs):
         validation.not_allowed_null(data=data,
