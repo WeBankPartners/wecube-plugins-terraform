@@ -14,9 +14,9 @@ from apps.background.resource.network.connnect_network import CCNObject
 from apps.background.resource.network.connnect_network import CCNBandwidthObject
 
 
-class CCNBandwithApi(ApiBase):
+class CCNBandwidthApi(ApiBase):
     def __init__(self):
-        super(CCNBandwithApi, self).__init__()
+        super(CCNBandwidthApi, self).__init__()
         self.resource_name = "ccn_bandwidth"
         self.resource_workspace = "ccn_bandwidth"
         self.resource_object = CCNBandwidthObject()
