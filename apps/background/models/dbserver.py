@@ -64,6 +64,10 @@ class LBListenerManager(_BaseManager):
     obj = model.LBListener
 
 
+class LBAttachManager(_BaseManager):
+    obj = model.LBAttach
+
+
 class DiskManager(_BaseManager):
     obj = model.Disk
 

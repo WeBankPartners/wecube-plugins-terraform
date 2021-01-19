@@ -4,15 +4,13 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import json
 import datetime
-from lib.logs import logger
 from lib.uuid_util import get_uuid
-from core import local_exceptions
-from apps.background.models.dbserver import LBManager
+from apps.background.models.dbserver import LBAttachManager
 
 
-class LBObject(object):
+class LBAttachObject(object):
     def __init__(self):
-        self.resource = LBManager()
+        self.resource = LBAttachManager()
 
     def list(self, filters=None, page=None, pagesize=None, orderby=None):
         filters = filters or {}
@@ -58,12 +56,6 @@ class LBObject(object):
 
         return count, data
 
-    def delete(self, rid, update_data=None):
+    def delete(self, rid):
         count, data = self.update(rid, update_data={"is_deleted": 1, "deleted_time": datetime.datetime.now()})
         return count
-
-    def lb_resource_id(self, rid):
-        data = self.show(rid)
-        if not data:
-            raise local_exceptions.ValueValidateError("lb", "lb %s 不存在" % rid)
-        return data["resource_id"]

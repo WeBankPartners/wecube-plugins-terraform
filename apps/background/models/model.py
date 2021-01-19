@@ -548,6 +548,7 @@ class LoadBalance(Base):
     zone = Column(String(64))
     resource_id = Column(String(64))
     name = Column(String(64))
+    ipaddress = Column(String(64))
     subnet_id = Column(String(64))
     extend_info = Column(String(512))
     define_json = Column(String(512))
@@ -568,6 +569,7 @@ class LoadBalance(Base):
         self.id = data.get("id")
         self.is_deleted = data.get("is_deleted")
         self.name = data.get("name")
+        self.ipaddress = data.get("ipaddress")
         self.subnet_id = data.get("subnet_id")
         self.provider = data.get("provider")
         self.provider_id = data.get("provider_id")
@@ -580,7 +582,7 @@ class LoadBalance(Base):
 
 
 class LBListener(Base):
-    __tablename__ = "load_balance_listener"
+    __tablename__ = "lb_listener"
 
     id = Column(String(36), primary_key=True)
     provider_id = Column(String(36))
@@ -592,7 +594,9 @@ class LBListener(Base):
     lb_id = Column(String(36))
     port = Column(Integer())
     protocol = Column(String(36))
-    backend_server = Column(String(1024))
+    backend_port = Column(Integer())
+    health_check = Column(String(32))
+    health_check_uri = Column(String(64))
     extend_info = Column(String(512))
     define_json = Column(String(512))
     status = Column(String(36))
@@ -605,7 +609,6 @@ class LBListener(Base):
 
     def __init__(self, data):
         self.created_time = datetime.datetime.now()
-        self.backend_server = data.get("backend_server")
         self.define_json = data.get("define_json") or '{}'
         self.deleted_time = data.get("deleted_time")
         self.enabled = data.get("enabled")
@@ -614,6 +617,9 @@ class LBListener(Base):
         self.is_deleted = data.get("is_deleted")
         self.name = data.get("name")
         self.lb_id = data.get("lb_id")
+        self.backend_port = data.get("backend_port")
+        self.health_check_uri = data.get("health_check_uri")
+        self.health_check = data.get("health_check")
         self.port = data.get("port")
         self.protocol = data.get("protocol")
         self.provider = data.get("provider")
@@ -623,6 +629,56 @@ class LBListener(Base):
         self.result_json = data.get("result_json") or '{}'
         self.status = data.get("status")
         self.updated_time = data.get("updated_time")
+        self.zone = data.get("zone")
+
+
+
+class LBAttach(Base):
+    __tablename__ = "lb_attach"
+
+    id = Column(String(36), primary_key=True)
+    provider_id = Column(String(36))
+    provider = Column(String(32), nullable=False)
+    region = Column(String(64))
+    zone = Column(String(64))
+    resource_id = Column(String(64))
+    name = Column(String(64))
+    lb_id = Column(String(36))
+    listener_id = Column(String(36))
+    instance_id = Column(String(36))
+    port = Column(Integer())
+    weigh = Column(String(32))
+    extend_info = Column(String(512))
+    define_json = Column(String(512))
+    status = Column(String(36))
+    result_json = Column(String(5120))
+    created_time = Column(DateTime)
+    updated_time = Column(DateTime)
+    deleted_time = Column(DateTime)
+    enabled = Column(TINYINT(1), server_default=text("'1'"))
+    is_deleted = Column(TINYINT(1), server_default=text("'0'"))
+
+    def __init__(self, data):
+        self.created_time = datetime.datetime.now()
+        self.define_json = data.get("define_json")
+        self.deleted_time = data.get("deleted_time")
+        self.enabled = data.get("enabled")
+        self.extend_info = data.get("extend_info")
+        self.id = data.get("id")
+        self.instance_id = data.get("instance_id")
+        self.is_deleted = data.get("is_deleted")
+        self.lb_id = data.get("lb_id")
+        self.listener_id = data.get("listener_id")
+        self.name = data.get("name")
+        self.port = data.get("port")
+        self.provider = data.get("provider")
+        self.provider_id = data.get("provider_id")
+        self.region = data.get("region")
+        self.resource_id = data.get("resource_id")
+        self.result_json = data.get("result_json")
+        self.status = data.get("status")
+        self.updated_time = data.get("updated_time")
+        self.weigh = data.get("weigh")
         self.zone = data.get("zone")
 
 
@@ -1280,8 +1336,7 @@ class KVStore(Base):
         self.version = data.get("version")
         self.zone = data.get("zone")
 
-# p = dir(RdsDb)
+# p = dir(LBAttach)
 # for x in p:
 #     if not x.startswith("_") and x not in ["to_dict", "metadata"]:
-#         print
-#         'self.%s = data.get("%s")' % (x, x)
+#         print('self.%s = data.get("%s")' % (x, x))

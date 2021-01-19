@@ -316,6 +316,7 @@ CREATE TABLE `load_balance` (
   `zone` VARCHAR(64) DEFAULT NULL,
   `resource_id` VARCHAR(64) DEFAULT NULL,
   `name` VARCHAR(64) DEFAULT NULL,
+  `ipaddress` VARCHAR(64) DEFAULT NULL,
   `subnet_id` VARCHAR(64) DEFAULT NULL,
   `extend_info` text DEFAULT NULL,
   `define_json` text DEFAULT NULL,
@@ -330,9 +331,9 @@ CREATE TABLE `load_balance` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 
-DROP TABLE IF EXISTS `load_balance_listener`;
+DROP TABLE IF EXISTS `lb_listener`;
 
-CREATE TABLE `load_balance_listener` (
+CREATE TABLE `lb_listener` (
   `id` VARCHAR(36) NOT NULL,
   `provider_id` VARCHAR(36) DEFAULT NULL,
   `provider` VARCHAR(32) DEFAULT NULL,
@@ -343,7 +344,36 @@ CREATE TABLE `load_balance_listener` (
   `lb_id` VARCHAR(36) DEFAULT NULL,
   `port` INT(11) DEFAULT NULL,
   `protocol` VARCHAR(36) DEFAULT NULL,
-  `backend_server` text DEFAULT NULL,
+  `backend_port` INT(11) DEFAULT NULL,
+  `health_check` VARCHAR(32) DEFAULT NULL,
+  `health_check_uri` VARCHAR(64) DEFAULT NULL,
+  `extend_info` text DEFAULT NULL,
+  `define_json` text DEFAULT NULL,
+  `status` varchar(36) DEFAULT NULL,
+  `result_json` TEXT DEFAULT NULL,
+  `created_time` DATETIME DEFAULT NULL,
+  `updated_time` DATETIME DEFAULT NULL,
+  `deleted_time` DATETIME DEFAULT NULL,
+  `enabled` BOOL DEFAULT TRUE,
+  `is_deleted` BOOL DEFAULT FALSE,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
+
+
+DROP TABLE IF EXISTS `lb_attach`;
+
+CREATE TABLE `lb_attach` (
+  `id` VARCHAR(36) NOT NULL,
+  `provider_id` VARCHAR(36) DEFAULT NULL,
+  `provider` VARCHAR(32) DEFAULT NULL,
+  `region` VARCHAR(64) DEFAULT NULL,
+  `zone` VARCHAR(64) DEFAULT NULL,
+  `resource_id` VARCHAR(64) DEFAULT NULL,
+  `lb_id` VARCHAR(36) DEFAULT NULL,
+  `listener_id` VARCHAR(36) DEFAULT NULL,
+  `instance_id` VARCHAR(36) DEFAULT NULL,
+  `port` INT(11) DEFAULT NULL,
+  `weigh` VARCHAR(32) DEFAULT NULL,
   `extend_info` text DEFAULT NULL,
   `define_json` text DEFAULT NULL,
   `status` varchar(36) DEFAULT NULL,
