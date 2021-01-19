@@ -5,6 +5,9 @@ from django.conf.urls import include, url
 import nat_controller
 import eip_controller
 import eip_association_controller
+import ccn_controller
+import ccn_attach_controller
+import ccn_bandwidth_controller
 
 from vpc_controller import VPCController
 from vpc_controller import VPCAddController
@@ -80,5 +83,20 @@ urlpatterns = [
     url(r'^eip_association$', eip_association_controller.EipAssociationController()),
     url(r'^eip_association/(?P<rid>[\w-]+)$', eip_association_controller.EipAssociationIdController()),
     url(r'^backend/eip_association/create$', eip_association_controller.EipAssociationAddController()),
-    url(r'^backend/eip_association/delete$', eip_association_controller.EipAssociationIdController()),
+    url(r'^backend/eip_association/delete$', eip_association_controller.EipAssociationDeleteController()),
+
+    url(r'^ccn$', ccn_controller.CCNController()),
+    url(r'^ccn/(?P<rid>[\w-]+)$', ccn_controller.CCNIdController()),
+    url(r'^backend/ccn/create$', ccn_controller.CCNAddController()),
+    url(r'^backend/ccn/delete$', ccn_controller.CCNDeleteController()),
+
+    url(r'^ccn_attach$', ccn_attach_controller.CCNAttachController()),
+    url(r'^ccn_attach/(?P<rid>[\w-]+)$', ccn_attach_controller.CCNAttachIdController()),
+    url(r'^backend/ccn_attach/create$', ccn_attach_controller.CCNAttachAddController()),
+    url(r'^backend/ccn_attach/delete$', ccn_attach_controller.CCNAttachDeleteController()),
+
+    url(r'^ccn_bandwidth$', ccn_bandwidth_controller.CCNBandwidthController()),
+    url(r'^ccn_bandwidth/(?P<rid>[\w-]+)$', ccn_bandwidth_controller.CCNBandwidthIdController()),
+    url(r'^backend/ccn_bandwidth/create$', ccn_bandwidth_controller.CCNBandwidthAddController()),
+    url(r'^backend/ccn_bandwidth/delete$', ccn_bandwidth_controller.CCNBandwidthDeleteController()),
 ]
