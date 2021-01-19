@@ -660,10 +660,9 @@ DROP TABLE IF EXISTS `connect_network`;
 
 CREATE TABLE `connect_network` (
   `id` VARCHAR(36) NOT NULL,
-  `provider_id` VARCHAR(36) DEFAULT NULL,
-  `provider` VARCHAR(32) DEFAULT NULL,
+  `provider` VARCHAR(32) NOT NULL,
   `region` VARCHAR(64) DEFAULT NULL,
-  `zone` VARCHAR(64) DEFAULT NULL,
+  `zone` VARCHAR(64) NOT NULL,
   `resource_id` VARCHAR(64) DEFAULT NULL,
   `name` VARCHAR(64) DEFAULT NULL,
   `extend_info` text DEFAULT NULL,
@@ -678,17 +677,18 @@ CREATE TABLE `connect_network` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `connect_network_attach`;
 
-CREATE TABLE `connect_network_attach` (
+DROP TABLE IF EXISTS `ccn_attach`;
+
+CREATE TABLE `ccn_attach` (
   `id` VARCHAR(36) NOT NULL,
-  `provider_id` VARCHAR(36) DEFAULT NULL,
-  `provider` VARCHAR(32) DEFAULT NULL,
+  `provider` VARCHAR(32) NOT NULL,
   `region` VARCHAR(64) DEFAULT NULL,
-  `zone` VARCHAR(64) DEFAULT NULL,
+  `zone` VARCHAR(64) NOT NULL,
   `resource_id` VARCHAR(64) DEFAULT NULL,
-  `connect_id` VARCHAR(64) DEFAULT NULL,
-  `instance_type` VARCHAR(64) DEFAULT NULL,
+  `ccn_id` VARCHAR(64) DEFAULT NULL,
+  `type` VARCHAR(32) DEFAULT NULL,
+  `instance_region` VARCHAR(32) DEFAULT NULL,
   `instance_id` VARCHAR(64) DEFAULT NULL,
   `extend_info` text DEFAULT NULL,
   `define_json` text DEFAULT NULL,
@@ -701,4 +701,30 @@ CREATE TABLE `connect_network_attach` (
   `is_deleted` BOOL DEFAULT FALSE,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
+
+
+DROP TABLE IF EXISTS `ccn_bandwidth`;
+
+CREATE TABLE `ccn_bandwidth` (
+  `id` VARCHAR(36) NOT NULL,
+  `provider` VARCHAR(32) NOT NULL,
+  `region` VARCHAR(64) DEFAULT NULL,
+  `zone` VARCHAR(64) NOT NULL,
+  `resource_id` VARCHAR(64) DEFAULT NULL,
+  `ccn_id` VARCHAR(64) DEFAULT NULL,
+  `from_region` VARCHAR(32) DEFAULT NULL,
+  `dest_region` VARCHAR(32) DEFAULT NULL,
+  `bandwidth` VARCHAR(32) DEFAULT NULL,
+  `extend_info` text DEFAULT NULL,
+  `define_json` text DEFAULT NULL,
+  `status` varchar(36) DEFAULT NULL,
+  `result_json` TEXT DEFAULT NULL,
+  `created_time` DATETIME DEFAULT NULL,
+  `updated_time` DATETIME DEFAULT NULL,
+  `deleted_time` DATETIME DEFAULT NULL,
+  `enabled` BOOL DEFAULT TRUE,
+  `is_deleted` BOOL DEFAULT FALSE,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
+
 

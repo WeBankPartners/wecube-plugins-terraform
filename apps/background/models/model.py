@@ -1017,7 +1017,7 @@ class ConnectNetwork(Base):
 
 
 class ConnectNetworkAttach(Base):
-    __tablename__ = "connect_network_attach"
+    __tablename__ = "ccn_attach"
 
     id = Column(String(36), primary_key=True)
     provider_id = Column(String(36))
@@ -1025,9 +1025,10 @@ class ConnectNetworkAttach(Base):
     region = Column(String(64))
     zone = Column(String(64))
     resource_id = Column(String(64))
-    connect_id = Column(String(64))
-    instance_type = Column(String(64))
-    instance_id = Column(String(64))
+    ccn_id = Column(String(64))
+    instance_type = Column(String(32))
+    instance_id = Column(String(32))
+    instance_region = Column(String(32))
     extend_info = Column(String(512))
     define_json = Column(String(512))
     status = Column(String(36))
@@ -1040,14 +1041,60 @@ class ConnectNetworkAttach(Base):
 
     def __init__(self, data):
         self.created_time = datetime.datetime.now()
-        self.connect_id = data.get("connect_id")
+        self.ccn_id = data.get("ccn_id")
         self.define_json = data.get("define_json") or '{}'
         self.deleted_time = data.get("deleted_time")
         self.enabled = data.get("enabled")
         self.extend_info = data.get("extend_info") or '{}'
         self.id = data.get("id")
+        self.instance_region = data.get("instance_region")
         self.instance_id = data.get("instance_id")
         self.instance_type = data.get("instance_type")
+        self.is_deleted = data.get("is_deleted")
+        self.provider = data.get("provider")
+        self.provider_id = data.get("provider_id")
+        self.region = data.get("region")
+        self.resource_id = data.get("resource_id")
+        self.result_json = data.get("result_json") or '{}'
+        self.status = data.get("status")
+        self.updated_time = data.get("updated_time")
+        self.zone = data.get("zone")
+
+
+class CCNBandWidthAttach(Base):
+    __tablename__ = "ccn_bandwidth"
+
+    id = Column(String(36), primary_key=True)
+    provider_id = Column(String(36))
+    provider = Column(String(32), nullable=False)
+    region = Column(String(64))
+    zone = Column(String(64))
+    resource_id = Column(String(64))
+    ccn_id = Column(String(64))
+    from_region = Column(String(32))
+    dest_region = Column(String(32))
+    bandwidth = Column(String(32))
+    extend_info = Column(String(512))
+    define_json = Column(String(512))
+    status = Column(String(36))
+    result_json = Column(String(5120))
+    created_time = Column(DateTime)
+    updated_time = Column(DateTime)
+    deleted_time = Column(DateTime)
+    enabled = Column(TINYINT(1), server_default=text("'1'"))
+    is_deleted = Column(TINYINT(1), server_default=text("'0'"))
+
+    def __init__(self, data):
+        self.created_time = datetime.datetime.now()
+        self.ccn_id = data.get("ccn_id")
+        self.define_json = data.get("define_json") or '{}'
+        self.deleted_time = data.get("deleted_time")
+        self.enabled = data.get("enabled")
+        self.extend_info = data.get("extend_info") or '{}'
+        self.id = data.get("id")
+        self.from_region = data.get("from_region")
+        self.dest_region = data.get("dest_region")
+        self.bandwidth = data.get("bandwidth")
         self.is_deleted = data.get("is_deleted")
         self.provider = data.get("provider")
         self.provider_id = data.get("provider_id")

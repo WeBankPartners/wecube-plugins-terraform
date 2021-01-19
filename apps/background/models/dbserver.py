@@ -88,6 +88,18 @@ class BucketObjectManager(_BaseManager):
     obj = model.BucketObject
 
 
+class CCNManager(_BaseManager):
+    obj = model.ConnectNetwork
+
+
+class CCNAttachManager(_BaseManager):
+    obj = model.ConnectNetworkAttach
+
+
+class CCNBandwidthManager(_BaseManager):
+    obj = model.CCNBandWidthAttach
+
+
 class InstanceTypeManager(_BaseManager):
     obj = model.InstanceType
 

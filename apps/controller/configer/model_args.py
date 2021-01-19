@@ -90,6 +90,9 @@ resouce_property_models = {
         "source",
         "bucket_id"
     ],
+    "ccn": [
+        "name"
+    ],
     "instance": [
         "name",
         "hostname",
@@ -278,6 +281,9 @@ output_property_models = {
         "url"
     ],
     "bucket_object": [
+        "resource_id"
+    ],
+    "ccn": [
         "resource_id"
     ],
     "instance": [

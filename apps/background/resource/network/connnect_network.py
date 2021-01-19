@@ -5,8 +5,10 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import json
 import datetime
 from lib.uuid_util import get_uuid
-from apps.background.models.dbserver import ConnectNetManager
-from apps.background.models.dbserver import ConnectNetAttachManager
+from core import local_exceptions
+from apps.background.models.dbserver import CCNManager
+from apps.background.models.dbserver import CCNAttachManager
+from apps.background.models.dbserver import CCNBandwithManager
 
 
 class _ConnectNetBase(object):
@@ -62,13 +64,25 @@ class _ConnectNetBase(object):
         return count
 
 
-class ConnectNetObject(_ConnectNetBase):
+class CCNObject(_ConnectNetBase):
     def __init__(self):
-        super(ConnectNetObject, self).__init__()
-        self.resource = ConnectNetManager()
+        super(CCNObject, self).__init__()
+        self.resource = CCNManager()
+
+    def resource_id(self, rid, where_data=None):
+        ccn = self.show(rid, where_data)
+        if not ccn:
+            raise local_exceptions.ValueValidateError("ccn", "ccn %s 不存在 或 不在同一区域" % rid)
+        return ccn["resource_id"]
 
 
-class ConnectNetAttachObject(_ConnectNetBase):
+class CCNAttachObject(_ConnectNetBase):
     def __init__(self):
-        super(ConnectNetAttachObject, self).__init__()
-        self.resource = ConnectNetAttachManager()
+        super(CCNAttachObject, self).__init__()
+        self.resource = CCNAttachManager()
+
+
+class CCNBandwidthObject(_ConnectNetBase):
+    def __init__(self):
+        super(CCNBandwidthObject, self).__init__()
+        self.resource = CCNBandwithManager()
