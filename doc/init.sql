@@ -371,9 +371,7 @@ CREATE TABLE `lb_attach` (
   `resource_id` VARCHAR(64) DEFAULT NULL,
   `lb_id` VARCHAR(36) DEFAULT NULL,
   `listener_id` VARCHAR(36) DEFAULT NULL,
-  `instance_id` VARCHAR(36) DEFAULT NULL,
-  `port` INT(11) DEFAULT NULL,
-  `weigh` VARCHAR(32) DEFAULT NULL,
+  `backend_servers` text DEFAULT NULL,
   `extend_info` text DEFAULT NULL,
   `define_json` text DEFAULT NULL,
   `status` varchar(36) DEFAULT NULL,
@@ -386,6 +384,24 @@ CREATE TABLE `lb_attach` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `lb_attach_instances`;
+
+CREATE TABLE `lb_attach_instances` (
+  `id` VARCHAR(36) NOT NULL,
+  `provider` VARCHAR(32) DEFAULT NULL,
+  `region` VARCHAR(64) DEFAULT NULL,
+  `lb_id` VARCHAR(36) DEFAULT NULL,
+  `listener_id` VARCHAR(36) DEFAULT NULL,
+  `instance_id` VARCHAR(36) DEFAULT NULL,
+  `port` INT(11) DEFAULT NULL,
+  `weigh` INT(11) DEFAULT NULL,
+  `created_time` DATETIME DEFAULT NULL,
+  `updated_time` DATETIME DEFAULT NULL,
+  `deleted_time` DATETIME DEFAULT NULL,
+  `enabled` BOOL DEFAULT TRUE,
+  `is_deleted` BOOL DEFAULT FALSE,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `disk`;
 

@@ -59,7 +59,11 @@ def str_to_time(key, date_str):
         raise exception_common.ValueValidateError(param=key, msg=u"非法值 %s，不是合法的时间" % date_str)
 
 
-def validate_port(port, min=None, max=None):
+def validate_port(port, min=None, max=None, permit_null=False):
+    if permit_null:
+        if not port and port != 0:
+            return 0
+
     try:
         port = int(port)
     except:
@@ -136,6 +140,7 @@ def validate_dict(key, value, minlen=None, maxlen=None):
 
     return value
 
+
 def validate_bool(key, value, default=None):
     if value is None:
         value = value or default
@@ -162,6 +167,7 @@ def validate_number(key, value, min=None, max=None):
         raise ValueError("%s 不能大于 %s" % (key, max))
 
     return value
+
 
 def validate_int(key, value, min=None, max=None):
     try:

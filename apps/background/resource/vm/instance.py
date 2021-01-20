@@ -44,6 +44,17 @@ class InstanceObject(object):
 
         return data
 
+    def org_show(self, rid, where_data=None):
+        where_data = where_data or {}
+        where_data.update({"id": rid})
+        data = self.resource.get(filters=where_data)
+        if data:
+            data["extend_info"] = json.loads(data["extend_info"])
+            data["define_json"] = json.loads(data["define_json"])
+            data["result_json"] = json.loads(data["result_json"])
+
+        return data
+
     def update(self, rid, update_data, where_data=None):
         where_data = where_data or {}
         where_data.update({"id": rid, "is_deleted": 0})
