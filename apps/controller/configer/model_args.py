@@ -58,6 +58,26 @@ resouce_property_models = {
         "private_ip"
     ],
     "lb": [
+        "name",
+        "network_type",
+        "vpc_id",
+        "subnet_id"
+    ],
+    "lb_listener": [
+        "name",
+        "port",
+        "protocol",
+        "backend_port",
+        "health_check",
+        "health_check_uri",
+        "lb_id"
+    ],
+    "lb_attach": [
+        "backend_servers",
+        "instance_id",
+        "weight",
+        "listener_id",
+        "lb_id"
     ],
     "disk": [
         "name",
@@ -261,6 +281,13 @@ output_property_models = {
         "resource_id"
     ],
     "lb": [
+        "resource_id",
+        "ipaddress"
+    ],
+    "lb_listener": [
+        "resource_id"
+    ],
+    "lb_attach": [
         "resource_id"
     ],
     "disk": [
