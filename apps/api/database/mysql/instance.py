@@ -5,6 +5,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 from lib.logs import logger
 from lib.json_helper import format_json_dumps
 from apps.common.convert_keys import validate_type
+from apps.common.convert_keys import convert_key_only
 from apps.api.configer.provider import ProviderApi
 from apps.background.resource.network.security_group import SecGroupObject
 from apps.background.resource.network.vpc import VpcObject
@@ -12,7 +13,7 @@ from apps.background.resource.network.subnet import SubnetObject
 from apps.common.convert_keys import define_relations_key
 from apps.background.resource.database.rds import MysqlObject
 from apps.background.resource.vm.instance_type import InstanceTypeObject
-from .rds import RdsDBApi
+from apps.api.database.rds import RdsDBApi
 
 
 class MysqlApi(RdsDBApi):
@@ -23,7 +24,7 @@ class MysqlApi(RdsDBApi):
         self.resource_object = MysqlObject()
         self.resource_keys_config = None
 
-    def before_keys_checks(self, provider, vpc_id, subnet_id, sg_id, **kwargs):
+    def before_keys_checks(self, provider, vpc_id, subnet_id, sg_id):
         '''
 
         :param provider:
@@ -60,9 +61,24 @@ class MysqlApi(RdsDBApi):
         logger.info("before_keys_checks add info: %s" % (format_json_dumps(ext_info)))
         return ext_info
 
+    def zone_info(self, provider, zone):
+        return ProviderApi().zone_info(provider, zone)
+
+    def _generate_slave_zone(self, provider, first_slave_zone, second_slave_zone):
+        create_data = {}
+        if first_slave_zone:
+            create_data["first_slave_zone"] = self.zone_info(provider, first_slave_zone)
+        if second_slave_zone:
+            create_data["second_slave_zone"] = self.zone_info(provider, second_slave_zone)
+
+        logger.info("_generate_slave_zone format json: %s" % (format_json_dumps(create_data)))
+        return create_data
+
     def create(self, rid, name, provider_id, version,
                instance_type, subnet_id, port, password,
-               user, disk_type, disk_size, vpc_id, security_group_id,
+               user, disk_type, disk_size,
+               vpc_id, security_group_id,
+               first_slave_zone, second_slave_zone,
                zone, region, extend_info, **kwargs):
 
         '''
@@ -78,20 +94,25 @@ class MysqlApi(RdsDBApi):
         :param user:
         :param disk_type:
         :param disk_size:
+        :param vpc_id:
+        :param security_group_id:
+        :param first_slave_zone:
+        :param second_slave_zone:
         :param zone:
         :param region:
         :param extend_info:
+        :param kwargs:
         :return:
         '''
 
-        # todo slave zone 转换值
-
         extend_info = extend_info or {}
+        label_name = self.resource_name + "_" + rid
         create_data = {"name": name, "engine": self.resource_name, "zone": zone,
                        "version": version, "instance_type": instance_type,
+                       "first_slave_zone": first_slave_zone,
+                       "second_slave_zone": second_slave_zone,
                        "password": password, "user": user, "port": port,
                        "disk_type": disk_type, "disk_size": disk_size}
-        label_name = self.resource_name + "_" + rid
 
         origin_type, instance_type_data = InstanceTypeObject().type_resource_id(provider_id, instance_type)
         cpu = instance_type_data.get("cpu")
@@ -102,6 +123,9 @@ class MysqlApi(RdsDBApi):
         _relations_id_dict = self.before_keys_checks(provider_object["name"], vpc_id,
                                                      subnet_id, security_group_id)
 
+        create_data.update(self._generate_slave_zone(provider=provider_object["name"],
+                                                     first_slave_zone=first_slave_zone,
+                                                     second_slave_zone=second_slave_zone))
         create_data.update(_relations_id_dict)
         define_json = self._generate_resource(provider_object["name"],
                                               label_name=label_name,
@@ -141,6 +165,6 @@ class MysqlApi(RdsDBApi):
         if not _update_data.get("resource_id"):
             _update_data["resource_id"] = self._fetch_id(result)
 
-        self.update_data(rid, data=_update_data)
+        _, result = self.update_data(rid, data=_update_data)
 
-        return rid
+        return rid, result
