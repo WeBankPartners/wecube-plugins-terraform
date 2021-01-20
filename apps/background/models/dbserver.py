@@ -68,6 +68,10 @@ class LBAttachManager(_BaseManager):
     obj = model.LBAttach
 
 
+class LBAttachInstanceManager(_BaseManager):
+    obj = model.LBAttachInstance
+
+
 class DiskManager(_BaseManager):
     obj = model.Disk
 
