@@ -619,6 +619,8 @@ CREATE TABLE `rds_db` (
   `engine` VARCHAR(64) DEFAULT NULL,
   `version` VARCHAR(32) DEFAULT NULL,
   `instance_type` VARCHAR(64) DEFAULT NULL,
+   `cpu` int(11) DEFAULT NULL,
+  `memory` int(11) DEFAULT NULL,
   `disk_type` VARCHAR(64) DEFAULT NULL,
   `disk_size` VARCHAR(64) DEFAULT NULL,
   `subnet_id` VARCHAR(64) DEFAULT NULL,
@@ -626,6 +628,100 @@ CREATE TABLE `rds_db` (
   `port` VARCHAR(32) DEFAULT NULL,
   `user` VARCHAR(32) DEFAULT NULL,
   `password` VARCHAR(64) DEFAULT NULL,
+  `extend_info` text DEFAULT NULL,
+  `define_json` text DEFAULT NULL,
+  `status` varchar(36) DEFAULT NULL,
+  `result_json` TEXT DEFAULT NULL,
+  `created_time` DATETIME DEFAULT NULL,
+  `updated_time` DATETIME DEFAULT NULL,
+  `deleted_time` DATETIME DEFAULT NULL,
+  `enabled` BOOL DEFAULT TRUE,
+  `is_deleted` BOOL DEFAULT FALSE,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
+
+
+DROP TABLE IF EXISTS `rds_database`;
+
+CREATE TABLE `rds_database` (
+  `id` VARCHAR(36) NOT NULL,
+  `provider` VARCHAR(32) DEFAULT NULL,
+  `region` VARCHAR(64) DEFAULT NULL,
+  `zone` VARCHAR(64) DEFAULT NULL,
+  `rds_id` VARCHAR(64) DEFAULT NULL,
+  `engine` VARCHAR(64) DEFAULT NULL,
+  `name` VARCHAR(64) DEFAULT NULL,
+  `extend_info` text DEFAULT NULL,
+  `define_json` text DEFAULT NULL,
+  `status` varchar(36) DEFAULT NULL,
+  `result_json` TEXT DEFAULT NULL,
+  `created_time` DATETIME DEFAULT NULL,
+  `updated_time` DATETIME DEFAULT NULL,
+  `deleted_time` DATETIME DEFAULT NULL,
+  `enabled` BOOL DEFAULT TRUE,
+  `is_deleted` BOOL DEFAULT FALSE,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
+
+
+DROP TABLE IF EXISTS `rds_account`;
+
+CREATE TABLE `rds_account` (
+  `id` VARCHAR(36) NOT NULL,
+  `provider` VARCHAR(32) DEFAULT NULL,
+  `region` VARCHAR(64) DEFAULT NULL,
+  `zone` VARCHAR(64) DEFAULT NULL,
+  `rds_id` VARCHAR(64) DEFAULT NULL,
+  `engine` VARCHAR(64) DEFAULT NULL,
+  `name` VARCHAR(64) DEFAULT NULL,
+  `password` VARCHAR(128) DEFAULT NULL,
+  `extend_info` text DEFAULT NULL,
+  `define_json` text DEFAULT NULL,
+  `status` varchar(36) DEFAULT NULL,
+  `result_json` TEXT DEFAULT NULL,
+  `created_time` DATETIME DEFAULT NULL,
+  `updated_time` DATETIME DEFAULT NULL,
+  `deleted_time` DATETIME DEFAULT NULL,
+  `enabled` BOOL DEFAULT TRUE,
+  `is_deleted` BOOL DEFAULT FALSE,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
+
+
+DROP TABLE IF EXISTS `rds_account_privilege`;
+
+CREATE TABLE `rds_account_privilege` (
+  `id` VARCHAR(36) NOT NULL,
+  `provider` VARCHAR(32) DEFAULT NULL,
+  `region` VARCHAR(64) DEFAULT NULL,
+  `rds_id` VARCHAR(64) DEFAULT NULL,
+  `engine` VARCHAR(64) DEFAULT NULL,
+  `account_name` VARCHAR(64) DEFAULT NULL,
+  `database` VARCHAR(64) DEFAULT NULL,
+  `privileges` VARCHAR(256) DEFAULT NULL,
+  `extend_info` text DEFAULT NULL,
+  `define_json` text DEFAULT NULL,
+  `status` varchar(36) DEFAULT NULL,
+  `result_json` TEXT DEFAULT NULL,
+  `created_time` DATETIME DEFAULT NULL,
+  `updated_time` DATETIME DEFAULT NULL,
+  `deleted_time` DATETIME DEFAULT NULL,
+  `enabled` BOOL DEFAULT TRUE,
+  `is_deleted` BOOL DEFAULT FALSE,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
+
+
+DROP TABLE IF EXISTS `rds_backup_policy`;
+
+CREATE TABLE `rds_backup_policy` (
+  `id` VARCHAR(36) NOT NULL,
+  `provider` VARCHAR(32) DEFAULT NULL,
+  `region` VARCHAR(64) DEFAULT NULL,
+  `rds_id` VARCHAR(64) DEFAULT NULL,
+  `engine` VARCHAR(64) DEFAULT NULL,
+  `backup_model` VARCHAR(64) DEFAULT NULL,
+  `backup_time` VARCHAR(128) DEFAULT NULL,
   `extend_info` text DEFAULT NULL,
   `define_json` text DEFAULT NULL,
   `status` varchar(36) DEFAULT NULL,
