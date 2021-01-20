@@ -33,7 +33,8 @@ class LBListenerController(BackendController):
 
     def before_handler(self, request, data, **kwargs):
         validation.allowed_key(data, ["id", "name", "provider_id", "lb_id",
-                                      "port", "protocol",
+                                      "port", "protocol", "backend_port",
+                                      "health_check", "health_check_uri",
                                       "zone", "region", "extend_info"])
         validation.not_allowed_null(data=data,
                                     keys=["region", "provider_id", "lb_id", "port"]
@@ -45,6 +46,10 @@ class LBListenerController(BackendController):
         validation.validate_string("zone", data.get("zone"))
         validation.validate_string("lb_id", data["lb_id"])
         validation.validate_port(data.get("port"))
+        validation.validate_string("protocol", data.get("protocol"))
+        validation.validate_port(data.get("backend_port"), permit_null=True)
+        validation.validate_string("health_check", data.get("health_check"))
+        validation.validate_string("health_check_uri", data.get("health_check_uri"))
         validation.validate_string("provider_id", data.get("provider_id"))
         validation.validate_dict("extend_info", data.get("extend_info"))
 
@@ -56,12 +61,16 @@ class LBListenerController(BackendController):
         lb_id = data.pop("lb_id", None)
         port = int(data.pop("port"))
         protocol = data.pop("protocol", None)
+        backend_port = validation.validate_port(data.get("backend_port"), permit_null=True)
+        health_check = data.pop("health_check", None)
+        health_check_uri = data.pop("health_check_uri", None)
         provider_id = data.pop("provider_id", None)
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         data.update(extend_info)
         result = self.resource.create(rid, name, provider_id,
-                                      lb_id, port, protocol,
+                                      lb_id, port, protocol, backend_port,
+                                      health_check, health_check_uri,
                                       zone, region, extend_info=data)
         return 1, result
 
@@ -102,8 +111,11 @@ class LBListenerAddController(BaseController):
         validation.validate_string("zone", data.get("zone"))
         validation.validate_string("lb_id", data["lb_id"])
         validation.validate_port(data.get("port"))
+        validation.validate_string("protocol", data.get("protocol"))
+        validation.validate_port(data.get("backend_port"), permit_null=True)
+        validation.validate_string("health_check", data.get("health_check"))
+        validation.validate_string("health_check_uri", data.get("health_check_uri"))
         validation.validate_string("provider_id", data.get("provider_id"))
-        validation.validate_dict("extend_info", data.get("extend_info"))
 
     def response_templete(self, data):
         return {}
@@ -116,9 +128,16 @@ class LBListenerAddController(BaseController):
         lb_id = data.pop("lb_id", None)
         port = int(data.pop("port"))
         protocol = data.pop("protocol", None)
+        backend_port = validation.validate_port(data.get("backend_port"), permit_null=True)
+        health_check = data.pop("health_check", None)
+        health_check_uri = data.pop("health_check_uri", None)
         provider_id = data.pop("provider_id", None)
+        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
+
+        data.update(extend_info)
         result = self.resource.create(rid, name, provider_id,
-                                      lb_id, port, protocol,
+                                      lb_id, port, protocol, backend_port,
+                                      health_check, health_check_uri,
                                       zone, region, extend_info=data)
 
         return {"result": result}

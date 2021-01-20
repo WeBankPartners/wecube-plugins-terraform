@@ -26,13 +26,14 @@ class LBController(BackendController):
         :return:
         '''
 
-        validation.allowed_key(data, ["id", "provider", "region", 'resource_id',
+        validation.allowed_key(data, ["id", "provider", "region", 'resource_id', "ipaddress",
                                       "provider_id", "name", "subnet_id", "enabled"])
         return self.resource.resource_object.list(filters=data, page=page,
                                                   pagesize=pagesize, orderby=orderby)
 
     def before_handler(self, request, data, **kwargs):
         validation.allowed_key(data, ["id", "name", "provider_id", "subnet_id",
+                                      "network_type", "vpc_id",
                                       "zone", "region", "extend_info"])
         validation.not_allowed_null(data=data,
                                     keys=["region", "provider_id", "subnet_id", "name"]
@@ -43,6 +44,8 @@ class LBController(BackendController):
         validation.validate_string("region", data["region"])
         validation.validate_string("zone", data.get("zone"))
         validation.validate_string("subnet_id", data["subnet_id"])
+        validation.validate_string("vpc_id", data["vpc_id"])
+        validation.validate_string("network_type", data["network_type"])
         validation.validate_string("provider_id", data.get("provider_id"))
         validation.validate_dict("extend_info", data.get("extend_info"))
 
@@ -53,16 +56,42 @@ class LBController(BackendController):
         region = data.pop("region", None)
         subnet_id = data.pop("subnet_id", None)
         provider_id = data.pop("provider_id", None)
+        vpc_id = data.pop("vpc_id", None)
+        network_type = data.pop("network_type", None)
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         data.update(extend_info)
-        result = self.resource.create(rid, name, provider_id, subnet_id,
-                                      zone, region, extend_info=data)
-        return 1, result
+        rid, result = self.resource.create(rid, name,
+                                           provider_id=provider_id, subnet_id=subnet_id,
+                                           network_type=network_type, vpc_id=vpc_id,
+                                           zone=zone, region=region, extend_info=data)
+
+        return 1, {"id": rid, "ipaddress": result.get("ipaddress")}
 
 
 class LBIdController(BackendIdController):
     allow_methods = ('GET', 'DELETE', 'PATCH')
+    resource = LBApi()
+
+    def show(self, request, data, **kwargs):
+        '''
+
+        :param request:
+        :param data:
+        :param kwargs:
+        :return:
+        '''
+
+        rid = kwargs.pop("rid", None)
+        return self.resource.resource_object.show(rid)
+
+    def delete(self, request, data, **kwargs):
+        rid = kwargs.pop("rid", None)
+        return self.resource.destory(rid)
+
+
+class LBIdDettachController(BackendIdController):
+    allow_methods = ('PATCH',)
     resource = LBApi()
 
     def show(self, request, data, **kwargs):
@@ -87,8 +116,6 @@ class LBAddController(BaseController):
     resource = LBApi()
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["id", "name", "provider_id", "subnet_id",
-                                      "zone", "region", "extend_info"])
         validation.not_allowed_null(data=data,
                                     keys=["region", "provider_id", "subnet_id", "name"]
                                     )
@@ -98,8 +125,9 @@ class LBAddController(BaseController):
         validation.validate_string("region", data["region"])
         validation.validate_string("zone", data.get("zone"))
         validation.validate_string("subnet_id", data["subnet_id"])
+        validation.validate_string("vpc_id", data["vpc_id"])
+        validation.validate_string("network_type", data["network_type"])
         validation.validate_string("provider_id", data.get("provider_id"))
-        validation.validate_dict("extend_info", data.get("extend_info"))
 
     def response_templete(self, data):
         return {}
@@ -111,13 +139,17 @@ class LBAddController(BaseController):
         region = data.pop("region", None)
         subnet_id = data.pop("subnet_id", None)
         provider_id = data.pop("provider_id", None)
+        vpc_id = data.pop("vpc_id", None)
+        network_type = data.pop("network_type", None)
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         data.update(extend_info)
-        result = self.resource.create(rid, name, provider_id, subnet_id,
-                                      zone, region, extend_info=data)
+        rid, result = self.resource.create(rid, name,
+                                           provider_id=provider_id, subnet_id=subnet_id,
+                                           network_type=network_type, vpc_id=vpc_id,
+                                           zone=zone, region=region, extend_info=data)
 
-        return {"result": result}
+        return {"result": rid, "ipaddress": result.get("ipaddress")}
 
 
 class LBDeleteController(BaseController):
