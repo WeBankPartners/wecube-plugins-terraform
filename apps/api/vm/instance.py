@@ -96,15 +96,13 @@ class InstanceApi(ApiBase):
 
         origin_columns.update(resource_columns)
 
-        _info = {
-            "resource": {
-                resource_name: {
-                    label_name: origin_columns
-                }
+        define_json["resource"] = {
+            resource_name: {
+                label_name: origin_columns
             }
         }
-        logger.info(format_json_dumps(_info))
-        return _info
+        logger.info(format_json_dumps(define_json))
+        return define_json
 
     def save_data(self, rid, name, hostname,
                   instance_type, disk_type,

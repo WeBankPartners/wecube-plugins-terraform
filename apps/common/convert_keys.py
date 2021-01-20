@@ -110,6 +110,22 @@ def convert_key(key, value, define):
     if value:
         return {key: value}
 
+def convert_key_only(key, define):
+    '''
+
+    :param key:
+    :param define:
+    :return:
+    '''
+
+    if isinstance(define, basestring):
+        key = define or key
+    else:
+        if define.get("convert"):
+            key = define.get("convert") or key
+
+    return key
+
 
 def convert_keys(datas, defines, is_update=False):
     '''
