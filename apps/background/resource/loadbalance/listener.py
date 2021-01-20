@@ -5,6 +5,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import json
 import datetime
 from lib.uuid_util import get_uuid
+from core import local_exceptions
 from apps.background.models.dbserver import LBListenerManager
 
 
@@ -59,3 +60,10 @@ class LBListenerObject(object):
     def delete(self, rid):
         count, data = self.update(rid, update_data={"is_deleted": 1, "deleted_time": datetime.datetime.now()})
         return count
+
+    def resource_id(self, rid):
+        data = self.show(rid)
+        if not data:
+            raise local_exceptions.ValueValidateError("lb listener", "lb  listener %s 不存在" % rid)
+        return data["resource_id"]
+
