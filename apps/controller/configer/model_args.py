@@ -142,6 +142,8 @@ resouce_property_models = {
         "security_group_id",
         "port",
         "user",
+        "first_slave_zone",
+        "second_slave_zone",
         "password",
         "force_delete"
     ],
