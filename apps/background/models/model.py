@@ -1253,6 +1253,168 @@ class RdsDb(Base):
         self.zone = data.get("zone")
 
 
+class RdsAccount(Base):
+    __tablename__ = "rds_account"
+
+    id = Column(String(36), primary_key=True)
+    provider = Column(String(32), nullable=False)
+    region = Column(String(64))
+    zone = Column(String(64))
+    rds_id = Column(String(64))
+    engine = Column(String(64))
+    name = Column(String(64))
+    password = Column(String(128))
+    extend_info = Column(String(1024))
+    define_json = Column(String(1024))
+    status = Column(String(36))
+    result_json = Column(String(5120))
+    created_time = Column(DateTime)
+    updated_time = Column(DateTime)
+    deleted_time = Column(DateTime)
+    enabled = Column(TINYINT(1), server_default=text("'1'"))
+    is_deleted = Column(TINYINT(1), server_default=text("'0'"))
+
+    def __init__(self, data):
+        self.created_time = data.get("created_time") or datetime.datetime.now()
+        self.created_time = data.get("created_time")
+        self.define_json = data.get("define_json")
+        self.deleted_time = data.get("deleted_time")
+        self.enabled = data.get("enabled")
+        self.engine = data.get("engine")
+        self.extend_info = data.get("extend_info")
+        self.id = data.get("id")
+        self.is_deleted = data.get("is_deleted")
+        self.name = data.get("name")
+        self.password = data.get("password")
+        self.provider = data.get("provider")
+        self.rds_id = data.get("rds_id")
+        self.region = data.get("region")
+        self.result_json = data.get("result_json")
+        self.status = data.get("status")
+        self.updated_time = data.get("updated_time")
+        self.zone = data.get("zone")
+
+
+class RdsDatabase(Base):
+    __tablename__ = "rds_database"
+
+    id = Column(String(36), primary_key=True)
+    provider = Column(String(32), nullable=False)
+    region = Column(String(64))
+    zone = Column(String(64))
+    rds_id = Column(String(64))
+    engine = Column(String(64))
+    name = Column(String(64))
+    extend_info = Column(String(1024))
+    define_json = Column(String(1024))
+    status = Column(String(36))
+    result_json = Column(String(5120))
+    created_time = Column(DateTime)
+    updated_time = Column(DateTime)
+    deleted_time = Column(DateTime)
+    enabled = Column(TINYINT(1), server_default=text("'1'"))
+    is_deleted = Column(TINYINT(1), server_default=text("'0'"))
+
+    def __init__(self, data):
+        self.created_time = data.get("created_time") or datetime.datetime.now()
+        self.created_time = data.get("created_time")
+        self.define_json = data.get("define_json")
+        self.deleted_time = data.get("deleted_time")
+        self.enabled = data.get("enabled")
+        self.engine = data.get("engine")
+        self.extend_info = data.get("extend_info")
+        self.id = data.get("id")
+        self.is_deleted = data.get("is_deleted")
+        self.name = data.get("name")
+        self.provider = data.get("provider")
+        self.rds_id = data.get("rds_id")
+        self.region = data.get("region")
+        self.result_json = data.get("result_json")
+        self.status = data.get("status")
+        self.updated_time = data.get("updated_time")
+        self.zone = data.get("zone")
+
+
+class RdsPrivilege(Base):
+    __tablename__ = "rds_account_privilege"
+
+    id = Column(String(36), primary_key=True)
+    provider = Column(String(32), nullable=False)
+    region = Column(String(64))
+    rds_id = Column(String(64))
+    engine = Column(String(64))
+    account_name = Column(String(64))
+    database = Column(String(64))
+    privileges = Column(String(256))
+    extend_info = Column(String(1024))
+    define_json = Column(String(1024))
+    status = Column(String(36))
+    result_json = Column(String(5120))
+    created_time = Column(DateTime)
+    updated_time = Column(DateTime)
+    deleted_time = Column(DateTime)
+    enabled = Column(TINYINT(1), server_default=text("'1'"))
+    is_deleted = Column(TINYINT(1), server_default=text("'0'"))
+
+    def __init__(self, data):
+        self.created_time = data.get("created_time") or datetime.datetime.now()
+        self.account_name = data.get("account_name")
+        self.database = data.get("database")
+        self.define_json = data.get("define_json")
+        self.deleted_time = data.get("deleted_time")
+        self.enabled = data.get("enabled")
+        self.engine = data.get("engine")
+        self.extend_info = data.get("extend_info")
+        self.id = data.get("id")
+        self.is_deleted = data.get("is_deleted")
+        self.privileges = data.get("privileges")
+        self.provider = data.get("provider")
+        self.rds_id = data.get("rds_id")
+        self.region = data.get("region")
+        self.result_json = data.get("result_json")
+        self.status = data.get("status")
+        self.updated_time = data.get("updated_time")
+
+
+class RdsBackup(Base):
+    __tablename__ = "rds_backup_policy"
+
+    id = Column(String(36), primary_key=True)
+    provider = Column(String(32), nullable=False)
+    region = Column(String(64))
+    rds_id = Column(String(64))
+    engine = Column(String(64))
+    backup_model = Column(String(64))
+    backup_time = Column(String(128))
+    extend_info = Column(String(1024))
+    define_json = Column(String(1024))
+    status = Column(String(36))
+    result_json = Column(String(5120))
+    created_time = Column(DateTime)
+    updated_time = Column(DateTime)
+    deleted_time = Column(DateTime)
+    enabled = Column(TINYINT(1), server_default=text("'1'"))
+    is_deleted = Column(TINYINT(1), server_default=text("'0'"))
+
+    def __init__(self, data):
+        self.created_time = data.get("created_time") or datetime.datetime.now()
+        self.backup_model = data.get("backup_model")
+        self.backup_time = data.get("backup_time")
+        self.define_json = data.get("define_json")
+        self.deleted_time = data.get("deleted_time")
+        self.enabled = data.get("enabled")
+        self.engine = data.get("engine")
+        self.extend_info = data.get("extend_info")
+        self.id = data.get("id")
+        self.is_deleted = data.get("is_deleted")
+        self.provider = data.get("provider")
+        self.rds_id = data.get("rds_id")
+        self.region = data.get("region")
+        self.result_json = data.get("result_json")
+        self.status = data.get("status")
+        self.updated_time = data.get("updated_time")
+
+
 class Nosql(Base):
     __tablename__ = "nosql"
 
@@ -1364,7 +1526,7 @@ class KVStore(Base):
         self.version = data.get("version")
         self.zone = data.get("zone")
 
-# p = dir(LBAttachInstance)
-# for x in p:
-#     if not x.startswith("_") and x not in ["to_dict", "metadata"]:
-#         print('self.%s = data.get("%s")' % (x, x))
+p = dir(RdsBackup)
+for x in p:
+    if not x.startswith("_") and x not in ["to_dict", "metadata"]:
+        print('self.%s = data.get("%s")' % (x, x))

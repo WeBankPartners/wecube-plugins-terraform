@@ -120,6 +120,22 @@ class RdsDbManager(_BaseManager):
     obj = model.RdsDb
 
 
+class RdsDatabaseManager(_BaseManager):
+    obj = model.RdsDatabase
+
+
+class RdsAccountManager(_BaseManager):
+    obj = model.RdsAccount
+
+
+class RdsPrivilegeManager(_BaseManager):
+    obj = model.RdsPrivilege
+
+
+class RdsBackupManager(_BaseManager):
+    obj = model.RdsBackup
+
+
 class NosqlManager(_BaseManager):
     obj = model.Nosql
 
