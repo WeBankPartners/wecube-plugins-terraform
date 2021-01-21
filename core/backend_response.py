@@ -86,6 +86,18 @@ class BackendResponse(object):
         data = request.GET
         data = self.build_filters(data.dict())
         count, res = self.list(request, **data)
+
+        if isinstance(res, list):
+            result = []
+            for t in res:
+                if isinstance(t, dict):
+                    if t.get("define_json"):
+                        t["define_json"]["provider"] = {}
+
+                result.append(t)
+
+            res = result
+
         return {"count": count, "data": res}
 
     def on_id_get(self, request, **kwargs):
@@ -96,6 +108,11 @@ class BackendResponse(object):
         res = self.show(request, data.dict(), **kwargs)
         if not res:
             raise exception_common.ResourceNotFoundError()
+
+        if isinstance(res, dict):
+            if res.get("define_json"):
+                res["define_json"]["provider"] = {}
+
         return res
 
     def on_delete(self, request, **kwargs):
@@ -118,6 +135,11 @@ class BackendResponse(object):
         count, res = self.update(request, data, **kwargs)
         if not res:
             raise exception_common.ResourceNotFoundError()
+
+        if isinstance(res, dict):
+            if res.get("define_json"):
+                res["define_json"]["provider"] = {}
+
         return {"count": count, "data": res}
 
     def before_handler(self, request, data, **kwargs):
