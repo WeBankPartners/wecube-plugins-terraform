@@ -103,7 +103,7 @@ class ConfigIdController(BackendIdController):
 
         validation.validate_bool("enabled", data.get("enabled"))
         validation.validate_string("id", data.get("id"))
-        validation.validate_string("provider", data["provider"])
+        validation.validate_string("provider", data.get("provider"))
         validation.validate_dict("value_config", data.get("value_config"))
         validation.validate_string("property", data.get("property"))
         validation.validate_string("resource", data.get("resource"))
