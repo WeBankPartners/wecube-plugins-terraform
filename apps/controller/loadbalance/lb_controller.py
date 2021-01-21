@@ -66,7 +66,8 @@ class LBController(BackendController):
                                            network_type=network_type, vpc_id=vpc_id,
                                            zone=zone, region=region, extend_info=data)
 
-        return 1, {"id": rid, "ipaddress": result.get("ipaddress")}
+        return 1, {"id": rid, "ipaddress": result.get("ipaddress"),
+                   "resource_id": result.get("resource_id")}
 
 
 class LBIdController(BackendIdController):
@@ -149,7 +150,8 @@ class LBAddController(BaseController):
                                            network_type=network_type, vpc_id=vpc_id,
                                            zone=zone, region=region, extend_info=data)
 
-        return {"result": rid, "ipaddress": result.get("ipaddress")}
+        return {"id": rid, "ipaddress": result.get("ipaddress"),
+                "resource_id": result.get("resource_id")}
 
 
 class LBDeleteController(BaseController):

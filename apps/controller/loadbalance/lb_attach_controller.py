@@ -66,10 +66,11 @@ class LBAttachController(BackendController):
             raise local_exceptions.ValueValidateError("backend_servers", "backend servers not permit null")
 
         data.update(extend_info)
-        result = self.resource.create(rid, name, provider_id,
-                                      lb_id, listener_id, backend_servers,
-                                      zone, region, extend_info=data)
-        return 1, result
+        _, result = self.resource.create(rid, name, provider_id,
+                                         lb_id, listener_id, backend_servers,
+                                         zone, region, extend_info=data)
+
+        return 1, {"id": rid, "resource_id": result.get("resource_id")}
 
 
 class LBAttachIdController(BackendIdController):
@@ -139,11 +140,11 @@ class LBAttachAddController(BaseController):
             raise local_exceptions.ValueValidateError("backend_servers", "backend servers not permit null")
 
         data.update(extend_info)
-        result = self.resource.create(rid, name, provider_id,
-                                      lb_id, listener_id, backend_servers,
-                                      zone, region, extend_info=data)
+        _, result = self.resource.create(rid, name, provider_id,
+                                         lb_id, listener_id, backend_servers,
+                                         zone, region, extend_info=data)
 
-        return {"result": result}
+        return {"id": rid, "resource_id": result.get("resource_id")}
 
 
 class LBAttachDeleteController(BaseController):
