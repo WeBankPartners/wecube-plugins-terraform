@@ -63,11 +63,12 @@ class MysqlPrivilegeController(BackendController):
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         data.update(extend_info)
-        result = self.resource.create(rid, username, provider_id,
+        _, result = self.resource.create(rid, username, provider_id,
                                       mysql_id, database, privileges,
                                       zone, region, extend_info=data)
 
-        return 1, result
+        res = {"id": rid, "resource_id": result.get("resource_id")}
+        return 1, res
 
 
 class MysqlPrivilegeIdController(BackendIdController):
@@ -125,11 +126,12 @@ class MysqlPrivilegeAddController(BaseController):
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         data.update(extend_info)
-        result = self.resource.create(rid, username, provider_id,
+        _, result = self.resource.create(rid, username, provider_id,
                                       mysql_id, database, privileges,
                                       zone, region, extend_info=data)
 
-        return {"result": result}
+        res = {"id": rid, "resource_id": result.get("resource_id")}
+        return res
 
 
 class MysqlPrivilegeDeleteController(BaseController):

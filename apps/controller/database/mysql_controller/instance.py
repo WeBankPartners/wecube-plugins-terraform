@@ -88,16 +88,16 @@ class MysqlController(BackendController):
 
         data.update(extend_info)
 
-        result = self.resource.create(rid, name=name, provider_id=provider_id,
-                                      version=version, port=port,
-                                      password=password, user=user,
-                                      instance_type=instance_type,
-                                      vpc_id=vpc_id, first_slave_zone=first_slave_zone,
-                                      second_slave_zone=second_slave_zone,
-                                      security_group_id=security_group_id,
-                                      disk_type=disk_type, disk_size=disk_size,
-                                      subnet_id=subnet_id, zone=zone,
-                                      region=region, extend_info=data)
+        _, result = self.resource.create(rid, name=name, provider_id=provider_id,
+                                         version=version, port=port,
+                                         password=password, user=user,
+                                         instance_type=instance_type,
+                                         vpc_id=vpc_id, first_slave_zone=first_slave_zone,
+                                         second_slave_zone=second_slave_zone,
+                                         security_group_id=security_group_id,
+                                         disk_type=disk_type, disk_size=disk_size,
+                                         subnet_id=subnet_id, zone=zone,
+                                         region=region, extend_info=data)
 
         return 1, {"result": rid, "ipaddress": result.get("ipaddress"),
                    "port": result.get("port"), "user": result.get("user"),
@@ -178,7 +178,7 @@ class MysqlAddController(BaseController):
 
         data.update(extend_info)
 
-        rid, result = self.resource.create(rid, name=name, provider_id=provider_id,
+        _, result = self.resource.create(rid, name=name, provider_id=provider_id,
                                            version=version, port=port,
                                            password=password, user=user,
                                            instance_type=instance_type,
@@ -189,7 +189,7 @@ class MysqlAddController(BaseController):
                                            subnet_id=subnet_id, zone=zone,
                                            region=region, extend_info=data)
 
-        return {"result": rid, "ipaddress": result.get("ipaddress"),
+        return {"id": rid, "ipaddress": result.get("ipaddress"),
                 "port": result.get("port"), "user": result.get("user"),
                 "password": result.get("password")}
 

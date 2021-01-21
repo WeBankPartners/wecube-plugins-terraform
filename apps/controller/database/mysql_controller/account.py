@@ -59,11 +59,12 @@ class MysqlAccountController(BackendController):
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         data.update(extend_info)
-        result = self.resource.create(rid, name, provider_id,
+        _, result = self.resource.create(rid, name, provider_id,
                                       mysql_id, password,
                                       zone, region, extend_info=data)
 
-        return 1, result
+        res = {"id": rid, "resource_id": result.get("resource_id")}
+        return 1, res
 
 
 class MysqlAccountIdController(BackendIdController):
@@ -116,11 +117,12 @@ class MysqlAccountAddController(BaseController):
         mysql_id = data.pop("mysql_id", None)
         provider_id = data.pop("provider_id", None)
 
-        result = self.resource.create(rid, name, provider_id,
+        _, result = self.resource.create(rid, name, provider_id,
                                       mysql_id, password,
                                       zone, region, extend_info=data)
 
-        return {"result": result}
+        res = {"id": rid, "resource_id": result.get("resource_id")}
+        return res
 
 
 class MysqlAccountDeleteController(BaseController):
