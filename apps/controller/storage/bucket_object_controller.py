@@ -67,10 +67,12 @@ class BucketObjectController(BackendController):
         if source is None and content is None:
             raise ValueError("source 和 content 不能同时为null")
 
-        result = self.resource.create(rid, name, provider_id, bucket_id,
+        _, result = self.resource.create(rid, name, provider_id, bucket_id,
                                       key, content, source,
                                       zone, region, extend_info=data)
-        return 1, result
+
+        res = {"id": rid, "resource_id": result.get("resource_id")}
+        return 1, res
 
 
 class BucketObjectIdController(BackendIdController):
@@ -133,10 +135,12 @@ class BucketObjectAddController(BaseController):
         if source is None and content is None:
             raise ValueError("source 和 content 不能同时为null")
 
-        result = self.resource.create(rid, name, provider_id, bucket_id,
+        _, result = self.resource.create(rid, name, provider_id, bucket_id,
                                       key, content, source,
                                       zone, region, extend_info=data)
-        return {"result": result}
+
+        res = {"id": rid, "resource_id": result.get("resource_id")}
+        return res
 
 
 class BucketObjectDeleteController(BaseController):
