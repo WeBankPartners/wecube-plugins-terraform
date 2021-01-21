@@ -66,10 +66,12 @@ class RouteEntryController(BackendController):
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         data.update(extend_info)
-        result = self.resource.create(rid, name, provider_id, zone, region,
+        _, result = self.resource.create(rid, name, provider_id, zone, region,
                                       vpc_id, route_table, next_type, next_hub,
                                       destination=destination, extend_info=data)
-        return 1, result
+
+        res = {"id": rid, "resource_id": result.get("resource_id")}
+        return 1, res
 
 
 class RouteEntryIdController(BackendIdController):
@@ -129,10 +131,12 @@ class RouteEntryAddController(BaseController):
         next_hub = data.pop("next_hub", None)
         destination = data.pop("destination", None)
 
-        result = self.resource.create(rid, name, provider_id, zone, region,
+        _, result = self.resource.create(rid, name, provider_id, zone, region,
                                       vpc_id, route_table, next_type, next_hub,
                                       destination=destination, extend_info=data)
-        return {"result": result}
+
+        res = {"id": rid, "resource_id": result.get("resource_id")}
+        return res
 
 
 class RouteEntryDeleteController(BaseController):

@@ -149,6 +149,6 @@ class RouteEntryApi(ApiBase):
         if not _update_data.get("resource_id"):
             _update_data["resource_id"] = self._fetch_id(result)
 
-        self.update_data(rid, data=_update_data)
+        _, res = self.update_data(rid, data=_update_data)
 
-        return rid
+        return rid, res
