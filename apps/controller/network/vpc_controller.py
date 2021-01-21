@@ -54,8 +54,10 @@ class VPCController(BackendController):
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         data.update(extend_info)
-        result = self.resource.create(rid, name, cidr, provider_id, region=region, extend_info=data)
-        return 1, result
+        _, result = self.resource.create(rid, name, cidr, provider_id, region=region, extend_info=data)
+
+        res = {"id": rid, "resource_id": result.get("resource_id")}
+        return 1, res
 
 
 class VPCIdController(BackendIdController):
@@ -105,8 +107,10 @@ class VPCAddController(BaseController):
         region = data.pop("region", None)
         provider_id = data.pop("provider_id", None)
 
-        result = self.resource.create(rid, name, cidr, provider_id, region=region, extend_info=data)
-        return {"result": result}
+        _, result = self.resource.create(rid, name, cidr, provider_id, region=region, extend_info=data)
+
+        res = {"id": rid, "resource_id": result.get("resource_id")}
+        return res
 
 
 class VPCDeleteController(BaseController):

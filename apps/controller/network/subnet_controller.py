@@ -60,10 +60,12 @@ class SubnetController(BackendController):
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         data.update(extend_info)
-        result = self.resource.create(rid, name, cidr, provider_id,
+        _, result = self.resource.create(rid, name, cidr, provider_id,
                                       vpc_id, region, zone,
                                       extend_info=data)
-        return 1, result
+
+        res = {"id": rid, "resource_id": result.get("resource_id")}
+        return 1, res
 
 
 class SubnetIdController(BackendIdController):
@@ -121,7 +123,8 @@ class SubnetAddController(BaseController):
                                       vpc_id, region, zone,
                                       extend_info=data)
 
-        return {"result": result}
+        res = {"id": rid, "resource_id": result.get("resource_id")}
+        return res
 
 
 class SubnetDeleteController(BaseController):
