@@ -85,7 +85,8 @@ class ResourceIdController(BackendIdController):
 
     def before_handler(self, request, data, **kwargs):
         validation.allowed_key(data, ["provider", "property", "extend_info",
-                                      "resource_name", "resource_property", "output_property"])
+                                      "resource_name", "resource_property",
+                                      "enabled", "output_property"])
 
         validation.validate_string("provider", data["provider"])
         validation.validate_string("property", data.get("property"))
@@ -110,7 +111,7 @@ class ResourceIdController(BackendIdController):
             data["resource_property"] = json.dumps(resource_property)
 
         if data.get("output_property") is not None:
-            output_property = validation.validate_dict("output_property", data.get("resource_property")) or {}
+            output_property = validation.validate_dict("output_property", data.get("output_property")) or {}
             validate_convert_value(output_property)
             output_necessary(resource_name=data["resource_name"],
                              output_property=output_property)
