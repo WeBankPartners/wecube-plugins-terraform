@@ -62,11 +62,13 @@ class EipAssociationController(BackendController):
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         data.update(extend_info)
-        result = self.resource.create(rid, name, provider_id, eip_id,
+        _, result = self.resource.create(rid, name, provider_id, eip_id,
                                       instance_id=instance_id, eni_id=eni_id,
                                       private_ip=private_ip, zone=zone,
                                       region=region, extend_info=data)
-        return 1, result
+
+        res = {"id": rid, "resource_id": result.get("resource_id")}
+        return 1, res
 
 
 class EipAssociationIdController(BackendIdController):
@@ -125,12 +127,13 @@ class EipAssociationAddController(BaseController):
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         data.update(extend_info)
-        result = self.resource.create(rid, name, provider_id, eip_id,
+        _, result = self.resource.create(rid, name, provider_id, eip_id,
                                       instance_id=instance_id, eni_id=eni_id,
                                       private_ip=private_ip, zone=zone,
                                       region=region, extend_info=data)
 
-        return {"result": result}
+        res = {"id": rid, "resource_id": result.get("resource_id")}
+        return 1, res
 
 
 class EipAssociationDeleteController(BaseController):

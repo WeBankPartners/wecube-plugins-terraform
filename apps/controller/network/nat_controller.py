@@ -65,7 +65,8 @@ class NatGatewayController(BackendController):
         rid, result = self.resource.create(rid, name, provider_id,
                                            vpc_id, subnet_id, eip,
                                            zone, region, extend_info=data)
-        res = {"id": rid, "ipaddress": result.get("ipaddress")}
+        res = {"id": rid, "ipaddress": result.get("ipaddress"),
+               "resource_id": result.get("resource_id")}
         return 1, res
 
 
@@ -129,11 +130,12 @@ class NatGatewayAddController(BaseController):
         eip = data.pop("eip", None)
         provider_id = data.pop("provider_id", None)
 
-        rid, result = self.resource.create(rid, name, provider_id,
+        _, result = self.resource.create(rid, name, provider_id,
                                            vpc_id, subnet_id, eip,
                                            zone, region, extend_info=data)
 
-        return {"result": rid, "ipaddress": result.get("ipaddress")}
+        return {"id": rid, "ipaddress": result.get("ipaddress"),
+                "resource_id": result.get("resource_id")}
 
 
 class NatGatewayDeleteController(BaseController):
