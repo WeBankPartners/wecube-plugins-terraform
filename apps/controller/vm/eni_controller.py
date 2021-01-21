@@ -64,10 +64,13 @@ class EniController(BackendController):
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         data.update(extend_info)
-        result = self.resource.create(rid, name, provider_id, vpc_id,
-                                      subnet_id, security_group_id, ipaddress,
-                                      zone, region, extend_info=data)
-        return 1, result
+        _, result = self.resource.create(rid, name, provider_id, vpc_id,
+                                         subnet_id, security_group_id, ipaddress,
+                                         zone, region, extend_info=data)
+
+        res = {"id": rid, "resource_id": result.get("resource_id"),
+               "ipaddress": result.get("ipaddress")}
+        return 1, res
 
 
 class EniIdController(BackendIdController):
@@ -128,11 +131,13 @@ class EniAddController(BaseController):
         provider_id = data.pop("provider_id", None)
         security_group_id = validation.validate_list("security_group_id", data.pop("security_group_id", None))
 
-        result = self.resource.create(rid, name, provider_id, vpc_id,
-                                      subnet_id, security_group_id, ipaddress,
-                                      zone, region, extend_info=data)
+        _, result = self.resource.create(rid, name, provider_id, vpc_id,
+                                         subnet_id, security_group_id, ipaddress,
+                                         zone, region, extend_info=data)
 
-        return {"result": result}
+        res = {"id": rid, "resource_id": result.get("resource_id"),
+               "ipaddress": result.get("ipaddress")}
+        return res
 
 
 class EniDeleteController(BaseController):
