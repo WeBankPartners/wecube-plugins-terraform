@@ -179,14 +179,14 @@ url: /terraform/v1/configer/provider/{id}
                 "deleted_time":null,
                 "region":"ap-guangzhou",
                 "enabled":1,
-                "secret_id":"AKIDDKF4pUGFQdfqZCv3EIBvhWL3g8d5oRL8",
+                "secret_id":"dasdad",
                 "updated_time":"2020-12-15 16:12:30",
                 "provider_property":"{}",
                 "created_time":"2020-12-15 16:12:30",
                 "extend_info":"{}",
                 "plugin_source":null,
                 "is_init":1,
-                "secret_key":"qqjWIvMbksHXuEzZxOkX9g7Ni9WkqkNe",
+                "secret_key":"ddada",
                 "id":"76c8286bed1e444db7bee8ef5129ede5"
             }
         ]
