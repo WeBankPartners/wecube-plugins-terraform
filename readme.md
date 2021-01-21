@@ -24,7 +24,7 @@ virtualenv terraform_env
 ```
 mkdir /apps/wecube_plugins_terraform
 cd wecube_plugins_terraform
-git clone xxx
+git clone https://github.com/WeBankPartners/wecube-plugins-terraform.git
 pip install -r requirements.txt
 ```
 
