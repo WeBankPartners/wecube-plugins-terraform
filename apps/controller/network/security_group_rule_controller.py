@@ -77,12 +77,14 @@ class SecGroupRuleController(BackendController):
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         data.update(extend_info)
-        result = self.resource.create(rid, name, provider_id,
+        _, result = self.resource.create(rid, name, provider_id,
                                       security_group_id, type,
                                       cidr_ip, ip_protocol,
                                       ports, policy, description,
                                       zone, region, extend_info=data)
-        return 1, result
+
+        res = {"id": rid, "resource_id": result.get("resource_id")}
+        return 1, res
 
 
 class SecGroupRuleIdController(BackendIdController):
@@ -153,13 +155,14 @@ class SecGroupRuleAddController(BaseController):
         description = data.pop("description")
         provider_id = data.pop("provider_id", None)
 
-        result = self.resource.create(rid, name, provider_id,
+        _, result = self.resource.create(rid, name, provider_id,
                                       security_group_id, type,
                                       cidr_ip, ip_protocol,
                                       ports, policy, description,
                                       zone, region, extend_info=data)
 
-        return {"result": result}
+        res = {"id": rid, "resource_id": result.get("resource_id")}
+        return res
 
 
 class SecGroupRuleDeleteController(BaseController):

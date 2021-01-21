@@ -119,7 +119,7 @@ class SubnetAddController(BaseController):
         vpc_id = data.pop("vpc_id", None)
         provider_id = data.pop("provider_id", None)
 
-        result = self.resource.create(rid, name, cidr, provider_id,
+        _, result = self.resource.create(rid, name, cidr, provider_id,
                                       vpc_id, region, zone,
                                       extend_info=data)
 
