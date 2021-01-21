@@ -143,6 +143,9 @@ class ApiBase(TerraformResource):
         :param data:
         :return:
         '''
+        if data.get("extend_info"):
+            if isinstance(data["extend_info"], dict):
+                data["extend_info"] = format_json_dumps(data["extend_info"])
 
         return self.resource_object.update(rid, data)
 
