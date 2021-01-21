@@ -15,8 +15,8 @@ from apps.api.apibase import ApiBase
 class MysqlBackupApi(ApiBase):
     def __init__(self):
         super(MysqlBackupApi, self).__init__()
-        self.resource_name = "mysql"
-        self.resource_workspace = "mysqlbackup"
+        self.resource_name = "mysql_backup"
+        self.resource_workspace = "mysql_backup"
         self.resource_object = MysqlBackupObject()
         self.resource_keys_config = None
 
@@ -60,7 +60,6 @@ class MysqlBackupApi(ApiBase):
         self.resource_object.create(create_data={"id": rid, "provider": provider,
                                                  "region": region,
                                                  "rds_id": mysql_id,
-                                                 "engine": self.resource_name,
                                                  "backup_model": backup_model,
                                                  "backup_time": backup_time,
                                                  "status": status,

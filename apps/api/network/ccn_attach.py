@@ -104,7 +104,7 @@ class CCNAttachApi(ApiBase):
 
         instance_type = instance_type or "VPC"
         extend_info = extend_info or {}
-        create_data = {"instance_type": instance_type, "instance_region": instance_region}
+        create_data = {"instance_type": instance_type}
         label_name = self.resource_name + "_" + rid
 
         provider_object, provider_info = ProviderApi().provider_info(provider_id, region)

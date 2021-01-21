@@ -20,8 +20,8 @@ from apps.api.apibase import ApiBase
 class MysqlAccountApi(ApiBase):
     def __init__(self):
         super(MysqlAccountApi, self).__init__()
-        self.resource_name = "mysql"
-        self.resource_workspace = "mysqlaccount"
+        self.resource_name = "mysql_account"
+        self.resource_workspace = "mysql_account"
         self.resource_object = MysqlAccountObject()
         self.resource_keys_config = None
 
@@ -65,7 +65,6 @@ class MysqlAccountApi(ApiBase):
         password = base64.b64encode(password) if password else password
         self.resource_object.create(create_data={"id": rid, "provider": provider,
                                                  "region": region,
-                                                 "engine": self.resource_name,
                                                  "rds_id": mysql_id,
                                                  "name": username,
                                                  "password": password,
@@ -141,8 +140,8 @@ class MysqlAccountApi(ApiBase):
 class MysqlPrivilegeApi(ApiBase):
     def __init__(self):
         super(MysqlPrivilegeApi, self).__init__()
-        self.resource_name = "mysql"
-        self.resource_workspace = "mysqlaccount"
+        self.resource_name = "mysql_privilege"
+        self.resource_workspace = "mysql_privilege"
         self.resource_object = MysqlPrivilegeObject()
         self.resource_keys_config = None
 
@@ -191,7 +190,6 @@ class MysqlPrivilegeApi(ApiBase):
 
         self.resource_object.create(create_data={"id": rid, "provider": provider,
                                                  "region": region,
-                                                 "engine": self.resource_name,
                                                  "rds_id": mysql_id,
                                                  "account_name": username,
                                                  "database": database,
@@ -259,9 +257,9 @@ class MysqlPrivilegeApi(ApiBase):
 
         extend_info = extend_info or {}
         label_name = self.resource_name + "_" + rid
-        create_data = {}
+        create_data = {"username": username}
 
-        MysqlAccountObject().query_account(username=username)
+        MysqlAccountObject().query_account(username=username, where_data={"rds_id": mysql_id})
         provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
         _relations_id_dict = self.before_keys_checks(provider_object["name"], mysql_id)
 

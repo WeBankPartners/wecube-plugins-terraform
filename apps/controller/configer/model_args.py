@@ -113,6 +113,18 @@ resouce_property_models = {
     "ccn": [
         "name"
     ],
+    "ccn_attach": [
+        "instance_type",
+        "instance_region",
+        "instance_id",
+        "ccn_id"
+    ],
+    "ccn_bandwidth": [
+        "bandwidth",
+        "from_region",
+        "dest_region",
+        "ccn_id"
+    ],
     "instance": [
         "name",
         "hostname",
@@ -146,6 +158,27 @@ resouce_property_models = {
         "second_slave_zone",
         "password",
         "force_delete"
+    ],
+    "mysql_database": [
+        "name",
+        "mysql_id"
+    ],
+    "mysql_account": [
+        "usrename",
+        "password",
+        "mysql_id"
+    ],
+    "mysql_privilege": [
+        "usrename",
+        "mysql_id",
+        "database_columns",
+        "database",
+        "privileges"
+    ],
+    "mysql_backup": [
+        "backup_model",
+        "mysql_id",
+        "backup_time"
     ],
     "mariadb": [
         "name",
@@ -315,6 +348,12 @@ output_property_models = {
     "ccn": [
         "resource_id"
     ],
+    "ccn_attach": [
+        "resource_id"
+    ],
+    "ccn_bandwidth": [
+        "resource_id"
+    ],
     "instance": [
         "resource_id",
         "ipaddress",
@@ -324,6 +363,18 @@ output_property_models = {
         "resource_id",
         "ipaddress",
         "port"
+    ],
+"mysql_database": [
+        "resource_id",
+    ],
+    "mysql_account": [
+        "resource_id",
+    ],
+    "mysql_privilege": [
+        "resource_id",
+    ],
+    "mysql_backup": [
+        "resource_id",
     ],
     "mariadb": [
         "resource_id",

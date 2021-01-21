@@ -17,7 +17,7 @@ from apps.api.apibase import ApiBase
 class MysqlDatabaseApi(ApiBase):
     def __init__(self):
         super(MysqlDatabaseApi, self).__init__()
-        self.resource_name = "mysql"
+        self.resource_name = "mysql_database"
         self.resource_workspace = "mysql_database"
         self.resource_object = MysqlDatabaseObject()
         self.resource_keys_config = None
@@ -61,7 +61,6 @@ class MysqlDatabaseApi(ApiBase):
 
         self.resource_object.create(create_data={"id": rid, "provider": provider,
                                                  "region": region,
-                                                 "engine": self.resource_name,
                                                  "rds_id": mysql_id,
                                                  "name": name,
                                                  "status": status,
