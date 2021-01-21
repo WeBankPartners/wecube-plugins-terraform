@@ -1526,7 +1526,7 @@ class KVStore(Base):
         self.version = data.get("version")
         self.zone = data.get("zone")
 
-p = dir(RdsBackup)
-for x in p:
-    if not x.startswith("_") and x not in ["to_dict", "metadata"]:
-        print('self.%s = data.get("%s")' % (x, x))
+# p = dir(RdsBackup)
+# for x in p:
+#     if not x.startswith("_") and x not in ["to_dict", "metadata"]:
+#         print('self.%s = data.get("%s")' % (x, x))

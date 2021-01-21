@@ -8,7 +8,7 @@ from lib.uuid_util import get_uuid
 from core import local_exceptions
 from apps.background.models.dbserver import CCNManager
 from apps.background.models.dbserver import CCNAttachManager
-from apps.background.models.dbserver import CCNBandwithManager
+from apps.background.models.dbserver import CCNBandwidthManager
 
 
 class _ConnectNetBase(object):
@@ -85,4 +85,4 @@ class CCNAttachObject(_ConnectNetBase):
 class CCNBandwidthObject(_ConnectNetBase):
     def __init__(self):
         super(CCNBandwidthObject, self).__init__()
-        self.resource = CCNBandwithManager()
+        self.resource = CCNBandwidthManager()

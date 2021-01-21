@@ -11,6 +11,11 @@ urlpatterns = [
     url(r'^backend/lb/create$', lb_controller.LBAddController()),
     url(r'^backend/lb/delete$', lb_controller.LBDeleteController()),
 
+    url(r'^lb_listener$', listener_controller.LBListenerController()),
+    url(r'^lb_listener/(?P<rid>[\w-]+)$', listener_controller.LBListenerIdController()),
+    url(r'^backend/lb_listener/create$', listener_controller.LBListenerAddController()),
+    url(r'^backend/lb_listener/delete$', listener_controller.LBListenerDeleteController()),
+
     url(r'^lb_attach$', lb_attach_controller.LBAttachController()),
     url(r'^lb_attach/(?P<rid>[\w-]+)$', lb_attach_controller.LBAttachIdController()),
     url(r'^lb_attach/(?P<rid>[\w-]+)/(?P<instance>[\w-]+)$', lb_attach_controller.LBDetachController()),
