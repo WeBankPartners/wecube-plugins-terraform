@@ -155,9 +155,7 @@ class EniApi(ApiBase):
         if ipaddress:
             _update_data["ipaddress"] = ipaddress
 
-        self.update_data(rid, data=_update_data)
-
-        return rid
+        return self.update_data(rid, data=_update_data)
 
     def destory(self, rid):
         '''
