@@ -67,7 +67,7 @@ class MysqlBackupController(BackendController):
                                       mysql_id, backup_model, backup_time,
                                       zone, region, extend_info=data)
 
-        res = {"id": rid, "resource_id": result.get("resource_id")}
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return 1, res
 
 
@@ -130,7 +130,7 @@ class MysqlBackupAddController(BaseController):
                                       mysql_id, backup_model, backup_time,
                                       zone, region, extend_info=data)
 
-        res = {"id": rid, "resource_id": result.get("resource_id")}
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return res
 
 

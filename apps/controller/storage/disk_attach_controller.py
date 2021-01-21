@@ -63,7 +63,7 @@ class DiskAttachController(BackendController):
                                       disk_id=disk_id, instance_id=instance_id,
                                       zone=zone, region=region, extend_info=data)
 
-        res = {"id": rid, "resource_id": result.get("resource_id")}
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return 1, res
 
 
@@ -122,7 +122,7 @@ class DiskAttachAddController(BaseController):
                                       disk_id=disk_id, instance_id=instance_id,
                                       zone=zone, region=region, extend_info=data)
 
-        res = {"id": rid, "resource_id": result.get("resource_id")}
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return res
 
 

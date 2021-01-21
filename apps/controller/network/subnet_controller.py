@@ -64,7 +64,7 @@ class SubnetController(BackendController):
                                       vpc_id, region, zone,
                                       extend_info=data)
 
-        res = {"id": rid, "resource_id": result.get("resource_id")}
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return 1, res
 
 
@@ -123,7 +123,7 @@ class SubnetAddController(BaseController):
                                       vpc_id, region, zone,
                                       extend_info=data)
 
-        res = {"id": rid, "resource_id": result.get("resource_id")}
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return res
 
 

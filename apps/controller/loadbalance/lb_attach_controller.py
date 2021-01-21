@@ -70,7 +70,7 @@ class LBAttachController(BackendController):
                                          lb_id, listener_id, backend_servers,
                                          zone, region, extend_info=data)
 
-        return 1, {"id": rid, "resource_id": result.get("resource_id")}
+        return 1, {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
 
 
 class LBAttachIdController(BackendIdController):
@@ -144,7 +144,7 @@ class LBAttachAddController(BaseController):
                                          lb_id, listener_id, backend_servers,
                                          zone, region, extend_info=data)
 
-        return {"id": rid, "resource_id": result.get("resource_id")}
+        return {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
 
 
 class LBAttachDeleteController(BaseController):

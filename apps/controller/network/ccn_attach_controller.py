@@ -68,7 +68,7 @@ class CCNAttachController(BackendController):
                                          instance_type, instance_region,
                                          region, zone, extend_info=data)
 
-        res = {"id": rid, "resource_id": result.get("resource_id")}
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return 1, res
 
 
@@ -132,7 +132,7 @@ class CCNAttachAddController(BaseController):
                                          instance_type, instance_region,
                                          region, zone, extend_info=data)
 
-        res = {"id": rid, "resource_id": result.get("resource_id")}
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return res
 
 

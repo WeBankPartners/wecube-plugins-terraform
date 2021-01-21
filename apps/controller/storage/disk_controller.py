@@ -62,7 +62,7 @@ class DiskController(BackendController):
         _, result = self.resource.create(rid, name, provider_id, disktype, size,
                                       zone, region, extend_info=data)
 
-        res = {"id": rid, "resource_id": result.get("resource_id")}
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return 1, res
 
 
@@ -120,7 +120,7 @@ class DiskAddController(BaseController):
         _, result = self.resource.create(rid, name, provider_id, disktype, size,
                                       zone, region, extend_info=data)
 
-        res = {"id": rid, "resource_id": result.get("resource_id")}
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return res
 
 

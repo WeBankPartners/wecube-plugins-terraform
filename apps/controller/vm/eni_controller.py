@@ -68,7 +68,7 @@ class EniController(BackendController):
                                          subnet_id, security_group_id, ipaddress,
                                          zone, region, extend_info=data)
 
-        res = {"id": rid, "resource_id": result.get("resource_id"),
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64],
                "ipaddress": result.get("ipaddress")}
         return 1, res
 
@@ -135,7 +135,7 @@ class EniAddController(BaseController):
                                          subnet_id, security_group_id, ipaddress,
                                          zone, region, extend_info=data)
 
-        res = {"id": rid, "resource_id": result.get("resource_id"),
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64],
                "ipaddress": result.get("ipaddress")}
         return res
 

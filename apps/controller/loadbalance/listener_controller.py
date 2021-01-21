@@ -73,7 +73,7 @@ class LBListenerController(BackendController):
                                          health_check, health_check_uri,
                                          zone, region, extend_info=data)
 
-        res = {"id": rid, "resource_id": result.get("resource_id")}
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return 1, res
 
 
@@ -142,7 +142,7 @@ class LBListenerAddController(BaseController):
                                          health_check, health_check_uri,
                                          zone, region, extend_info=data)
 
-        res = {"id": rid, "resource_id": result.get("resource_id")}
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return res
 
 

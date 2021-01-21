@@ -59,7 +59,7 @@ class SecGroupController(BackendController):
         _, result = self.resource.create(rid, name, provider_id, vpc_id,
                                       zone, region, extend_info=data)
 
-        res = {"id": rid, "resource_id": result.get("resource_id")}
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return 1, res
 
 
@@ -115,7 +115,7 @@ class SecGroupAddController(BaseController):
         _, result = self.resource.create(rid, name, provider_id, vpc_id,
                                       zone, region, extend_info=data)
 
-        res = {"id": rid, "resource_id": result.get("resource_id")}
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return res
 
 

@@ -93,7 +93,7 @@ class InstanceController(BackendController):
                                          subnet_id=subnet_id, zone=zone,
                                          region=region, extend_info=data)
 
-        res = {"id": rid, "resource_id": result.get("resource_id"),
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64],
                "ipaddress": result.get("ipaddress")}
         return 1, res
 
@@ -220,7 +220,7 @@ class InstanceAddController(BaseController):
                                          subnet_id=subnet_id, zone=zone,
                                          region=region, extend_info=data)
 
-        res = {"id": rid, "resource_id": result.get("resource_id"),
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64],
                "ipaddress": result.get("ipaddress")}
         return res
 

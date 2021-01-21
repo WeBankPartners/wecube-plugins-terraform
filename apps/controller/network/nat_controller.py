@@ -66,7 +66,7 @@ class NatGatewayController(BackendController):
                                            vpc_id, subnet_id, eip,
                                            zone, region, extend_info=data)
         res = {"id": rid, "ipaddress": result.get("ipaddress"),
-               "resource_id": result.get("resource_id")}
+               "resource_id": str(result.get("resource_id"))[:64]}
         return 1, res
 
 
@@ -135,7 +135,7 @@ class NatGatewayAddController(BaseController):
                                            zone, region, extend_info=data)
 
         return {"id": rid, "ipaddress": result.get("ipaddress"),
-                "resource_id": result.get("resource_id")}
+                "resource_id": str(result.get("resource_id"))[:64]}
 
 
 class NatGatewayDeleteController(BaseController):

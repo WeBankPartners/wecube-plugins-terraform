@@ -67,7 +67,7 @@ class EipAssociationController(BackendController):
                                       private_ip=private_ip, zone=zone,
                                       region=region, extend_info=data)
 
-        res = {"id": rid, "resource_id": result.get("resource_id")}
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return 1, res
 
 
@@ -132,7 +132,7 @@ class EipAssociationAddController(BaseController):
                                       private_ip=private_ip, zone=zone,
                                       region=region, extend_info=data)
 
-        res = {"id": rid, "resource_id": result.get("resource_id")}
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return 1, res
 
 

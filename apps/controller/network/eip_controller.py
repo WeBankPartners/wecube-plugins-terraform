@@ -57,7 +57,7 @@ class EipController(BackendController):
         _, result = self.resource.create(rid, name, provider_id,
                                          zone, region, extend_info=data)
 
-        res = {"id": rid, "resource_id": result.get("resource_id"),
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64],
                "ipaddress": result.get("ipaddress")}
         return 1, res
 
@@ -111,7 +111,7 @@ class EipAddController(BaseController):
         _, result = self.resource.create(rid, name, provider_id,
                                          zone, region, extend_info=data)
 
-        res = {"id": rid, "resource_id": result.get("resource_id"),
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64],
                "ipaddress": result.get("ipaddress")}
         return res
 

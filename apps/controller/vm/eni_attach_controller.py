@@ -65,7 +65,7 @@ class EniAttachController(BackendController):
                                       instance_id=instance_id,
                                       zone=zone, region=region, extend_info=data)
 
-        res = {"id": rid, "resource_id": result.get("resource_id"),
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64],
                "instance_id": instance_id}
         return 1, res
 
@@ -126,7 +126,7 @@ class EniAttachAddController(BaseController):
                                       instance_id=instance_id,
                                       zone=zone, region=region, extend_info=data)
 
-        res = {"id": rid, "resource_id": result.get("resource_id"),
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64],
                "instance_id": instance_id}
         return res
 

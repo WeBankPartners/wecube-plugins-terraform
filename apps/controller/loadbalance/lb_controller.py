@@ -67,7 +67,7 @@ class LBController(BackendController):
                                            zone=zone, region=region, extend_info=data)
 
         return 1, {"id": rid, "ipaddress": result.get("ipaddress"),
-                   "resource_id": result.get("resource_id")}
+                   "resource_id": str(result.get("resource_id"))[:64]}
 
 
 class LBIdController(BackendIdController):
@@ -151,7 +151,7 @@ class LBAddController(BaseController):
                                            zone=zone, region=region, extend_info=data)
 
         return {"id": rid, "ipaddress": result.get("ipaddress"),
-                "resource_id": result.get("resource_id")}
+                "resource_id": str(result.get("resource_id"))[:64]}
 
 
 class LBDeleteController(BaseController):

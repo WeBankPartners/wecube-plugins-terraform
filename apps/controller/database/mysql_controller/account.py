@@ -63,7 +63,7 @@ class MysqlAccountController(BackendController):
                                       mysql_id, password,
                                       zone, region, extend_info=data)
 
-        res = {"id": rid, "resource_id": result.get("resource_id")}
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return 1, res
 
 
@@ -121,7 +121,7 @@ class MysqlAccountAddController(BaseController):
                                       mysql_id, password,
                                       zone, region, extend_info=data)
 
-        res = {"id": rid, "resource_id": result.get("resource_id")}
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return res
 
 

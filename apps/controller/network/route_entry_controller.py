@@ -70,7 +70,7 @@ class RouteEntryController(BackendController):
                                       vpc_id, route_table, next_type, next_hub,
                                       destination=destination, extend_info=data)
 
-        res = {"id": rid, "resource_id": result.get("resource_id")}
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return 1, res
 
 
@@ -135,7 +135,7 @@ class RouteEntryAddController(BaseController):
                                       vpc_id, route_table, next_type, next_hub,
                                       destination=destination, extend_info=data)
 
-        res = {"id": rid, "resource_id": result.get("resource_id")}
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return res
 
 

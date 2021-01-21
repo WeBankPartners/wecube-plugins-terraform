@@ -56,7 +56,7 @@ class VPCController(BackendController):
         data.update(extend_info)
         _, result = self.resource.create(rid, name, cidr, provider_id, region=region, extend_info=data)
 
-        res = {"id": rid, "resource_id": result.get("resource_id")}
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return 1, res
 
 
@@ -109,7 +109,7 @@ class VPCAddController(BaseController):
 
         _, result = self.resource.create(rid, name, cidr, provider_id, region=region, extend_info=data)
 
-        res = {"id": rid, "resource_id": result.get("resource_id")}
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return res
 
 
