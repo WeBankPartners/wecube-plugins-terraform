@@ -45,5 +45,5 @@ class InstanceTypeApi(object):
             provider_info = ProviderObject().provider_object(provider_id=data.get("provider_id"))
             data["provider"] = provider_info.get("provider")
 
-        self.resource_object.update(rid, data)
+        return self.resource_object.update(rid, data)
 

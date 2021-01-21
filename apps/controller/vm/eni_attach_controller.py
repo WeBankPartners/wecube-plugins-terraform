@@ -130,7 +130,7 @@ class EniDetachController(BaseController):
     name = "EniDetach"
     resource_describe = "EniDetach"
     allow_methods = ("POST",)
-    resource = EniAttachApi()
+    resource = ENIAttachApi()
 
     def before_handler(self, request, data, **kwargs):
         validation.not_allowed_null(data=data,

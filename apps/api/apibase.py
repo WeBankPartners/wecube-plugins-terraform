@@ -144,7 +144,7 @@ class ApiBase(TerraformResource):
         :return:
         '''
 
-        self.resource_object.update(rid, data)
+        return self.resource_object.update(rid, data)
 
     def _fetch_id(self, result):
         '''
