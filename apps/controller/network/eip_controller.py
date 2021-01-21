@@ -54,10 +54,11 @@ class EipController(BackendController):
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         data.update(extend_info)
-        rid, result = self.resource.create(rid, name, provider_id,
-                                           zone, region, extend_info=data)
+        _, result = self.resource.create(rid, name, provider_id,
+                                         zone, region, extend_info=data)
 
-        res = {"id": rid, "ipaddress": result.get("ipaddress")}
+        res = {"id": rid, "resource_id": result.get("resource_id"),
+               "ipaddress": result.get("ipaddress")}
         return 1, res
 
 
@@ -107,10 +108,12 @@ class EipAddController(BaseController):
         region = data.pop("region", None)
         provider_id = data.pop("provider_id", None)
 
-        rid, result = self.resource.create(rid, name, provider_id,
-                                           zone, region, extend_info=data)
+        _, result = self.resource.create(rid, name, provider_id,
+                                         zone, region, extend_info=data)
 
-        return {"result": rid, "ipaddress": result.get("ipaddress")}
+        res = {"id": rid, "resource_id": result.get("resource_id"),
+               "ipaddress": result.get("ipaddress")}
+        return res
 
 
 class EipDeleteController(BaseController):

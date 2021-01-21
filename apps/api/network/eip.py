@@ -108,6 +108,4 @@ class EipApi(ApiBase):
         if not _update_data.get("resource_id"):
             _update_data["resource_id"] = self._fetch_id(result)
 
-        _, data = self.update_data(rid, data=_update_data)
-
-        return rid, data
+        return self.update_data(rid, data=_update_data)
