@@ -83,7 +83,7 @@ class ProviderIdController(BackendIdController):
 
     def before_handler(self, request, data, **kwargs):
         validation.allowed_key(data, ["secret_id", "secret_key", "enabled",
-                                      "name", "extend_info", "provider_property"])
+                                      "extend_info", "provider_property"])
 
         validation.validate_string("name", data.get("name"))
         validation.validate_string("secret_id", data.get("secret_id"))
