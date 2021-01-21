@@ -83,16 +83,19 @@ class InstanceController(BackendController):
         data_disks = validation.validate_dict("data_disks", data.pop("data_disks", None))
 
         data.update(extend_info)
-        result = self.resource.create(rid, name=name, provider_id=provider_id,
-                                      hostname=hostname, image=image,
-                                      instance_type=instance_type,
-                                      password=password, vpc_id=vpc_id,
-                                      security_group_id=security_group_id,
-                                      data_disks=data_disks,
-                                      disk_type=disk_type, disk_size=disk_size,
-                                      subnet_id=subnet_id, zone=zone,
-                                      region=region, extend_info=data)
-        return 1, result
+        _, result = self.resource.create(rid, name=name, provider_id=provider_id,
+                                         hostname=hostname, image=image,
+                                         instance_type=instance_type,
+                                         password=password, vpc_id=vpc_id,
+                                         security_group_id=security_group_id,
+                                         data_disks=data_disks,
+                                         disk_type=disk_type, disk_size=disk_size,
+                                         subnet_id=subnet_id, zone=zone,
+                                         region=region, extend_info=data)
+
+        res = {"id": rid, "resource_id": result.get("resource_id"),
+               "ipaddress": result.get("ipaddress")}
+        return 1, res
 
 
 class InstanceIdController(BackendIdController):
@@ -207,17 +210,19 @@ class InstanceAddController(BaseController):
         security_group_id = validation.validate_list("security_group_id", data.pop("security_group_id", None))
         data_disks = validation.validate_dict("data_disks", data.pop("data_disks", None))
 
-        result = self.resource.create(rid, name=name, provider_id=provider_id,
-                                      hostname=hostname, image=image,
-                                      instance_type=instance_type,
-                                      password=password, vpc_id=vpc_id,
-                                      security_group_id=security_group_id,
-                                      data_disks=data_disks,
-                                      disk_type=disk_type, disk_size=disk_size,
-                                      subnet_id=subnet_id, zone=zone,
-                                      region=region, extend_info=data)
+        _, result = self.resource.create(rid, name=name, provider_id=provider_id,
+                                         hostname=hostname, image=image,
+                                         instance_type=instance_type,
+                                         password=password, vpc_id=vpc_id,
+                                         security_group_id=security_group_id,
+                                         data_disks=data_disks,
+                                         disk_type=disk_type, disk_size=disk_size,
+                                         subnet_id=subnet_id, zone=zone,
+                                         region=region, extend_info=data)
 
-        return {"result": result}
+        res = {"id": rid, "resource_id": result.get("resource_id"),
+               "ipaddress": result.get("ipaddress")}
+        return res
 
 
 class InstanceDeleteController(BaseController):
@@ -301,5 +306,6 @@ class InstanceStartController(BaseController):
         else:
             raise local_exceptions.ValueValidateError("action", "VM 开关机操作，请使用合法值 start/stop")
 
-        result.update({"result": count})
-        return result
+        res = {"result": count, "action": action,
+               "power_status": result.get("power_status")}
+        return res

@@ -233,9 +233,8 @@ class InstanceApi(ApiBase):
                         "resource_id": resource_id,
                         "result_json": format_json_dumps(result)}
         _update_data.update(self._read_output_result(result))
-        self.update_data(rid, data=_update_data)
 
-        return rid
+        return self.update_data(rid, data=_update_data)
 
     def destory(self, rid, force_delete=False):
         '''
