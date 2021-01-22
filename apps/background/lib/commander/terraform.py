@@ -79,7 +79,9 @@ class TerraformDriver(object):
     def init_resource_dir(self, dir_path, provider):
         provider_path = self.init_provider_path(provider)
         if not os.path.exists(os.path.join(dir_path, "versions.tf")):
-            command("cp %s %s" % (os.path.join(provider_path, "versions.tf"), dir_path))
+            if os.path.exists(os.path.join(provider_path, "versions.tf")):
+                command("cp %s %s" % (os.path.join(provider_path, "versions.tf"), dir_path))
+
             self.init(dir_path=dir_path)
 
     def _format_cmd(self, cmd, args=None):
