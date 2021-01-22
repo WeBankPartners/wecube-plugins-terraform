@@ -160,7 +160,7 @@ class ApiBase(TerraformResource):
             _data = result.get("resources")[0]
             _instances = _data.get("instances")[0]
             _attributes = _instances.get("attributes")
-            return _attributes.get("id") or "0000000"
+            return _attributes.get("id")[:62] or "0000000"
         except:
             logger.info(traceback.format_exc())
             raise ValueError("result can not fetch id")
@@ -181,6 +181,11 @@ class ApiBase(TerraformResource):
                 _out_dict = read_output(key=column, define=models.get(column),
                                         result=res.get("value"))
                 ext_result.update(_out_dict)
+
+            if "resource_id" in ext_result.keys():
+                if len(ext_result["resource_id"]) > 63:
+                    ext_result["resource_id"] = ext_result["resource_id"][:62]
+                    logger.info("resource id length more than 64, will truncated for resource_id")
 
             logger.info(format_json_dumps(ext_result))
             return ext_result
