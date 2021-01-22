@@ -2,6 +2,7 @@
 
 from django.conf.urls import include, url
 import disk_controller
+import object_storage_controller
 import disk_attach_controller
 
 urlpatterns = [
@@ -15,5 +16,9 @@ urlpatterns = [
     url(r'^backend/disk/attach$', disk_attach_controller.DiskAttachAddController()),
     url(r'^backend/disk/detach$', disk_attach_controller.DiskDetachController()),
 
+    url(r'^object_storage$', object_storage_controller.ObjectStorageController()),
+    url(r'^object_storage/(?P<rid>[\w-]+)$', object_storage_controller.ObjectStorageIdController()),
+    url(r'^backend/object_storage/create$', object_storage_controller.ObjectStorageAddController()),
+    url(r'^backend/object_storage/delete$', object_storage_controller.ObjectStorageDeleteController()),
 
 ]

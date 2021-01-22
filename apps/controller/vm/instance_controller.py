@@ -59,7 +59,7 @@ class InstanceController(BackendController):
         validation.validate_int("disk_size", data.get("disk_size"))
         validation.validate_string("provider_id", data.get("provider_id"))
         validation.validate_string("password", data.get("password"))
-        validation.validate_list("security_group_id", data.get("security_group_id"))
+        # validation.validate_list("security_group_id", data.get("security_group_id"))
         validation.validate_string("vpc_id", data.get("vpc_id"))
         validation.validate_dict("data_disks", data.get("data_disks"))
         validation.validate_dict("extend_info", data.get("extend_info"))
@@ -78,7 +78,7 @@ class InstanceController(BackendController):
         provider_id = data.pop("provider_id", None)
         password = data.pop("password", None)
         vpc_id = data.pop("vpc_id", None)
-        security_group_id = validation.validate_list("security_group_id", data.pop("security_group_id", None))
+        security_group_id = data.pop("security_group_id", None)
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
         data_disks = validation.validate_dict("data_disks", data.pop("data_disks", None))
 
@@ -141,7 +141,7 @@ class InstanceIdController(BackendIdController):
         return self.resource.update(rid, name, instance_type, image, security_group_id, extend_info)
 
 
-class InstanceActionController(BackendController):
+class InstanceActionController(BackendIdController):
     allow_methods = ('PATCH',)
     resource = InstanceApi()
 
@@ -158,7 +158,7 @@ class InstanceActionController(BackendController):
         action = data.get("action", None)
         if action.lower() == "start":
             return self.resource.start(rid)
-        elif action.lower == "stop":
+        elif action.lower() == "stop":
             return self.resource.stop(rid)
         else:
             raise local_exceptions.ValueValidateError("action", "VM 开关机操作，请使用合法值 start/stop")

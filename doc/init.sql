@@ -455,6 +455,7 @@ DROP TABLE IF EXISTS `object_storage`;
 
 CREATE TABLE `object_storage` (
   `id` VARCHAR(36) NOT NULL,
+  `provider_id` VARCHAR(36) DEFAULT NULL,
   `provider` VARCHAR(32) NOT NULL,
   `region` VARCHAR(64) DEFAULT NULL,
   `zone` VARCHAR(64) NOT NULL,
