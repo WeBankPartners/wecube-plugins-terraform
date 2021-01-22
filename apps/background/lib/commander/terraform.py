@@ -81,6 +81,8 @@ class TerraformDriver(object):
         if not os.path.exists(os.path.join(dir_path, "versions.tf")):
             if os.path.exists(os.path.join(provider_path, "versions.tf")):
                 command("cp %s %s" % (os.path.join(provider_path, "versions.tf"), dir_path))
+            else:
+                logger.info("versions.tf file not exists")
 
             self.init(dir_path=dir_path)
 
