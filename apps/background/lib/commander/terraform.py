@@ -84,7 +84,7 @@ class TerraformDriver(object):
             else:
                 logger.info("versions.tf file not exists")
 
-            self.init(dir_path=dir_path)
+        return self.init(dir_path=dir_path)
 
     def _format_cmd(self, cmd, args=None):
         if not args:

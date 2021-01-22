@@ -110,6 +110,8 @@ class ObjectStorageApi(ApiBase):
                        status="applying", result_json={})
 
         self.write_define(rid, _path, define_json=define_json)
+
+        self.init_workspace(_path, provider_object["name"])
         result = self.run(_path)
 
         result = self.formate_result(result)

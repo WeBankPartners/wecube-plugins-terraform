@@ -31,9 +31,11 @@ class TerraformResource(object):
         _path = os.path.join(TERRAFORM_BASE_PATH, provider, region, self.resource_workspace, rid)
         if not os.path.exists(_path):
             os.makedirs(_path)
-            self.terraformDriver.init_resource_dir(dir_path=_path, provider=provider)
 
         return _path
+
+    def init_workspace(self, _path, provider):
+        return self.terraformDriver.init_resource_dir(dir_path=_path, provider=provider)
 
     def write_define(self, rid, path, define_json):
         '''
