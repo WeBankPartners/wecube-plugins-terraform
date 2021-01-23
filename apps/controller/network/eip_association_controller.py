@@ -36,11 +36,11 @@ class EipAssociationController(BackendController):
                                       "instance_id", "private_ip",
                                       "zone", "region", "extend_info"])
         validation.not_allowed_null(data=data,
-                                    keys=["region", "provider_id", "name", "eip_id"]
+                                    keys=["region", "provider_id", "eip_id", "instance_id"]
                                     )
 
         validation.validate_string("id", data.get("id"))
-        validation.validate_string("name", data["name"])
+        validation.validate_string("name", data.get("name"))
         validation.validate_string("region", data["region"])
         validation.validate_string("zone", data.get("zone"))
         validation.validate_string("eip_id", data.get("eip_id"))
@@ -57,15 +57,15 @@ class EipAssociationController(BackendController):
         eip_id = data.pop("eip_id", None)
         provider_id = data.pop("provider_id", None)
         instance_id = data.pop("instance_id", None)
-        eni_id = data.pop("eni_id", None) # 统一使用instance id 不使用eni
-        private_ip = data.pop("private_ip")
+        eni_id = data.pop("eni_id", None)  # 统一使用instance id 不使用eni
+        private_ip = data.pop("private_ip", None)
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         data.update(extend_info)
         _, result = self.resource.create(rid, name, provider_id, eip_id,
-                                      instance_id=instance_id, eni_id=eni_id,
-                                      private_ip=private_ip, zone=zone,
-                                      region=region, extend_info=data)
+                                         instance_id=instance_id, eni_id=eni_id,
+                                         private_ip=private_ip, zone=zone,
+                                         region=region, extend_info=data)
 
         res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return 1, res
@@ -102,7 +102,7 @@ class EipAssociationAddController(BaseController):
                                     )
 
         validation.validate_string("id", data.get("id"))
-        validation.validate_string("name", data["name"])
+        validation.validate_string("name", data.get("name"))
         validation.validate_string("region", data["region"])
         validation.validate_string("zone", data.get("zone"))
         validation.validate_string("eip_id", data.get("eip_id"))
@@ -128,9 +128,9 @@ class EipAssociationAddController(BaseController):
 
         data.update(extend_info)
         _, result = self.resource.create(rid, name, provider_id, eip_id,
-                                      instance_id=instance_id, eni_id=eni_id,
-                                      private_ip=private_ip, zone=zone,
-                                      region=region, extend_info=data)
+                                         instance_id=instance_id, eni_id=eni_id,
+                                         private_ip=private_ip, zone=zone,
+                                         region=region, extend_info=data)
 
         res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return 1, res

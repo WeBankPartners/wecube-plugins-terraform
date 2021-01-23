@@ -879,7 +879,7 @@ class BucketObject(Base):
 
 
 class NetworkInterface(Base):
-    __tablename__ = "network_interface"
+    __tablename__ = "vm_network_interface"
 
     id = Column(String(36), primary_key=True)
     provider_id = Column(String(36))
@@ -890,7 +890,6 @@ class NetworkInterface(Base):
     name = Column(String(64))
     subnet_id = Column(String(36))
     ipaddress = Column(String(36))
-    type = Column(String(36))
     extend_info = Column(String(1024))
     define_json = Column(String(1024))
     status = Column(String(36))
@@ -923,7 +922,7 @@ class NetworkInterface(Base):
 
 
 class NetworkInterfaceAttach(Base):
-    __tablename__ = "network_interface_attach"
+    __tablename__ = "vm_network_interface_attach"
 
     id = Column(String(36), primary_key=True)
     provider_id = Column(String(36))

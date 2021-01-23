@@ -36,15 +36,15 @@ class DiskAttachController(BackendController):
                                       "zone", "region", "extend_info"])
         validation.not_allowed_null(data=data,
                                     keys=["region", "provider_id", "zone",
-                                          "disk_id", "instance_id", "name"]
+                                          "disk_id", "instance_id"]
                                     )
 
         validation.validate_string("id", data.get("id"))
-        validation.validate_string("name", data["name"])
+        validation.validate_string("name", data.get("name"))
         validation.validate_string("region", data["region"])
         validation.validate_string("zone", data.get("zone"))
         validation.validate_string("disk_id", data["disk_id"])
-        validation.validate_int("instance_id", data.get("instance_id"))
+        validation.validate_string("instance_id", data.get("instance_id"))
         validation.validate_string("provider_id", data.get("provider_id"))
         validation.validate_dict("extend_info", data.get("extend_info"))
 
@@ -95,15 +95,15 @@ class DiskAttachAddController(BaseController):
     def before_handler(self, request, data, **kwargs):
         validation.not_allowed_null(data=data,
                                     keys=["region", "provider_id", "zone",
-                                          "disk_id", "instance_id", "name"]
+                                          "disk_id", "instance_id"]
                                     )
 
         validation.validate_string("id", data.get("id"))
-        validation.validate_string("name", data["name"])
+        validation.validate_string("name", data.get("name"))
         validation.validate_string("region", data["region"])
         validation.validate_string("zone", data.get("zone"))
         validation.validate_string("disk_id", data["disk_id"])
-        validation.validate_int("instance_id", data.get("instance_id"))
+        validation.validate_string("instance_id", data.get("instance_id"))
         validation.validate_string("provider_id", data.get("provider_id"))
 
     def response_templete(self, data):

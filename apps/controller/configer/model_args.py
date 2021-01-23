@@ -364,7 +364,7 @@ output_property_models = {
         "ipaddress",
         "port"
     ],
-"mysql_database": [
+    "mysql_database": [
         "resource_id",
     ],
     "mysql_account": [

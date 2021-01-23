@@ -60,7 +60,7 @@ class DiskController(BackendController):
 
         data.update(extend_info)
         _, result = self.resource.create(rid, name, provider_id, disktype, size,
-                                      zone, region, extend_info=data)
+                                         zone, region, extend_info=data)
 
         res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return 1, res
@@ -118,7 +118,7 @@ class DiskAddController(BaseController):
         provider_id = data.pop("provider_id", None)
 
         _, result = self.resource.create(rid, name, provider_id, disktype, size,
-                                      zone, region, extend_info=data)
+                                         zone, region, extend_info=data)
 
         res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return res

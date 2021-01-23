@@ -120,6 +120,8 @@ def validate_list(key, value, minlen=None, maxlen=None):
     if maxlen and len(value) > maxlen:
         raise ValueError("%s 长度不能大于 %s" % (key, maxlen))
 
+    return value
+
 
 def validate_dict(key, value, minlen=None, maxlen=None):
     if value is None:

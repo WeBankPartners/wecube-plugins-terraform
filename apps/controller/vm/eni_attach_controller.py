@@ -45,7 +45,7 @@ class EniAttachController(BackendController):
         validation.validate_string("region", data["region"])
         validation.validate_string("zone", data.get("zone"))
         validation.validate_string("network_interface_id", data["network_interface_id"])
-        validation.validate_int("instance_id", data.get("instance_id"))
+        validation.validate_string("instance_id", data.get("instance_id"))
         validation.validate_string("provider_id", data.get("provider_id"))
         validation.validate_dict("extend_info", data.get("extend_info"))
 
@@ -61,9 +61,9 @@ class EniAttachController(BackendController):
 
         data.update(extend_info)
         _, result = self.resource.attach(rid, name=name, provider_id=provider_id,
-                                      network_interface_id=network_interface_id,
-                                      instance_id=instance_id,
-                                      zone=zone, region=region, extend_info=data)
+                                         network_interface_id=network_interface_id,
+                                         instance_id=instance_id,
+                                         zone=zone, region=region, extend_info=data)
 
         res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64],
                "instance_id": instance_id}
@@ -106,7 +106,7 @@ class EniAttachAddController(BaseController):
         validation.validate_string("region", data["region"])
         validation.validate_string("zone", data.get("zone"))
         validation.validate_string("network_interface_id", data["network_interface_id"])
-        validation.validate_int("instance_id", data.get("instance_id"))
+        validation.validate_string("instance_id", data.get("instance_id"))
         validation.validate_string("provider_id", data.get("provider_id"))
 
     def response_templete(self, data):
@@ -122,9 +122,9 @@ class EniAttachAddController(BaseController):
         provider_id = data.pop("provider_id", None)
 
         _, result = self.resource.attach(rid, name=name, provider_id=provider_id,
-                                      network_interface_id=network_interface_id,
-                                      instance_id=instance_id,
-                                      zone=zone, region=region, extend_info=data)
+                                         network_interface_id=network_interface_id,
+                                         instance_id=instance_id,
+                                         zone=zone, region=region, extend_info=data)
 
         res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64],
                "instance_id": instance_id}

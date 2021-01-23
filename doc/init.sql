@@ -359,7 +359,6 @@ CREATE TABLE `lb_listener` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
-
 DROP TABLE IF EXISTS `lb_attach`;
 
 CREATE TABLE `lb_attach` (
@@ -369,6 +368,7 @@ CREATE TABLE `lb_attach` (
   `region` VARCHAR(64) DEFAULT NULL,
   `zone` VARCHAR(64) DEFAULT NULL,
   `resource_id` VARCHAR(64) DEFAULT NULL,
+  `name` VARCHAR(64) DEFAULT NULL,
   `lb_id` VARCHAR(36) DEFAULT NULL,
   `listener_id` VARCHAR(36) DEFAULT NULL,
   `backend_servers` text DEFAULT NULL,

@@ -137,7 +137,17 @@ class LBAttachAddController(BaseController):
         backend_servers = validation.validate_list("backend_servers", data.pop("backend_servers", None))
 
         if not backend_servers:
-            raise local_exceptions.ValueValidateError("backend_servers", "backend servers not permit null")
+            instance_id = data.pop("instance_id", None)
+            backend_servers = {"instance_id": instance_id}
+            if not instance_id:
+                raise local_exceptions.ValueValidateError("backend_servers", "backend servers not permit null")
+
+            weight = data.pop("weight", None)
+            port = data.pop("port", None)
+            if weight is not None:
+                backend_servers["weight"] = weight
+            if port is not None:
+                backend_servers["port"] = port
 
         data.update(extend_info)
         _, result = self.resource.create(rid, name, provider_id,

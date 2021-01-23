@@ -27,7 +27,7 @@ def validate_convert_value(defines):
                              "或json:{'type': <type>, 'value':<value>}")
 
         if isinstance(define, dict):
-            if define.get("type", "string") not in ["string", "json", "int", "float", "list"]:
+            if define.get("type", "string") not in ["string", "json", "int", "float", "list", "bool"]:
                 raise ValueError("未知的类型约束 %s" % define.get("type"))
 
 
@@ -120,10 +120,13 @@ def convert_key(key, value, define):
         if define.get("convert"):
             key = define.get("convert") or key
 
-    if value is not None:
+    if value:
+        return {key: value}
+    elif isinstance(value, (int, bool)):
         return {key: value}
     else:
         return {}
+
 
 def convert_key_only(key, define):
     '''
