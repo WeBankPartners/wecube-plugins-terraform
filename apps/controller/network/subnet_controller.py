@@ -106,6 +106,7 @@ class SubnetAddController(BaseController):
         validation.validate_string("vpc_id", data["vpc_id"])
         validation.validate_string("provider_id", data.get("provider_id"))
         validation.validate_string("cidr", data.get("cidr"))
+        validation.validate_dict("extend_info", data.get("extend_info"))
 
     def response_templete(self, data):
         return {}
@@ -118,7 +119,9 @@ class SubnetAddController(BaseController):
         region = data.pop("region", None)
         vpc_id = data.pop("vpc_id", None)
         provider_id = data.pop("provider_id", None)
+        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
+        data.update(extend_info)
         _, result = self.resource.create(rid, name, cidr, provider_id,
                                       vpc_id, region, zone,
                                       extend_info=data)

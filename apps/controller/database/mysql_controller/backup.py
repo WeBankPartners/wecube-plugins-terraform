@@ -110,6 +110,7 @@ class MysqlBackupAddController(BaseController):
         validation.validate_string("zone", data.get("zone"))
         validation.validate_string("mysql_id", data["mysql_id"])
         validation.validate_string("provider_id", data.get("provider_id"))
+        validation.validate_dict("extend_info", data.get("extend_info"))
 
     def response_templete(self, data):
         return {}

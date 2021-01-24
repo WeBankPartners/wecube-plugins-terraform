@@ -33,7 +33,8 @@ class VPCController(BackendController):
                                                   pagesize=pagesize, orderby=orderby)
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["id", "name", "provider_id", "region", "cidr", "extend_info"])
+        validation.allowed_key(data, ["id", "name", "provider_id",
+                                      "region", "cidr", "extend_info"])
         validation.not_allowed_null(data=data,
                                     keys=["region", "provider_id", "name", "cidr"]
                                     )
@@ -106,7 +107,9 @@ class VPCAddController(BaseController):
         cidr = data.pop("cidr", None)
         region = data.pop("region", None)
         provider_id = data.pop("provider_id", None)
+        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
+        data.update(extend_info)
         _, result = self.resource.create(rid, name, cidr, provider_id, region=region, extend_info=data)
 
         res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}

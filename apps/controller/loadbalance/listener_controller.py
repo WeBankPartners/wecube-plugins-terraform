@@ -118,6 +118,7 @@ class LBListenerAddController(BaseController):
         validation.validate_string("health_check", data.get("health_check"))
         validation.validate_string("health_check_uri", data.get("health_check_uri"))
         validation.validate_string("provider_id", data.get("provider_id"))
+        validation.validate_dict("extend_info", data.get("extend_info"))
 
     def response_templete(self, data):
         return {}

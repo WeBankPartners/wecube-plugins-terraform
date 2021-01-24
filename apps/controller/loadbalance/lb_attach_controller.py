@@ -120,6 +120,7 @@ class LBAttachAddController(BaseController):
         validation.validate_string("lb_id", data["lb_id"])
         validation.validate_string("listener_id", data.get("listener_id"))
         validation.validate_string("provider_id", data.get("provider_id"))
+        validation.validate_dict("extend_info", data.get("extend_info"))
         validation.validate_list("backend_servers", data.get("backend_servers"))
 
     def response_templete(self, data):
@@ -136,6 +137,10 @@ class LBAttachAddController(BaseController):
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
         backend_servers = validation.validate_list("backend_servers", data.pop("backend_servers", None))
 
+        if not backend_servers:
+            raise local_exceptions.ValueValidateError("backend_servers", "backend servers not permit null")
+
+        data.update(extend_info)
         if not backend_servers:
             instance_id = data.pop("instance_id", None)
             backend_servers = {"instance_id": instance_id}

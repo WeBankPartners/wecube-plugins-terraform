@@ -116,6 +116,7 @@ class NatGatewayAddController(BaseController):
         validation.validate_string("subnet_id", data.get("subnet_id"))
         validation.validate_string("eip", data.get("eip"))
         validation.validate_string("provider_id", data.get("provider_id"))
+        validation.validate_dict("extend_info", data.get("extend_info"))
 
     def response_templete(self, data):
         return {}
@@ -129,8 +130,10 @@ class NatGatewayAddController(BaseController):
         subnet_id = data.pop("subnet_id", None)
         eip = data.pop("eip", None)
         provider_id = data.pop("provider_id", None)
+        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
-        _, result = self.resource.create(rid, name, provider_id,
+        data.update(extend_info)
+        rid, result = self.resource.create(rid, name, provider_id,
                                            vpc_id, subnet_id, eip,
                                            zone, region, extend_info=data)
 

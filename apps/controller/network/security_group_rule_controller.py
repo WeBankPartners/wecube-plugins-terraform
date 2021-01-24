@@ -137,6 +137,7 @@ class SecGroupRuleAddController(BaseController):
         validation.validate_string("ports", data.get("ports"))
         validation.validate_string("policy", data.get("policy"))
         validation.validate_string("security_group_id", data.get("security_group_id"))
+        validation.validate_dict("extend_info", data.get("extend_info"))
 
     def response_templete(self, data):
         return {}
@@ -154,7 +155,9 @@ class SecGroupRuleAddController(BaseController):
         policy = data.pop("policy", None)
         description = data.pop("description")
         provider_id = data.pop("provider_id", None)
+        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
+        data.update(extend_info)
         _, result = self.resource.create(rid, name, provider_id,
                                       security_group_id, type,
                                       cidr_ip, ip_protocol,

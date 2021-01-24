@@ -105,6 +105,7 @@ class DiskAttachAddController(BaseController):
         validation.validate_string("disk_id", data["disk_id"])
         validation.validate_string("instance_id", data.get("instance_id"))
         validation.validate_string("provider_id", data.get("provider_id"))
+        validation.validate_dict("extend_info", data.get("extend_info"))
 
     def response_templete(self, data):
         return {}
@@ -117,7 +118,9 @@ class DiskAttachAddController(BaseController):
         disk_id = data.pop("disk_id", None)
         instance_id = data.pop("instance_id", None)
         provider_id = data.pop("provider_id", None)
+        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
+        data.update(extend_info)
         _, result = self.resource.attach(rid, name=name, provider_id=provider_id,
                                       disk_id=disk_id, instance_id=instance_id,
                                       zone=zone, region=region, extend_info=data)

@@ -114,6 +114,7 @@ class BucketObjectAddController(BaseController):
         validation.validate_string("content", data.get("content"))
         validation.validate_string("source", data.get("source"))
         validation.validate_string("provider_id", data.get("provider_id"))
+        validation.validate_dict("extend_info", data.get("extend_info"))
 
     def response_templete(self, data):
         return {}

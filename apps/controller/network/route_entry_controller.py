@@ -115,6 +115,7 @@ class RouteEntryAddController(BaseController):
         validation.validate_string("next_hub", data.get("next_hub"))
         validation.validate_string("provider_id", data.get("provider_id"))
         validation.validate_string("destination", data.get("destination"))
+        validation.validate_dict("extend_info", data.get("extend_info"))
 
     def response_templete(self, data):
         return {}
@@ -130,7 +131,9 @@ class RouteEntryAddController(BaseController):
         next_type = data.pop("next_type", None)
         next_hub = data.pop("next_hub", None)
         destination = data.pop("destination", None)
+        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
+        data.update(extend_info)
         _, result = self.resource.create(rid, name, provider_id, zone, region,
                                       vpc_id, route_table, next_type, next_hub,
                                       destination=destination, extend_info=data)

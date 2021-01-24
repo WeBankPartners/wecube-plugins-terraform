@@ -32,7 +32,8 @@ class EniController(BackendController):
                                                   pagesize=pagesize, orderby=orderby)
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["id", "name", "provider_id", "ipaddress", "subnet_id",
+        validation.allowed_key(data, ["id", "name", "provider_id",
+                                      "ipaddress", "subnet_id",
                                       "vpc_id", "security_group_id",
                                       "zone", "region", "extend_info"])
         validation.not_allowed_null(data=data,
@@ -99,9 +100,6 @@ class EniAddController(BaseController):
     resource = EniApi()
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["id", "name", "provider_id", "ipaddress", "subnet_id",
-                                      "vpc_id", "security_group_id",
-                                      "zone", "region", "extend_info"])
         validation.not_allowed_null(data=data,
                                     keys=["region", "provider_id", "zone",
                                           "subnet_id", "name"]
@@ -116,6 +114,7 @@ class EniAddController(BaseController):
         validation.validate_string("ipaddress", data.get("ipaddress"))
         validation.validate_list("security_group_id", data.get("security_group_id"))
         validation.validate_string("provider_id", data.get("provider_id"))
+        validation.validate_dict("extend_info", data.get("extend_info"))
 
     def response_templete(self, data):
         return {}
@@ -130,7 +129,9 @@ class EniAddController(BaseController):
         ipaddress = data.pop("ipaddress", None)
         provider_id = data.pop("provider_id", None)
         security_group_id = validation.validate_list("security_group_id", data.pop("security_group_id", None))
+        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
+        data.update(extend_info)
         _, result = self.resource.create(rid, name, provider_id, vpc_id,
                                          subnet_id, security_group_id, ipaddress,
                                          zone, region, extend_info=data)

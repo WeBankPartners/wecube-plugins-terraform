@@ -60,8 +60,8 @@ class MysqlAccountController(BackendController):
 
         data.update(extend_info)
         _, result = self.resource.create(rid, name, provider_id,
-                                      mysql_id, password,
-                                      zone, region, extend_info=data)
+                                         mysql_id, password,
+                                         zone, region, extend_info=data)
 
         res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return 1, res
@@ -104,6 +104,7 @@ class MysqlAccountAddController(BaseController):
         validation.validate_string("zone", data.get("zone"))
         validation.validate_string("mysql_id", data["mysql_id"])
         validation.validate_string("provider_id", data.get("provider_id"))
+        validation.validate_dict("extend_info", data.get("extend_info"))
 
     def response_templete(self, data):
         return {}
@@ -116,10 +117,12 @@ class MysqlAccountAddController(BaseController):
         region = data.pop("region", None)
         mysql_id = data.pop("mysql_id", None)
         provider_id = data.pop("provider_id", None)
+        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
+        data.update(extend_info)
         _, result = self.resource.create(rid, name, provider_id,
-                                      mysql_id, password,
-                                      zone, region, extend_info=data)
+                                         mysql_id, password,
+                                         zone, region, extend_info=data)
 
         res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return res

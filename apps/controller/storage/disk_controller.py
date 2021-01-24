@@ -104,6 +104,7 @@ class DiskAddController(BaseController):
         validation.validate_string("type", data["type"])
         validation.validate_int("size", data.get("size"))
         validation.validate_string("provider_id", data.get("provider_id"))
+        validation.validate_dict("extend_info", data.get("extend_info"))
 
     def response_templete(self, data):
         return {}
@@ -116,7 +117,9 @@ class DiskAddController(BaseController):
         disktype = data.pop("type", None)
         size = int(data.pop("size", None))
         provider_id = data.pop("provider_id", None)
+        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
+        data.update(extend_info)
         _, result = self.resource.create(rid, name, provider_id, disktype, size,
                                          zone, region, extend_info=data)
 

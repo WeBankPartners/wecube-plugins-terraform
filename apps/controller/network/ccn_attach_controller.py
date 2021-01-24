@@ -113,6 +113,7 @@ class CCNAttachAddController(BaseController):
         validation.validate_string("instance_type", data.get("instance_type"))
         validation.validate_string("instance_region", data.get("instance_region"))
         validation.validate_string("provider_id", data.get("provider_id"))
+        validation.validate_dict("extend_info", data.get("extend_info"))
 
     def response_templete(self, data):
         return {}

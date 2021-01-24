@@ -111,6 +111,7 @@ class CCNBandwidthAddController(BaseController):
         validation.validate_string("dest_region", data.get("dest_region"))
         validation.validate_string("bandwidth", data.get("bandwidth"))
         validation.validate_string("provider_id", data.get("provider_id"))
+        validation.validate_dict("extend_info", data.get("extend_info"))
 
     def response_templete(self, data):
         return {}
@@ -129,8 +130,8 @@ class CCNBandwidthAddController(BaseController):
 
         data.update(extend_info)
         _, result = self.resource.create(rid, name, provider_id, ccn_id,
-                                      from_region, dest_region, bandwidth,
-                                      region, zone, extend_info=data)
+                                         from_region, dest_region, bandwidth,
+                                         region, zone, extend_info=data)
 
         res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return res

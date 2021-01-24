@@ -186,9 +186,10 @@ class InstanceAddController(BaseController):
         validation.validate_int("disk_size", data.get("disk_size"))
         validation.validate_string("provider_id", data.get("provider_id"))
         validation.validate_string("password", data.get("password"))
-        validation.validate_list("security_group_id", data.get("security_group_id"))
+        # validation.validate_list("security_group_id", data.get("security_group_id"))
         validation.validate_string("vpc_id", data.get("vpc_id"))
         validation.validate_dict("data_disks", data.get("data_disks"))
+        validation.validate_dict("extend_info", data.get("extend_info"))
 
     def response_templete(self, data):
         return {}
@@ -207,9 +208,11 @@ class InstanceAddController(BaseController):
         provider_id = data.pop("provider_id", None)
         password = data.pop("password", None)
         vpc_id = data.pop("vpc_id", None)
-        security_group_id = validation.validate_list("security_group_id", data.pop("security_group_id", None))
+        security_group_id = data.pop("security_group_id", None)
+        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
         data_disks = validation.validate_dict("data_disks", data.pop("data_disks", None))
 
+        data.update(extend_info)
         _, result = self.resource.create(rid, name=name, provider_id=provider_id,
                                          hostname=hostname, image=image,
                                          instance_type=instance_type,

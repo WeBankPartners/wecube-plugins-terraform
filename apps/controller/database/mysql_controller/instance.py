@@ -152,6 +152,7 @@ class MysqlAddController(BaseController):
         validation.validate_string("vpc_id", data.get("vpc_id"))
         validation.validate_int("disk_size", data.get("disk_size"))
         validation.validate_string("provider_id", data.get("provider_id"))
+        validation.validate_dict("extend_info", data.get("extend_info"))
 
     def response_templete(self, data):
         return {}
@@ -179,15 +180,15 @@ class MysqlAddController(BaseController):
         data.update(extend_info)
 
         _, result = self.resource.create(rid, name=name, provider_id=provider_id,
-                                           version=version, port=port,
-                                           password=password, user=user,
-                                           instance_type=instance_type,
-                                           vpc_id=vpc_id, first_slave_zone=first_slave_zone,
-                                           second_slave_zone=second_slave_zone,
-                                           security_group_id=security_group_id,
-                                           disk_type=disk_type, disk_size=disk_size,
-                                           subnet_id=subnet_id, zone=zone,
-                                           region=region, extend_info=data)
+                                         version=version, port=port,
+                                         password=password, user=user,
+                                         instance_type=instance_type,
+                                         vpc_id=vpc_id, first_slave_zone=first_slave_zone,
+                                         second_slave_zone=second_slave_zone,
+                                         security_group_id=security_group_id,
+                                         disk_type=disk_type, disk_size=disk_size,
+                                         subnet_id=subnet_id, zone=zone,
+                                         region=region, extend_info=data)
 
         return {"id": rid, "ipaddress": result.get("ipaddress"),
                 "port": result.get("port"), "user": result.get("user"),

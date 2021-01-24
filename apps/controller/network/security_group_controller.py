@@ -99,6 +99,7 @@ class SecGroupAddController(BaseController):
         validation.validate_string("zone", data.get("zone"))
         validation.validate_string("vpc_id", data["vpc_id"])
         validation.validate_string("provider_id", data.get("provider_id"))
+        validation.validate_dict("extend_info", data.get("extend_info"))
 
 
     def response_templete(self, data):
@@ -111,7 +112,9 @@ class SecGroupAddController(BaseController):
         region = data.pop("region", None)
         vpc_id = data.pop("vpc_id", None)
         provider_id = data.pop("provider_id", None)
+        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
+        data.update(extend_info)
         _, result = self.resource.create(rid, name, provider_id, vpc_id,
                                       zone, region, extend_info=data)
 

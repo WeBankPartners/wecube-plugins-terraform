@@ -96,6 +96,7 @@ class CCNAddController(BaseController):
         validation.validate_string("region", data["region"])
         validation.validate_string("zone", data.get("zone"))
         validation.validate_string("provider_id", data.get("provider_id"))
+        validation.validate_dict("extend_info", data.get("extend_info"))
 
     def response_templete(self, data):
         return {}
@@ -106,9 +107,12 @@ class CCNAddController(BaseController):
         zone = data.pop("zone", None)
         region = data.pop("region", None)
         provider_id = data.pop("provider_id", None)
+        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
+        data.update(extend_info)
         _, result = self.resource.create(rid, name, provider_id,
                                          region, zone, extend_info=data)
+
         res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return res
 

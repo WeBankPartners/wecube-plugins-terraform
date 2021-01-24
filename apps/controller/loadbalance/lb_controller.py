@@ -129,6 +129,7 @@ class LBAddController(BaseController):
         validation.validate_string("vpc_id", data["vpc_id"])
         validation.validate_string("network_type", data["network_type"])
         validation.validate_string("provider_id", data.get("provider_id"))
+        validation.validate_dict("extend_info", data.get("extend_info"))
 
     def response_templete(self, data):
         return {}
