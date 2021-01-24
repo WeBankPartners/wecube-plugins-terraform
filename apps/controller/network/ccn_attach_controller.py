@@ -34,18 +34,18 @@ class CCNAttachController(BackendController):
 
     def before_handler(self, request, data, **kwargs):
         validation.allowed_key(data, ["id", "name", "provider_id", "ccn_id",
-                                      "vpc_id", "instance_type", "instance_region",
+                                      "instance_id", "instance_type", "instance_region",
                                       "zone", "region", "extend_info"])
         validation.not_allowed_null(data=data,
-                                    keys=["region", "provider_id", "ccn_id", "vpc_id"]
+                                    keys=["region", "provider_id", "ccn_id", "instance_id"]
                                     )
 
         validation.validate_string("id", data.get("id"))
-        validation.validate_string("name", data["name"])
+        validation.validate_string("name", data.get("name"))
         validation.validate_string("region", data["region"])
         validation.validate_string("zone", data.get("zone"))
         validation.validate_string("ccn_id", data.get("ccn_id"))
-        validation.validate_string("vpc_id", data["vpc_id"])
+        validation.validate_string("instance_id", data["instance_id"])
         validation.validate_string("instance_type", data.get("instance_type"))
         validation.validate_string("instance_region", data.get("instance_region"))
         validation.validate_string("provider_id", data.get("provider_id"))
@@ -56,7 +56,7 @@ class CCNAttachController(BackendController):
         name = data.pop("name", None)
         zone = data.pop("zone", None)
         region = data.pop("region", None)
-        vpc_id = data.pop("vpc_id", None)
+        vpc_id = data.pop("instance_id", None)
         instance_region = data.pop("instance_region", None)
         instance_type = data.pop("instance_type", None)
         provider_id = data.pop("provider_id", None)
@@ -64,9 +64,11 @@ class CCNAttachController(BackendController):
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         data.update(extend_info)
-        _, result = self.resource.create(rid, name, provider_id, ccn_id, vpc_id,
-                                         instance_type, instance_region,
-                                         region, zone, extend_info=data)
+        _, result = self.resource.create(rid, name, provider_id,
+                                         ccn_id, instance_id=vpc_id,
+                                         instance_type=instance_type,
+                                         instance_region=instance_region,
+                                         region=region, zone=zone, extend_info=data)
 
         res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return 1, res
@@ -99,15 +101,15 @@ class CCNAttachAddController(BaseController):
 
     def before_handler(self, request, data, **kwargs):
         validation.not_allowed_null(data=data,
-                                    keys=["region", "provider_id", "ccn_id", "vpc_id"]
+                                    keys=["region", "provider_id", "ccn_id", "instance_id"]
                                     )
 
         validation.validate_string("id", data.get("id"))
-        validation.validate_string("name", data["name"])
+        validation.validate_string("name", data.get("name"))
         validation.validate_string("region", data["region"])
         validation.validate_string("zone", data.get("zone"))
         validation.validate_string("ccn_id", data.get("ccn_id"))
-        validation.validate_string("vpc_id", data["vpc_id"])
+        validation.validate_string("instance_id", data["instance_id"])
         validation.validate_string("instance_type", data.get("instance_type"))
         validation.validate_string("instance_region", data.get("instance_region"))
         validation.validate_string("provider_id", data.get("provider_id"))
@@ -120,7 +122,7 @@ class CCNAttachAddController(BaseController):
         name = data.pop("name", None)
         zone = data.pop("zone", None)
         region = data.pop("region", None)
-        vpc_id = data.pop("vpc_id", None)
+        vpc_id = data.pop("instance_id", None)
         instance_region = data.pop("instance_region", None)
         instance_type = data.pop("instance_type", None)
         provider_id = data.pop("provider_id", None)
@@ -128,9 +130,11 @@ class CCNAttachAddController(BaseController):
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         data.update(extend_info)
-        _, result = self.resource.create(rid, name, provider_id, ccn_id, vpc_id,
-                                         instance_type, instance_region,
-                                         region, zone, extend_info=data)
+        _, result = self.resource.create(rid, name, provider_id,
+                                         ccn_id, instance_id=vpc_id,
+                                         instance_type=instance_type,
+                                         instance_region=instance_region,
+                                         region=region, zone=zone, extend_info=data)
 
         res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
         return res

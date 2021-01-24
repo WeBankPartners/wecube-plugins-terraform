@@ -648,7 +648,9 @@ CREATE TABLE `rds_database` (
   `id` VARCHAR(36) NOT NULL,
   `provider` VARCHAR(32) DEFAULT NULL,
   `region` VARCHAR(64) DEFAULT NULL,
+  `provider_id` VARCHAR(36) DEFAULT NULL,
   `zone` VARCHAR(64) DEFAULT NULL,
+  `resource_id` VARCHAR(64) DEFAULT NULL,
   `rds_id` VARCHAR(64) DEFAULT NULL,
   `engine` VARCHAR(64) DEFAULT NULL,
   `name` VARCHAR(64) DEFAULT NULL,
@@ -670,8 +672,10 @@ DROP TABLE IF EXISTS `rds_account`;
 CREATE TABLE `rds_account` (
   `id` VARCHAR(36) NOT NULL,
   `provider` VARCHAR(32) DEFAULT NULL,
+  `provider_id` VARCHAR(36) DEFAULT NULL,
   `region` VARCHAR(64) DEFAULT NULL,
   `zone` VARCHAR(64) DEFAULT NULL,
+  `resource_id` VARCHAR(64) DEFAULT NULL,
   `rds_id` VARCHAR(64) DEFAULT NULL,
   `engine` VARCHAR(64) DEFAULT NULL,
   `name` VARCHAR(64) DEFAULT NULL,
@@ -694,7 +698,9 @@ DROP TABLE IF EXISTS `rds_account_privilege`;
 CREATE TABLE `rds_account_privilege` (
   `id` VARCHAR(36) NOT NULL,
   `provider` VARCHAR(32) DEFAULT NULL,
+  `provider_id` VARCHAR(36) DEFAULT NULL,
   `region` VARCHAR(64) DEFAULT NULL,
+  `resource_id` VARCHAR(64) DEFAULT NULL,
   `rds_id` VARCHAR(64) DEFAULT NULL,
   `engine` VARCHAR(64) DEFAULT NULL,
   `account_name` VARCHAR(64) DEFAULT NULL,
@@ -718,7 +724,9 @@ DROP TABLE IF EXISTS `rds_backup_policy`;
 CREATE TABLE `rds_backup_policy` (
   `id` VARCHAR(36) NOT NULL,
   `provider` VARCHAR(32) DEFAULT NULL,
+  `provider_id` VARCHAR(36) DEFAULT NULL,
   `region` VARCHAR(64) DEFAULT NULL,
+  `resource_id` VARCHAR(64) DEFAULT NULL,
   `rds_id` VARCHAR(64) DEFAULT NULL,
   `engine` VARCHAR(64) DEFAULT NULL,
   `backup_model` VARCHAR(64) DEFAULT NULL,
@@ -803,9 +811,10 @@ DROP TABLE IF EXISTS `connect_network`;
 
 CREATE TABLE `connect_network` (
   `id` VARCHAR(36) NOT NULL,
-  `provider` VARCHAR(32) NOT NULL,
+  `provider_id` VARCHAR(36) DEFAULT NULL,
+  `provider` VARCHAR(32) DEFAULT NULL,
   `region` VARCHAR(64) DEFAULT NULL,
-  `zone` VARCHAR(64) NOT NULL,
+  `zone` VARCHAR(64) DEFAULT NULL,
   `resource_id` VARCHAR(64) DEFAULT NULL,
   `name` VARCHAR(64) DEFAULT NULL,
   `extend_info` text DEFAULT NULL,
@@ -825,12 +834,13 @@ DROP TABLE IF EXISTS `ccn_attach`;
 
 CREATE TABLE `ccn_attach` (
   `id` VARCHAR(36) NOT NULL,
-  `provider` VARCHAR(32) NOT NULL,
+   `provider_id` VARCHAR(36) DEFAULT NULL,
+  `provider` VARCHAR(32) DEFAULT NULL,
   `region` VARCHAR(64) DEFAULT NULL,
-  `zone` VARCHAR(64) NOT NULL,
+  `zone` VARCHAR(64) DEFAULT NULL,
   `resource_id` VARCHAR(64) DEFAULT NULL,
   `ccn_id` VARCHAR(64) DEFAULT NULL,
-  `type` VARCHAR(32) DEFAULT NULL,
+  `instance_type` VARCHAR(32) DEFAULT NULL,
   `instance_region` VARCHAR(32) DEFAULT NULL,
   `instance_id` VARCHAR(64) DEFAULT NULL,
   `extend_info` text DEFAULT NULL,
@@ -850,9 +860,10 @@ DROP TABLE IF EXISTS `ccn_bandwidth`;
 
 CREATE TABLE `ccn_bandwidth` (
   `id` VARCHAR(36) NOT NULL,
-  `provider` VARCHAR(32) NOT NULL,
+  `provider_id` VARCHAR(36) DEFAULT NULL,
+  `provider` VARCHAR(32) DEFAULT NULL,
   `region` VARCHAR(64) DEFAULT NULL,
-  `zone` VARCHAR(64) NOT NULL,
+  `zone` VARCHAR(64) DEFAULT NULL,
   `resource_id` VARCHAR(64) DEFAULT NULL,
   `ccn_id` VARCHAR(64) DEFAULT NULL,
   `from_region` VARCHAR(32) DEFAULT NULL,

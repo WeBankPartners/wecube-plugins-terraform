@@ -164,7 +164,7 @@ resouce_property_models = {
         "mysql_id"
     ],
     "mysql_account": [
-        "usrename",
+        "name",
         "password",
         "mysql_id"
     ],

@@ -94,7 +94,7 @@ class MysqlAccountApi(ApiBase):
         password = password or "Terraform.123"
         extend_info = extend_info or {}
         label_name = self.resource_name + "_" + rid
-        create_data = {"usrename": name, "password": password}
+        create_data = {"name": name, "password": password}
 
         provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
         _relations_id_dict = self.before_keys_checks(provider_object["name"], mysql_id)
