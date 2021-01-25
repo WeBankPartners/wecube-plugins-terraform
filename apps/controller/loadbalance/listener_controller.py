@@ -61,7 +61,7 @@ class LBListenerController(BackendController):
         lb_id = data.pop("lb_id", None)
         port = int(data.pop("port"))
         protocol = data.pop("protocol", None)
-        backend_port = validation.validate_port(data.get("backend_port"), permit_null=True)
+        backend_port = validation.validate_port(data.pop("backend_port", None), permit_null=True)
         health_check = data.pop("health_check", None)
         health_check_uri = data.pop("health_check_uri", None)
         provider_id = data.pop("provider_id", None)
