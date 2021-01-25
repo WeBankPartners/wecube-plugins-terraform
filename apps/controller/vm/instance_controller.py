@@ -259,7 +259,12 @@ class InstanceUpdateController(BaseController):
         if not data:
             raise ValueError("没有需要更新的配置")
 
-        validation.allowed_key(data, ["name", "instance_type", "image", "extend_info", "security_group_id"])
+        validation.not_allowed_null(data=data,
+                                    keys=["id"]
+                                    )
+
+        validation.allowed_key(data, ["id", "name", "instance_type", "image", "extend_info", "security_group_id"])
+        validation.validate_string("id", data.get("id"))
         validation.validate_string("name", data.get("name"))
         validation.validate_string("instance_type", data.get("instance_type"))
         validation.validate_string("image", data.get("image"))
@@ -270,7 +275,7 @@ class InstanceUpdateController(BaseController):
         return {}
 
     def main_response(self, request, data, **kwargs):
-        rid = kwargs.pop("rid", None)
+        rid = data.pop("id", None)
         name = data.pop("name", None)
         instance_type = data.pop("instance_tpe")
         image = data.pop("image")
@@ -279,8 +284,8 @@ class InstanceUpdateController(BaseController):
 
         count, result = self.resource.update(rid, name, instance_type, image, security_group_id, extend_info)
 
-        result.update({"result": count})
-        return result
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
+        return res
 
 
 class InstanceStartController(BaseController):
@@ -288,9 +293,9 @@ class InstanceStartController(BaseController):
     resource = InstanceApi()
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["action"])
+        validation.allowed_key(data, ["id", "action"])
         validation.not_allowed_null(data=data,
-                                    keys=["action"]
+                                    keys=["id", "action"]
                                     )
 
         validation.validate_string("action", data["action"])

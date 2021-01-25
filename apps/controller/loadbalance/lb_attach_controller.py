@@ -110,7 +110,7 @@ class LBAttachAddController(BaseController):
 
     def before_handler(self, request, data, **kwargs):
         validation.not_allowed_null(data=data,
-                                    keys=["region", "provider_id", "lb_id", "backend_servers"]
+                                    keys=["region", "provider_id", "lb_id"]
                                     )
 
         validation.validate_string("id", data.get("id"))

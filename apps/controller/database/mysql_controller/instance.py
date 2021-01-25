@@ -99,9 +99,10 @@ class MysqlController(BackendController):
                                          subnet_id=subnet_id, zone=zone,
                                          region=region, extend_info=data)
 
-        return 1, {"result": rid, "ipaddress": result.get("ipaddress"),
+        return 1, {"id": rid, "ipaddress": result.get("ipaddress"),
                    "port": result.get("port"), "user": result.get("user"),
-                   "password": result.get("password")}
+                   "password": result.get("password"),
+                   "resource_id": str(result.get("resource_id"))[:64]}
 
 
 class MysqlIdController(BackendIdController):
@@ -192,7 +193,8 @@ class MysqlAddController(BaseController):
 
         return {"id": rid, "ipaddress": result.get("ipaddress"),
                 "port": result.get("port"), "user": result.get("user"),
-                "password": result.get("password")}
+                "password": result.get("password"),
+                "resource_id": str(result.get("resource_id"))[:64]}
 
 
 class MysqlDeleteController(BaseController):
