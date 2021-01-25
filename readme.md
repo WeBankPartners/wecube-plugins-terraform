@@ -29,7 +29,7 @@ pip install -r requirements.txt
 ```
 
 ### 三. terraform 插件配置
-在plugins 中创建provider name 目录， 并写入对应的版本需求文件 versions.tf
+在plugins 中创建provider name 目录， 如terraform插件有版本要求则写入对应的版本需求文件 versions.tf
 
 例如： 腾讯云 tencentcloud
 则在 plugins 下创建 tencentcloud 目录， 并创建version.tf 文件
@@ -40,7 +40,18 @@ pip install -r requirements.txt
 例如cache tencentcloud 的插件，
 则将tencentcloud插件放入 `/usr/local/share/terraform/plugins/registry.terraform.io/tencentcloudstack`
 
-### 四. terraform 接入云厂商配置信息
+### 四. terraform docker镜像打包：
+镜像打包需要python:2.7.18-slim为基础镜像
+镜像需要依赖terraform cli 以及cache的加速， 需要将对应的依赖包放入对应目录
+1. 将terraform cli 软件包放入源码文件的bin目录下
+ 例如当前源码文件为/data/wecube_plugins_terraform， cli版本文件(例如：terraform_0.14.5_linux_amd64.zip），
+ 则放入/data/wecube_plugins_terraform/bin  并修改Makefile的`cd bin && unzip -o terraform_0.14.5_linux_amd64.zip`
+
+2. cache 加速：
+将对应插件的完整目录打包成registry.terraform.io.tar 放入到源码文件的plugins目录下，
+并修改Dockerfile的tar -xvf /app/wecube_plugins_terraform/plugins/registry.terraform.io.tar
+
+### 五. terraform 接入云厂商配置信息
 转换规则：
 字段属性转换定义说明：
 1. string 直接转换为对应的值， 若为空字符串，则不转换， 如 {"cider": ''}
