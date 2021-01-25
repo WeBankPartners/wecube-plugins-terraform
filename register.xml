@@ -1,216 +1,843 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package name="terraform" version="{{PLUGIN_VERSION}}">
+<package name="terraform" version="{{ PLUGIN_VERSION }}">
 
-    <!-- 1.依赖分析 - 描述运行本插件包需要的其他插件包 -->
-    <packageDependencies>
-        <packageDependency name="platform" version="v2.7.0" />
-    </packageDependencies>
+	<!-- 1.依赖分析 - 描述运行本插件包需要的其他插件包 -->
+	<packageDependencies>
+		<packageDependency name="platform" version="v2.7.0"/>
+	</packageDependencies>
 
-    <!-- 2.菜单注入 - 描述运行本插件包需要注入的菜单 -->
-    <menus>
-        <menu code='ADMIN_TERRAFORM_CONFIG' cat='ADMIN' displayName="Terraform" localDisplayName="Terraform配置管理">/terraformIndex</menu>
-    </menus>
+	<!-- 2.菜单注入 - 描述运行本插件包需要注入的菜单 -->
+	<menus>
+		<menu code='ADMIN_TERRAFORM_CONFIG' cat='ADMIN' displayName="Terraform" localDisplayName="Terraform配置管理">
+			/terraformIndex
+		</menu>
+	</menus>
 
-    <!-- 3.数据模型 - 描述本插件包的数据模型,并且描述和Framework数据模型的关系 -->
-    <dataModel>
-    </dataModel>
+	<!-- 3.数据模型 - 描述本插件包的数据模型,并且描述和Framework数据模型的关系 -->
+	<dataModel>
+	</dataModel>
 
-    <!-- 4.系统参数 - 描述运行本插件包需要的系统参数 -->
-    <systemParameters>
-    </systemParameters>
+	<!-- 4.系统参数 - 描述运行本插件包需要的系统参数 -->
+	<systemParameters>
+	</systemParameters>
 
 
-    <!-- 5.权限设定 -->
-    <authorities>
-        <authority systemRoleName="SUPER_ADMIN" >
-            <menu code="ADMIN_TERRAFORM_CONFIG" />
-        </authority >
-    </authorities>
+	<!-- 5.权限设定 -->
+	<authorities>
+		<authority systemRoleName="SUPER_ADMIN">
+			<menu code="ADMIN_TERRAFORM_CONFIG"/>
+		</authority>
+	</authorities>
 
-    <!-- 6.运行资源 - 描述部署运行本插件包需要的基础资源(如主机、虚拟机、容器、数据库等) -->
-    <resourceDependencies>
-        <docker imageName="{{IMAGENAME}}" containerName="{{CONTAINERNAME}}"
-        portBindings="{{ALLOCATE_PORT}}:8999"
-        volumeBindings="{{BASE_MOUNT_PATH}}/certs:/data,/etc/localtime:/etc/localtime,{{BASE_MOUNT_PATH}}/terraform/logs:/app/wecube_plugins_terraform/logs,{{BASE_MOUNT_PATH}}/terraform/terraform:/app/wecube_plugins_terraform/terraform"
-        envVariables="MYSQL_USERNAME={{DB_USER}},MYSQL_PASSWORD={{DB_PWD}},
-        MYSQL_HOST={{DB_HOST}},MYSQL_PORT={{DB_PORT}},MYSQL_DATABASE={{DB_SCHEMA}},
-        JWT_SIGNING_KEY={{JWT_SIGNING_KEY}}"/>
-        <mysql schema="terraform" initFileName="init.sql"/>
-    </resourceDependencies>
+	<!-- 6.运行资源 - 描述部署运行本插件包需要的基础资源(如主机、虚拟机、容器、数据库等) -->
+	<resourceDependencies>
+		<docker imageName="{{ IMAGENAME }}" containerName="{{ CONTAINERNAME }}"
+			portBindings="{{ ALLOCATE_PORT }}:8999"
+			volumeBindings="{{ BASE_MOUNT_PATH }}/certs:/data,/etc/localtime:/etc/localtime,{{ BASE_MOUNT_PATH }}/terraform/logs:/app/wecube_plugins_terraform/logs,{{ BASE_MOUNT_PATH }}/terraform/terraform:/app/wecube_plugins_terraform/terraform"
+			envVariables="MYSQL_USERNAME={{ DB_USER }},MYSQL_PASSWORD={{ DB_PWD }},MYSQL_HOST={{ DB_HOST }},MYSQL_PORT={{ DB_PORT }},MYSQL_DATABASE={{ DB_SCHEMA }},JWT_SIGNING_KEY={{ JWT_SIGNING_KEY }}"/>
+		<mysql schema="terraform" initFileName="init.sql"/>
+	</resourceDependencies>
 
-    <!-- 7.插件列表 - 描述插件包中单个插件的输入和输出 -->
-    <plugins>
-        <plugin name="vpc">
-            <interface action="create" path="/terraform/v1/network/backend/vpc/create" httpMethod='POST'>
-                <inputParameters>
-                    <parameter datatype="string" mappingType="entity" required="N">id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">region</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">zone</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">cidr</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string">result</parameter>
-                    <parameter datatype="string">errorMessage</parameter>
-                    <parameter datatype="string">errorCode</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="delete" path="/terraform/v1/network/backend/vpc/delete" httpMethod='POST'>
-                <inputParameters>
-                    <parameter datatype="string" mappingType="entity" required="Y">id</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string">result</parameter>
-                    <parameter datatype="string">errorMessage</parameter>
-                    <parameter datatype="string">errorCode</parameter>
-                </outputParameters>
-            </interface>
-        </plugin>
-        <plugin name="subnet">
-            <interface action="create" path="/terraform/v1/network/backend/subnet/create" httpMethod='POST'>
-                <inputParameters>
-                    <parameter datatype="string" mappingType="entity" required="N">id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">name</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">region</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">zone</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">cidr</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">vpc_id</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string">result</parameter>
-                    <parameter datatype="string">errorMessage</parameter>
-                    <parameter datatype="string">errorCode</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="delete" path="/terraform/v1/network/backend/subnet/delete" httpMethod='POST'>
-                <inputParameters>
-                    <parameter datatype="string" mappingType="entity" required="Y">id</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string">result</parameter>
-                    <parameter datatype="string">errorMessage</parameter>
-                    <parameter datatype="string">errorCode</parameter>
-                </outputParameters>
-            </interface>
-        </plugin>
-        <plugin name="route_table">
-            <interface action="create" path="/terraform/v1/network/backend/route_table/create" httpMethod='POST'>
-                <inputParameters>
-                    <parameter datatype="string" mappingType="entity" required="N">id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">name</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">region</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">zone</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">vpc_id</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string">result</parameter>
-                    <parameter datatype="string">errorMessage</parameter>
-                    <parameter datatype="string">errorCode</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="delete" path="/terraform/v1/network/backend/route_table/delete" httpMethod='POST'>
-                <inputParameters>
-                    <parameter datatype="string" mappingType="entity" required="Y">id</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string">result</parameter>
-                    <parameter datatype="string">errorMessage</parameter>
-                    <parameter datatype="string">errorCode</parameter>
-                </outputParameters>
-            </interface>
-        </plugin>
-        <plugin name="route_entry">
-            <interface action="create" path="/terraform/v1/network/backend/route_entry/create" httpMethod='POST'>
-                <inputParameters>
-                    <parameter datatype="string" mappingType="entity" required="N">id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">name</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">vpc_id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">destination</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">route_table_id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">next_type</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">next_hub</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">zone</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">region</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string">result</parameter>
-                    <parameter datatype="string">errorMessage</parameter>
-                    <parameter datatype="string">errorCode</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="delete" path="/terraform/v1/network/backend/route_entry/delete" httpMethod='POST'>
-                <inputParameters>
-                    <parameter datatype="string" mappingType="entity" required="Y">id</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string">result</parameter>
-                    <parameter datatype="string">errorMessage</parameter>
-                    <parameter datatype="string">errorCode</parameter>
-                </outputParameters>
-            </interface>
-        </plugin>
-        <plugin name="security_group">
-            <interface action="create" path="/terraform/v1/network/backend/security_group/create" httpMethod='POST'>
-                <inputParameters>
-                    <parameter datatype="string" mappingType="entity" required="N">id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">name</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">vpc_id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">zone</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">region</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string">result</parameter>
-                    <parameter datatype="string">errorMessage</parameter>
-                    <parameter datatype="string">errorCode</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="delete" path="/terraform/v1/network/backend/security_group/delete" httpMethod='POST'>
-                <inputParameters>
-                    <parameter datatype="string" mappingType="entity" required="Y">id</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string">result</parameter>
-                    <parameter datatype="string">errorMessage</parameter>
-                    <parameter datatype="string">errorCode</parameter>
-                </outputParameters>
-            </interface>
-        </plugin>
-        <plugin name="security_group_rule">
-            <interface action="create" path="/terraform/v1/network/backend/security_group_rule/create" httpMethod='POST'>
-                <inputParameters>
-                    <parameter datatype="string" mappingType="entity" required="Y">id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">name</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">security_group_id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">zone</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">region</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">type</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">cidr_ip</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">ip_protocol</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">ports</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">policy</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">description</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string">result</parameter>
-                    <parameter datatype="string">errorMessage</parameter>
-                    <parameter datatype="string">errorCode</parameter>
-                </outputParameters>
-            </interface>
-            <interface action="delete" path="/terraform/v1/network/backend/security_group/delete" httpMethod='POST'>
-                <inputParameters>
-                    <parameter datatype="string" mappingType="entity" required="Y">id</parameter>
-                </inputParameters>
-                <outputParameters>
-                    <parameter datatype="string">result</parameter>
-                    <parameter datatype="string">errorMessage</parameter>
-                    <parameter datatype="string">errorCode</parameter>
-                </outputParameters>
-            </interface>
-        </plugin>
-    </plugins>
+	<!-- 7.插件列表 - 描述插件包中单个插件的输入和输出 -->
+	<plugins>
+		<plugin name="vpc">
+			<interface action="create" path="/terraform/v1/network/backend/vpc/create" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">cidr</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">id</parameter>
+					<parameter datatype="string">resource_id</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="delete" path="/terraform/v1/network/backend/vpc/delete" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+		</plugin>
+		<plugin name="subnet">
+			<interface action="create" path="/terraform/v1/network/backend/subnet/create" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">vpc_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">zone</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">cidr</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">id</parameter>
+					<parameter datatype="string">resource_id</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="delete" path="/terraform/v1/network/backend/subnet/delete" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+		</plugin>
+		<plugin name="route_table">
+			<interface action="create" path="/terraform/v1/network/backend/route_table/create" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">vpc_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">id</parameter>
+					<parameter datatype="string">resource_id</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="delete" path="/terraform/v1/network/backend/route_table/delete" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+		</plugin>
+		<plugin name="route_entry">
+			<interface action="create" path="/terraform/v1/network/backend/route_entry/create" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">vpc_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">destination</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">route_table_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">next_type</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">next_hub</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">id</parameter>
+					<parameter datatype="string">resource_id</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="delete" path="/terraform/v1/network/backend/route_entry/delete" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+		</plugin>
+		<plugin name="security_group">
+			<interface action="create" path="/terraform/v1/network/backend/security_group/create" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">vpc_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">id</parameter>
+					<parameter datatype="string">resource_id</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="delete" path="/terraform/v1/network/backend/security_group/delete" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+		</plugin>
+		<plugin name="security_group_rule">
+			<interface action="create" path="/terraform/v1/network/backend/security_group_rule/create"
+				httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">security_group_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">type</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">cidr_ip</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">ip_protocol</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">ports</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">policy</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">description</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">id</parameter>
+					<parameter datatype="string">resource_id</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="delete" path="/terraform/v1/network/backend/security_group/delete" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+		</plugin>
+		<plugin name="nat">
+			<interface action="create" path="/terraform/v1/network/backend/nat/create" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">vpc_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">subnet_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">eip</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">ipaddress</parameter>
+					<parameter datatype="string">id</parameter>
+					<parameter datatype="string">resource_id</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="delete" path="/terraform/v1/network/backend/nat/delete" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+		</plugin>
+		<plugin name="eip">
+			<interface action="create" path="/terraform/v1/network/backend/eip/create" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">ipaddress</parameter>
+					<parameter datatype="string">id</parameter>
+					<parameter datatype="string">resource_id</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="delete" path="/terraform/v1/network/backend/eip/delete" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="create_association" path="/terraform/v1/network/backend/eip_association/create" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">eip_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">instance_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">private_ip</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">id</parameter>
+					<parameter datatype="string">resource_id</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="delete_association" path="/terraform/v1/network/backend/eip_association/delete" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+		</plugin>
+		<plugin name="connect_network">
+			<interface action="create" path="/terraform/v1/network/backend/ccn/create" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">id</parameter>
+					<parameter datatype="string">resource_id</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="delete" path="/terraform/v1/network/backend/nat/delete" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="attach" path="/terraform/v1/network/backend/ccn_attach/create" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">ccn_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">instance_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">instance_type</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">instance_region</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">id</parameter>
+					<parameter datatype="string">resource_id</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="detach" path="/terraform/v1/network/ccn_attach/nat/delete" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="create_bandwidth" path="/terraform/v1/network/backend/ccn_bandwidth/create" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">ccn_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">from_region</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">dest_region</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">bandwidth</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">id</parameter>
+					<parameter datatype="string">resource_id</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="delete_bandwidth" path="/terraform/v1/network/ccn_bandwidth/nat/delete" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+		</plugin>
+		<plugin name="object_storage">
+			<interface action="create" path="/terraform/v1/storage/backend/object_storage/create" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">acl</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">appid</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">id</parameter>
+					<parameter datatype="string">resource_id</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="delete" path="/terraform/v1/storage/backend/object_storage/delete" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+		</plugin>
+		<plugin name="vm">
+			<interface action="create" path="/terraform/v1/vm/backend/instance/create" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">subnet_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">hostname</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">image</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">instance_type</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">disk_type</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">disk_size</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">password</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">security_group_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">vpc_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">data_disks</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">zone</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">ipaddress</parameter>
+					<parameter datatype="string">id</parameter>
+					<parameter datatype="string">resource_id</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="update" path="/terraform/v1/vm/backend/instance/update" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">instance_type</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">image</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">security_group_id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">id</parameter>
+					<parameter datatype="string">resource_id</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="delete" path="/terraform/v1/storage/backend/instance/delete" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="start" path="/terraform/v1/vm/backend/instance/action" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">action</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">action</parameter>
+					<parameter datatype="string">power_status</parameter>
+					<parameter datatype="string">result</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="stop" path="/terraform/v1/storage/backend/instance/action" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">action</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">action</parameter>
+					<parameter datatype="string">power_status</parameter>
+					<parameter datatype="string">result</parameter>
+				</outputParameters>
+			</interface>
+		</plugin>
+		<plugin name="network_interface">
+			<interface action="create" path="/terraform/v1/vm/backend/network_interface/create" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">ipaddress</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">subnet_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">vpc_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">security_group_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">zone</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">ipaddress</parameter>
+					<parameter datatype="string">id</parameter>
+					<parameter datatype="string">resource_id</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="delete" path="/terraform/v1/vm/backend/network_interface/delete" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="attach" path="backend/network_interface/attach" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">network_interface_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">instance_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">zone</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">id</parameter>
+					<parameter datatype="string">resource_id</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="create" path="backend/network_interface/detach" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+		</plugin>
+		<plugin name="loadbalance">
+			<interface action="create" path="/terraform/v1/loadbalance/backend/lb/create" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">subnet_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">network_type</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">vpc_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">ipaddress</parameter>
+					<parameter datatype="string">id</parameter>
+					<parameter datatype="string">resource_id</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="delete" path="/terraform/v1/loadbalance/backend/lb/delete" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="create_listener" path="/terraform/v1/loadbalance/backend/lb_listener/create" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">lb_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">port</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">protocol</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">backend_port</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">health_check</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">health_check_uri</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">id</parameter>
+					<parameter datatype="string">resource_id</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="delete_listener" path="/terraform/v1/loadbalance/backend/lb_listener/delete" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="attach_server" path="/terraform/v1/loadbalance/backend/lb/attach" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">lb_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">listener_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">backend_servers</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">instance_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">weight</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">port</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">id</parameter>
+					<parameter datatype="string">resource_id</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="dettach_all" path="/terraform/v1/loadbalance/backend/lb/detach" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="dettach_instance" path="/terraform/v1/loadbalance/backend/lb/detach/instance" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">instance_id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+		</plugin>
+		<plugin name="mysql">
+			<interface action="create" path="/terraform/v1/database/backend/mysql/create" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">subnet_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">user</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">password</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">port</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">disk_type</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">disk_size</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">version</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">instance_type</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">vpc_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">security_group_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">second_slave_zone</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">first_slave_zone</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">zone</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">user</parameter>
+					<parameter datatype="string">password</parameter>
+					<parameter datatype="string">ipaddress</parameter>
+					<parameter datatype="string">port</parameter>
+					<parameter datatype="string">id</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="delete" path="/terraform/v1/database/backend/mysql/delete" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="create_database" path="/terraform/v1/database/backend/mysql_database/create" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">mysql_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">id</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="delete_database" path="/terraform/v1/database/backend/mysql_database/delete" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="create_account" path="/terraform/v1/database/backend/mysql_account/create" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">mysql_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">password</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">id</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="delete_account" path="/terraform/v1/database/backend/mysql_account/delete" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="create_account_privilege" path="/terraform/v1/database/backend/mysql_privilege/create" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">mysql_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">username</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">database</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">privileges</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">id</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="delete_account_privilege" path="/terraform/v1/database/backend/mysql_privilege/delete" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="create_mysql_backup" path="/terraform/v1/database/backend/mysql_backup/create" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">mysql_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">backup_model</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">backup_time</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">id</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="delete_mysql_backup" path="/terraform/v1/database/backend/mysql_backup/delete" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+		</plugin>
+	</plugins>
 </package>
