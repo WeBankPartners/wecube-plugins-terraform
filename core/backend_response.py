@@ -181,11 +181,6 @@ class BackendResponse(object):
             return HttpResponse(str(self.allow_methods))
         else:
             if request.method.upper() in self.allow_methods:
-                if not DEBUG:
-                    jwt_info = jwt_request(request)
-                    self._is_platform(jwt_info)
-                    self.requestUser = jwt_info.get("sub")
-
                 self.requestId = "req_%s" % get_uuid()
                 self._trace_req(request)
                 res = self._request_response(request, **kwargs)
@@ -207,6 +202,11 @@ class BackendResponse(object):
 
     def _request_response(self, request, **kwargs):
         try:
+            if not DEBUG:
+                jwt_info = jwt_request(request)
+                self._is_platform(jwt_info)
+                self.requestUser = jwt_info.get("sub")
+
             res = HttpResponse(content=self.handler_http(request=request, **kwargs),
                                status=200,
                                content_type=content_type)
