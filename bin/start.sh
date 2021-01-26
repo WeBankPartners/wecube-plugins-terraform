@@ -10,6 +10,8 @@ cd ${SCRIPT_PATH};
 
 mkdir ../logs
 cd ..
+
+sed -i "s/true/false/g"  conf/application.conf
 echo "gunicorn starting process. wating ... "
 gunicorn  -c gunicorn.conf wecube_plugins_terraform.wsgi:application -t 900 --pid $pidfile --error-logfile $logfile --log-level info
 
