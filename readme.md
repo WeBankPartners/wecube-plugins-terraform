@@ -48,8 +48,8 @@ pip install -r requirements.txt
  则放入/data/wecube_plugins_terraform/bin  并修改Makefile的`cd bin && unzip -o terraform_0.14.5_linux_amd64.zip`
 
 2. cache 加速：
-将对应插件的完整目录打包成registry.terraform.io.tar 放入到源码文件的plugins目录下，
-并修改Dockerfile的tar -xvf /app/wecube_plugins_terraform/plugins/registry.terraform.io.tar
+将对应插件的完整目录打包成registry.terraform.io.tar.gz 放入到源码文件的plugins目录下，
+并修改Dockerfile的tar -xvf /app/wecube_plugins_terraform/plugins/registry.terraform.io.tar.gz
 
 ### 五. terraform 接入云厂商配置信息
 转换规则：
