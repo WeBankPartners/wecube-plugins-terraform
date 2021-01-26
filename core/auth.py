@@ -29,10 +29,10 @@ else:
 
 
 def jwt_request(request):
-    _token = request.headers.get('Authorization'.upper(), None)
+    _token = request.META.get("HTTP_AUTHORIZATION", None)
     if _token:
-        token = _token.split(" ")[1]
         try:
+            token = _token[len("Bearer "):]
             return jwt.decode(token, jwt_key, verify=True)
         except Exception, e:
             logger.info(traceback.format_exc())
