@@ -32,9 +32,7 @@
         <docker imageName="{{IMAGENAME}}" containerName="{{CONTAINERNAME}}"
         portBindings="{{ALLOCATE_PORT}}:8999"
         volumeBindings="{{BASE_MOUNT_PATH}}/certs:/data,/etc/localtime:/etc/localtime,{{BASE_MOUNT_PATH}}/terraform/logs:/app/wecube_plugins_terraform/logs,{{BASE_MOUNT_PATH}}/terraform/terraform:/app/wecube_plugins_terraform/terraform"
-        envVariables="MYSQL_USERNAME={{DB_USER}},MYSQL_PASSWORD={{DB_PWD}},
-        MYSQL_HOST={{DB_HOST}},MYSQL_PORT={{DB_PORT}},MYSQL_DATABASE={{DB_SCHEMA}},
-        JWT_SIGNING_KEY={{JWT_SIGNING_KEY}}"/>
+        envVariables="MYSQL_USERNAME={{DB_USER}},MYSQL_PASSWORD={{DB_PWD}},MYSQL_HOST={{DB_HOST}},MYSQL_PORT={{DB_PORT}},MYSQL_DATABASE={{DB_SCHEMA}},JWT_SIGNING_KEY={{JWT_SIGNING_KEY}}"/>
         <mysql schema="terraform" initFileName="init.sql"/>
     </resourceDependencies>
 
