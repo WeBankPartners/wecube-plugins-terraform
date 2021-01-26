@@ -66,7 +66,7 @@ class BackendResponse(object):
         if pagesize:
             pagesize = validation.validate_int("pagesize", pagesize, min=1)
             page = validation.validate_int("page", page, min=1)
-            page -= page
+            page = page - 1
             PAGINATION = {'pagesize': pagesize, 'page': page}
         else:
             PAGINATION = {}
@@ -197,7 +197,8 @@ class BackendResponse(object):
         raise NotImplementedError()
 
     def _is_platform(self, jwt_info):
-        if ("SUB_SYSTEM" not in jwt_info.get("authority")) and ("ADMIN_TERRAFORM_CONFIG" not in jwt_info.get("authority")):
+        if ("SUB_SYSTEM" not in jwt_info.get("authority")) and (
+                "ADMIN_TERRAFORM_CONFIG" not in jwt_info.get("authority")):
             raise exception_common.AllowedForbidden("AllowedForbidden")
 
     def _request_response(self, request, **kwargs):
