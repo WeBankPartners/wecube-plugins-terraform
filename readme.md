@@ -2,7 +2,7 @@
 ### 一.简介
 Terraform 多云管理
 
-支持的云厂商： 腾讯云(tencentcloud),
+支持的云厂商： 腾讯云(tencentcloud), 阿里云(alicloud),
 
 
 ### 二. 安装
