@@ -16,7 +16,7 @@ from lib.logs import logger
 from lib.uuid_util import get_uuid
 from .auth import jwt_request
 
-content_type = 'application/json,charset=utf-8'
+content_type = 'application/json;charset=utf-8'
 exception_common_classes = get_all_class_for_module(exception_common)
 
 
@@ -54,6 +54,10 @@ class ResponseController(object):
             _res = {"errorCode": "0", "errorMessage": ""}
             _res["callbackParameter"] = data.pop("callbackParameter", "")
             try:
+                data.pop("callbackParameter", "")
+                user = data.pop("operator", "")
+                logger.info("user: %s data: %s" % (user, format_json_dumps(data)))
+
                 res = self.main_response(request, data, **kwargs)
                 if not res:
                     res = self.response_templete(data)

@@ -17,7 +17,7 @@ from lib.logs import logger
 from lib.uuid_util import get_uuid
 from .auth import jwt_request
 
-content_type = 'application/json,charset=utf-8'
+content_type = 'application/json;charset=utf-8'
 exception_common_classes = get_all_class_for_module(exception_common)
 
 
