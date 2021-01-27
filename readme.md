@@ -6,8 +6,10 @@ Terraform 多云管理
 
 依赖内容：
 1. python 2.7
+
 2. terraform (cli, 建议将terraform的provide 插件cache进行加速，具体可参考文档中(`terraform 插件配置`))
 3. 公有云厂商(例如腾讯云，阿里云)， 用户自行进行开通， 并参考各云厂商申请API key，
+
    若为子账号则需要足够的资源申请权限(包括但不限于：
    1）. 使用的云资源的权限(创建，删除， 修改权限)，
    2）. 账户对资源的付费权限(没有该权限可能创建失败)，
@@ -161,7 +163,7 @@ url: /terraform/v1/configer/keyconfig
 "value_config": {
 	"subnet_20": "10.0.20.0/24",
 	"subnet_1": "10.0.1.0/24"
-}
+    }
 }
 ```
 
