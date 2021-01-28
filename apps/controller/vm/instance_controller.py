@@ -94,7 +94,9 @@ class InstanceController(BackendController):
                                          region=region, extend_info=data)
 
         res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64],
-               "ipaddress": result.get("ipaddress")}
+               "ipaddress": result.get("ipaddress"),
+               "cpu": result.get("cpu"),
+               "memory": result.get("memory")}
         return 1, res
 
 
@@ -224,7 +226,9 @@ class InstanceAddController(BaseController):
                                          region=region, extend_info=data)
 
         res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64],
-               "ipaddress": result.get("ipaddress")}
+               "ipaddress": result.get("ipaddress"),
+               "cpu": result.get("cpu"),
+               "memory": result.get("memory")}
         return res
 
 
@@ -284,7 +288,10 @@ class InstanceUpdateController(BaseController):
 
         count, result = self.resource.update(rid, name, instance_type, image, security_group_id, extend_info)
 
-        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64],
+               "ipaddress": result.get("ipaddress"),
+               "cpu": result.get("cpu"),
+               "memory": result.get("memory")}
         return res
 
 

@@ -486,6 +486,8 @@
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">ipaddress</parameter>
+                    <parameter datatype="string">cpu</parameter>
+                    <parameter datatype="string">memory</parameter>
 					<parameter datatype="string">id</parameter>
 					<parameter datatype="string">resource_id</parameter>
 				</outputParameters>
@@ -502,6 +504,9 @@
 				<outputParameters>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">ipaddress</parameter>
+                    <parameter datatype="string">cpu</parameter>
+                    <parameter datatype="string">memory</parameter>
 					<parameter datatype="string">id</parameter>
 					<parameter datatype="string">resource_id</parameter>
 				</outputParameters>
