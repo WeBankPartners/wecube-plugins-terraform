@@ -401,6 +401,36 @@
 				</outputParameters>
 			</interface>
 		</plugin>
+        <plugin name="disk">
+			<interface action="create" path="/terraform/v1/storage/backend/disk/create" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">type</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">size</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">zone</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">id</parameter>
+					<parameter datatype="string">resource_id</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="delete" path="/terraform/v1/storage/backend/disk/delete" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+		</plugin>
 		<plugin name="object_storage">
 			<interface action="create" path="/terraform/v1/storage/backend/object_storage/create" httpMethod='POST'>
 				<inputParameters>
@@ -416,6 +446,7 @@
 				<outputParameters>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
+                    <parameter datatype="string">url</parameter>
 					<parameter datatype="string">id</parameter>
 					<parameter datatype="string">resource_id</parameter>
 				</outputParameters>
