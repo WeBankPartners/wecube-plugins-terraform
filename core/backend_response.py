@@ -58,15 +58,15 @@ class BackendResponse(object):
         return {"count": count, "data": result}
 
     def build_filters(self, data):
-        pagesize = data.pop("pagesize", None)
-        page = data.pop("page", 1)
+        pagesize = data.pop("pagesize", None) or data.pop("__limit", None)
+        page = data.pop("page", 1) or data.pop("__offset", None)
         oder_key = data.pop("oder_key", None)
         oder_as = data.pop("oder_as", 'asc')
 
         if pagesize:
             pagesize = validation.validate_int("pagesize", pagesize, min=1)
-            page = validation.validate_int("page", page, min=1)
-            page = page - 1
+            page = validation.validate_int("page", page, min=0)
+            page = page - 1 if page > 1 else 1
             PAGINATION = {'pagesize': pagesize, 'page': page}
         else:
             PAGINATION = {}
@@ -78,7 +78,13 @@ class BackendResponse(object):
             ORDER = [[oder_key, oder_as]]
         else:
             ORDER = []
-        res = {"orderby": ORDER, "data": data}
+
+        query_data = {}
+        for col, value in data.items():
+            if value:
+                query_data[col] = value
+
+        res = {"orderby": ORDER, "data": query_data}
         res.update(PAGINATION)
         return res
 
