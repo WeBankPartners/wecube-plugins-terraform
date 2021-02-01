@@ -57,3 +57,6 @@ class ResourceObject(object):
         where_data = where_data or {}
         where_data.update({"id": rid})
         return self.resource.delete(filters=where_data)
+
+    def ora_delete(self, rid):
+        return self.resource.delete(filters={"id": rid})

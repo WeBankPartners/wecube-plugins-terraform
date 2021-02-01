@@ -66,3 +66,7 @@ class RouteTableObject(object):
         if not data:
             raise local_exceptions.ValueValidateError("route_table_id", "route table %s 不存在" % rid)
         return data["resource_id"]
+
+    def ora_delete(self, rid):
+        return self.resource.delete(filters={"id": rid})
+

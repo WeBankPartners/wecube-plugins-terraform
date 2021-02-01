@@ -149,6 +149,17 @@ class ApiBase(TerraformResource):
 
         return self.resource_object.update(rid, data)
 
+    def rollback_data(self, rid):
+        '''
+
+        :param rid:
+        :return:
+        '''
+        try:
+            self.resource_object.ora_delete(rid)
+        except:
+            logger.info(traceback.format_exc())
+
     def _fetch_id(self, result):
         '''
 

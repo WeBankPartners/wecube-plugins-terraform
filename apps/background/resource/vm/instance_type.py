@@ -60,3 +60,7 @@ class InstanceTypeObject(object):
         if not data:
             raise local_exceptions.ValueValidateError("instance type name", "instance type name %s 不存在" % name)
         return data["origin_name"], data
+
+    def ora_delete(self, rid):
+        return self.resource.delete(filters={"id": rid})
+

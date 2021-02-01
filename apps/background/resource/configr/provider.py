@@ -78,3 +78,7 @@ class ProviderObject(object):
         if not data:
             raise local_exceptions.ResourceValidateError("provider", "provider %s 未注册" % provider)
         return data
+
+    def ora_delete(self, rid):
+        return self.resource.delete(filters={"id": rid})
+

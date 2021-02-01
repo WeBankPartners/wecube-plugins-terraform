@@ -86,6 +86,9 @@ class _NosqlBase(object):
             raise local_exceptions.ValueValidateError(engine, "rds database %s 不存在" % rid)
         return data["resource_id"]
 
+    def ora_delete(self, rid):
+        return self.resource.delete(filters={"id": rid})
+
 
 class MongoDBObject(_NosqlBase):
     def __init__(self):

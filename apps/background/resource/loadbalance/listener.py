@@ -67,3 +67,6 @@ class LBListenerObject(object):
             raise local_exceptions.ValueValidateError("lb listener", "lb  listener %s 不存在" % rid)
         return data["resource_id"]
 
+    def ora_delete(self, rid):
+        return self.resource.delete(filters={"id": rid})
+

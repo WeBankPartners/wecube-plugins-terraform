@@ -106,6 +106,7 @@ class MysqlApi(RdsDBApi):
         '''
 
         extend_info = extend_info or {}
+        password = password or "Terraform.123"
         label_name = self.resource_name + "_" + rid
         create_data = {"name": name, "engine": self.resource_name, "zone": zone,
                        "version": version, "instance_type": instance_type,
@@ -156,7 +157,12 @@ class MysqlApi(RdsDBApi):
         self.write_define(rid, _path, define_json=define_json)
 
         self.init_workspace(_path, provider_object["name"])
-        result = self.run(_path)
+
+        try:
+            result = self.run(_path)
+        except Exception, e:
+            self.rollback_data(rid)
+            raise e
 
         result = self.formate_result(result)
         logger.info(format_json_dumps(result))

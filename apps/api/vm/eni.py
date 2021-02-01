@@ -142,14 +142,18 @@ class EniApi(ApiBase):
         self.write_define(rid, _path, define_json=define_json)
 
         self.init_workspace(_path, provider_object["name"])
-        result = self.run(_path)
+
+        try:
+            result = self.run(_path)
+        except Exception, e:
+            self.rollback_data(rid)
+            raise e
 
         result = self.formate_result(result)
         logger.info(format_json_dumps(result))
 
         _update_data = {"status": "ok", "result_json": format_json_dumps(result)}
         _update_data.update(self._read_output_result(result))
-        # todo 处理不同云厂商的输出参数， 提取
 
         if not _update_data.get("resource_id"):
             _update_data["resource_id"] = self._fetch_id(result)

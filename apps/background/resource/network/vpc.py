@@ -66,6 +66,9 @@ class VpcObject(object):
         where_data.update({"id": rid})
         return self.resource.delete(filters=where_data)
 
+    def ora_delete(self, rid):
+        return self.resource.delete(filters={"id": rid})
+
     def delete(self, rid):
         count, data = self.update(rid, update_data={"is_deleted": 1, "deleted_time": datetime.datetime.now()})
         return count

@@ -66,3 +66,6 @@ class SubnetObject(object):
         count, data = self.update(rid, update_data={"is_deleted": 1, "deleted_time": datetime.datetime.now()})
         return count
 
+    def ora_delete(self, rid):
+        return self.resource.delete(filters={"id": rid})
+

@@ -73,6 +73,9 @@ class InstanceObject(object):
         count, data = self.update(rid, update_data=update_data)
         return count
 
+    def ora_delete(self, rid):
+        return self.resource.delete(filters={"id": rid})
+
     def vm_resource_id(self, rid):
         data = self.show(rid)
         if not data:
