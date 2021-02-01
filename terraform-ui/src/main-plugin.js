@@ -12,16 +12,16 @@ import zhCN from '@/locale/i18n/zh-CN.json'
 import enUS from '@/locale/i18n/en-US.json'
 
 import TerraformPageTable from '@/pages/components/table-page/page'
-import ModalComponent from '@/pages/components/modal'
+import TfModalComponent from '@/pages/components/modal'
 
 window.addOptions({
   JQ: jquery,
-  $itsCommonUtil: commonUtil,
+  $tfCommonUtil: commonUtil,
   $validate: validate
 })
 
 window.component('TerraformPageTable', TerraformPageTable)
-window.component('ModalComponent', ModalComponent)
+window.component('TfModalComponent', TfModalComponent)
 
 window.locale('zh-CN', zhCN)
 window.locale('en-US', enUS)
