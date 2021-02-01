@@ -139,14 +139,14 @@ export default {
             value: 'extend_info',
             placeholder: 'JSON',
             disabled: false,
-            type: 'text'
+            type: 'textarea'
           },
           {
             label: 'tf_provider_property',
             value: 'resource_property',
             placeholder: 'JSON',
             disabled: false,
-            type: 'text'
+            type: 'textarea'
           }
         ],
         addRow: {
