@@ -144,17 +144,19 @@ export default {
             label: 'tf_cpu',
             value: 'cpu',
             placeholder: 'tips.inputRequired',
-            v_validate: 'required:true',
+            max: 128,
+            min: 1,
             disabled: false,
-            type: 'text'
+            type: 'inputNumber'
           },
           {
             label: 'tf_memory',
             value: 'memory',
             placeholder: 'tips.inputRequired',
-            v_validate: 'required:true',
+            max: 1024 * 512,
+            min: 1,
             disabled: false,
-            type: 'text'
+            type: 'inputNumber'
           },
           {
             label: 'tf_network',
@@ -176,8 +178,8 @@ export default {
           name: '',
           provider_id: '',
           origin_name: '',
-          cpu: '',
-          memory: '',
+          cpu: 1,
+          memory: 1,
           network: '',
           extend_info: ''
         },
@@ -218,8 +220,6 @@ export default {
     },
     async addPost () {
       this.modelConfig.addRow.extend_info = JSON.parse(this.modelConfig.addRow.extend_info)
-      this.modelConfig.addRow.cpu = Number(this.modelConfig.addRow.cpu)
-      this.modelConfig.addRow.memory = Number(this.modelConfig.addRow.memory)
       const { status, message } = await addTableRow(this.pageConfig.CRUD, this.modelConfig.addRow)
       if (status === 'OK') {
         this.initTableData()
