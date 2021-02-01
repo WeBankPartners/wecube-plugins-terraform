@@ -2,6 +2,7 @@ import terraformIndex from '@/pages/terraform-index'
 import keyconfig from '@/pages/keyconfig'
 import resource from '@/pages/resource'
 import provider from '@/pages/provider'
+import instanceType from '@/pages/instance-type'
 
 const router = [
   {
@@ -32,6 +33,13 @@ const router = [
         title: '云厂商',
         meta: {},
         component: provider
+      },
+      {
+        path: 'instanceType',
+        name: 'instanceType',
+        title: '资源规格',
+        meta: {},
+        component: instanceType
       }
     ]
   }

@@ -1,7 +1,7 @@
 <template>
   <div class=" ">
     <TerraformPageTable :pageConfig="pageConfig"></TerraformPageTable>
-    <ModalComponent :modelConfig="modelConfig"></ModalComponent>
+    <TfModalComponent :modelConfig="modelConfig"></TfModalComponent>
   </div>
 </template>
 
@@ -9,7 +9,7 @@
 import { getTableData, addTableRow, editTableRow, deleteTableRow } from '@/api/server'
 let tableEle = [
   {
-    title: 'ID',
+    title: 'tf_id',
     value: 'id', //
     display: true
   },
@@ -129,9 +129,9 @@ export default {
             label: 'tf_provider_property',
             value: 'value_config',
             placeholder: 'tips.inputRequired',
-            v_validate: 'required:true|min:2|max:60',
+            v_validate: 'required:true',
             disabled: false,
-            type: 'text'
+            type: 'textarea'
           }
         ],
         addRow: {
@@ -154,7 +154,7 @@ export default {
   },
   methods: {
     async initTableData () {
-      const params = this.$itsCommonUtil.managementUrl(this)
+      const params = this.$tfCommonUtil.managementUrl(this)
       const { status, data } = await getTableData(params)
       if (status === 'OK') {
         this.pageConfig.table.tableData = data.data
@@ -178,7 +178,7 @@ export default {
       this.id = rowData.id
       this.modelConfig.isAdd = false
       this.modelTip.value = rowData[this.modelTip.key]
-      this.modelConfig.addRow = this.$itsCommonUtil.manageEditParams(this.modelConfig.addRow, rowData)
+      this.modelConfig.addRow = this.$tfCommonUtil.manageEditParams(this.modelConfig.addRow, rowData)
       this.modelConfig.addRow.value_config = JSON.stringify(this.modelConfig.addRow.value_config)
       this.$root.JQ('#add_edit_Modal').modal('show')
     },
