@@ -9,7 +9,7 @@
 import { getTableData, addTableRow, editTableRow, deleteTableRow } from '@/api/server'
 let tableEle = [
   {
-    title: 'ID',
+    title: 'tf_id',
     value: 'id', //
     display: true
   },
@@ -129,7 +129,7 @@ export default {
             label: 'tf_provider_property',
             value: 'value_config',
             placeholder: 'tips.inputRequired',
-            v_validate: 'required:true|min:2|max:60',
+            v_validate: 'required:true',
             disabled: false,
             type: 'textarea'
           }

@@ -1,7 +1,19 @@
 <template>
   <div class=" ">
     <TerraformPageTable :pageConfig="pageConfig"></TerraformPageTable>
-    <TfModalComponent :modelConfig="modelConfig"></TfModalComponent>
+    <TfModalComponent :modelConfig="modelConfig">
+      <template #outer-config>
+        <div class="marginbottom params-each">
+          <label class="col-md-2 label-name">{{ $t('tf_provider') }}:</label>
+          <Select v-model="modelConfig.addRow.provider_id" filterable style="width: 338px">
+            <Option v-for="host in modelConfig.v_select_configs.providerOption" :value="host.id" :key="host.id">{{
+              host.name
+            }}</Option>
+          </Select>
+          <label class="required-tip">*</label>
+        </div>
+      </template>
+    </TfModalComponent>
   </div>
 </template>
 
@@ -14,33 +26,33 @@ let tableEle = [
     display: true
   },
   {
-    title: 'tf_provider', // 不必
+    title: 'tf_name',
+    value: 'name',
+    display: true
+  },
+  {
+    title: 'tf_origin_name',
+    value: 'origin_name',
+    display: true
+  },
+  {
+    title: 'tf_provider',
     value: 'provider', //
     display: true
   },
   {
-    title: 'tf_resource',
-    value: 'resource_name', //
+    title: 'tf_cpu',
+    value: 'cpu', //
     display: true
   },
   {
-    title: 'tf_property',
-    value: 'property',
+    title: 'tf_memory', // 不必
+    value: 'memory', //
     display: true
   },
   {
-    title: 'tf_provider_property',
-    value: 'resource_property', //
-    display: true
-  },
-  {
-    title: 'tf_output_property',
-    value: 'output_property',
-    display: true
-  },
-  {
-    title: 'tf_extend_info',
-    value: 'extend_info',
+    title: 'tf_extend_info', // 不必
+    value: 'extend_info', //
     display: true
   }
 ]
@@ -53,25 +65,25 @@ export default {
   data () {
     return {
       pageConfig: {
-        CRUD: '/terraform/v1/configer/resource',
+        CRUD: '/terraform/v1/vm/instance_type',
         researchConfig: {
           input_conditions: [
+            {
+              value: 'name',
+              type: 'input',
+              placeholder: 'tf_name',
+              style: ''
+            },
+            {
+              value: 'origin_name',
+              type: 'input',
+              placeholder: 'tf_origin_name',
+              style: ''
+            },
             {
               value: 'provider',
               type: 'input',
               placeholder: 'tf_provider',
-              style: ''
-            },
-            {
-              value: 'property',
-              type: 'input',
-              placeholder: 'tf_property',
-              style: ''
-            },
-            {
-              value: 'resource_name',
-              type: 'input',
-              placeholder: 'tf_resource',
               style: ''
             }
           ],
@@ -89,11 +101,7 @@ export default {
               btn_icon: 'fa fa-plus'
             }
           ],
-          filters: {
-            provider: '',
-            property: '',
-            resource_name: ''
-          }
+          filters: {}
         },
         table: {
           tableData: [],
@@ -112,30 +120,46 @@ export default {
       },
       modelConfig: {
         modalId: 'add_edit_Modal',
-        modalTitle: 'tf_resource',
+        modalTitle: 'tf_instance_type',
         isAdd: true,
         config: [
           {
-            label: 'tf_resource',
-            value: 'resource_name',
+            label: 'tf_name',
+            value: 'name',
             placeholder: 'tips.inputRequired',
             v_validate: 'required:true|min:2|max:60',
-            disabled: true,
+            disabled: false,
             type: 'text'
           },
           {
-            label: 'tf_provider',
-            value: 'provider',
+            label: 'tf_origin_name',
+            value: 'origin_name',
             placeholder: 'tips.inputRequired',
             v_validate: 'required:true|min:2|max:60',
-            disabled: true,
+            disabled: false,
+            type: 'text'
+          },
+          { name: 'outer-config', type: 'slot' },
+          {
+            label: 'tf_cpu',
+            value: 'cpu',
+            placeholder: 'tips.inputRequired',
+            v_validate: 'required:true',
+            disabled: false,
             type: 'text'
           },
           {
-            label: 'tf_property',
-            value: 'property',
+            label: 'tf_memory',
+            value: 'memory',
             placeholder: 'tips.inputRequired',
-            v_validate: 'required:true|min:2|max:60',
+            v_validate: 'required:true',
+            disabled: false,
+            type: 'text'
+          },
+          {
+            label: 'tf_network',
+            value: 'network',
+            placeholder: '',
             disabled: false,
             type: 'text'
           },
@@ -145,34 +169,24 @@ export default {
             placeholder: 'tf_json',
             disabled: false,
             type: 'textarea'
-          },
-          {
-            label: 'tf_provider_property',
-            value: 'resource_property',
-            placeholder: 'tf_json',
-            disabled: false,
-            type: 'textarea'
-          },
-          {
-            label: 'tf_output_property',
-            value: 'output_property',
-            placeholder: 'tf_json',
-            disabled: false,
-            type: 'textarea'
           }
         ],
         addRow: {
           // [通用]-保存用户新增、编辑时数据
-          resource_name: '',
-          provider: '',
-          property: '',
-          extend_info: '',
-          resource_property: '',
-          output_property: ''
+          name: '',
+          provider_id: '',
+          origin_name: '',
+          cpu: '',
+          memory: '',
+          network: '',
+          extend_info: ''
+        },
+        v_select_configs: {
+          providerOption: []
         }
       },
       modelTip: {
-        key: 'resource_name',
+        key: 'name',
         value: null
       },
       id: ''
@@ -190,14 +204,22 @@ export default {
         this.pageConfig.pagination.total = data.count
       }
     },
-    add () {
+    async getProvider () {
+      this.modelConfig.v_select_configs.providerOption = []
+      const { status, data } = await getTableData('/terraform/v1/configer/provider')
+      if (status === 'OK') {
+        this.modelConfig.v_select_configs.providerOption = data.data
+      }
+    },
+    async add () {
+      await this.getProvider()
       this.modelConfig.isAdd = true
       this.$root.JQ('#add_edit_Modal').modal('show')
     },
     async addPost () {
       this.modelConfig.addRow.extend_info = JSON.parse(this.modelConfig.addRow.extend_info)
-      this.modelConfig.addRow.resource_property = JSON.parse(this.modelConfig.addRow.resource_property)
-      this.modelConfig.addRow.output_property = JSON.parse(this.modelConfig.addRow.output_property)
+      this.modelConfig.addRow.cpu = Number(this.modelConfig.addRow.cpu)
+      this.modelConfig.addRow.memory = Number(this.modelConfig.addRow.memory)
       const { status, message } = await addTableRow(this.pageConfig.CRUD, this.modelConfig.addRow)
       if (status === 'OK') {
         this.initTableData()
@@ -207,20 +229,16 @@ export default {
     },
     async editF (rowData) {
       this.id = rowData.id
+      await this.getProvider()
       this.modelConfig.isAdd = false
       this.modelTip.value = rowData[this.modelTip.key]
       this.modelConfig.addRow = this.$tfCommonUtil.manageEditParams(this.modelConfig.addRow, rowData)
       this.modelConfig.addRow.extend_info = JSON.stringify(this.modelConfig.addRow.extend_info)
-      this.modelConfig.addRow.resource_property = JSON.stringify(this.modelConfig.addRow.resource_property)
-      this.modelConfig.addRow.output_property = JSON.stringify(this.modelConfig.addRow.output_property)
       this.$root.JQ('#add_edit_Modal').modal('show')
     },
     async editPost () {
       let editData = JSON.parse(JSON.stringify(this.modelConfig.addRow))
-      delete editData.name
       editData.extend_info = JSON.parse(editData.extend_info)
-      editData.resource_property = JSON.parse(editData.resource_property)
-      editData.output_property = JSON.parse(editData.output_property)
       const { status, message } = await editTableRow(this.pageConfig.CRUD, this.id, editData)
       if (status === 'OK') {
         this.initTableData()
@@ -230,7 +248,7 @@ export default {
     },
     deleteConfirmModal (rowData) {
       this.$Modal.confirm({
-        title: this.$t('delete_confirm') + rowData.name,
+        title: this.$t('delete_confirm') + rowData[this.modelTip.key],
         'z-index': 1000000,
         onOk: async () => {
           const { status, message } = await deleteTableRow(this.pageConfig.CRUD, rowData.id)

@@ -9,7 +9,7 @@
 import { getTableData, addTableRow, editTableRow, deleteTableRow } from '@/api/server'
 let tableEle = [
   {
-    title: 'ID',
+    title: 'tf_id',
     value: 'id', //
     display: true
   },
@@ -130,14 +130,14 @@ export default {
           {
             label: 'tf_extend_info',
             value: 'extend_info',
-            placeholder: 'JSON',
+            placeholder: 'tf_json',
             disabled: false,
             type: 'textarea'
           },
           {
             label: 'tf_provider_property',
             value: 'provider_property',
-            placeholder: 'JSON',
+            placeholder: 'tf_json',
             disabled: false,
             type: 'textarea'
           }

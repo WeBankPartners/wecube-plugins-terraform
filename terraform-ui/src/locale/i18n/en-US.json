@@ -105,6 +105,8 @@
   "tf_provider": "Cloud Vendor",
   "tf_resource": "Resource",
   "tf_keyconfig": "Key Config",
+  "tf_instance_type": "Instance Type",
+  "tf_id": "ID",
   "tf_name": "Name",
   "tf_secret_id": "Secret ID",
   "tf_secret_key": "Secret Key",
@@ -113,5 +115,10 @@
   "tf_extend_info": "Extend Info",
   "tf_provider_property": "Provider Property",
   "tf_property": "Property",
-  "tf_output_property": "Output Property"
+  "tf_output_property": "Output Property",
+  "tf_origin_name": "Origin Name",
+  "tf_memory": "Memory",
+  "tf_cpu": "CPU",
+  "tf_network": "Network",
+  "tf_json": "JSON"
 }
