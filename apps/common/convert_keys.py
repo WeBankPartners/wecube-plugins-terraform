@@ -235,6 +235,9 @@ def convert_extend_propertys(datas, extend_info, is_update=False):
     if is_update:
         for key, define in extend_info.items():
             if isinstance(define, (int, basestring, int, float, bool)):
+                if isinstance(define, basestring):
+                    if define == "-":
+                        continue
                 if key in datas.keys():
                     ora_ext_info[key] = define
             elif isinstance(define, dict):
@@ -248,6 +251,9 @@ def convert_extend_propertys(datas, extend_info, is_update=False):
 
     for key, define in extend_info.items():
         if isinstance(define, (int, basestring, int, float, bool)):
+            if isinstance(define, basestring):
+                if define == "-":
+                    continue
             ora_ext_info[key] = define
         elif isinstance(define, dict):
             if define.get("value") is not None:
