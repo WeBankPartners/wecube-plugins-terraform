@@ -112,5 +112,6 @@
   "tf_zone": "区域",
   "tf_extend_info": "其他信息",
   "tf_provider_property": "转换信息",
-  "tf_property": "资源属性"
+  "tf_property": "资源属性",
+  "tf_output_property": "输出属性"
 }

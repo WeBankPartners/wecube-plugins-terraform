@@ -112,5 +112,6 @@
   "tf_zone": "Zone",
   "tf_extend_info": "Extend Info",
   "tf_provider_property": "Provider Property",
-  "tf_property": "Property"
+  "tf_property": "Property",
+  "tf_output_property": "Output Property"
 }

@@ -15,13 +15,13 @@ import 'font-awesome/css/font-awesome.css'
 import jquery from 'jquery'
 
 import TerraformPageTable from '@/pages/components/table-page/page'
-import ModalComponent from '@/pages/components/modal'
+import TfModalComponent from '@/pages/components/modal'
 
 Vue.prototype.$validate = validate
-Vue.prototype.$itsCommonUtil = commonUtil
+Vue.prototype.$tfCommonUtil = commonUtil
 Vue.prototype.JQ = jquery
 Vue.component('TerraformPageTable', TerraformPageTable)
-Vue.component('ModalComponent', ModalComponent)
+Vue.component('TfModalComponent', TfModalComponent)
 
 Vue.config.productionTip = false
 
