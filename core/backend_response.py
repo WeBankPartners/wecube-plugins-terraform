@@ -81,6 +81,9 @@ class BackendResponse(object):
 
         query_data = {}
         for col, value in data.items():
+            if col.startswith("__"):
+                continue
+
             if value:
                 query_data[col] = value
 
