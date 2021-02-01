@@ -66,7 +66,7 @@ class BackendResponse(object):
         if pagesize:
             pagesize = validation.validate_int("pagesize", pagesize, min=1)
             page = validation.validate_int("page", page, min=0)
-            page = page - 1 if page > 1 else 1
+            page = page - 1 if page >= 1 else 1
             PAGINATION = {'pagesize': pagesize, 'page': page}
         else:
             PAGINATION = {}
