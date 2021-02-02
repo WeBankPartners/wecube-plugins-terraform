@@ -882,3 +882,12 @@ CREATE TABLE `ccn_bandwidth` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 
+DROP TABLE IF EXISTS `resource_history`;
+
+CREATE TABLE `resource_history` (
+  `id` VARCHAR(36) DEFAULT NULL,
+  `resource` VARCHAR(36) DEFAULT NULL,
+  `ora_data` text DEFAULT NULL,
+  INDEX `idx_id` (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
+

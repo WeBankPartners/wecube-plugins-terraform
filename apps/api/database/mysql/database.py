@@ -89,6 +89,10 @@ class MysqlDatabaseApi(ApiBase):
         :return:
         '''
 
+        _exists_data = self.create_resource_exists(rid)
+        if _exists_data:
+            return _exists_data
+
         extend_info = extend_info or {}
         label_name = self.resource_name + "_" + rid
         create_data = {"name": name}

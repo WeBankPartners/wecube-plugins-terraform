@@ -91,6 +91,10 @@ class MysqlAccountApi(ApiBase):
         :return:
         '''
 
+        _exists_data = self.create_resource_exists(rid)
+        if _exists_data:
+            return _exists_data
+
         password = password or "Terraform.123"
         extend_info = extend_info or {}
         label_name = self.resource_name + "_" + rid

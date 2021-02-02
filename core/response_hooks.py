@@ -58,7 +58,7 @@ class ResponseController(object):
                 user = data.pop("operator", "")
                 logger.info("user: %s data: %s" % (user, format_json_dumps(data)))
 
-                res = self.main_response(request, data, **kwargs)
+                res = self.backend_response(request, data, **kwargs)
                 if not res:
                     res = self.response_templete(data)
 
@@ -98,6 +98,9 @@ class ResponseController(object):
 
     def before_handler(self, request, data, **kwargs):
         pass
+
+    def backend_response(self, request, data, **kwargs):
+        return self.main_response(request, data, **kwargs)
 
     def main_response(self, request, data, **kwargs):
         return self.resource.create(data)

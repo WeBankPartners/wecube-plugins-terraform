@@ -5,7 +5,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 class ResourceBaseObject(object):
     resource = None
 
-    def org_show(self, rid, where_data=None):
+    def ora_show(self, rid, where_data=None):
         where_data = where_data or {}
         where_data.update({"id": rid})
         return self.resource.get(filters=where_data)

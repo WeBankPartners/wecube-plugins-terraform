@@ -18,6 +18,7 @@ class _BaseManager(object):
         '''
 
         try:
+            logger.info("try create data: %s" % (format_json_dumps(data)))
             obj = self.obj(data)
             Database().create(obj)
             return 1, obj.id

@@ -13,8 +13,9 @@ from apps.common.convert_keys import output_values
 from apps.common.convert_keys import output_line
 from apps.common.convert_keys import define_relations_key
 from apps.common.convert_keys import convert_extend_propertys
-from apps.api.configer.resource import ResourceObject
-from apps.api.configer.value_config import ValueConfigObject
+from apps.background.resource.configr.history import HistoryObject
+from apps.background.resource.configr.resource import ResourceObject
+from apps.background.resource.configr.value_config import ValueConfigObject
 from apps.background.lib.drivers.terraform_operate import TerraformResource
 
 
@@ -26,8 +27,17 @@ class ApiBase(TerraformResource):
         self.resource_object = None
         self.resource_keys_config = None
 
-    def resource_exists(self, rid):
-        return self.resource_object.show(rid)
+    def create_resource_exists(self, rid):
+        _exists_data = self.resource_object.ora_show(rid)
+        if _exists_data:
+            if _exists_data.get("is_deleted"):
+                logger.info("create resource check id exists and status is deleted, clear it")
+                HistoryObject().create(create_data={"id": rid, "resource": self.resource_name,
+                                                    "ora_data": _exists_data})
+            else:
+                return _exists_data
+        else:
+            return
 
     def resource_info(self, provider):
         '''
@@ -226,6 +236,7 @@ class ApiBase(TerraformResource):
         resource_info = self.resource_object.show(rid)
         if not resource_info:
             return 0
+
         _path = self.create_workpath(rid,
                                      provider=resource_info["provider"],
                                      region=resource_info["region"])

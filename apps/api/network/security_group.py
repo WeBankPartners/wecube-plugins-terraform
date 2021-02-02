@@ -81,6 +81,11 @@ class SecGroupApi(ApiBase):
         :param extend_info:
         :return:
         '''
+
+        _exists_data = self.create_resource_exists(rid)
+        if _exists_data:
+            return _exists_data
+
         extend_info = extend_info or {}
         create_data = {"name": name}
         label_name = self.resource_name + "_" + rid

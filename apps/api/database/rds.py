@@ -116,6 +116,10 @@ class RdsDBApi(ApiBase):
         :return:
         '''
 
+        _exists_data = self.create_resource_exists(rid)
+        if _exists_data:
+            return _exists_data
+
         extend_info = extend_info or {}
         create_data = {"name": name, "engine": self.resource_name, "zone": zone,
                        "version": version, "instance_type": instance_type,

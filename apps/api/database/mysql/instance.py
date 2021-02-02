@@ -105,6 +105,10 @@ class MysqlApi(RdsDBApi):
         :return:
         '''
 
+        _exists_data = self.create_resource_exists(rid)
+        if _exists_data:
+            return _exists_data
+
         extend_info = extend_info or {}
         password = password or "Terraform.123"
         label_name = self.resource_name + "_" + rid

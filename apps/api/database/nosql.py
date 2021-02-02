@@ -116,6 +116,10 @@ class NosqlApi(TerraformResource):
         :return:
         '''
 
+        _exists_data = self.create_resource_exists(rid)
+        if _exists_data:
+            return _exists_data
+
         subnet_resource_id = SubnetObject().subnet_resource_id(subnet_id)
 
         provider_object, provider_info = ProviderApi().provider_info(provider_id, region)

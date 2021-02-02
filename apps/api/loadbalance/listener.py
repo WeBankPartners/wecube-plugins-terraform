@@ -101,6 +101,10 @@ class LBListenerApi(ApiBase):
         :return:
         '''
 
+        _exists_data = self.create_resource_exists(rid)
+        if _exists_data:
+            return _exists_data
+
         name = name or "%s_%s" % (protocol, port)
         extend_info = extend_info or {}
         create_data = {"name": name, "port": port, "protocol": protocol,

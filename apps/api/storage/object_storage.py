@@ -77,6 +77,10 @@ class ObjectStorageApi(ApiBase):
         :return:
         '''
 
+        _exists_data = self.create_resource_exists(rid)
+        if _exists_data:
+            return _exists_data
+
         if appid:
             name = "%s-%s" % (name, appid)
 

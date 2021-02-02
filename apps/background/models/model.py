@@ -17,6 +17,19 @@ def to_dict(self):
 Base.to_dict = to_dict
 
 
+class ResourceHistory(Base):
+    __tablename__ = "resource_history"
+
+    id = Column(String(36))
+    resource = Column(String(36))
+    ora_data = Column(String(65535))
+
+    def __init__(self, data):
+        self.id = data.get("id")
+        self.resource = data.get("resource")
+        self.ora_data = data.get("ora_data")
+
+
 class Providers(Base):
     __tablename__ = "cloud_providers"
 

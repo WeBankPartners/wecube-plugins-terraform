@@ -86,6 +86,10 @@ class SubnetApi(ApiBase):
         :return:
         '''
 
+        _exists_data = self.create_resource_exists(rid)
+        if _exists_data:
+            return _exists_data
+
         extend_info = extend_info or {}
         create_data = {"cidr": cidr, "name": name, "zone": zone}
         label_name = self.resource_name + "_" + rid

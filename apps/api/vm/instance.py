@@ -178,6 +178,10 @@ class InstanceApi(ApiBase):
 
         # todo 校验 data disks ， 定义type模型
 
+        _exists_data = self.create_resource_exists(rid)
+        if _exists_data:
+            return _exists_data
+
         extend_info = extend_info or {}
         create_data = {"name": name, "hostname": hostname,
                        "disk_type": disk_type,

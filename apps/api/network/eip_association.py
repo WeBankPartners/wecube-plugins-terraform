@@ -95,6 +95,10 @@ class EipAssociationApi(ApiBase):
         :return:
         '''
 
+        _exists_data = self.create_resource_exists(rid)
+        if _exists_data:
+            return _exists_data
+
         # todo 依据不同云厂商， 转换对应的参(参考resource_property 定义)
         extend_info = extend_info or {}
 

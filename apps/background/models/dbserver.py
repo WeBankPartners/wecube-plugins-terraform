@@ -4,6 +4,10 @@ import model
 from objects import _BaseManager
 
 
+class HistoryManager(_BaseManager):
+    obj = model.ResourceHistory
+
+
 class ProvidersManager(_BaseManager):
     obj = model.Providers
 
