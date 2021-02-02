@@ -26,6 +26,9 @@ class ApiBase(TerraformResource):
         self.resource_object = None
         self.resource_keys_config = None
 
+    def resource_exists(self, rid):
+        return self.resource_object.show(rid)
+
     def resource_info(self, provider):
         '''
 
@@ -221,6 +224,8 @@ class ApiBase(TerraformResource):
         '''
 
         resource_info = self.resource_object.show(rid)
+        if not resource_info:
+            return 0
         _path = self.create_workpath(rid,
                                      provider=resource_info["provider"],
                                      region=resource_info["region"])

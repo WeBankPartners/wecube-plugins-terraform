@@ -206,6 +206,9 @@ class BucketObjectApi(ApiBase):
         '''
 
         resource_info = self.resource_object.show(rid)
+        if not resource_info:
+            return 0
+
         _path = self.create_workpath(rid,
                                      provider=resource_info["provider"],
                                      region=resource_info["region"])
