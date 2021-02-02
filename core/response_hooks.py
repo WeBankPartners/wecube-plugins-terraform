@@ -173,12 +173,12 @@ class ResponseController(object):
 
     def exception_response(self, e):
         if e.__class__.__name__ in ['UnicodeDecodeError']:
-            status_code = 400
-            errmsg = self.format_err(400, "DataError", "字符错误， 原因：请使用UTF-8编码")
+            status_code = 200
+            errmsg = self.format_err(200, "DataError", "字符错误， 原因：请使用UTF-8编码")
             response_res = HttpResponse(status=status_code, content=errmsg, content_type=content_type)
         elif e.__class__.__name__ in ['ValueError', 'TypeError', "KeyError"]:
-            status_code = 400
-            errmsg = self.format_err(400, "ValueError", "字符错误， 原因：%s" % e.message)
+            status_code = 200
+            errmsg = self.format_err(200, "ValueError", "字符错误， 原因：%s" % e.message)
             response_res = HttpResponse(status=status_code, content=errmsg, content_type=content_type)
         elif e.__class__.__name__ in ['AuthFailedError']:
             status_code = 401
