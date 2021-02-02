@@ -474,7 +474,7 @@
 					<parameter datatype="string" mappingType="entity" required="Y">instance_type</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">disk_type</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">disk_size</parameter>
-					<parameter datatype="string" mappingType="entity" required="N">password</parameter>
+					<parameter datatype="string" mappingType="entity" required="N" sensitiveData="Y">password</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">security_group_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">vpc_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">data_disks</parameter>
@@ -724,7 +724,7 @@
 					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">subnet_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">user</parameter>
-					<parameter datatype="string" mappingType="entity" required="N">password</parameter>
+					<parameter datatype="string" mappingType="entity" required="N" sensitiveData="Y">password</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">port</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">disk_type</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">disk_size</parameter>
@@ -743,7 +743,7 @@
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">resource_id</parameter>
 					<parameter datatype="string">user</parameter>
-					<parameter datatype="string">password</parameter>
+					<parameter datatype="string" sensitiveData="Y">password</parameter>
 					<parameter datatype="string">ipaddress</parameter>
 					<parameter datatype="string">port</parameter>
 					<parameter datatype="string">id</parameter>
@@ -792,7 +792,7 @@
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">mysql_id</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">password</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y" sensitiveData="Y">password</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>

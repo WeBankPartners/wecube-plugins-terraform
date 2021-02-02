@@ -2,6 +2,7 @@
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
+import base64
 from core import validation
 from core import local_exceptions
 from core.controller import BackendController
@@ -99,9 +100,10 @@ class MysqlController(BackendController):
                                          subnet_id=subnet_id, zone=zone,
                                          region=region, extend_info=data)
 
+        _password = base64.b64decode(result.get("password")) if result.get("password") else None
         return 1, {"id": rid, "ipaddress": result.get("ipaddress"),
                    "port": result.get("port"), "user": result.get("user"),
-                   "password": result.get("password"),
+                   "password": _password,
                    "resource_id": str(result.get("resource_id"))[:64]}
 
 
@@ -191,9 +193,10 @@ class MysqlAddController(BaseController):
                                          subnet_id=subnet_id, zone=zone,
                                          region=region, extend_info=data)
 
+        _password = base64.b64decode(result.get("password")) if result.get("password") else None
         return {"id": rid, "ipaddress": result.get("ipaddress"),
                 "port": result.get("port"), "user": result.get("user"),
-                "password": result.get("password"),
+                "password": _password,
                 "resource_id": str(result.get("resource_id"))[:64]}
 
 
