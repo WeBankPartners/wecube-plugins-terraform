@@ -9,38 +9,45 @@
 import { getTableData, addTableRow, editTableRow, deleteTableRow } from '@/api/server'
 let tableEle = [
   {
-    title: 'tf_id',
-    value: 'id', //
-    display: true
-  },
-  {
     title: 'tf_provider', // 不必
     value: 'provider', //
+    style: { width: '150px' },
     display: true
   },
   {
     title: 'tf_resource',
     value: 'resource_name', //
+    style: { width: '150px' },
     display: true
   },
   {
     title: 'tf_property',
     value: 'property',
+    style: { width: '150px' },
     display: true
   },
   {
     title: 'tf_provider_property',
     value: 'resource_property', //
+    render: item => {
+      return JSON.stringify(item.resource_property)
+    },
     display: true
   },
   {
     title: 'tf_output_property',
     value: 'output_property',
+    render: item => {
+      return JSON.stringify(item.output_property)
+    },
     display: true
   },
   {
     title: 'tf_extend_info',
     value: 'extend_info',
+    render: item => {
+      return JSON.stringify(item.extend_info)
+    },
     display: true
   }
 ]

@@ -21,38 +21,41 @@
 import { getTableData, addTableRow, editTableRow, deleteTableRow } from '@/api/server'
 let tableEle = [
   {
-    title: 'tf_id',
-    value: 'id', //
-    display: true
-  },
-  {
     title: 'tf_name',
     value: 'name',
+    style: { width: '150px' },
     display: true
   },
   {
     title: 'tf_origin_name',
     value: 'origin_name',
+    style: { width: '150px' },
     display: true
   },
   {
     title: 'tf_provider',
     value: 'provider', //
+    style: { width: '150px' },
     display: true
   },
   {
     title: 'tf_cpu',
     value: 'cpu', //
+    style: { width: '150px' },
     display: true
   },
   {
     title: 'tf_memory', // 不必
     value: 'memory', //
+    style: { width: '150px' },
     display: true
   },
   {
     title: 'tf_extend_info', // 不必
     value: 'extend_info', //
+    render: item => {
+      return JSON.stringify(item.extend_info)
+    },
     display: true
   }
 ]

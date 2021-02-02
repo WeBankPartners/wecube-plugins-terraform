@@ -11,31 +11,41 @@ let tableEle = [
   {
     title: 'tf_id',
     value: 'id', //
+    style: { width: '200px' },
     display: true
   },
   {
     title: 'tf_name',
     value: 'name', //
+    style: { width: '150px' },
     display: true
   },
   {
     title: 'tf_secret_id',
     value: 'secret_id', //
+    style: { width: '150px' },
     display: true
   },
   {
     title: 'tf_secret_key',
     value: 'secret_key', //
+    style: { width: '150px' },
     display: true
   },
   {
     title: 'tf_provider_property',
     value: 'provider_property', //
+    render: item => {
+      return JSON.stringify(item.provider_property)
+    },
     display: true
   },
   {
     title: 'tf_extend_info',
     value: 'extend_info', //
+    render: item => {
+      return JSON.stringify(item.extend_info)
+    },
     display: true
   }
 ]

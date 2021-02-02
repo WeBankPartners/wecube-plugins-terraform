@@ -105,7 +105,7 @@
   "tf_provider": "云厂商",
   "tf_resource": "资源",
   "tf_keyconfig": "属性",
-  "tf_instance_type": "资源规格",
+  "tf_instance_type": "实例规格",
   "tf_id": "ID",
   "tf_name": "名称",
   "tf_secret_id": "Secret ID",

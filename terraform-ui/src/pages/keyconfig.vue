@@ -10,27 +10,34 @@ import { getTableData, addTableRow, editTableRow, deleteTableRow } from '@/api/s
 let tableEle = [
   {
     title: 'tf_id',
+    style: { width: '150px' },
     value: 'id', //
     display: true
   },
   {
     title: 'tf_provider',
     value: 'provider', //
+    style: { width: '150px' },
     display: true
   },
   {
     title: 'tf_resource',
     value: 'resource', //
+    style: { width: '150px' },
     display: true
   },
   {
     title: 'tf_property', // 不必
     value: 'property', //
+    style: { width: '150px' },
     display: true
   },
   {
     title: 'tf_provider_property',
     value: 'value_config',
+    render: item => {
+      return JSON.stringify(item.value_config)
+    },
     display: true
   }
 ]
