@@ -216,14 +216,21 @@ export default {
         this.modelConfig.v_select_configs.providerOption = data.data
       }
     },
+    beautyParams (params) {
+      if (params.extend_info) {
+        params.extend_info = JSON.parse(params.extend_info)
+      } else {
+        params.extend_info = {}
+      }
+    },
     async add () {
       await this.getProvider()
       this.modelConfig.isAdd = true
       this.$root.JQ('#add_edit_Modal').modal('show')
     },
     async addPost () {
-      this.modelConfig.addRow.extend_info = JSON.parse(this.modelConfig.addRow.extend_info)
-      const { status, message } = await addTableRow(this.pageConfig.CRUD, this.modelConfig.addRow)
+      const params = this.beautyParams(this.modelConfig.addRow)
+      const { status, message } = await addTableRow(this.pageConfig.CRUD, params)
       if (status === 'OK') {
         this.initTableData()
         this.$Message.success(message)
@@ -241,8 +248,8 @@ export default {
     },
     async editPost () {
       let editData = JSON.parse(JSON.stringify(this.modelConfig.addRow))
-      editData.extend_info = JSON.parse(editData.extend_info)
-      const { status, message } = await editTableRow(this.pageConfig.CRUD, this.id, editData)
+      const params = this.beautyParams(editData)
+      const { status, message } = await editTableRow(this.pageConfig.CRUD, this.id, params)
       if (status === 'OK') {
         this.initTableData()
         this.$Message.success(message)

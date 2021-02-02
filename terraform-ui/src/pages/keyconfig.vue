@@ -172,9 +172,16 @@ export default {
       this.modelConfig.isAdd = true
       this.$root.JQ('#add_edit_Modal').modal('show')
     },
+    beautyParams (params) {
+      if (params.value_config) {
+        params.value_config = JSON.parse(params.value_config)
+      } else {
+        params.value_config = {}
+      }
+    },
     async addPost () {
-      this.modelConfig.addRow.value_config = JSON.parse(this.modelConfig.addRow.value_config)
-      const { status, message } = await addTableRow(this.pageConfig.CRUD, this.modelConfig.addRow)
+      const params = this.beautyParams(this.modelConfig.addRow)
+      const { status, message } = await addTableRow(this.pageConfig.CRUD, params)
       if (status === 'OK') {
         this.initTableData()
         this.$Message.success(message)
@@ -191,8 +198,8 @@ export default {
     },
     async editPost () {
       let editData = JSON.parse(JSON.stringify(this.modelConfig.addRow))
-      editData.value_config = JSON.parse(editData.value_config)
-      const { status, message } = await editTableRow(this.pageConfig.CRUD, this.id, editData)
+      const params = this.beautyParams(editData)
+      const { status, message } = await editTableRow(this.pageConfig.CRUD, this.id, params)
       if (status === 'OK') {
         this.initTableData()
         this.$Message.success(message)
