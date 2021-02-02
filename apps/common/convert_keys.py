@@ -4,6 +4,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import json
 from lib.logs import logger
+from lib.json_helper import format_json_dumps
 
 
 def validate_convert_key(defines):
@@ -112,7 +113,7 @@ def convert_key(key, value, define):
     else:
         if (value is None) and (not define.get("allow_null", 1)):
             raise ValueError("key %s 不允许为空" % key)
-        if not value:
+        if value is None:
             value = define.get("default") or value
         else:
             value = validate_type(value, type=define.get("type", "string"))
@@ -226,42 +227,54 @@ def convert_extend_propertys(datas, extend_info, is_update=False):
                 raise ValueError("不合法的参数%s" % key)
 
     if not extend_info:
-        logger.info("extend info define is null, so extend keys will be removed")
+        logger.info("data: %s extend info define is null, so extend keys will be removed" % (format_json_dumps(datas)))
         return {}
 
     ora_ext_info = {}
-    allowed_key(datas.keys(), extend_info.keys())
 
     if is_update:
         for key, define in extend_info.items():
             if isinstance(define, (int, basestring, int, float, bool)):
-                if isinstance(define, basestring):
-                    if define == "-":
-                        continue
-                if key in datas.keys():
-                    ora_ext_info[key] = define
+                if isinstance(define, basestring) and define == "-":
+                    logger.info("key: %s removed" % key)
+                elif key in datas.keys():
+                    ora_ext_info[key] = datas.get(key) if datas.get(key) is not None else define
             elif isinstance(define, dict):
-                if define.get("value") is not None:
-                    if key in datas.keys():
-                        ora_ext_info[key] = datas.get(key)
-                if define.get("type") is not None and (key in datas.keys()):
-                    validate_type(datas.get(key), type=define.get("type", "string"))
+                if key in datas.keys():
+                    if define.get("value") is not None:
+                        ora_ext_info[key] = datas.get(key) if datas.get(key) is not None else define.get("value")
+                    else:
+                        if datas.get(key) is not None:
+                            ora_ext_info[key] = datas.get(key)
+
+                if define.get("type") is not None and (key in ora_ext_info.keys()):
+                    ora_ext_info[key] = validate_type(datas.get(key), type=define.get("type", "string"))
 
         return ora_ext_info
 
     for key, define in extend_info.items():
         if isinstance(define, (int, basestring, int, float, bool)):
-            if isinstance(define, basestring):
-                if define == "-":
-                    continue
-            ora_ext_info[key] = define
+            if isinstance(define, basestring) and define == "-":
+                logger.info("key: %s removed" % key)
+            else:
+                value = datas.get(key) if datas.get(key) is not None else define
+                if value or isinstance(value, (int, bool)):
+                    ora_ext_info[key] = define
+                else:
+                    logger.info("key %s value is null, remove it" % key)
         elif isinstance(define, dict):
+            value = datas.get(key)
             if define.get("value") is not None:
-                ora_ext_info[key] = define.get("value")
+                value = value if value is not None else define.get("value")
             if define.get("type") is not None and (key in datas.keys()):
-                validate_type(datas.get(key), type=define.get("type", "string"))
+                if value is not None:
+                    value = validate_type(value, type=define.get("type", "string"))
 
-    ora_ext_info.update(datas)
+            if value or isinstance(value, (int, bool)):
+                ora_ext_info[key] = define
+            else:
+                logger.info("key %s value is null, remove it" % key)
+
     return ora_ext_info
 
 

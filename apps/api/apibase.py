@@ -106,6 +106,8 @@ class ApiBase(TerraformResource):
             resource_columns[key] = value
 
         resource_columns = convert_keys(resource_columns, defines=resource_property)
+        _extend_columns = convert_keys(datas=extend_info, defines=resource_property)
+        resource_columns.update(_extend_columns)
         _extend_columns = convert_extend_propertys(datas=extend_info, extend_info=resource_extend_info)
         resource_columns.update(_extend_columns)
 
