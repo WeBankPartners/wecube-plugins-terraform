@@ -1,7 +1,7 @@
 <template>
   <div class=" ">
     <TerraformPageTable :pageConfig="pageConfig"></TerraformPageTable>
-    <ModalComponent :modelConfig="modelConfig"></ModalComponent>
+    <TfModalComponent :modelConfig="modelConfig"></TfModalComponent>
   </div>
 </template>
 
@@ -9,33 +9,45 @@
 import { getTableData, addTableRow, editTableRow, deleteTableRow } from '@/api/server'
 let tableEle = [
   {
-    title: 'ID',
-    value: 'id', //
-    display: true
-  },
-  {
     title: 'tf_provider', // 不必
     value: 'provider', //
+    style: { width: '150px' },
     display: true
   },
   {
     title: 'tf_resource',
     value: 'resource_name', //
+    style: { width: '150px' },
     display: true
   },
   {
     title: 'tf_property',
     value: 'property',
+    style: { width: '150px' },
     display: true
   },
   {
     title: 'tf_provider_property',
     value: 'resource_property', //
+    render: item => {
+      return JSON.stringify(item.resource_property)
+    },
+    display: true
+  },
+  {
+    title: 'tf_output_property',
+    value: 'output_property',
+    render: item => {
+      return JSON.stringify(item.output_property)
+    },
     display: true
   },
   {
     title: 'tf_extend_info',
     value: 'extend_info',
+    render: item => {
+      return JSON.stringify(item.extend_info)
+    },
     display: true
   }
 ]
@@ -137,16 +149,23 @@ export default {
           {
             label: 'tf_extend_info',
             value: 'extend_info',
-            placeholder: 'JSON',
+            placeholder: 'tf_json',
             disabled: false,
-            type: 'text'
+            type: 'textarea'
           },
           {
             label: 'tf_provider_property',
             value: 'resource_property',
-            placeholder: 'JSON',
+            placeholder: 'tf_json',
             disabled: false,
-            type: 'text'
+            type: 'textarea'
+          },
+          {
+            label: 'tf_output_property',
+            value: 'output_property',
+            placeholder: 'tf_json',
+            disabled: false,
+            type: 'textarea'
           }
         ],
         addRow: {
@@ -155,7 +174,8 @@ export default {
           provider: '',
           property: '',
           extend_info: '',
-          resource_property: ''
+          resource_property: '',
+          output_property: ''
         }
       },
       modelTip: {
@@ -170,7 +190,7 @@ export default {
   },
   methods: {
     async initTableData () {
-      const params = this.$itsCommonUtil.managementUrl(this)
+      const params = this.$tfCommonUtil.managementUrl(this)
       const { status, data } = await getTableData(params)
       if (status === 'OK') {
         this.pageConfig.table.tableData = data.data
@@ -184,6 +204,7 @@ export default {
     async addPost () {
       this.modelConfig.addRow.extend_info = JSON.parse(this.modelConfig.addRow.extend_info)
       this.modelConfig.addRow.resource_property = JSON.parse(this.modelConfig.addRow.resource_property)
+      this.modelConfig.addRow.output_property = JSON.parse(this.modelConfig.addRow.output_property)
       const { status, message } = await addTableRow(this.pageConfig.CRUD, this.modelConfig.addRow)
       if (status === 'OK') {
         this.initTableData()
@@ -195,9 +216,10 @@ export default {
       this.id = rowData.id
       this.modelConfig.isAdd = false
       this.modelTip.value = rowData[this.modelTip.key]
-      this.modelConfig.addRow = this.$itsCommonUtil.manageEditParams(this.modelConfig.addRow, rowData)
+      this.modelConfig.addRow = this.$tfCommonUtil.manageEditParams(this.modelConfig.addRow, rowData)
       this.modelConfig.addRow.extend_info = JSON.stringify(this.modelConfig.addRow.extend_info)
       this.modelConfig.addRow.resource_property = JSON.stringify(this.modelConfig.addRow.resource_property)
+      this.modelConfig.addRow.output_property = JSON.stringify(this.modelConfig.addRow.output_property)
       this.$root.JQ('#add_edit_Modal').modal('show')
     },
     async editPost () {
@@ -205,6 +227,7 @@ export default {
       delete editData.name
       editData.extend_info = JSON.parse(editData.extend_info)
       editData.resource_property = JSON.parse(editData.resource_property)
+      editData.output_property = JSON.parse(editData.output_property)
       const { status, message } = await editTableRow(this.pageConfig.CRUD, this.id, editData)
       if (status === 'OK') {
         this.initTableData()

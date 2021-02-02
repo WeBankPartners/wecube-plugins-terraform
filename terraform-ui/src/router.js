@@ -37,6 +37,13 @@ export default new Router({
               title: '云厂商',
               meta: {},
               component: () => import('@/pages/provider')
+            },
+            {
+              path: 'instanceType',
+              name: 'instanceType',
+              title: '资源规格',
+              meta: {},
+              component: () => import('@/pages/instance-type')
             }
           ]
         }

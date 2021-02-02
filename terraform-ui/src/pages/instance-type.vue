@@ -1,7 +1,19 @@
 <template>
   <div class=" ">
     <TerraformPageTable :pageConfig="pageConfig"></TerraformPageTable>
-    <TfModalComponent :modelConfig="modelConfig"></TfModalComponent>
+    <TfModalComponent :modelConfig="modelConfig">
+      <template #outer-config>
+        <div class="marginbottom params-each">
+          <label class="col-md-2 label-name">{{ $t('tf_provider') }}:</label>
+          <Select v-model="modelConfig.addRow.provider_id" filterable style="width: 338px">
+            <Option v-for="host in modelConfig.v_select_configs.providerOption" :value="host.id" :key="host.id">{{
+              host.name
+            }}</Option>
+          </Select>
+          <label class="required-tip">*</label>
+        </div>
+      </template>
+    </TfModalComponent>
   </div>
 </template>
 
@@ -9,39 +21,37 @@
 import { getTableData, addTableRow, editTableRow, deleteTableRow } from '@/api/server'
 let tableEle = [
   {
-    title: 'tf_id',
-    value: 'id', //
-    style: { width: '200px' },
-    display: true
-  },
-  {
     title: 'tf_name',
-    value: 'name', //
+    value: 'name',
     style: { width: '150px' },
     display: true
   },
   {
-    title: 'tf_secret_id',
-    value: 'secret_id', //
+    title: 'tf_origin_name',
+    value: 'origin_name',
     style: { width: '150px' },
     display: true
   },
   {
-    title: 'tf_secret_key',
-    value: 'secret_key', //
+    title: 'tf_provider',
+    value: 'provider', //
     style: { width: '150px' },
     display: true
   },
   {
-    title: 'tf_provider_property',
-    value: 'provider_property', //
-    render: item => {
-      return JSON.stringify(item.provider_property)
-    },
+    title: 'tf_cpu',
+    value: 'cpu', //
+    style: { width: '150px' },
     display: true
   },
   {
-    title: 'tf_extend_info',
+    title: 'tf_memory', // 不必
+    value: 'memory', //
+    style: { width: '150px' },
+    display: true
+  },
+  {
+    title: 'tf_extend_info', // 不必
     value: 'extend_info', //
     render: item => {
       return JSON.stringify(item.extend_info)
@@ -58,7 +68,7 @@ export default {
   data () {
     return {
       pageConfig: {
-        CRUD: '/terraform/v1/configer/provider',
+        CRUD: '/terraform/v1/vm/instance_type',
         researchConfig: {
           input_conditions: [
             {
@@ -68,9 +78,15 @@ export default {
               style: ''
             },
             {
-              value: 'region',
+              value: 'origin_name',
               type: 'input',
-              placeholder: 'tf_region',
+              placeholder: 'tf_origin_name',
+              style: ''
+            },
+            {
+              value: 'provider',
+              type: 'input',
+              placeholder: 'tf_provider',
               style: ''
             }
           ],
@@ -88,10 +104,7 @@ export default {
               btn_icon: 'fa fa-plus'
             }
           ],
-          filters: {
-            name: '',
-            region: ''
-          }
+          filters: {}
         },
         table: {
           tableData: [],
@@ -110,7 +123,7 @@ export default {
       },
       modelConfig: {
         modalId: 'add_edit_Modal',
-        modalTitle: 'tf_provider',
+        modalTitle: 'tf_instance_type',
         isAdd: true,
         config: [
           {
@@ -118,22 +131,40 @@ export default {
             value: 'name',
             placeholder: 'tips.inputRequired',
             v_validate: 'required:true|min:2|max:60',
-            disabled: true,
+            disabled: false,
             type: 'text'
           },
           {
-            label: 'tf_secret_key',
-            value: 'secret_key',
+            label: 'tf_origin_name',
+            value: 'origin_name',
             placeholder: 'tips.inputRequired',
             v_validate: 'required:true|min:2|max:60',
             disabled: false,
             type: 'text'
           },
+          { name: 'outer-config', type: 'slot' },
           {
-            label: 'tf_secret_id',
-            value: 'secret_id',
+            label: 'tf_cpu',
+            value: 'cpu',
             placeholder: 'tips.inputRequired',
-            v_validate: 'required:true|min:2|max:60',
+            max: 128,
+            min: 1,
+            disabled: false,
+            type: 'inputNumber'
+          },
+          {
+            label: 'tf_memory',
+            value: 'memory',
+            placeholder: 'tips.inputRequired',
+            max: 1024 * 512,
+            min: 1,
+            disabled: false,
+            type: 'inputNumber'
+          },
+          {
+            label: 'tf_network',
+            value: 'network',
+            placeholder: '',
             disabled: false,
             type: 'text'
           },
@@ -143,22 +174,20 @@ export default {
             placeholder: 'tf_json',
             disabled: false,
             type: 'textarea'
-          },
-          {
-            label: 'tf_provider_property',
-            value: 'provider_property',
-            placeholder: 'tf_json',
-            disabled: false,
-            type: 'textarea'
           }
         ],
         addRow: {
           // [通用]-保存用户新增、编辑时数据
           name: '',
-          secret_key: '',
-          secret_id: '',
-          extend_info: '',
-          provider_property: ''
+          provider_id: '',
+          origin_name: '',
+          cpu: 1,
+          memory: 1,
+          network: '',
+          extend_info: ''
+        },
+        v_select_configs: {
+          providerOption: []
         }
       },
       modelTip: {
@@ -180,13 +209,20 @@ export default {
         this.pageConfig.pagination.total = data.count
       }
     },
-    add () {
+    async getProvider () {
+      this.modelConfig.v_select_configs.providerOption = []
+      const { status, data } = await getTableData('/terraform/v1/configer/provider')
+      if (status === 'OK') {
+        this.modelConfig.v_select_configs.providerOption = data.data
+      }
+    },
+    async add () {
+      await this.getProvider()
       this.modelConfig.isAdd = true
       this.$root.JQ('#add_edit_Modal').modal('show')
     },
     async addPost () {
       this.modelConfig.addRow.extend_info = JSON.parse(this.modelConfig.addRow.extend_info)
-      this.modelConfig.addRow.provider_property = JSON.parse(this.modelConfig.addRow.provider_property)
       const { status, message } = await addTableRow(this.pageConfig.CRUD, this.modelConfig.addRow)
       if (status === 'OK') {
         this.initTableData()
@@ -196,18 +232,16 @@ export default {
     },
     async editF (rowData) {
       this.id = rowData.id
+      await this.getProvider()
       this.modelConfig.isAdd = false
       this.modelTip.value = rowData[this.modelTip.key]
       this.modelConfig.addRow = this.$tfCommonUtil.manageEditParams(this.modelConfig.addRow, rowData)
       this.modelConfig.addRow.extend_info = JSON.stringify(this.modelConfig.addRow.extend_info)
-      this.modelConfig.addRow.provider_property = JSON.stringify(this.modelConfig.addRow.provider_property)
       this.$root.JQ('#add_edit_Modal').modal('show')
     },
     async editPost () {
       let editData = JSON.parse(JSON.stringify(this.modelConfig.addRow))
-      delete editData.name
       editData.extend_info = JSON.parse(editData.extend_info)
-      editData.provider_property = JSON.parse(editData.provider_property)
       const { status, message } = await editTableRow(this.pageConfig.CRUD, this.id, editData)
       if (status === 'OK') {
         this.initTableData()
@@ -217,7 +251,7 @@ export default {
     },
     deleteConfirmModal (rowData) {
       this.$Modal.confirm({
-        title: this.$t('delete_confirm') + rowData.name,
+        title: this.$t('delete_confirm') + rowData[this.modelTip.key],
         'z-index': 1000000,
         onOk: async () => {
           const { status, message } = await deleteTableRow(this.pageConfig.CRUD, rowData.id)
