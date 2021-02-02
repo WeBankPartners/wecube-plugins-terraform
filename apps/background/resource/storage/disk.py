@@ -6,11 +6,12 @@ import json
 import datetime
 from lib.uuid_util import get_uuid
 from core import local_exceptions
+from apps.background.resource.resource_base import ResourceBaseObject
 from apps.background.models.dbserver import DiskAttachManager
 from apps.background.models.dbserver import DiskManager
 
 
-class _DiskBaseObject(object):
+class _DiskBaseObject(ResourceBaseObject):
     def __init__(self):
         self.resource = None
 

@@ -7,9 +7,10 @@ from lib.uuid_util import get_uuid
 from core import local_exceptions
 from apps.background.models.dbserver import SecGroupManager
 from apps.background.models.dbserver import SecGroupRuleManager
+from apps.background.resource.resource_base import ResourceBaseObject
 
 
-class _SecBaseObject(object):
+class _SecBaseObject(ResourceBaseObject):
     def __init__(self):
         self.resource = None
 

@@ -6,11 +6,12 @@ import json
 import datetime
 from lib.uuid_util import get_uuid
 from core import local_exceptions
+from apps.background.resource.resource_base import ResourceBaseObject
 from apps.background.models.dbserver import ObjectStorageManager
 from apps.background.models.dbserver import BucketObjectManager
 
 
-class _StorageBaseObject(object):
+class _StorageBaseObject(ResourceBaseObject):
     def __init__(self):
         self.resource = None
 

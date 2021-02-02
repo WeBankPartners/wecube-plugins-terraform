@@ -7,9 +7,10 @@ import datetime
 from lib.uuid_util import get_uuid
 from apps.background.models.dbserver import LBAttachManager
 from apps.background.models.dbserver import LBAttachInstanceManager
+from apps.background.resource.resource_base import ResourceBaseObject
 
 
-class LBAttachObject(object):
+class LBAttachObject(ResourceBaseObject):
     def __init__(self):
         self.resource = LBAttachManager()
 

@@ -8,9 +8,10 @@ from lib.logs import logger
 from lib.uuid_util import get_uuid
 from core import local_exceptions
 from apps.background.models.dbserver import LBManager
+from apps.background.resource.resource_base import ResourceBaseObject
 
 
-class LBObject(object):
+class LBObject(ResourceBaseObject):
     def __init__(self):
         self.resource = LBManager()
 

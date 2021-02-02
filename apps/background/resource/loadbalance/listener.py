@@ -7,9 +7,10 @@ import datetime
 from lib.uuid_util import get_uuid
 from core import local_exceptions
 from apps.background.models.dbserver import LBListenerManager
+from apps.background.resource.resource_base import ResourceBaseObject
 
 
-class LBListenerObject(object):
+class LBListenerObject(ResourceBaseObject):
     def __init__(self):
         self.resource = LBListenerManager()
 

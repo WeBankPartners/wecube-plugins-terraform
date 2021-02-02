@@ -7,9 +7,10 @@ import datetime
 from lib.uuid_util import get_uuid
 from core import local_exceptions
 from apps.background.models.dbserver import KVStoreManager
+from apps.background.resource.resource_base import ResourceBaseObject
 
 
-class _KVStoreBase(object):
+class _KVStoreBase(ResourceBaseObject):
     def __init__(self):
         self.resource = KVStoreManager()
         self.engine = None

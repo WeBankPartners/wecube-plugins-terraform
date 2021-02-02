@@ -5,9 +5,10 @@ import json
 import datetime
 from lib.uuid_util import get_uuid
 from apps.background.models.dbserver import RouteEntryManager
+from apps.background.resource.resource_base import ResourceBaseObject
 
 
-class RouteEntryObject(object):
+class RouteEntryObject(ResourceBaseObject):
     def __init__(self):
         self.resource = RouteEntryManager()
 

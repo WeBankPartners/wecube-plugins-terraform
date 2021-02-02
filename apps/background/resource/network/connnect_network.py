@@ -9,9 +9,10 @@ from core import local_exceptions
 from apps.background.models.dbserver import CCNManager
 from apps.background.models.dbserver import CCNAttachManager
 from apps.background.models.dbserver import CCNBandwidthManager
+from apps.background.resource.resource_base import ResourceBaseObject
 
 
-class _ConnectNetBase(object):
+class _ConnectNetBase(ResourceBaseObject):
     def __init__(self):
         self.resource = None
 

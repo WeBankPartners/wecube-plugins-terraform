@@ -7,9 +7,10 @@ import datetime
 from lib.uuid_util import get_uuid
 from core import local_exceptions
 from apps.background.models.dbserver import NosqlManager
+from apps.background.resource.resource_base import ResourceBaseObject
 
 
-class _NosqlBase(object):
+class _NosqlBase(ResourceBaseObject):
     def __init__(self):
         self.resource = NosqlManager()
         self.engine = None

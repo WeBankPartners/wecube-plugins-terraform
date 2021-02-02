@@ -5,10 +5,11 @@ import json
 import datetime
 from lib.uuid_util import get_uuid
 from core import local_exceptions
+from apps.background.resource.resource_base import ResourceBaseObject
 from apps.background.models.dbserver import VpcManager
 
 
-class VpcObject(object):
+class VpcObject(ResourceBaseObject):
     def __init__(self):
         self.resource = VpcManager()
 

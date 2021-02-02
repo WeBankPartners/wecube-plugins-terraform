@@ -5,10 +5,11 @@ import json
 import datetime
 from lib.uuid_util import get_uuid
 from core import local_exceptions
+from apps.background.resource.resource_base import ResourceBaseObject
 from apps.background.models.dbserver import InstanceTypeManager
 
 
-class InstanceTypeObject(object):
+class InstanceTypeObject(ResourceBaseObject):
     def __init__(self):
         self.resource = InstanceTypeManager()
 

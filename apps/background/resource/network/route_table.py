@@ -7,9 +7,10 @@ import datetime
 from lib.uuid_util import get_uuid
 from core import local_exceptions
 from apps.background.models.dbserver import RouteTableManager
+from apps.background.resource.resource_base import ResourceBaseObject
 
 
-class RouteTableObject(object):
+class RouteTableObject(ResourceBaseObject):
     def __init__(self):
         self.resource = RouteTableManager()
 

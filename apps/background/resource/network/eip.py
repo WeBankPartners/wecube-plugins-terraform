@@ -8,9 +8,10 @@ from lib.uuid_util import get_uuid
 from core import local_exceptions
 from apps.background.models.dbserver import EipManager
 from apps.background.models.dbserver import EipAssociation
+from apps.background.resource.resource_base import ResourceBaseObject
 
 
-class _eipBase(object):
+class _eipBase(ResourceBaseObject):
     def __init__(self):
         self.resource = None
 

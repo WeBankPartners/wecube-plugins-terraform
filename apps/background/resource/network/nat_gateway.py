@@ -5,9 +5,10 @@ import json
 import datetime
 from lib.uuid_util import get_uuid
 from apps.background.models.dbserver import NatGatewayManager
+from apps.background.resource.resource_base import ResourceBaseObject
 
 
-class NatGatewayObject(object):
+class NatGatewayObject(ResourceBaseObject):
     def __init__(self):
         self.resource = NatGatewayManager()
 

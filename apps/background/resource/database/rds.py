@@ -11,9 +11,10 @@ from apps.background.models.dbserver import RdsAccountManager
 from apps.background.models.dbserver import RdsPrivilegeManager
 from apps.background.models.dbserver import RdsBackupManager
 from apps.background.models.dbserver import RdsDatabaseManager
+from apps.background.resource.resource_base import ResourceBaseObject
 
 
-class _RdsDbBase(object):
+class _RdsDbBase(ResourceBaseObject):
     def __init__(self):
         self.resource = RdsDbManager()
         self.engine = "rds"
