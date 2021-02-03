@@ -13,7 +13,7 @@ from apps.background.resource.network.subnet import SubnetObject
 from apps.common.convert_keys import define_relations_key
 from apps.background.resource.database.rds import MysqlObject
 from apps.background.resource.vm.instance_type import InstanceTypeObject
-from apps.api.database.rds import RdsDBApi
+from apps.api.database.rds.rds import RdsDBApi
 
 
 class MysqlApi(RdsDBApi):
