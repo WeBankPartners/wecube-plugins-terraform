@@ -62,6 +62,14 @@ class InstanceTypeObject(ResourceBaseObject):
             raise local_exceptions.ValueValidateError("instance type name", "instance type name %s 不存在" % name)
         return data["origin_name"], data
 
+    def convert_resource_id(self, provider_id, name):
+        data = self.resource.get(filters={"provider_id": provider_id,
+                                          "name": name})
+        if data:
+            return data["origin_name"], data
+        else:
+            return name, {"cpu": 0, "memory": 0}
+
     def ora_delete(self, rid):
         return self.resource.delete(filters={"id": rid})
 
