@@ -91,6 +91,11 @@ class _KVStoreBase(ResourceBaseObject):
         return self.resource.delete(filters={"id": rid})
 
 
+class _BackupBase(_KVStoreBase):
+    def __init__(self):
+        super(_BackupBase, self).__init__()
+
+
 class RedisObject(_KVStoreBase):
     def __init__(self):
         super(RedisObject, self).__init__()
@@ -104,4 +109,18 @@ class MemcachedObject(_KVStoreBase):
 
 
 class KVStoreObject(_KVStoreBase):
+    pass
+
+
+class RedisBackupObject(_BackupBase):
+    def __init__(self):
+        super(RedisBackupObject, self).__init__()
+
+
+class MemcachedBackupObject(_BackupBase):
+    def __init__(self):
+        super(MemcachedBackupObject, self).__init__()
+
+
+class KVStoreBackupObject(_BackupBase):
     pass
