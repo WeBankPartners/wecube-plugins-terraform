@@ -34,6 +34,9 @@ class ApiBase(TerraformResource):
                 logger.info("create resource check id exists and status is deleted, clear it")
                 HistoryObject().create(create_data={"id": rid, "resource": self.resource_name,
                                                     "ora_data": _exists_data})
+
+                self.resource_object.ora_delete(rid)
+                return
             else:
                 return _exists_data
         else:
