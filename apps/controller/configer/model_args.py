@@ -256,6 +256,8 @@ resouce_property_models = {
         "zone",
         "version",
         "subnet_id",
+        "vpc_id",
+        "security_group_id",
         "instance_type",
         "port",
         "password",
@@ -267,6 +269,8 @@ resouce_property_models = {
         "zone",
         "version",
         "subnet_id",
+        "vpc_id",
+        "security_group_id",
         "instance_type",
         "port",
         "password",
@@ -278,10 +282,27 @@ resouce_property_models = {
         "zone",
         "version",
         "subnet_id",
+        "vpc_id",
+        "security_group_id",
         "instance_type",
         "port",
         "password",
         "force_delete"
+    ],
+    "kvstore_backup": [
+        "backup_time",
+        "backup_period",
+        "kvstore_id"
+    ],
+    "redis_backup": [
+        "backup_time",
+        "backup_period",
+        "redis_id"
+    ],
+    "memcached_backup": [
+        "backup_time",
+        "backup_period",
+        "memcached_id"
     ],
 }
 
@@ -415,7 +436,16 @@ output_property_models = {
         "resource_id",
         "ipaddress",
         "port"
-    ]
+    ],
+    "memcached_backup": [
+        "resource_id"
+    ],
+    "redis_backup": [
+        "resource_id"
+    ],
+    "kvstore_backup": [
+        "resource_id"
+    ],
 }
 
 
