@@ -3,7 +3,7 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 from apps.background.resource.database.nosql import MongoDBObject
-from .rds import RdsDBApi
+from apps.api.database.rds import RdsDBApi
 
 
 class MongodbApi(RdsDBApi):
