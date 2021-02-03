@@ -20,7 +20,7 @@ Base.to_dict = to_dict
 class ResourceHistory(Base):
     __tablename__ = "resource_history"
 
-    id = Column(String(36))
+    id = Column(String(36), primary_key=True)
     resource = Column(String(36))
     ora_data = Column(String(65535))
 
@@ -1554,7 +1554,51 @@ class KVStore(Base):
         self.version = data.get("version")
         self.zone = data.get("zone")
 
-# p = dir(RdsBackup)
+
+class KVStoreBackup(Base):
+    __tablename__ = "kvstore_backup"
+
+    id = Column(String(36), primary_key=True)
+    provider_id = Column(String(36))
+    provider = Column(String(32), nullable=False)
+    region = Column(String(64))
+    zone = Column(String(64))
+    resource_id = Column(String(64))
+    kvstore_id = Column(String(36))
+    backup_time = Column(String(64))
+    backup_period = Column(String(128))
+    extend_info = Column(String(1024))
+    define_json = Column(String(1024))
+    status = Column(String(36))
+    result_json = Column(String(5120))
+    created_time = Column(DateTime)
+    updated_time = Column(DateTime)
+    deleted_time = Column(DateTime)
+    enabled = Column(TINYINT(1), server_default=text("'1'"))
+    is_deleted = Column(TINYINT(1), server_default=text("'0'"))
+
+    def __init__(self, data):
+        self.created_time = data.get("created_time") or datetime.datetime.now()
+        self.backup_period = data.get("backup_period")
+        self.backup_time = data.get("backup_time")
+        self.define_json = data.get("define_json")
+        self.deleted_time = data.get("deleted_time")
+        self.enabled = data.get("enabled")
+        self.extend_info = data.get("extend_info")
+        self.id = data.get("id")
+        self.is_deleted = data.get("is_deleted")
+        self.kvstore_id = data.get("kvstore_id")
+        self.provider = data.get("provider")
+        self.provider_id = data.get("provider_id")
+        self.region = data.get("region")
+        self.resource_id = data.get("resource_id")
+        self.result_json = data.get("result_json")
+        self.status = data.get("status")
+        self.updated_time = data.get("updated_time")
+        self.zone = data.get("zone")
+
+
+# p = dir(KVStoreBackup)
 # for x in p:
 #     if not x.startswith("_") and x not in ["to_dict", "metadata"]:
 #         print('self.%s = data.get("%s")' % (x, x))

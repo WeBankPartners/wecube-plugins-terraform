@@ -148,6 +148,10 @@ class KVStoreManager(_BaseManager):
     obj = model.KVStore
 
 
+class KVStoreBackupManager(_BaseManager):
+    obj = model.KVStoreBackup
+
+
 class ConnectNetManager(_BaseManager):
     obj = model.ConnectNetwork
 

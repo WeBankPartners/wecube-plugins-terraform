@@ -807,6 +807,30 @@ CREATE TABLE `kvstore` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 
+DROP TABLE IF EXISTS `kvstore_backup`;
+
+CREATE TABLE `kvstore_backup` (
+  `id` VARCHAR(36) NOT NULL,
+  `provider_id` VARCHAR(36) DEFAULT NULL,
+  `provider` VARCHAR(32) DEFAULT NULL,
+  `region` VARCHAR(64) DEFAULT NULL,
+  `zone` VARCHAR(64) DEFAULT NULL,
+  `resource_id` VARCHAR(64) DEFAULT NULL,
+  `kvstore_id` VARCHAR(36) DEFAULT NULL,
+  `backup_time` VARCHAR(64) DEFAULT NULL,
+  `backup_period` VARCHAR(128) DEFAULT NULL,
+  `extend_info` text DEFAULT NULL,
+  `define_json` text DEFAULT NULL,
+  `status` varchar(36) DEFAULT NULL,
+  `result_json` TEXT DEFAULT NULL,
+  `created_time` DATETIME DEFAULT NULL,
+  `updated_time` DATETIME DEFAULT NULL,
+  `deleted_time` DATETIME DEFAULT NULL,
+  `enabled` BOOL DEFAULT TRUE,
+  `is_deleted` BOOL DEFAULT FALSE,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
+
 DROP TABLE IF EXISTS `connect_network`;
 
 CREATE TABLE `connect_network` (
