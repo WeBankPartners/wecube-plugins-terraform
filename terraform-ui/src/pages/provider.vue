@@ -11,31 +11,41 @@ let tableEle = [
   {
     title: 'tf_id',
     value: 'id', //
+    style: { width: '200px' },
     display: true
   },
   {
     title: 'tf_name',
     value: 'name', //
+    style: { width: '150px' },
     display: true
   },
   {
     title: 'tf_secret_id',
     value: 'secret_id', //
+    style: { width: '150px' },
     display: true
   },
   {
     title: 'tf_secret_key',
     value: 'secret_key', //
+    style: { width: '150px' },
     display: true
   },
   {
     title: 'tf_provider_property',
     value: 'provider_property', //
+    render: item => {
+      return JSON.stringify(item.provider_property)
+    },
     display: true
   },
   {
     title: 'tf_extend_info',
     value: 'extend_info', //
+    render: item => {
+      return JSON.stringify(item.extend_info)
+    },
     display: true
   }
 ]
@@ -128,15 +138,16 @@ export default {
             type: 'text'
           },
           {
-            label: 'tf_extend_info',
-            value: 'extend_info',
+            label: 'tf_provider_property',
+            value: 'provider_property',
             placeholder: 'tf_json',
+            v_validate: 'required:true',
             disabled: false,
             type: 'textarea'
           },
           {
-            label: 'tf_provider_property',
-            value: 'provider_property',
+            label: 'tf_extend_info',
+            value: 'extend_info',
             placeholder: 'tf_json',
             disabled: false,
             type: 'textarea'
@@ -174,10 +185,21 @@ export default {
       this.modelConfig.isAdd = true
       this.$root.JQ('#add_edit_Modal').modal('show')
     },
+    beautyParams (params) {
+      if (params.extend_info) {
+        params.extend_info = JSON.parse(params.extend_info)
+      } else {
+        params.extend_info = {}
+      }
+      if (params.provider_property) {
+        params.provider_property = JSON.parse(params.provider_property)
+      } else {
+        params.provider_property = {}
+      }
+    },
     async addPost () {
-      this.modelConfig.addRow.extend_info = JSON.parse(this.modelConfig.addRow.extend_info)
-      this.modelConfig.addRow.provider_property = JSON.parse(this.modelConfig.addRow.provider_property)
-      const { status, message } = await addTableRow(this.pageConfig.CRUD, this.modelConfig.addRow)
+      const params = this.beautyParams(this.modelConfig.addRow)
+      const { status, message } = await addTableRow(this.pageConfig.CRUD, params)
       if (status === 'OK') {
         this.initTableData()
         this.$Message.success(message)
@@ -196,9 +218,8 @@ export default {
     async editPost () {
       let editData = JSON.parse(JSON.stringify(this.modelConfig.addRow))
       delete editData.name
-      editData.extend_info = JSON.parse(editData.extend_info)
-      editData.provider_property = JSON.parse(editData.provider_property)
-      const { status, message } = await editTableRow(this.pageConfig.CRUD, this.id, editData)
+      const params = this.beautyParams(editData)
+      const { status, message } = await editTableRow(this.pageConfig.CRUD, this.id, params)
       if (status === 'OK') {
         this.initTableData()
         this.$Message.success(message)

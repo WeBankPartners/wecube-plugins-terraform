@@ -9,38 +9,45 @@
 import { getTableData, addTableRow, editTableRow, deleteTableRow } from '@/api/server'
 let tableEle = [
   {
-    title: 'tf_id',
-    value: 'id', //
-    display: true
-  },
-  {
     title: 'tf_provider', // 不必
     value: 'provider', //
+    style: { width: '150px' },
     display: true
   },
   {
     title: 'tf_resource',
     value: 'resource_name', //
+    style: { width: '150px' },
     display: true
   },
   {
     title: 'tf_property',
     value: 'property',
+    style: { width: '150px' },
     display: true
   },
   {
     title: 'tf_provider_property',
     value: 'resource_property', //
+    render: item => {
+      return JSON.stringify(item.resource_property)
+    },
     display: true
   },
   {
     title: 'tf_output_property',
     value: 'output_property',
+    render: item => {
+      return JSON.stringify(item.output_property)
+    },
     display: true
   },
   {
     title: 'tf_extend_info',
     value: 'extend_info',
+    render: item => {
+      return JSON.stringify(item.extend_info)
+    },
     display: true
   }
 ]
@@ -140,22 +147,23 @@ export default {
             type: 'text'
           },
           {
-            label: 'tf_extend_info',
-            value: 'extend_info',
-            placeholder: 'tf_json',
-            disabled: false,
-            type: 'textarea'
-          },
-          {
             label: 'tf_provider_property',
             value: 'resource_property',
             placeholder: 'tf_json',
+            v_validate: 'required:true',
             disabled: false,
             type: 'textarea'
           },
           {
             label: 'tf_output_property',
             value: 'output_property',
+            placeholder: 'tf_json',
+            disabled: false,
+            type: 'textarea'
+          },
+          {
+            label: 'tf_extend_info',
+            value: 'extend_info',
             placeholder: 'tf_json',
             disabled: false,
             type: 'textarea'
@@ -194,11 +202,26 @@ export default {
       this.modelConfig.isAdd = true
       this.$root.JQ('#add_edit_Modal').modal('show')
     },
+    beautyParams (params) {
+      if (params.extend_info) {
+        params.extend_info = JSON.parse(params.extend_info)
+      } else {
+        params.extend_info = {}
+      }
+      if (params.resource_property) {
+        params.resource_property = JSON.parse(params.resource_property)
+      } else {
+        params.resource_property = {}
+      }
+      if (params.output_property) {
+        params.output_property = JSON.parse(params.output_property)
+      } else {
+        params.output_property = {}
+      }
+    },
     async addPost () {
-      this.modelConfig.addRow.extend_info = JSON.parse(this.modelConfig.addRow.extend_info)
-      this.modelConfig.addRow.resource_property = JSON.parse(this.modelConfig.addRow.resource_property)
-      this.modelConfig.addRow.output_property = JSON.parse(this.modelConfig.addRow.output_property)
-      const { status, message } = await addTableRow(this.pageConfig.CRUD, this.modelConfig.addRow)
+      const params = this.beautyParams(this.modelConfig.addRow)
+      const { status, message } = await addTableRow(this.pageConfig.CRUD, params)
       if (status === 'OK') {
         this.initTableData()
         this.$Message.success(message)
@@ -218,10 +241,8 @@ export default {
     async editPost () {
       let editData = JSON.parse(JSON.stringify(this.modelConfig.addRow))
       delete editData.name
-      editData.extend_info = JSON.parse(editData.extend_info)
-      editData.resource_property = JSON.parse(editData.resource_property)
-      editData.output_property = JSON.parse(editData.output_property)
-      const { status, message } = await editTableRow(this.pageConfig.CRUD, this.id, editData)
+      const params = this.beautyParams(editData)
+      const { status, message } = await editTableRow(this.pageConfig.CRUD, this.id, params)
       if (status === 'OK') {
         this.initTableData()
         this.$Message.success(message)
