@@ -4,6 +4,7 @@ Terraform 多云管理
 
 支持的云厂商： 腾讯云(tencentcloud), 阿里云(alicloud)等
 <p></p>
+整体架构如下图：
 <img src="./doc/images/terraform_process.svg" />
 
 依赖内容：
