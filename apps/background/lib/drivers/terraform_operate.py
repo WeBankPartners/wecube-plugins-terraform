@@ -37,6 +37,25 @@ class TerraformResource(object):
     def init_workspace(self, _path, provider):
         return self.terraformDriver.init_resource_dir(dir_path=_path, provider=provider)
 
+    def write_provider_define(self, path, define_json):
+        '''
+
+        :param rid:
+        :param path:
+        :param define_json:
+        :return:
+        '''
+
+        file = os.path.join(path, "provider.tf.json")
+        if os.path.exists(file):
+            backupfile = file + "_" + get_datetime_point_str()
+            copyfile(file, backupfile)
+
+        with open(file, 'wb+') as f:
+            json.dump(define_json, f, ensure_ascii=False, indent=4)
+
+        logger.info(format_json_dumps(define_json))
+
     def write_define(self, rid, path, define_json):
         '''
 
@@ -55,6 +74,25 @@ class TerraformResource(object):
             json.dump(define_json, f, ensure_ascii=False, indent=4)
 
         logger.info(format_json_dumps(define_json))
+
+    def rewrite_state(self, path, state_file):
+        '''
+
+        :param rid:
+        :param path:
+        :param define_json:
+        :return:
+        '''
+
+        _statefile = os.path.join(path, "terraform.tfstate")
+        if os.path.exists(_statefile):
+            return
+
+        with open(_statefile, 'wb+') as f:
+            json.dump(state_file, f, ensure_ascii=False, indent=4)
+
+        logger.info("rewrite state file")
+        logger.info(format_json_dumps(state_file))
 
     def run(self, path):
         '''
@@ -79,6 +117,19 @@ class TerraformResource(object):
         '''
 
         file = os.path.join(path, "%s.tf.json" % rid)
+        if os.path.exists(file):
+            return True
+
+        return False
+
+    def ensure_provider_file(self, path):
+        '''
+
+        :param rid:
+        :param path:
+        :return:
+        '''
+        file = os.path.join(path, "provider.tf.json")
         if os.path.exists(file):
             return True
 

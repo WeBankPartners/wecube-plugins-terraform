@@ -2,6 +2,8 @@
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
+import base64
+import json
 import traceback
 from lib.logs import logger
 from lib.json_helper import format_json_dumps
@@ -11,12 +13,13 @@ from apps.common.convert_keys import convert_value
 from apps.common.convert_keys import read_output
 from apps.common.convert_keys import output_values
 from apps.common.convert_keys import output_line
-from apps.common.convert_keys import define_relations_key
 from apps.common.convert_keys import convert_extend_propertys
+from apps.background.lib.drivers.terraform_operate import TerraformResource
+from apps.api.configer.provider import ProviderApi
 from apps.background.resource.configr.history import HistoryObject
 from apps.background.resource.configr.resource import ResourceObject
 from apps.background.resource.configr.value_config import ValueConfigObject
-from apps.background.lib.drivers.terraform_operate import TerraformResource
+from apps.background.resource.resource_base import CrsObject
 
 
 class ApiBase(TerraformResource):
@@ -26,6 +29,9 @@ class ApiBase(TerraformResource):
         self.resource_workspace = ""
         self.resource_object = None
         self.resource_keys_config = None
+
+    def _flush_resobj(self):
+        self.resource_object = CrsObject(self.resource_name)
 
     def create_resource_exists(self, rid):
         _exists_data = self.resource_object.ora_show(rid)
@@ -66,7 +72,45 @@ class ApiBase(TerraformResource):
 
         return ValueConfigObject().resource_value_configs(provider, self.resource_name)
 
-    def before_keys_checks(self, **kwargs):
+    def workspace_controller(self, rid, provider_name, region, provider_json):
+        _path = self.create_workpath(rid,
+                                     provider=provider_name,
+                                     region=region)
+
+        self.write_provider_define(_path, define_json=provider_json)
+        self.init_workspace(_path, provider_name)
+
+        return _path
+
+    def resource_filter_controller(self, provider_name, label_name, create_data, extend_info):
+        define_json = self._generate_resource(provider_name, label_name=label_name,
+                                              data=create_data, extend_info=extend_info)
+
+        output_json = self._generate_output(label_name=label_name)
+        define_json.update(output_json)
+
+        return define_json
+
+    def read_output_controller(self, result):
+        result = self.formate_result(result)
+        logger.info(format_json_dumps(result))
+
+        res = self._read_output_result(result)
+
+        if not res.get("resource_id"):
+            res["resource_id"] = self._fetch_id(result)
+
+        return res
+
+    def update_db_controller(self, rid, result, output_json):
+        resource_id = output_json.get("resource_id")
+        _update_data = {"status": "ok", "resource_id": resource_id,
+                        "output_json": output_json,
+                        "result_json": format_json_dumps(result)}
+
+        return self.update_data(rid, data=_update_data)
+
+    def before_keys_checks(self, create_data):
         '''
         校验依赖的id的合法性
         :param kwargs:
@@ -146,13 +190,41 @@ class ApiBase(TerraformResource):
 
         return result
 
-    def save_data(self, **kwargs):
+    def save_data(self, rid, provider,
+                  provider_id, region, zone,
+                  owner_id, relation_id, extend_info,
+                  define_json, status, result_json,
+                  create_data, **kwargs):
+
         '''
-        save data to db
+
+        :param rid:
+        :param provider:
+        :param provider_id:
+        :param region:
+        :param zone:
+        :param owner_id:
+        :param relation_id:
+        :param extend_info:
+        :param define_json:
+        :param status:
+        :param result_json:
         :param kwargs:
         :return:
         '''
-        raise NotImplementedError()
+
+        propertys = create_data.update(kwargs)
+        self.resource_object.create(create_data={"id": rid, "provider": provider,
+                                                 "provider_id": provider_id,
+                                                 "region": region, "zone": zone,
+                                                 "resource_name": self.resource_name,
+                                                 "owner_id": owner_id,
+                                                 "relation_id": relation_id,
+                                                 "propertys": propertys,
+                                                 "status": status,
+                                                 "extend_info": extend_info,
+                                                 "define_json": define_json,
+                                                 "result_json": result_json})
 
     def update_data(self, rid, data):
         '''
@@ -221,6 +293,71 @@ class ApiBase(TerraformResource):
 
         return {}
 
+    def run_create(self, rid, provider_id, region, zone,
+                   provider_object, provider_info,
+                   owner_id, relation_id,
+                   create_data, extend_info, **kwargs):
+        '''
+
+        :param rid:
+        :param provider_id:
+        :param region:
+        :param zone:
+        :param owner_id:
+        :param relation_id:
+        :param create_data:
+        :param extend_info:
+        :param kwargs:
+        :return:
+        '''
+
+        extend_info = extend_info or {}
+        label_name = self.resource_name + "_" + rid
+
+        # provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
+        # _relations_id_dict = self.before_keys_checks(create_data)
+        # create_data.update(_relations_id_dict)
+
+        define_json = self.resource_filter_controller(provider_name=provider_object["name"],
+                                                      label_name=label_name,
+                                                      create_data=create_data,
+                                                      extend_info=extend_info)
+
+        self.save_data(rid, provider=provider_object["name"],
+                       provider_id=provider_id,
+                       region=region, zone=zone,
+                       owner_id=owner_id,
+                       relation_id=relation_id,
+                       extend_info=extend_info,
+                       define_json=define_json,
+                       status="applying",
+                       result_json={}, **kwargs)
+
+        try:
+            _path = self.workspace_controller(rid, provider_object["name"], region, provider_info)
+            self.write_define(rid, _path, define_json=define_json)
+
+            result = self.run(_path)
+        except Exception, e:
+            self.rollback_data(rid)
+            raise e
+
+        output_json = self.read_output_controller(result)
+        count, res = self.update_db_controller(rid, result, output_json)
+        return count, self.result_return_controller(res)
+
+    def result_return_controller(self, result):
+        info = {}
+        for key in ["id", "provider", "provider_id", "region", "zone",
+                    "resource_name", "resource_id", "owner_id", "relation_id",
+                    "status", "created_time", "updated_time"]:
+            info[key] = result.get(key)
+
+        info.update(result.get("propertys", {}))
+        info.update(result.get("extend_info", {}))
+        info.update(result.get("output_json", {}))
+        return info
+
     def create(self, **kwargs):
         '''
         main    create resource and save info into db
@@ -245,7 +382,15 @@ class ApiBase(TerraformResource):
                                      region=resource_info["region"])
 
         if not self.destory_ensure_file(rid, path=_path):
+            self.rewrite_state(_path, state_file=resource_info["result_json"])
             self.write_define(rid, _path, define_json=resource_info["define_json"])
+
+            if not self.ensure_provider_file(_path):
+                provider_object, provider_info = ProviderApi().provider_info(resource_info.get("provider_id"),
+                                                                             region=resource_info.get("region"))
+
+                self.workspace_controller(rid, provider_name=resource_info["provider"],
+                                          region=resource_info["region"], provider_json=provider_info)
 
         status = self.run_destory(_path)
         if not status:

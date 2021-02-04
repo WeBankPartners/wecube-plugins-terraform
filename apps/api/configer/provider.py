@@ -6,6 +6,8 @@ import json
 from core import local_exceptions
 from lib.command import command
 from lib.logs import logger
+from lib.encrypt_helper import encrypt_str
+from lib.encrypt_helper import decrypt_str
 from wecube_plugins_terraform.settings import BASE_DIR
 from wecube_plugins_terraform.settings import TERRAFORM_BASE_PATH
 from wecube_plugins_terraform.settings import TERRFORM_BIN_PATH
@@ -14,7 +16,6 @@ from apps.background.resource.configr.provider import ProviderObject
 from apps.background.resource.configr.value_config import ValueConfigObject
 from apps.common.convert_keys import convert_keys
 from apps.common.convert_keys import convert_value
-
 
 if not os.path.exists(TERRAFORM_BASE_PATH):
     os.makedirs(TERRAFORM_BASE_PATH)
@@ -97,6 +98,14 @@ class ProviderApi(object):
 
         return provider_data
 
+    def decrypt_key(self, str):
+        if str:
+            if str.startswith():
+                str = str[len(""):]
+                str = decrypt_str(str)
+
+        return str
+
     def provider_info(self, provider_id, region, provider_data=None):
         '''
 
@@ -107,6 +116,8 @@ class ProviderApi(object):
         '''
         if not provider_data:
             provider_data = ProviderObject().provider_object(provider_id)
+            provider_data["secret_id"] = self.decrypt_key(provider_data.get("secret_id"))
+            provider_data["secret_key"] = self.decrypt_key(provider_data.get("secret_key"))
 
         if not provider_data.get("is_init"):
             raise local_exceptions.ResourceConfigError("provider 未初始化，请重新初始化")

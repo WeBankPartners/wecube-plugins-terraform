@@ -5,6 +5,8 @@ import json
 import datetime
 from core import local_exceptions
 from lib.uuid_util import get_uuid
+from lib.encrypt_helper import encrypt_str
+from lib.encrypt_helper import decrypt_str
 from apps.background.models.dbserver import ProvidersManager
 
 
@@ -27,6 +29,16 @@ class ProviderObject(object):
         return count, data
 
     def create(self, create_data):
+        if create_data.get("secret_id"):
+            _key = create_data.get("secret_id")
+            if not _key.startswith(""):
+                create_data["secret_id"] = "" + encrypt_str(create_data.get("secret_id"))
+        
+        if create_data.get("secret_key"):
+            _key = create_data.get("secret_key")
+            if not _key.startswith(""):
+                create_data["secret_key"] = "" + encrypt_str(create_data.get("secret_key"))
+                
         create_data["id"] = create_data.get("id") or get_uuid()
         create_data["created_time"] = datetime.datetime.now()
         create_data["updated_time"] = create_data["created_time"]
@@ -52,6 +64,16 @@ class ProviderObject(object):
         return data
 
     def update(self, rid, update_data, where_data=None):
+        if update_data.get("secret_id"):
+            _key = update_data.get("secret_id")
+            if not _key.startswith(""):
+                update_data["secret_id"] = "" + encrypt_str(update_data.get("secret_id"))
+
+        if update_data.get("secret_key"):
+            _key = update_data.get("secret_key")
+            if not _key.startswith(""):
+                update_data["secret_key"] = "" + encrypt_str(update_data.get("secret_key"))
+                
         where_data = where_data or {}
         where_data.update({"id": rid, "is_deleted": 0})
         update_data["updated_time"] = datetime.datetime.now()
