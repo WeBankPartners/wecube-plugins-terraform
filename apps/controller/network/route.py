@@ -44,7 +44,6 @@ urlpatterns = [
     url(r'^vpc/(?P<rid>[\w-]+)$', VPCIdController()),
     url(r'^backend/vpc/create$', VPCAddController()),
     url(r'^backend/vpc/delete$', VPCDeleteController()),
-
     url(r'^subnet$', SubnetController()),
     url(r'^subnet/(?P<rid>[\w-]+)$', SubnetIdController()),
     url(r'^backend/subnet/create$', SubnetAddController()),
