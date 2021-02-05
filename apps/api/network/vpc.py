@@ -8,7 +8,6 @@ from lib.json_helper import format_json_dumps
 from lib.logs import logger
 from apps.api.apibase import ApiBase
 from apps.api.configer.provider import ProviderApi
-from apps.background.resource.network.vpc import VpcObject
 
 
 class VpcApi(ApiBase):
@@ -34,13 +33,13 @@ class VpcApi(ApiBase):
 
         _exists_data = self.create_resource_exists(rid)
         if _exists_data:
-            return _exists_data
+            return 1, _exists_data
 
         extend_info = extend_info or {}
         create_data = {"cidr": cidr, "name": name}
 
         provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
-        _relations_id_dict = self.before_keys_checks(provider_object["name"])
+        _relations_id_dict = self.before_keys_checks(provider_object["name"], create_data)
 
         create_data.update(_relations_id_dict)
 

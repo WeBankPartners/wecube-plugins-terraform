@@ -6,10 +6,9 @@ from lib.logs import logger
 from lib.json_helper import format_json_dumps
 from core import local_exceptions
 from apps.common.convert_keys import define_relations_key
-from apps.background.resource.database.kvstore import RedisObject
-from apps.background.resource.database.kvstore import RedisBackupObject
 from .kvstore import KvStoreApi
 from .kvstore_backup import KvBackupApi
+from apps.background.resource.resource_base import CrsObject
 
 
 class RedisApi(KvStoreApi):
@@ -17,7 +16,7 @@ class RedisApi(KvStoreApi):
         super(RedisApi, self).__init__()
         self.resource_name = "redis"
         self.resource_workspace = "redis"
-        self.resource_object = RedisObject()
+        self._flush_resobj()
 
 
 class RedisBackupApi(KvBackupApi):
@@ -25,7 +24,7 @@ class RedisBackupApi(KvBackupApi):
         super(RedisBackupApi, self).__init__()
         self.resource_name = "redis_backup"
         self.resource_workspace = "redis_backup"
-        self.resource_object = RedisBackupObject()
+        self._flush_resobj()
 
     def before_keys_checks(self, provider, kvstore_id):
         '''
@@ -41,7 +40,7 @@ class RedisBackupApi(KvBackupApi):
 
         ext_info = {}
         if kvstore_id and (not _kv_status):
-            ext_info["redis_id"] = RedisObject().object_resource_id(kvstore_id)
+            ext_info["redis_id"] = CrsObject("redis").object_resource_id(kvstore_id)
 
         logger.info("before_keys_checks add info: %s" % (format_json_dumps(ext_info)))
         return ext_info

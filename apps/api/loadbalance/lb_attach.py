@@ -13,11 +13,12 @@ from apps.common.convert_keys import convert_key_only
 from apps.common.convert_keys import define_relations_key
 from apps.api.apibase import ApiBase
 from apps.api.configer.provider import ProviderApi
-from apps.background.resource.vm.instance import InstanceObject
-from apps.background.resource.loadbalance.lb import LBObject
-from apps.background.resource.loadbalance.listener import LBListenerObject
-from apps.background.resource.loadbalance.lb_attach import LBAttachObject
-from apps.background.resource.loadbalance.lb_attach import LBAttachInstanceObject
+# from apps.background.resource.vm.instance import InstanceObject
+# from apps.background.resource.loadbalance.lb import LBObject
+# from apps.background.resource.loadbalance.listener import LBListenerObject
+# from apps.background.resource.loadbalance.lb_attach import LBAttachObject
+# from apps.background.resource.loadbalance.lb_attach import LBAttachInstanceObject
+from apps.background.resource.resource_base import CrsObject
 
 
 class LBAttachApi(ApiBase):
@@ -25,10 +26,10 @@ class LBAttachApi(ApiBase):
         super(LBAttachApi, self).__init__()
         self.resource_name = "lb_attach"
         self.resource_workspace = "lb_attach"
-        self.resource_object = LBAttachObject()
+        self._flush_resobj()
         self.resource_keys_config = None
 
-    def before_keys_checks(self, provider, lb_id, listener_id):
+    def before_keys_checks(self, provider, create_data):
         '''
 
         :param provider:
@@ -36,6 +37,8 @@ class LBAttachApi(ApiBase):
         :param listener_id:
         :return:
         '''
+        lb_id = create_data.get("lb_id")
+        listener_id = create_data.get("listener_id")
 
         self.resource_info(provider)
         resource_property = self.resource_keys_config["resource_property"]
@@ -44,9 +47,9 @@ class LBAttachApi(ApiBase):
 
         ext_info = {}
         if listener_id and (not _ll_status):
-            ext_info["listener_id"] = LBListenerObject().resource_id(listener_id)
+            ext_info["listener_id"] = CrsObject("lb_listener").object_resource_id(listener_id)
         if lb_id and (not _lb_status):
-            ext_info["lb_id"] = LBObject().lb_resource_id(lb_id)
+            ext_info["lb_id"] = CrsObject("lb").object_resource_id(lb_id)
 
         logger.info("before_keys_checks add info: %s" % (format_json_dumps(ext_info)))
         return ext_info
@@ -61,7 +64,8 @@ class LBAttachApi(ApiBase):
             if not instance_dict.get("instance_id"):
                 raise ValueError("instance not permit null")
             else:
-                instance_dict["instance_id"] = InstanceObject().vm_resource_id(instance_dict.get("instance_id"))
+                instance_dict["instance_id"] = CrsObject("instance").object_resource_id(
+                    instance_dict.get("instance_id"))
 
                 resource_columns = {}
                 for key, value in instance_dict.items():
@@ -76,60 +80,27 @@ class LBAttachApi(ApiBase):
 
         return result
 
-    def save_lb_instance(self, rid, lb_id, listener_id,
-                         instance_id, port, weight,
-                         provider, region):
-        '''
-
-        :param rid:
-        :param lb_id:
-        :param listener_id:
-        :param instance_id:
-        :param port:
-        :param weight:
-        :param provider:
-        :param region:
-        :return:
-        '''
-        rid = get_uuid()
-        self.resource_object.create(create_data={"id": rid, "provider": provider,
-                                                 "region": region,
-                                                 "lb_id": lb_id, "listener_id": listener_id,
-                                                 "instance_id": instance_id,
-                                                 "port": port, "weight": weight})
-
-    def save_data(self, rid, name, lb_id,
-                  listener_id, backend_servers,
-                  provider, provider_id, region, zone,
-                  extend_info, define_json,
-                  status, result_json):
-        '''
-        
-        :param rid: 
-        :param name: 
-        :param lb_id: 
-        :param listener_id: 
-        :param backend_servers: 
-        :param provider: 
-        :param provider_id: 
-        :param region: 
-        :param zone: 
-        :param extend_info: 
-        :param define_json: 
-        :param status: 
-        :param result_json: 
-        :return: 
-        '''
-        # todo  获取主机的ip， 保存instance - ipaddress
-        self.resource_object.create(create_data={"id": rid, "provider": provider,
-                                                 "region": region, "zone": zone,
-                                                 "name": name, "status": status,
-                                                 "lb_id": lb_id, "listener_id": listener_id,
-                                                 "backend_servers": json.dumps(backend_servers),
-                                                 "provider_id": provider_id,
-                                                 "extend_info": json.dumps(extend_info),
-                                                 "define_json": json.dumps(define_json),
-                                                 "result_json": json.dumps(result_json)})
+    # def save_lb_instance(self, rid, lb_id, listener_id,
+    #                      instance_id, port, weight,
+    #                      provider, region):
+    #     '''
+    #
+    #     :param rid:
+    #     :param lb_id:
+    #     :param listener_id:
+    #     :param instance_id:
+    #     :param port:
+    #     :param weight:
+    #     :param provider:
+    #     :param region:
+    #     :return:
+    #     '''
+    #     rid = get_uuid()
+    #     self.resource_object.create(create_data={"id": rid, "provider": provider,
+    #                                              "region": region,
+    #                                              "lb_id": lb_id, "listener_id": listener_id,
+    #                                              "instance_id": instance_id,
+    #                                              "port": port, "weight": weight})
 
     def create(self, rid, name, provider_id,
                lb_id, listener_id, backend_servers,
@@ -153,69 +124,34 @@ class LBAttachApi(ApiBase):
 
         _exists_data = self.create_resource_exists(rid)
         if _exists_data:
-            return _exists_data
+            return 1, _exists_data
 
         extend_info = extend_info or {}
         create_data = {}
-        label_name = self.resource_name + "_" + rid
+        _r_create_data = {"lb_id": lb_id, "listener_id": listener_id}
 
         provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
-        _relations_id_dict = self.before_keys_checks(provider_object["name"], lb_id, listener_id)
+        create_data["backend_servers"] = self.validate_instance(provider_object["name"], instances=backend_servers)
+
+        # for _instance_ in backend_servers:
+        #     self.save_lb_instance("", lb_id, listener_id=listener_id,
+        #                           instance_id=_instance_.get("instance_id"),
+        #                           port=_instance_.get("port"), weight=_instance_.get("weight"),
+        #                           provider=provider_object["name"], region=region)
+
+        _relations_id_dict = self.before_keys_checks(provider_object["name"], _r_create_data)
 
         create_data.update(_relations_id_dict)
 
-        create_data["backend_servers"] = self.validate_instance(provider_object["name"], instances=backend_servers)
-        define_json = self._generate_resource(provider_object["name"],
-                                              label_name=label_name,
-                                              data=create_data, extend_info=extend_info)
+        count, res = self.run_create(rid, provider_id, region, zone=zone,
+                                     provider_object=provider_object,
+                                     provider_info=provider_info,
+                                     owner_id=None,
+                                     relation_id=None,
+                                     create_data=create_data,
+                                     extend_info=extend_info, **kwargs)
 
-        output_json = self._generate_output(label_name=label_name)
-        define_json.update(provider_info)
-        define_json.update(output_json)
-
-        _path = self.create_workpath(rid,
-                                     provider=provider_object["name"],
-                                     region=region)
-
-        for _instance_ in backend_servers:
-            self.save_lb_instance("", lb_id, listener_id=listener_id,
-                                  instance_id=_instance_.get("instance_id"),
-                                  port=_instance_.get("port"), weight=_instance_.get("weight"),
-                                  provider=provider_object["name"], region=region)
-
-        self.save_data(rid, name=name,
-                       provider=provider_object["name"],
-                       provider_id=provider_id,
-                       region=region, zone=zone,
-                       lb_id=lb_id,
-                       backend_servers=backend_servers,
-                       listener_id=listener_id,
-                       extend_info=extend_info,
-                       define_json=define_json,
-                       status="applying", result_json={})
-
-        self.write_define(rid, _path, define_json=define_json)
-
-        self.init_workspace(_path, provider_object["name"])
-
-        try:
-            result = self.run(_path)
-        except Exception, e:
-            self.rollback_data(rid)
-            raise e
-
-        result = self.formate_result(result)
-        logger.info(format_json_dumps(result))
-
-        _update_data = {"status": "ok", "result_json": format_json_dumps(result)}
-        _update_data.update(self._read_output_result(result))
-
-        if not _update_data.get("resource_id"):
-            _update_data["resource_id"] = self._fetch_id(result)
-
-        _, res = self.update_data(rid, data=_update_data)
-
-        return rid, res
+        return count, res
 
     def destory(self, rid):
         '''
@@ -289,11 +225,10 @@ class LBAttachApi(ApiBase):
             _filter_instance["listener_id"] = resource_info["listener_id"]
 
         _filter_instance["instance_id"] = instance_id
-        _attach_status = LBAttachInstanceObject().query_one(where_data=_filter_instance)
-        if not _attach_status:
-            raise local_exceptions.ResourceValidateError("lb attach instance", "lb %s 未关联实例 %s" % (rid, instance_id))
-
-        _instance_data = InstanceObject().org_show(rid=instance_id)
+        # _attach_status = LBAttachInstanceObject().query_one(where_data=_filter_instance)
+        # if not _attach_status:
+        #     raise local_exceptions.ResourceValidateError("lb attach instance", "lb %s 未关联实例 %s" % (rid, instance_id))
+        _instance_data = CrsObject("instance").ora_show(rid=instance_id)
 
         _path = self.create_workpath(rid,
                                      provider=resource_info["provider"],
@@ -312,7 +247,6 @@ class LBAttachApi(ApiBase):
             raise local_exceptions.ResourceOperateException(self.resource_name,
                                                             msg="detach %s %s failed" % (self.resource_name, rid))
 
-        self.resource_object.update(rid, update_data={"define_json": define_json})
+        count, data = self.resource_object.update(rid, update_data={"define_json": define_json})
 
-        LBAttachInstanceObject().delete(rid=_attach_status.get("id"))
-        return LBAttachInstanceObject().delete(rid=_attach_status.get("id"))
+        return count

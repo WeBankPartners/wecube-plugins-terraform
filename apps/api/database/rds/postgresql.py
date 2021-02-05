@@ -12,4 +12,3 @@ class PostgreSQLApi(RdsDBApi):
         self.resource_name = "postgreSQL"
         self.resource_workspace = "postgreSQL"
         self.resource_object = PostgreSQLObject()
-

@@ -12,4 +12,3 @@ class MongodbApi(RdsDBApi):
         self.resource_name = "mongodb"
         self.resource_workspace = "mongodb"
         self.resource_object = MongoDBObject()
-

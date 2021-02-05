@@ -146,7 +146,7 @@ def convert_key_only(key, define):
     return key
 
 
-def convert_keys(datas, defines, is_update=False):
+def convert_keys(datas, defines, is_update=False, is_extend=False):
     '''
 
     :param datas:
@@ -163,6 +163,12 @@ def convert_keys(datas, defines, is_update=False):
             else:
                 raise ValueError("未定义的关键词 %s, 若需移除关键词，则定义为 'key': '-'" % key)
 
+        return result
+
+    if is_extend:
+        for key, value in datas.items():
+            if defines.get(key) is not None:
+                result.update(convert_key(key, value, define=defines[key]))
         return result
 
     for key, define in defines.items():

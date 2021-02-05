@@ -12,4 +12,3 @@ class MariaDBApi(RdsDBApi):
         self.resource_name = "mariadb"
         self.resource_workspace = "mariadb"
         self.resource_object = MariaDBObject()
-

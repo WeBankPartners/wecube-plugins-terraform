@@ -8,9 +8,7 @@ from lib.json_helper import format_json_dumps
 from apps.common.convert_keys import define_relations_key
 from apps.api.apibase import ApiBase
 from apps.api.configer.provider import ProviderApi
-from apps.background.resource.network.vpc import VpcObject
-from apps.background.resource.network.route_table import RouteTableObject
-from apps.background.resource.network.route_entry import RouteEntryObject
+from apps.background.resource.resource_base import CrsObject
 
 
 class RouteEntryApi(ApiBase):
@@ -18,48 +16,11 @@ class RouteEntryApi(ApiBase):
         super(RouteEntryApi, self).__init__()
         self.resource_name = "route_entry"
         self.resource_workspace = "route_entry"
-        self.resource_object = RouteEntryObject()
+        self.owner_resource = "route_table"
+        self._flush_resobj()
         self.resource_keys_config = None
 
-    def save_data(self, rid, name, vpc, destination,
-                  route_table, next_type, next_hub,
-                  provider, provider_id, region, zone,
-                  extend_info, define_json,
-                  status, result_json):
-        '''
-
-        :param rid:
-        :param name:
-        :param vpc:
-        :param destination:
-        :param route_table:
-        :param next_type:
-        :param next_hub:
-        :param provider:
-        :param provider_id:
-        :param region:
-        :param zone:
-        :param extend_info:
-        :param define_json:
-        :param status:
-        :param result_json:
-        :return:
-        '''
-
-        self.resource_object.create(create_data={"id": rid, "provider": provider,
-                                                 "provider_id": provider_id,
-                                                 "region": region, "zone": zone,
-                                                 "name": name, "vpc": vpc,
-                                                 "route_table": route_table,
-                                                 "next_type": next_type,
-                                                 "next_hub": next_hub,
-                                                 "status": status,
-                                                 "destination": destination,
-                                                 "extend_info": json.dumps(extend_info),
-                                                 "define_json": json.dumps(define_json),
-                                                 "result_json": json.dumps(result_json)})
-
-    def before_keys_checks(self, provider, vpc_id, route_table_id):
+    def before_keys_checks(self, provider, create_data):
         '''
 
         :param provider:
@@ -68,6 +29,9 @@ class RouteEntryApi(ApiBase):
         :return:
         '''
 
+        vpc_id = create_data.get("vpc_id")
+        route_table_id = create_data.get("route_table_id")
+
         self.resource_info(provider)
         resource_property = self.resource_keys_config["resource_property"]
         _vpc_status = define_relations_key("vpc_id", vpc_id, resource_property.get("vpc_id"))
@@ -75,16 +39,16 @@ class RouteEntryApi(ApiBase):
 
         ext_info = {}
         if vpc_id and (not _vpc_status):
-            ext_info["vpc_id"] = VpcObject().vpc_resource_id(vpc_id)
+            ext_info["vpc_id"] = CrsObject("vpc").object_resource_id(vpc_id)
         if route_table_id and (not _rt_status):
-            ext_info["route_table_id"] = RouteTableObject().routeTable_resource_id(route_table_id)
+            ext_info["route_table_id"] = CrsObject(self.owner_resource).object_resource_id(route_table_id)
 
         logger.info("before_keys_checks add info: %s" % (format_json_dumps(ext_info)))
         return ext_info
 
     def create(self, rid, name, provider_id, zone, region,
                vpc_id, route_table, next_type, next_hub,
-               destination, extend_info):
+               destination, extend_info, **kwargs):
 
         '''
 
@@ -108,58 +72,27 @@ class RouteEntryApi(ApiBase):
 
         # todo 依据不同的next type转化不同的id
         extend_info = extend_info or {}
-        label_name = self.resource_name + "_" + rid
+
         create_data = {"name": name,
                        "destination": destination,
                        "next_type": next_type,
-                       "next_hub": next_hub}
+                       "next_hub": next_hub
+                       }
+
+        _r_create_data = {"vpc_id": vpc_id,
+                          "route_table_id": route_table}
 
         provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
-        _relations_id_dict = self.before_keys_checks(provider_object["name"], vpc_id, route_table)
+        _relations_id_dict = self.before_keys_checks(provider_object["name"], _r_create_data)
 
         create_data.update(_relations_id_dict)
-        define_json = self._generate_resource(provider_object["name"],
-                                              label_name=label_name,
-                                              data=create_data, extend_info=extend_info)
 
-        output_json = self._generate_output(label_name=label_name)
-        define_json.update(provider_info)
-        define_json.update(output_json)
+        count, res = self.run_create(rid, provider_id, region, zone=zone,
+                                     provider_object=provider_object,
+                                     provider_info=provider_info,
+                                     owner_id=route_table,
+                                     relation_id=None,
+                                     create_data=create_data,
+                                     extend_info=extend_info, **kwargs)
 
-        _path = self.create_workpath(rid,
-                                     provider=provider_object["name"],
-                                     region=region)
-
-        self.save_data(rid, name=name,
-                       vpc=vpc_id, route_table=route_table,
-                       next_type=next_type, next_hub=next_hub,
-                       provider=provider_object["name"],
-                       provider_id=provider_id,
-                       destination=destination,
-                       region=region, zone=zone,
-                       extend_info=extend_info,
-                       define_json=define_json,
-                       status="applying", result_json={})
-
-        self.write_define(rid, _path, define_json=define_json)
-
-        self.init_workspace(_path, provider_object["name"])
-
-        try:
-            result = self.run(_path)
-        except Exception, e:
-            self.rollback_data(rid)
-            raise e
-
-        result = self.formate_result(result)
-        logger.info(format_json_dumps(result))
-
-        _update_data = {"status": "ok", "result_json": format_json_dumps(result)}
-        _update_data.update(self._read_output_result(result))
-
-        if not _update_data.get("resource_id"):
-            _update_data["resource_id"] = self._fetch_id(result)
-
-        _, res = self.update_data(rid, data=_update_data)
-
-        return rid, res
+        return count, res

@@ -27,6 +27,8 @@ class ApiBase(TerraformResource):
         super(ApiBase, self).__init__()
         self.resource_name = ""
         self.resource_workspace = ""
+        self.owner_resource = ""
+        self.relation_resource = ""
         self.resource_object = None
         self.resource_keys_config = None
 
@@ -110,14 +112,14 @@ class ApiBase(TerraformResource):
 
         return self.update_data(rid, data=_update_data)
 
-    def before_keys_checks(self, create_data):
+    def before_keys_checks(self, provider, create_data):
         '''
         校验依赖的id的合法性
         :param kwargs:
         :return:
         '''
 
-        # self.resource_info(provider)
+        self.resource_info(provider)
         return {}
 
     def _generate_output(self, label_name):
@@ -166,7 +168,7 @@ class ApiBase(TerraformResource):
             resource_columns[key] = value
 
         resource_columns = convert_keys(resource_columns, defines=resource_property)
-        _extend_columns = convert_keys(datas=extend_info, defines=resource_property)
+        _extend_columns = convert_keys(datas=extend_info, defines=resource_property, is_extend=True)
         resource_columns.update(_extend_columns)
         _extend_columns = convert_extend_propertys(datas=extend_info, extend_info=resource_extend_info)
         resource_columns.update(_extend_columns)
@@ -213,14 +215,19 @@ class ApiBase(TerraformResource):
         :return:
         '''
 
-        propertys = create_data.update(kwargs)
+        create_data.update(kwargs)
+        if owner_id and self.owner_resource:
+            owner_id = self.owner_resource + "_" + owner_id
+        if relation_id and self.relation_resource:
+            relation_id = self.relation_resource + "_" + relation_id
+
         self.resource_object.create(create_data={"id": rid, "provider": provider,
                                                  "provider_id": provider_id,
                                                  "region": region, "zone": zone,
                                                  "resource_name": self.resource_name,
                                                  "owner_id": owner_id,
                                                  "relation_id": relation_id,
-                                                 "propertys": propertys,
+                                                 "propertys": create_data,
                                                  "status": status,
                                                  "extend_info": extend_info,
                                                  "define_json": define_json,
@@ -331,6 +338,7 @@ class ApiBase(TerraformResource):
                        extend_info=extend_info,
                        define_json=define_json,
                        status="applying",
+                       create_data=create_data,
                        result_json={}, **kwargs)
 
         try:

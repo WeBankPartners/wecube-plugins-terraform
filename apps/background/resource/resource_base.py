@@ -11,8 +11,20 @@ from core import local_exceptions
 from apps.background.models.dbserver import CrsManager
 
 
+class ResourceBaseObject(object):
+    resource = None
+
+    def ora_show(self, rid, where_data=None):
+        where_data = where_data or {}
+        where_data.update({"id": rid})
+        return self.resource.get(filters=where_data)
+
+    def ora_delete(self, rid):
+        return self.resource.delete(filters={"id": rid})
+
+
 class CrsObject(object):
-    def __init__(self, resource_name):
+    def __init__(self, resource_name=None):
         self.resource = CrsManager()
         self.resource_name = resource_name
 
@@ -42,8 +54,8 @@ class CrsObject(object):
 
         propertys = create_data.get("propertys", {})
         if propertys.get("password"):
-            if not propertys.startswith(""):
-                propertys["password"] = encrypt_str(propertys.get("password"))
+            if not propertys.startswith("(aes)"):
+                propertys["password"] = "(aes)" + encrypt_str(propertys.get("password"))
 
         create_data["propertys"] = propertys
         _after_data = {}
