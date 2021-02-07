@@ -69,7 +69,7 @@ class CCNAttachApi(ApiBase):
 
         _exists_data = self.create_resource_exists(rid)
         if _exists_data:
-            return _exists_data
+            return 1, _exists_data
 
         instance_type = instance_type or "VPC"
         extend_info = extend_info or {}

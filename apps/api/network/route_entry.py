@@ -68,7 +68,7 @@ class RouteEntryApi(ApiBase):
 
         _exists_data = self.create_resource_exists(rid)
         if _exists_data:
-            return _exists_data
+            return 1, _exists_data
 
         # todo 依据不同的next type转化不同的id
         extend_info = extend_info or {}

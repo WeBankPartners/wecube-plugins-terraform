@@ -9,6 +9,7 @@ from core.controller import BackendController
 from core.controller import BackendIdController
 from core.controller import BaseController
 from lib.uuid_util import get_uuid
+from lib.encrypt_helper import decrypt_str
 from apps.api.database.mysql.instance import MysqlApi
 
 
@@ -67,6 +68,14 @@ class MysqlController(BackendController):
         validation.validate_string("provider_id", data.get("provider_id"))
         validation.validate_dict("extend_info", data.get("extend_info"))
 
+    def decrypt_key(self, str):
+        if str:
+            if str.startswith("{cipher_a}"):
+                str = str[len("{cipher_a}"):]
+                str = decrypt_str(str)
+
+        return str
+
     def create(self, request, data, **kwargs):
         rid = data.pop("id", None) or get_uuid()
         name = data.pop("name", None)
@@ -100,7 +109,7 @@ class MysqlController(BackendController):
                                          subnet_id=subnet_id, zone=zone,
                                          region=region, extend_info=data)
 
-        _password = base64.b64decode(result.get("password")) if result.get("password") else None
+        _password = self.decrypt_key(result.get("password"))
         return 1, {"id": rid, "ipaddress": result.get("ipaddress"),
                    "port": result.get("port"), "user": result.get("user"),
                    "password": _password,

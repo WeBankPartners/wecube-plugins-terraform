@@ -118,7 +118,7 @@ class NosqlApi(TerraformResource):
 
         _exists_data = self.create_resource_exists(rid)
         if _exists_data:
-            return _exists_data
+            return 1, _exists_data
 
         subnet_resource_id = SubnetObject().subnet_resource_id(subnet_id)
 

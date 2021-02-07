@@ -133,7 +133,7 @@ class InstanceApi(ApiBase):
 
         _exists_data = self.create_resource_exists(rid)
         if _exists_data:
-            return _exists_data
+            return 1, _exists_data
 
         extend_info = extend_info or {}
         create_data = {"name": name, "hostname": hostname,

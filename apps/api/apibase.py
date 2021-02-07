@@ -57,8 +57,8 @@ class ApiBase(TerraformResource):
         :return:
         '''
 
-        if self.resource_keys_config:
-            return
+        # if self.resource_keys_config:
+        #     return
 
         self.resource_keys_config = ResourceObject().query_one(where_data={"provider": provider,
                                                                            "resource_name": self.resource_name})
