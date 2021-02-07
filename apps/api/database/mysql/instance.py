@@ -44,7 +44,7 @@ class MysqlApi(RdsDBApi):
         if subnet_id and (not _subnet_status):
             ext_info["subnet_id"] = CrsObject("subnet").object_resource_id(subnet_id)
         if vpc_id and (not _vpc_status):
-            ext_info["vpc_id"] = CrsObject("vpo").object_resource_id(vpc_id)
+            ext_info["vpc_id"] = CrsObject("vpc").object_resource_id(vpc_id)
         if sg_id and (not _sg_status):
             sg_property = resource_property.get("security_group_id")
             if isinstance(sg_property, dict):

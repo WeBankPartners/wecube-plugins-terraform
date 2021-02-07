@@ -54,8 +54,9 @@ class CrsObject(object):
 
         propertys = create_data.get("propertys", {})
         if propertys.get("password"):
-            if not propertys.startswith("{cipher_a}"):
-                propertys["password"] = "{cipher_a}" + encrypt_str(propertys.get("password"))
+            password = propertys.get("password")
+            if not password.startswith("{cipher_a}"):
+                propertys["password"] = "{cipher_a}" + encrypt_str(password)
 
         create_data["propertys"] = propertys
         _after_data = {}

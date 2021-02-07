@@ -124,7 +124,7 @@ def validate_list(key, value, minlen=None, maxlen=None):
 
 
 def validate_dict(key, value, minlen=None, maxlen=None):
-    if value is None:
+    if not value:
         return {}
     try:
         if isinstance(value, basestring):

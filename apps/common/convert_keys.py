@@ -245,6 +245,8 @@ def convert_extend_propertys(datas, extend_info, is_update=False):
                     logger.info("key: %s removed" % key)
                 elif key in datas.keys():
                     ora_ext_info[key] = datas.get(key) if datas.get(key) is not None else define
+                else:
+                    logger.info("key: %s, not set in data" % key)
             elif isinstance(define, dict):
                 if key in datas.keys():
                     if define.get("value") is not None:
@@ -252,6 +254,8 @@ def convert_extend_propertys(datas, extend_info, is_update=False):
                     else:
                         if datas.get(key) is not None:
                             ora_ext_info[key] = datas.get(key)
+                else:
+                    logger.info("key: %s, not set in data" % key)
 
                 if define.get("type") is not None and (key in ora_ext_info.keys()):
                     ora_ext_info[key] = validate_type(datas.get(key), type=define.get("type", "string"))
