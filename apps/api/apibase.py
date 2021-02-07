@@ -341,6 +341,7 @@ class ApiBase(TerraformResource):
                        create_data=create_data,
                        result_json={}, **kwargs)
 
+        _path = ""
         try:
             _path = self.workspace_controller(rid, provider_object["name"], region, provider_info)
             self.write_define(rid, _path, define_json=define_json)
@@ -348,6 +349,8 @@ class ApiBase(TerraformResource):
             result = self.run(_path)
         except Exception, e:
             self.rollback_data(rid)
+            if _path:
+                self.rollback_workspace(_path)
             raise e
 
         output_json = self.read_output_controller(result)

@@ -5,6 +5,7 @@ import os
 import json
 from shutil import copyfile
 from lib.logs import logger
+from lib.command import command
 from lib.json_helper import format_json_dumps
 from lib.date_time import get_datetime_point_str
 from wecube_plugins_terraform.settings import TERRAFORM_BASE_PATH
@@ -93,6 +94,12 @@ class TerraformResource(object):
 
         logger.info("rewrite state file")
         logger.info(format_json_dumps(state_file))
+
+    def rollback_workspace(self, path):
+        if os.path.exists(path):
+            backuppath = path + "_" + get_datetime_point_str()
+            logger.info("try rollback workspace %s to %s" % (path, backuppath))
+            command(cmd="mv %s %s" % (path, backuppath))
 
     def run(self, path):
         '''
