@@ -20,11 +20,13 @@ LOG_MSG_MAX_LEN = Config.getInt("LOG", "msg_max_len", default=2048)
 
 # ---------------------mysql setting --------------------
 if DEBUG:
+    ENCRYPT_SEED = "wecube1620210201"
     MYSQL_SERVER = Config.get("DATABASE", "server")
     MYSQL_USERNAME = Config.get("DATABASE", "username")
     MYSQL_PASSWORD = Config.get("DATABASE", "password")
     MYSQL_DATABASE = Config.get("DATABASE", "database")
 else:
+    ENCRYPT_SEED = os.environ.get("ENCRYPT_SEED")
     MYSQL_HOST = os.environ.get("MYSQL_HOST")
     MYSQL_PORT = os.environ.get("MYSQL_PORT")
     MYSQL_SERVER = "%s:%s" % (MYSQL_HOST, MYSQL_PORT)

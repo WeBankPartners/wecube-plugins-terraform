@@ -100,8 +100,8 @@ class ProviderApi(object):
 
     def decrypt_key(self, str):
         if str:
-            if str.startswith("(aes)"):
-                str = str[len("(aes)"):]
+            if str.startswith("{cipher_a}"):
+                str = str[len("{cipher_a}"):]
                 str = decrypt_str(str)
 
         return str

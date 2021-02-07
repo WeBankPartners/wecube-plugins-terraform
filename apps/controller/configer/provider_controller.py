@@ -82,10 +82,13 @@ class ProviderIdController(BackendIdController):
         return self.resource.show(rid)
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["secret_id", "secret_key", "enabled",
-                                      "extend_info", "provider_property"])
+        validation.allowed_key(data, ["zone", "secret_id",
+                                      "secret_key", "region", "enabled",
+                                      "extend_info", "plugin_source",
+                                      "provider_property", "display_name"])
 
         validation.validate_string("name", data.get("name"))
+        validation.validate_string("display_name", data.get("display_name"))
         validation.validate_string("secret_id", data.get("secret_id"))
         validation.validate_string("secret_key", data.get("secret_key"))
         validation.validate_dict("extend_info", data.get("extend_info"))

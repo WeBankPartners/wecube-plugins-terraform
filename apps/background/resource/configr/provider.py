@@ -31,13 +31,13 @@ class ProviderObject(object):
     def create(self, create_data):
         if create_data.get("secret_id"):
             _key = create_data.get("secret_id")
-            if not _key.startswith("(aes)"):
-                create_data["secret_id"] = "" + encrypt_str(create_data.get("secret_id"))
+            if not _key.startswith("{cipher_a}"):
+                create_data["secret_id"] = "{cipher_a}" + encrypt_str(create_data.get("secret_id"))
         
         if create_data.get("secret_key"):
             _key = create_data.get("secret_key")
-            if not _key.startswith("(aes)"):
-                create_data["secret_key"] = "" + encrypt_str(create_data.get("secret_key"))
+            if not _key.startswith("{cipher_a}"):
+                create_data["secret_key"] = "{cipher_a}" + encrypt_str(create_data.get("secret_key"))
                 
         create_data["id"] = create_data.get("id") or get_uuid()
         create_data["created_time"] = datetime.datetime.now()
@@ -66,13 +66,13 @@ class ProviderObject(object):
     def update(self, rid, update_data, where_data=None):
         if update_data.get("secret_id"):
             _key = update_data.get("secret_id")
-            if not _key.startswith("(aes)"):
-                update_data["secret_id"] = "(aes)" + encrypt_str(update_data.get("secret_id"))
+            if not _key.startswith("{cipher_a}"):
+                update_data["secret_id"] = "{cipher_a}" + encrypt_str(update_data.get("secret_id"))
 
         if update_data.get("secret_key"):
             _key = update_data.get("secret_key")
-            if not _key.startswith("(aes)"):
-                update_data["secret_key"] = "(aes)" + encrypt_str(update_data.get("secret_key"))
+            if not _key.startswith("{cipher_a}"):
+                update_data["secret_key"] = "{cipher_a}" + encrypt_str(update_data.get("secret_key"))
                 
         where_data = where_data or {}
         where_data.update({"id": rid, "is_deleted": 0})

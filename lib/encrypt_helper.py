@@ -1,9 +1,15 @@
 # coding: utf-8
 
 from pyDes import *
+from wecube_plugins_terraform.settings import ENCRYPT_SEED
+
+ENCRYPT_SEED = ENCRYPT_SEED[:16]
+
+if len(ENCRYPT_SEED) < 16:
+    ENCRYPT_SEED = ENCRYPT_SEED + 's' * (16 - len(ENCRYPT_SEED))
 
 
-def encrypt_str(text, key='wecube1620210201'):
+def encrypt_str(text, key=ENCRYPT_SEED):
     try:
         from Crypto.Cipher import AES
     except:
@@ -17,7 +23,7 @@ def encrypt_str(text, key='wecube1620210201'):
     return base64.b64encode(cipher.encrypt(pad(text)))
 
 
-def decrypt_str(encryptstr, key='wecube1620210201'):
+def decrypt_str(encryptstr, key=ENCRYPT_SEED):
     try:
         from Crypto.Cipher import AES
     except:
