@@ -142,6 +142,14 @@ class MysqlAddController(BaseController):
     allow_methods = ("POST",)
     resource = MysqlApi()
 
+    def decrypt_key(self, str):
+        if str:
+            if str.startswith("{cipher_a}"):
+                str = str[len("{cipher_a}"):]
+                str = decrypt_str(str)
+
+        return str
+
     def before_handler(self, request, data, **kwargs):
         validation.not_allowed_null(data=data,
                                     keys=["region", "provider_id", "zone", "name",
@@ -202,7 +210,7 @@ class MysqlAddController(BaseController):
                                          subnet_id=subnet_id, zone=zone,
                                          region=region, extend_info=data)
 
-        _password = base64.b64decode(result.get("password")) if result.get("password") else None
+        _password = self.decrypt_key(result.get("password"))
         return {"id": rid, "ipaddress": result.get("ipaddress"),
                 "port": result.get("port"), "user": result.get("user"),
                 "password": _password,

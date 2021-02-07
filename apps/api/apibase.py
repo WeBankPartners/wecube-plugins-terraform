@@ -36,6 +36,7 @@ class ApiBase(TerraformResource):
         self.resource_object = CrsObject(self.resource_name)
 
     def create_resource_exists(self, rid):
+        # todo 接入refresh, 如果数据不存在,则清除, 如果数据存在, 则更新状态
         _exists_data = self.resource_object.ora_show(rid)
         if _exists_data:
             if _exists_data.get("is_deleted"):
@@ -49,6 +50,10 @@ class ApiBase(TerraformResource):
                 return _exists_data
         else:
             return
+
+    def refresh_remote_state(self, path):
+        result = self.refresh(path)
+        return result.get("resources")
 
     def resource_info(self, provider):
         '''

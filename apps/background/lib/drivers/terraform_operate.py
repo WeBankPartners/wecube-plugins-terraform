@@ -115,6 +115,20 @@ class TerraformResource(object):
         self.terraformDriver.apply(path, auto_approve="")
         return self.terraformDriver.resource_result(path)
 
+    def refresh(self, path):
+        '''
+
+        :param path:
+        :return:
+        '''
+
+        _statefile = os.path.join(path, "terraform.tfstate")
+        if os.path.exists(_statefile):
+            backupfile = _statefile + "_" + get_datetime_point_str()
+            copyfile(_statefile, backupfile)
+        self.terraformDriver.refresh(path)
+        return self.terraformDriver.resource_result(path)
+
     def destory_ensure_file(self, rid, path):
         '''
 

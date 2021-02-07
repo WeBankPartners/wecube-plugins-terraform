@@ -153,6 +153,23 @@ class TerraformDriver(object):
         else:
             raise TerrformExecError("apply error, msg: %s" % err)
 
+    def refresh(self, path=None):
+        '''
+
+        :param path:
+        :return:
+        '''
+
+        workdir = path or self.workdir or ''
+
+        exec_cmd = "refresh  %s" % (path)
+
+        code, out, err = command(self._format_cmd(exec_cmd), workdir=workdir)
+        if code == 0:
+            return True
+        else:
+            raise TerrformExecError("refresh error, msg: %s" % err)
+
     def plan(self, dir_path=None, compact_warnings=None,
              destroy=None, detailed_exitcode=None,
              out=None, refresh=None, state=None,
