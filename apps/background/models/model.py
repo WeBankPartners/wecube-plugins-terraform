@@ -69,6 +69,37 @@ class Providers(Base):
         self.updated_time = data.get("updated_time")
 
 
+class ProviderSecret(Base):
+    __tablename__ = "cloud_secret"
+
+    id = Column(String(36), primary_key=True)
+    name = Column(String(64), nullable=False)
+    display_name = Column(String(64))
+    provider = Column(String(64), nullable=False)
+    region = Column(String(64))
+    extend_info = Column(String(2048))
+    secret_info = Column(String(2048))
+    created_time = Column(DateTime)
+    updated_time = Column(DateTime)
+    deleted_time = Column(DateTime)
+    enabled = Column(TINYINT(1), server_default=text("'1'"))
+    is_deleted = Column(TINYINT(1), server_default=text("'0'"))
+
+    def __init__(self, data):
+        self.created_time = datetime.datetime.now()
+        self.deleted_time = data.get("deleted_time")
+        self.display_name = data.get("display_name")
+        self.enabled = data.get("enabled")
+        self.extend_info = data.get("extend_info")
+        self.id = data.get("id")
+        self.is_deleted = data.get("is_deleted")
+        self.name = data.get("name")
+        self.provider = data.get("provider")
+        self.region = data.get("region")
+        self.secret_info = data.get("secret_info")
+        self.updated_time = data.get("updated_time")
+
+
 class Resource(Base):
     __tablename__ = "resource"
 
@@ -300,7 +331,7 @@ class CloudResource(Base):
         self.updated_time = data.get("updated_time")
         self.zone = data.get("zone")
 
-# p = dir(CloudResource)
+# p = dir(ProviderSecret)
 # for x in p:
 #     if not x.startswith("_") and x not in ["to_dict", "metadata"]:
 #         print('self.%s = data.get("%s")' % (x, x))

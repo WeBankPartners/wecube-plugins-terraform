@@ -22,6 +22,26 @@ CREATE TABLE `cloud_providers` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 
+DROP TABLE IF EXISTS `cloud_secret`;
+
+CREATE TABLE `cloud_secret` (
+  `id` VARCHAR(36) NOT NULL,
+  `name` VARCHAR(64) NOT NULL,
+  `display_name` VARCHAR(64) DEFAULT NULL,
+  `provider` VARCHAR(64) NOT NULL,
+  `region` VARCHAR(64) DEFAULT NULL,
+  `secret_info` VARCHAR(2048) NOT NULL,
+  `extend_info` TEXT DEFAULT NULL,
+  `created_time` DATETIME DEFAULT NULL,
+  `updated_time` DATETIME DEFAULT NULL,
+  `deleted_time` DATETIME DEFAULT NULL,
+  `enabled` BOOL DEFAULT TRUE,
+  `is_deleted` BOOL DEFAULT FALSE,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `idx_name` (`name`, `provider`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
+
+
 DROP TABLE IF EXISTS `resource`;
 
 CREATE TABLE `resource` (

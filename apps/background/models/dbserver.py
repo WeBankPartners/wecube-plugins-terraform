@@ -12,6 +12,10 @@ class ProvidersManager(_BaseManager):
     obj = model.Providers
 
 
+class ProviderSecretManager(_BaseManager):
+    obj = model.ProviderSecret
+
+
 class CommonKeyManager(_BaseManager):
     obj = model.CommonKeys
 
