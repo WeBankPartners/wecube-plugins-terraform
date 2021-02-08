@@ -47,6 +47,8 @@ class BackendResponse(object):
 
     def on_create(self, request, **kwargs):
         try:
+            if not request.body:
+                return {}
             data = json.loads(request.body)
         except:
             raise exception_common.RequestValidateError("请求参数不为json")
@@ -133,6 +135,8 @@ class BackendResponse(object):
 
     def on_patch(self, request, **kwargs):
         try:
+            if not request.body:
+                return {}
             data = json.loads(request.body)
         except:
             raise exception_common.RequestValidateError("请求参数不为json")

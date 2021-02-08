@@ -269,7 +269,7 @@ def convert_extend_propertys(datas, extend_info, is_update=False):
             else:
                 value = datas.get(key) if datas.get(key) is not None else define
                 if value or isinstance(value, (int, bool)):
-                    ora_ext_info[key] = define
+                    ora_ext_info[key] = value
                 else:
                     logger.info("key %s value is null, remove it" % key)
         elif isinstance(define, dict):
@@ -281,7 +281,7 @@ def convert_extend_propertys(datas, extend_info, is_update=False):
                     value = validate_type(value, type=define.get("type", "string"))
 
             if value or isinstance(value, (int, bool)):
-                ora_ext_info[key] = define
+                ora_ext_info[key] = value
             else:
                 logger.info("key %s value is null, remove it" % key)
 
