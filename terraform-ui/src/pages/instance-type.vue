@@ -222,6 +222,7 @@ export default {
       } else {
         params.extend_info = {}
       }
+      return params
     },
     async add () {
       await this.getProvider()

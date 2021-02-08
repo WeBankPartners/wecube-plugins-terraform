@@ -178,6 +178,7 @@ export default {
       } else {
         params.value_config = {}
       }
+      return params
     },
     async addPost () {
       const params = this.beautyParams(this.modelConfig.addRow)

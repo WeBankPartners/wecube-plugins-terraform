@@ -196,6 +196,7 @@ export default {
       } else {
         params.provider_property = {}
       }
+      return params
     },
     async addPost () {
       const params = this.beautyParams(this.modelConfig.addRow)

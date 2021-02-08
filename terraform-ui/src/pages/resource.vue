@@ -218,6 +218,7 @@ export default {
       } else {
         params.output_property = {}
       }
+      return params
     },
     async addPost () {
       const params = this.beautyParams(this.modelConfig.addRow)
