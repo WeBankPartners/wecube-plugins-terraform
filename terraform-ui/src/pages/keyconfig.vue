@@ -9,12 +9,6 @@
 import { getTableData, addTableRow, editTableRow, deleteTableRow } from '@/api/server'
 let tableEle = [
   {
-    title: 'tf_id',
-    style: { width: '150px' },
-    value: 'id', //
-    display: true
-  },
-  {
     title: 'tf_provider',
     value: 'provider', //
     style: { width: '150px' },
@@ -120,9 +114,9 @@ export default {
             label: 'tf_provider',
             value: 'provider',
             placeholder: 'tips.inputRequired',
-            v_validate: 'required:true|min:2|max:60',
-            disabled: false,
-            type: 'text'
+            option: 'providerOption',
+            disabled: true,
+            type: 'select'
           },
           {
             label: 'tf_property',
@@ -147,6 +141,9 @@ export default {
           provider: '',
           property: '',
           value_config: ''
+        },
+        v_select_configs: {
+          providerOption: []
         }
       },
       modelTip: {
@@ -168,9 +165,21 @@ export default {
         this.pageConfig.pagination.total = data.count
       }
     },
-    add () {
+    async getProvider () {
+      const { status, data } = await getTableData('/terraform/v1/configer/provider')
+      if (status === 'OK') {
+        this.modelConfig.v_select_configs.providerOption = data.data.map(item => {
+          return {
+            value: item.name,
+            label: item.name
+          }
+        })
+        this.$root.JQ('#add_edit_Modal').modal('show')
+      }
+    },
+    async add () {
+      await this.getProvider()
       this.modelConfig.isAdd = true
-      this.$root.JQ('#add_edit_Modal').modal('show')
     },
     beautyParams (params) {
       if (params.value_config) {
@@ -191,11 +200,11 @@ export default {
     },
     async editF (rowData) {
       this.id = rowData.id
+      await this.getProvider()
       this.modelConfig.isAdd = false
       this.modelTip.value = rowData[this.modelTip.key]
       this.modelConfig.addRow = this.$tfCommonUtil.manageEditParams(this.modelConfig.addRow, rowData)
       this.modelConfig.addRow.value_config = JSON.stringify(this.modelConfig.addRow.value_config)
-      this.$root.JQ('#add_edit_Modal').modal('show')
     },
     async editPost () {
       let editData = JSON.parse(JSON.stringify(this.modelConfig.addRow))

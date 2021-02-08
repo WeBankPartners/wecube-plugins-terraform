@@ -9,12 +9,6 @@
 import { getTableData, addTableRow, editTableRow, deleteTableRow } from '@/api/server'
 let tableEle = [
   {
-    title: 'tf_id',
-    value: 'id', //
-    style: { width: '200px' },
-    display: true
-  },
-  {
     title: 'tf_name',
     value: 'name', //
     style: { width: '150px' },
