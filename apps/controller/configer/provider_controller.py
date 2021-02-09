@@ -51,7 +51,7 @@ class ProviderController(BackendController):
         :param kwargs:
         :return:
         '''
-
+        #todo 移除provider 认证信息必填项,
         name = data.get("name")
         extend_info = validation.validate_dict("extend_info", data.get("extend_info")) or {}
         provider_property = validation.validate_dict("provider_property", data.get("provider_property")) or {}

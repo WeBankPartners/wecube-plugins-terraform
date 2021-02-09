@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import os
 import json
+import traceback
 from core import local_exceptions
 from lib.logs import logger
 from lib.encrypt_helper import encrypt_str
@@ -37,5 +38,14 @@ class SecretApi(object):
                 if region not in define_region.split(","):
                     raise ValueError("secret : %s define at %s not apply for region: %s" % (name,
                                                                                             define_region, region))
-
-            return self.decrypt_key(data.get("secret_info"))
+            try:
+                _info = self.decrypt_key(data.get("secret_info"))
+                if _info:
+                    return json.loads(_info)
+                else:
+                    logger.info("secret name %s info is null" % name)
+                    return {}
+            except:
+                logger.info(traceback.format_exc())
+                logger.info("secret name %s decrypt secret failed..." % name)
+                return {}

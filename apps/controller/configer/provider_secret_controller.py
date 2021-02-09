@@ -9,6 +9,7 @@ from lib.encrypt_helper import decrypt_str
 from core import validation
 from core.controller import BackendController
 from core.controller import BackendIdController
+from apps.common.validation import validate_column_line
 from apps.api.configer.provider_secret import SecretApi
 from apps.api.configer.provider_secret import ProviderSecretObject
 
@@ -49,6 +50,8 @@ class ProviderSecretController(BackendController):
         :param kwargs:
         :return:
         '''
+        name = data.get("name")
+        validate_column_line(name)
 
         extend_info = validation.validate_dict("extend_info", data.get("extend_info")) or {}
         secret_info = validation.validate_dict("secret_info", data.get("secret_info"))

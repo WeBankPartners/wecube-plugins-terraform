@@ -50,6 +50,7 @@ class ResourceController(BackendController):
         :param kwargs:
         :return:
         '''
+        # todo  新增资源查询data resource 回刷定义/或启用新的资源进行定义
 
         extend_info = validation.validate_dict("extend_info", data.get("extend_info")) or {}
         resource_property = validation.validate_dict("resource_property", data.get("resource_property")) or {}
