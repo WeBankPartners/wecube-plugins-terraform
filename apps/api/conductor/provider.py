@@ -5,16 +5,11 @@ import os
 import json
 import traceback
 from core import local_exceptions
-from lib.command import command
 from lib.logs import logger
 from lib.encrypt_helper import encrypt_str
 from lib.encrypt_helper import decrypt_str
-from wecube_plugins_terraform.settings import BASE_DIR
 from wecube_plugins_terraform.settings import TERRAFORM_BASE_PATH
-from wecube_plugins_terraform.settings import TERRFORM_BIN_PATH
-from apps.background.lib.commander.terraform import TerraformDriver
 from apps.background.resource.configr.provider import ProviderObject
-from apps.background.resource.configr.value_config import ValueConfigObject
 from apps.api.configer.provider_secret import SecretApi
 from apps.api.configer.provider import ProviderApi
 from apps.common.validation import validate_column_line
@@ -25,7 +20,7 @@ if not os.path.exists(TERRAFORM_BASE_PATH):
     os.makedirs(TERRAFORM_BASE_PATH)
 
 
-class Provider(object):
+class ProviderConductor(object):
     def decrypt_key(self, str):
         if str:
             if str.startswith("{cipher_a}"):
@@ -54,6 +49,8 @@ class Provider(object):
         :param secret:
         :return:
         '''
+        if not secret:
+            return {}
 
         if "{" in secret and "}" in secret:
             try:
@@ -62,7 +59,7 @@ class Provider(object):
                 logger.info(secret)
                 raise ValueError("secret key 不能转换为json")
 
-        elif ";" in secret:
+        elif ";" in secret or "=" in secret:
             res = self._split_to_json(secret)
         else:
             validate_column_line(secret)
@@ -70,7 +67,10 @@ class Provider(object):
 
         return res
 
-    def provider_secret(self, provider, region, secret):
+    def _provider_secret(self, provider, region, secret):
+        if not secret:
+            return secret
+
         secret = self.format_secret(secret)
         if isinstance(secret, dict):
             return secret
@@ -79,6 +79,39 @@ class Provider(object):
             # if not info:
             #     raise ValueError("provider %s 提供了未知的认证信息, 请检查")
             return info
+
+    def producer_secret_info(self, provider, region, secret, provider_data):
+        '''
+
+        :param provider:
+        :param region:
+        :param secret:
+        :return:
+        '''
+
+        secret_info = self._provider_secret(provider, region, secret)
+        if not secret_info:
+            # 兼容provider旧的认证方式
+            secret_info = {}
+            provider_data["secret_id"] = self.decrypt_key(provider_data.get("secret_id"))
+            provider_data["secret_key"] = self.decrypt_key(provider_data.get("secret_key"))
+
+            for key in ["secret_id", "secret_key"]:
+                if provider_data.get(key):
+                    secret_info[key] = provider_data.get(key)
+
+        if not secret_info:
+            raise ValueError("获取provider 认证信息失败")
+
+        return secret_info
+
+    def find_provider_info(self, provider):
+        provider_data = ProviderObject().provider_name_object(provider)
+
+        if not provider_data.get("is_init"):
+            raise local_exceptions.ResourceConfigError("provider 未初始化，请重新初始化")
+
+        return provider_data
 
     def product_provider_info(self, provider, region, secret):
         '''
@@ -89,24 +122,11 @@ class Provider(object):
         :return:
         '''
 
-        provider_data = ProviderObject().provider_name_object(provider)
+        provider_data = self.find_provider_info(provider)
 
-        provider_data["secret_id"] = self.decrypt_key(provider_data.get("secret_id"))
-        provider_data["secret_key"] = self.decrypt_key(provider_data.get("secret_key"))
+        secret_info = self.producer_secret_info(provider, region, secret, provider_data)
 
-        if not provider_data.get("is_init"):
-            raise local_exceptions.ResourceConfigError("provider 未初始化，请重新初始化")
-
-        secret_info = self.provider_secret(provider, region, secret)
-        if not secret_info:
-            # 兼容provider旧的认证方式
-            for key in ["secret_id", "secret_key"]:
-                if provider_data.get(key):
-                    secret_info[key] = provider_data.get(key)
-
-        if not secret_info:
-            raise ValueError("获取provider 认证信息失败")
-
+        region = ProviderApi().region_info(provider, region)
         provider_info = {"region": region}
 
         extend_info = provider_data.get("extend_info", {})
@@ -122,5 +142,4 @@ class Provider(object):
             }
         }
 
-        return info
-
+        return provider_data, info

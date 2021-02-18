@@ -169,6 +169,8 @@ def convert_keys(datas, defines, is_update=False, is_extend=False):
         for key, value in datas.items():
             if defines.get(key) is not None:
                 result.update(convert_key(key, value, define=defines[key]))
+            else:
+                logger.info("data key %s not define, skip." % key)
         return result
 
     for key, define in defines.items():
