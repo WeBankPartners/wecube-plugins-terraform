@@ -20,6 +20,8 @@ from apps.background.resource.configr.history import HistoryObject
 from apps.background.resource.configr.resource import ResourceObject
 from apps.background.resource.configr.value_config import ValueConfigObject
 from apps.background.resource.resource_base import CrsObject
+from apps.api.conductor.provider import ProviderConductor
+from apps.api.conductor.resource import ResourceConductor
 
 
 class ApiBase(TerraformResource):
@@ -62,9 +64,6 @@ class ApiBase(TerraformResource):
         :return:
         '''
 
-        # if self.resource_keys_config:
-        #     return
-
         self.resource_keys_config = ResourceObject().query_one(where_data={"provider": provider,
                                                                            "resource_name": self.resource_name})
         if not self.resource_keys_config:
@@ -90,12 +89,20 @@ class ApiBase(TerraformResource):
         return _path
 
     def resource_filter_controller(self, provider_name, label_name, create_data, extend_info):
-        define_json = self._generate_resource(provider_name, label_name=label_name,
-                                              data=create_data, extend_info=extend_info)
+        '''
 
-        output_json = self._generate_output(label_name=label_name)
-        define_json.update(output_json)
+        :param provider_name:
+        :param label_name:
+        :param create_data:
+        :param extend_info:
+        :return:
+        '''
 
+        define_json, _ = ResourceConductor().conductor_apply_resource(provider=provider_name,
+                                                                      resource_name=self.resource_name,
+                                                                      label_name=label_name,
+                                                                      create_data=create_data,
+                                                                      extend_info=extend_info)
         return define_json
 
     def read_output_controller(self, result):
@@ -126,69 +133,6 @@ class ApiBase(TerraformResource):
 
         self.resource_info(provider)
         return {}
-
-    def _generate_output(self, label_name):
-        '''
-        转换output 输出参数，生成配置
-        :param label_name:
-        :return:
-        '''
-
-        output_configs = self.resource_keys_config["output_property"]
-        resource_name = self.resource_keys_config["property"]
-
-        _ext_output = {}
-        for key, define in output_configs.items():
-            _ext_output.update(output_line(key, define))
-
-        ext_output_config = {}
-        for column, ora_column in _ext_output.items():
-            ext_output_config[column] = {"value": "${%s.%s.%s}" % (resource_name, label_name, ora_column)}
-
-        return {"output": ext_output_config} if ext_output_config else {}
-
-    def _generate_resource(self, provider, label_name, data, extend_info):
-        '''
-        转换resource 资源属性， 生成配置
-        :param provider:
-        :param label_name: 资源的标签名称
-        :param data:
-        :param extend_info:
-        :return:
-        '''
-
-        self.resource_info(provider)
-        resource_values_config = self.values_config(provider)
-
-        resource_name = self.resource_keys_config["property"]
-        resource_property = self.resource_keys_config["resource_property"]
-        resource_extend_info = self.resource_keys_config["extend_info"]
-
-        resource_columns = {}
-        for key, value in data.items():
-            if resource_values_config.get(key):
-                _values_configs = resource_values_config.get(key)
-                value = convert_value(value, _values_configs.get(value))
-
-            resource_columns[key] = value
-
-        resource_columns = convert_keys(resource_columns, defines=resource_property)
-        _extend_columns = convert_keys(datas=extend_info, defines=resource_property, is_extend=True)
-        logger.info("property extend info; %s" % (format_json_dumps(_extend_columns)))
-        resource_columns.update(_extend_columns)
-        _extend_columns = convert_extend_propertys(datas=extend_info, extend_info=resource_extend_info)
-        logger.info("extend info; %s" % (format_json_dumps(_extend_columns)))
-        resource_columns.update(_extend_columns)
-
-        _info = {
-            "resource": {
-                resource_name: {
-                    label_name: resource_columns
-                }
-            }
-        }
-        logger.info(format_json_dumps(_info))
-        return _info
 
     def formate_result(self, result):
         '''
@@ -307,14 +251,37 @@ class ApiBase(TerraformResource):
 
         return {}
 
-    def run_create(self, rid, provider_id, region, zone,
+    def _run_and_read_result(self, rid, provider, region, provider_info, define_json):
+        '''
+
+        :param rid:
+        :param provider:
+        :param region:
+        :param provider_info:
+        :param define_json:
+        :return:
+        '''
+
+        _path = ""
+        try:
+            _path = self.workspace_controller(rid, provider, region, provider_info)
+            self.write_define(rid, _path, define_json=define_json)
+
+            result = self.run(_path)
+            return result
+        except Exception, e:
+            self.rollback_data(rid)
+            if _path:
+                self.rollback_workspace(_path)
+            raise e
+
+    def run_create(self, rid, region, zone,
                    provider_object, provider_info,
                    owner_id, relation_id,
                    create_data, extend_info, **kwargs):
         '''
 
         :param rid:
-        :param provider_id:
         :param region:
         :param zone:
         :param owner_id:
@@ -328,17 +295,13 @@ class ApiBase(TerraformResource):
         extend_info = extend_info or {}
         label_name = self.resource_name + "_" + rid
 
-        # provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
-        # _relations_id_dict = self.before_keys_checks(create_data)
-        # create_data.update(_relations_id_dict)
-
         define_json = self.resource_filter_controller(provider_name=provider_object["name"],
                                                       label_name=label_name,
                                                       create_data=create_data,
                                                       extend_info=extend_info)
 
         self.save_data(rid, provider=provider_object["name"],
-                       provider_id=provider_id,
+                       provider_id=provider_object["id"],
                        region=region, zone=zone,
                        owner_id=owner_id,
                        relation_id=relation_id,
@@ -348,17 +311,9 @@ class ApiBase(TerraformResource):
                        create_data=create_data,
                        result_json={}, **kwargs)
 
-        _path = ""
-        try:
-            _path = self.workspace_controller(rid, provider_object["name"], region, provider_info)
-            self.write_define(rid, _path, define_json=define_json)
-
-            result = self.run(_path)
-        except Exception, e:
-            self.rollback_data(rid)
-            if _path:
-                self.rollback_workspace(_path)
-            raise e
+        result = self._run_and_read_result(rid, provider=provider_object["name"],
+                                           region=region, provider_info=provider_info,
+                                           define_json=define_json)
 
         output_json = self.read_output_controller(result)
         count, res = self.update_db_controller(rid, result, output_json)
@@ -376,13 +331,49 @@ class ApiBase(TerraformResource):
         info.update(result.get("output_json", {}))
         return info
 
-    def create(self, **kwargs):
+    def generate_create_data(self, zone, create_data):
+        r_create_data = {}
+        return create_data, r_create_data
+
+    def generate_owner_data(self, create_data):
+        return None, None
+
+    def create(self, rid, provider, region, zone, secret,
+               create_data, extend_info, **kwargs):
         '''
-        main    create resource and save info into db
+
+        :param rid:
+        :param provider:
+        :param region:
+        :param secret:
+        :param create_data:
+        :param extend_info:
         :param kwargs:
         :return:
         '''
-        raise NotImplementedError()
+
+        _exists_data = self.create_resource_exists(rid)
+        if _exists_data:
+            return 1, _exists_data
+
+        extend_info = extend_info or {}
+        provider_object, provider_info = ProviderConductor().conductor_provider_info(provider, region, secret)
+
+        zone = ProviderConductor().zone_info(provider=provider_object["name"], zone=zone)
+        create_data, r_create_data = self.generate_create_data(zone, create_data)
+        _relations_id_dict = self.before_keys_checks(provider_object["name"], r_create_data)
+
+        create_data.update(_relations_id_dict)
+
+        owner_id, relation_id = self.generate_owner_data(create_data)
+        count, res = self.run_create(rid=rid, region=region, zone=zone,
+                                     provider_object=provider_object,
+                                     provider_info=provider_info,
+                                     owner_id=owner_id, relation_id=relation_id,
+                                     create_data=create_data,
+                                     extend_info=extend_info, **kwargs)
+
+        return count, res
 
     def destory(self, rid):
         '''
