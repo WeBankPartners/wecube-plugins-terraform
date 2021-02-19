@@ -56,6 +56,8 @@ class ProviderObject(object):
         return data
 
     def query_one(self, where_data):
+        where_data = where_data or {}
+        where_data.update({"is_deleted": 0})
         data = self.resource.get(filters=where_data)
         if data:
             data["extend_info"] = json.loads(data["extend_info"])
