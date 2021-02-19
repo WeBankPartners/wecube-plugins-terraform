@@ -41,6 +41,7 @@ class SecretApi(object):
             try:
                 _info = self.decrypt_key(data.get("secret_info"))
                 if _info:
+                    logger.debug("found secret: %s" % name)
                     return json.loads(_info)
                 else:
                     logger.info("secret name %s info is null" % name)
