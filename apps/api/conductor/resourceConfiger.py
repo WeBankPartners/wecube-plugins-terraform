@@ -7,21 +7,14 @@ import traceback
 from core import local_exceptions
 from lib.logs import logger
 from lib.json_helper import format_json_dumps
-from lib.encrypt_helper import encrypt_str
-from lib.encrypt_helper import decrypt_str
 from apps.common.convert_keys import convert_extend_propertys
-from wecube_plugins_terraform.settings import TERRAFORM_BASE_PATH
-from apps.background.resource.configr.provider import ProviderObject
-from apps.api.configer.provider_secret import SecretApi
-from apps.api.configer.provider import ProviderApi
-from apps.common.validation import validate_column_line
 from apps.common.convert_keys import convert_keys
 from apps.common.convert_keys import convert_value
 from apps.common.convert_keys import output_line
 from apps.background.resource.configr.resource import ResourceObject
 
 
-class ResourceConductor(object):
+class ResourceConfiger(object):
     def __init__(self):
         self.resource_keys_config = None
 
@@ -33,7 +26,7 @@ class ResourceConductor(object):
         :return:
         '''
 
-        if not self.resource_keys_config:
+        if self.resource_keys_config:
             return self.resource_keys_config
 
         resource_keys_config = ResourceObject().query_one(where_data={"provider": provider,
@@ -76,15 +69,14 @@ class ResourceConductor(object):
         resource_extend_info = self.resource_keys_config["extend_info"]
 
         _extend_columns = convert_keys(datas=extend_info, defines=resource_property, is_extend=True)
-        logger.info("property extend info; %s" % (format_json_dumps(_extend_columns)))
+        logger.info("property extend info: %s" % (format_json_dumps(_extend_columns)))
         resource_columns.update(_extend_columns)
 
         _extend_columns = convert_extend_propertys(datas=extend_info, extend_info=resource_extend_info)
-        logger.info("extend info; %s" % (format_json_dumps(_extend_columns)))
+        logger.info("extend info: %s" % (format_json_dumps(_extend_columns)))
         resource_columns.update(_extend_columns)
 
         return resource_columns, self.resource_keys_config
-
 
     def _generate_output(self, provider, resource_name, label_name):
         '''
@@ -106,5 +98,32 @@ class ResourceConductor(object):
         for column, ora_column in _ext_output.items():
             ext_output_config[column] = {"value": "${%s.%s.%s}" % (resource_name, label_name, ora_column)}
 
-        return {"output": ext_output_config} if ext_output_config else {}
+        result = {"output": ext_output_config} if ext_output_config else {}
+        return result, self.resource_keys_config
 
+    def conductor_apply_output(self, provider, resource_name, label_name):
+        '''
+
+        :param provider:
+        :param resource_name:
+        :param label_name:
+        :return:
+        '''
+
+        return self._generate_output(provider, resource_name, label_name)
+
+    def conductor_update_property(self, provider, resource_name, resource_data):
+        '''
+
+        :param provider:
+        :param resource_name:
+        :param resource_data:
+        :return:
+        '''
+
+        self.resource_info(provider, resource_name)
+
+        resource_property = self.resource_keys_config["resource_property"]
+        resource_columns = convert_keys(resource_data, defines=resource_property, is_update=True)
+
+        return resource_columns, self.resource_keys_config

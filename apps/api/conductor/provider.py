@@ -43,6 +43,12 @@ class ProviderConductor(object):
             logger.info(traceback.format_exc())
             raise ValueError("格式错误, 无法解析的格式, 正确格式为:  key1=value1; key2=value2 ...")
 
+    def zone_info(self, provider, zone):
+        if zone:
+            return ProviderApi().zone_info(provider, zone)
+
+        return zone
+
     def format_secret(self, secret):
         '''
 
@@ -73,8 +79,10 @@ class ProviderConductor(object):
 
         secret = self.format_secret(secret)
         if isinstance(secret, dict):
+            logger.debug("secret format json, use secret info")
             return secret
         else:
+            logger.debug("search secret info")
             info = SecretApi().secret_info(provider, name=secret, region=region)
             # if not info:
             #     raise ValueError("provider %s 提供了未知的认证信息, 请检查")
@@ -93,6 +101,7 @@ class ProviderConductor(object):
         if not secret_info:
             # 兼容provider旧的认证方式
             secret_info = {}
+            logger.info("not search secret info, try use provider define info")
             provider_data["secret_id"] = self.decrypt_key(provider_data.get("secret_id"))
             provider_data["secret_key"] = self.decrypt_key(provider_data.get("secret_key"))
 
@@ -105,15 +114,31 @@ class ProviderConductor(object):
 
         return secret_info
 
+    def _provider_object(self, provider):
+        provider_data = ProviderObject().query_one(where_data={"name": provider})
+        if not provider_data:
+            logger.debug("provider: %s is null, try search id" % provider)
+            provider_data = ProviderObject().show(provider)
+
+        if not provider_data:
+            raise local_exceptions.ResourceValidateError("provider", "provider %s 未注册" % provider)
+        return provider_data
+
     def find_provider_info(self, provider):
-        provider_data = ProviderObject().provider_name_object(provider)
+        '''
+
+        :param provider: ID or name
+        :return:
+        '''
+
+        provider_data = self._provider_object(provider)
 
         if not provider_data.get("is_init"):
             raise local_exceptions.ResourceConfigError("provider 未初始化，请重新初始化")
 
         return provider_data
 
-    def product_provider_info(self, provider, region, secret):
+    def conductor_provider_info(self, provider, region, secret):
         '''
 
         :param provider:  name
@@ -124,6 +149,7 @@ class ProviderConductor(object):
 
         provider_data = self.find_provider_info(provider)
 
+        provider = provider_data.get("name")
         secret_info = self.producer_secret_info(provider, region, secret, provider_data)
 
         region = ProviderApi().region_info(provider, region)

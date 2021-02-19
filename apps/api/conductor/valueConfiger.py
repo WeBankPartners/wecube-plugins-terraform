@@ -21,7 +21,7 @@ class ValueConductor(object):
 
         return ValueConfigObject().resource_value_configs(provider, resource_name)
 
-    def conductor_apply(self, provider, resource_name, data):
+    def conductor_apply_values(self, provider, resource_name, data):
         '''
         todo 特殊值/约定规则值处理
         :param provider:
@@ -33,7 +33,6 @@ class ValueConductor(object):
         resource_values_config = self.values_config(provider, resource_name)
 
         resource_columns = {}
-
         logger.debug("start revert value ....")
         for key, value in data.items():
             if resource_values_config.get(key):
