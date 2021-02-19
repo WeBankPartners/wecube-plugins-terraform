@@ -43,40 +43,14 @@ class SubnetApi(ApiBase):
         logger.info("before_keys_checks add info: %s" % (format_json_dumps(ext_info)))
         return ext_info
 
-    def create(self, rid, name, cidr, provider_id,
-               vpc_id, region, zone, extend_info, **kwargs):
-        '''
+    def generate_create_data(self, zone, create_data):
+        r_create_data = {"vpc_id": create_data.get("vpc_id")}
+        create_data = {"cidr": create_data.get("cidr"),
+                       "name": create_data.get("name"),
+                       "zone": zone}
 
-        :param rid:
-        :param name:
-        :param cidr:
-        :param provider_id:
-        :param vpc_id:
-        :param region:
-        :param zone:
-        :param extend_info:
-        :return:
-        '''
+        return create_data, r_create_data
 
-        _exists_data = self.create_resource_exists(rid)
-        if _exists_data:
-            return 1, _exists_data
-
-        extend_info = extend_info or {}
-        create_data = {"cidr": cidr, "name": name, "zone": zone}
-        _r_create_data = {"vpc_id": vpc_id}
-
-        provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
-        _relations_id_dict = self.before_keys_checks(provider_object["name"], _r_create_data)
-
-        create_data.update(_relations_id_dict)
-
-        count, res = self.run_create(rid, provider_id, region, zone=zone,
-                                     provider_object=provider_object,
-                                     provider_info=provider_info,
-                                     owner_id=vpc_id,
-                                     relation_id=None,
-                                     create_data=create_data,
-                                     extend_info=extend_info, **kwargs)
-
-        return count, res
+    def generate_owner_data(self, create_data):
+        owner_id = create_data.get("vpc_id")
+        return owner_id, None
