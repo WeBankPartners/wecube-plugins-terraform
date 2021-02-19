@@ -110,6 +110,20 @@ def validate_string(key, value, minlen=None, maxlen=None):
     return value
 
 
+def validate_collector(data, strings=None, dicts=None, lists=None):
+    if strings:
+        for str in strings:
+            validate_string(key=str, value=data.get(str))
+
+    if dicts:
+        for d in dicts:
+            validate_dict(key=d, value=data.get(d))
+
+    if lists:
+        for d in lists:
+            validate_list(key=d, value=data.get(d))
+
+
 def validate_list(key, value, minlen=None, maxlen=None):
     if not value:
         return []
