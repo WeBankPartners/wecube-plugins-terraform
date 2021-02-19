@@ -63,7 +63,10 @@ class _BaseManager(object):
         try:
             filters = filters or {}
             result = Database().get(self.obj, filters=filters, filter_string=filter_string, params=params)
-            return result.to_dict()
+            if result:
+                return result.to_dict()
+            else:
+                return {}
         except:
             logger.info("%s get data error" % (str(self.obj)))
             logger.info(traceback.format_exc())
