@@ -10,6 +10,7 @@ from apps.api.configer.provider import ProviderApi
 from apps.api.apibase import ApiBase
 from apps.common.convert_keys import define_relations_key
 from apps.background.resource.resource_base import CrsObject
+from apps.api.conductor.provider import ProviderConductor
 
 
 class CCNAttachApi(ApiBase):
@@ -47,10 +48,21 @@ class CCNAttachApi(ApiBase):
     def region_name(self, provider, region):
         return ProviderApi().region_info(provider, region)
 
-    def create(self, rid, name, provider_id,
-               ccn_id, instance_id,
-               instance_type, instance_region,
-               region, zone, extend_info, **kwargs):
+    def generate_create_data(self, zone, create_data, **kwargs):
+        r_create_data = {"vpc_id": create_data.get("instance_id"),
+                         "ccn_id": create_data.get("ccn_id")}
+
+        instance_type = create_data.get("instance_type") or "VPC"
+        create_data = {"instance_type": instance_type}
+
+        return create_data, r_create_data
+
+    def generate_owner_data(self, create_data, **kwargs):
+        owner_id = None
+        return owner_id, None
+
+    def create(self, rid, provider, region, zone, secret,
+               create_data, extend_info, **kwargs):
 
         '''
 
@@ -71,28 +83,25 @@ class CCNAttachApi(ApiBase):
         if _exists_data:
             return 1, _exists_data
 
-        instance_type = instance_type or "VPC"
         extend_info = extend_info or {}
-        create_data = {"instance_type": instance_type}
+        provider_object, provider_info = ProviderConductor().conductor_provider_info(provider, region, secret)
 
-        _r_create_data = {"vpc_id": instance_id,
-                          "ccn_id": ccn_id}
+        zone = ProviderConductor().zone_info(provider=provider_object["name"], zone=zone)
+        x_create_data, r_create_data = self.generate_create_data(zone, create_data)
+        _relations_id_dict = self.before_keys_checks(provider_object["name"], r_create_data)
 
-        provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
-
+        instance_region = create_data.get("instance_region")
         if instance_region:
             create_data["instance_region"] = self.region_name(provider_object["name"], instance_region)
 
-        _relations_id_dict = self.before_keys_checks(provider_object["name"], _r_create_data)
+        x_create_data.update(_relations_id_dict)
 
-        create_data.update(_relations_id_dict)
-
-        count, res = self.run_create(rid, provider_id, region, zone=zone,
+        owner_id, relation_id = self.generate_owner_data(create_data)
+        count, res = self.run_create(rid=rid, region=region, zone=zone,
                                      provider_object=provider_object,
                                      provider_info=provider_info,
-                                     owner_id=None,
-                                     relation_id=None,
-                                     create_data=create_data,
+                                     owner_id=owner_id, relation_id=relation_id,
+                                     create_data=x_create_data,
                                      extend_info=extend_info, **kwargs)
 
         return count, res
