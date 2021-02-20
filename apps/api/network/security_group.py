@@ -7,7 +7,6 @@ from lib.logs import logger
 from lib.json_helper import format_json_dumps
 from apps.common.convert_keys import define_relations_key
 from apps.api.apibase import ApiBase
-from apps.api.configer.provider import ProviderApi
 from apps.background.resource.resource_base import CrsObject
 
 
@@ -41,39 +40,13 @@ class SecGroupApi(ApiBase):
         logger.info("before_keys_checks add info: %s" % (format_json_dumps(ext_info)))
         return ext_info
 
-    def create(self, rid, name, provider_id, vpc_id,
-               zone, region, extend_info, **kwargs):
-        '''
+    def generate_create_data(self, zone, create_data, **kwargs):
+        r_create_data = {"vpc_id": create_data.get("vpc_id")}
+        create_data = {"name": create_data.get("name")}
 
-        :param rid:
-        :param name:
-        :param provider_id:
-        :param vpc_id:
-        :param zone:
-        :param region:
-        :param extend_info:
-        :return:
-        '''
+        return create_data, r_create_data
 
-        _exists_data = self.create_resource_exists(rid)
-        if _exists_data:
-            return 1, _exists_data
+    def generate_owner_data(self, create_data, **kwargs):
+        r_id = create_data.get("vpc_id")
+        return None, r_id
 
-        extend_info = extend_info or {}
-        create_data = {"name": name}
-        _r_create_data = {"vpc_id": vpc_id}
-
-        provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
-        _relations_id_dict = self.before_keys_checks(provider_object["name"], _r_create_data)
-
-        create_data.update(_relations_id_dict)
-
-        count, res = self.run_create(rid, provider_id, region, zone=zone,
-                                     provider_object=provider_object,
-                                     provider_info=provider_info,
-                                     owner_id=vpc_id,
-                                     relation_id=None,
-                                     create_data=create_data,
-                                     extend_info=extend_info, **kwargs)
-
-        return count, res
