@@ -43,48 +43,12 @@ class MysqlDatabaseApi(ApiBase):
         logger.info("before_keys_checks add info: %s" % (format_json_dumps(ext_info)))
         return ext_info
 
-    # def check_database(self, mysql_id, database):
-    #     _exists_data = MysqlDatabaseObject().query_one(where_data={"name": database, "rds_id": mysql_id})
-    #     if _exists_data:
-    #         raise local_exceptions.ResourceValidateError("database name", "database %s already exists" % database)
+    def generate_create_data(self, zone, create_data, **kwargs):
+        r_create_data = {"mysql_id": create_data.get("mysql_id")}
 
-    def create(self, rid, name, provider_id, mysql_id,
-               zone, region, extend_info, **kwargs):
+        x_create_data = {"name": create_data.get("name")}
+        return x_create_data, r_create_data
 
-        '''
-
-        :param rid:
-        :param name:
-        :param provider_id:
-        :param mysql_id:
-        :param zone:
-        :param region:
-        :param extend_info:
-        :param kwargs:
-        :return:
-        '''
-
-        _exists_data = self.create_resource_exists(rid)
-        if _exists_data:
-            return 1, _exists_data
-
-        extend_info = extend_info or {}
-
-        create_data = {"name": name}
-        _r_create_data = {"mysql_id": mysql_id}
-
-        # self.check_database(mysql_id, name)
-        provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
-        _relations_id_dict = self.before_keys_checks(provider_object["name"], _r_create_data)
-
-        create_data.update(_relations_id_dict)
-
-        count, res = self.run_create(rid, provider_id, region, zone=zone,
-                                     provider_object=provider_object,
-                                     provider_info=provider_info,
-                                     owner_id=mysql_id,
-                                     relation_id=None,
-                                     create_data=create_data,
-                                     extend_info=extend_info, **kwargs)
-
-        return count, res
+    def generate_owner_data(self, create_data, **kwargs):
+        owner_id = create_data.get("mysql_id")
+        return owner_id, None
