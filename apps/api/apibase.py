@@ -331,11 +331,11 @@ class ApiBase(TerraformResource):
         info.update(result.get("output_json", {}))
         return info
 
-    def generate_create_data(self, zone, create_data):
+    def generate_create_data(self, zone, create_data, **kwargs):
         r_create_data = {}
         return create_data, r_create_data
 
-    def generate_owner_data(self, create_data):
+    def generate_owner_data(self, create_data, **kwargs):
         return None, None
 
     def create(self, rid, provider, region, zone, secret,
@@ -360,17 +360,17 @@ class ApiBase(TerraformResource):
         provider_object, provider_info = ProviderConductor().conductor_provider_info(provider, region, secret)
 
         zone = ProviderConductor().zone_info(provider=provider_object["name"], zone=zone)
-        create_data, r_create_data = self.generate_create_data(zone, create_data)
+        x_create_data, r_create_data = self.generate_create_data(zone, create_data)
         _relations_id_dict = self.before_keys_checks(provider_object["name"], r_create_data)
 
-        create_data.update(_relations_id_dict)
+        x_create_data.update(_relations_id_dict)
 
         owner_id, relation_id = self.generate_owner_data(create_data)
         count, res = self.run_create(rid=rid, region=region, zone=zone,
                                      provider_object=provider_object,
                                      provider_info=provider_info,
                                      owner_id=owner_id, relation_id=relation_id,
-                                     create_data=create_data,
+                                     create_data=x_create_data,
                                      extend_info=extend_info, **kwargs)
 
         return count, res
