@@ -33,7 +33,7 @@ class ENIAttachApi(ApiBase):
         '''
 
         instance_id = create_data.get("instance_id")
-        eni_id = create_data.get("eni_id")
+        eni_id = create_data.get("network_interface_id")
 
         self.resource_info(provider)
         resource_property = self.resource_keys_config["resource_property"]
@@ -49,45 +49,34 @@ class ENIAttachApi(ApiBase):
         logger.info("before_keys_checks add info: %s" % (format_json_dumps(ext_info)))
         return ext_info
 
-    def attach(self, rid, name, provider_id,
-               network_interface_id, instance_id,
-               zone, region, extend_info, **kwargs):
+    def generate_create_data(self, zone, create_data, **kwargs):
+        r_create_data = {"instance_id": create_data.get("instance_id"),
+                         "network_interface_id": create_data.get("network_interface_id")}
+        x_create_data = {}
+
+        return x_create_data, r_create_data
+
+    def generate_owner_data(self, create_data, **kwargs):
+        owner_id = None
+        return owner_id, None
+
+    def attach(self, rid, provider, region, zone, secret,
+               create_data, extend_info, **kwargs):
         '''
 
         :param rid:
-        :param name:
-        :param provider_id:
-        :param network_interface_id:
-        :param instance_id:
-        :param zone:
+        :param provider:
         :param region:
+        :param zone:
+        :param secret:
+        :param create_data:
         :param extend_info:
         :param kwargs:
         :return:
         '''
 
-        _exists_data = self.create_resource_exists(rid)
-        if _exists_data:
-            return 1, _exists_data
-
-        extend_info = extend_info or {}
-        create_data = {}
-        _r_create_data = {"instance_id": instance_id, "network_interface_id": network_interface_id}
-
-        provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
-        _relations_id_dict = self.before_keys_checks(provider_object["name"], _r_create_data)
-
-        create_data.update(_relations_id_dict)
-
-        count, res = self.run_create(rid, provider_id, region, zone=zone,
-                                     provider_object=provider_object,
-                                     provider_info=provider_info,
-                                     owner_id=None,
-                                     relation_id=None,
-                                     create_data=create_data,
-                                     extend_info=extend_info, **kwargs)
-
-        return count, res
+        return self.create(rid, provider, region, zone, secret,
+                           create_data, extend_info, **kwargs)
 
     def detach(self, rid):
         '''
