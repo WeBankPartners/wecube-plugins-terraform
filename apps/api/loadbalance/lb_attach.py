@@ -80,78 +80,20 @@ class LBAttachApi(ApiBase):
 
         return result
 
-    # def save_lb_instance(self, rid, lb_id, listener_id,
-    #                      instance_id, port, weight,
-    #                      provider, region):
-    #     '''
-    #
-    #     :param rid:
-    #     :param lb_id:
-    #     :param listener_id:
-    #     :param instance_id:
-    #     :param port:
-    #     :param weight:
-    #     :param provider:
-    #     :param region:
-    #     :return:
-    #     '''
-    #     rid = get_uuid()
-    #     self.resource_object.create(create_data={"id": rid, "provider": provider,
-    #                                              "region": region,
-    #                                              "lb_id": lb_id, "listener_id": listener_id,
-    #                                              "instance_id": instance_id,
-    #                                              "port": port, "weight": weight})
+    def generate_create_data(self, zone, create_data, **kwargs):
+        r_create_data = {"lb_id": create_data.get("lb_id"),
+                         "listener_id": create_data.get("listener_id")}
 
-    def create(self, rid, name, provider_id,
-               lb_id, listener_id, backend_servers,
-               zone, region, extend_info, **kwargs):
-        '''
-        :param rid:
-        :param name:
-        :param provider_id:
-        :param lb_id:
-        :param port:
-        :param protocol:
-        :param backend_port:
-        :param health_check:
-        :param health_check_uri:
-        :param zone:
-        :param region:
-        :param extend_info:
-        :param kwargs:
-        :return:
-        '''
+        backend_servers = create_data.get("backend_servers")
+        bs = self.validate_instance(provider=kwargs.get("provider"),
+                                    instances=backend_servers)
 
-        _exists_data = self.create_resource_exists(rid)
-        if _exists_data:
-            return 1, _exists_data
+        x_create_data = {"backend_servers": bs}
+        return x_create_data, r_create_data
 
-        extend_info = extend_info or {}
-        create_data = {}
-        _r_create_data = {"lb_id": lb_id, "listener_id": listener_id}
-
-        provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
-        create_data["backend_servers"] = self.validate_instance(provider_object["name"], instances=backend_servers)
-
-        # for _instance_ in backend_servers:
-        #     self.save_lb_instance("", lb_id, listener_id=listener_id,
-        #                           instance_id=_instance_.get("instance_id"),
-        #                           port=_instance_.get("port"), weight=_instance_.get("weight"),
-        #                           provider=provider_object["name"], region=region)
-
-        _relations_id_dict = self.before_keys_checks(provider_object["name"], _r_create_data)
-
-        create_data.update(_relations_id_dict)
-
-        count, res = self.run_create(rid, provider_id, region, zone=zone,
-                                     provider_object=provider_object,
-                                     provider_info=provider_info,
-                                     owner_id=None,
-                                     relation_id=None,
-                                     create_data=create_data,
-                                     extend_info=extend_info, **kwargs)
-
-        return count, res
+    def generate_owner_data(self, create_data, **kwargs):
+        owner_id = None
+        return owner_id, None
 
     def destory(self, rid):
         '''
