@@ -2,11 +2,16 @@
   <div class=" ">
     <TerraformPageTable :pageConfig="pageConfig"></TerraformPageTable>
     <TfModalComponent :modelConfig="modelConfig"></TfModalComponent>
+    <Button type="primary" @click="modal1 = true">树转JSON</Button>
+    <Modal v-model="modal1" title="Common Modal dialog box title">
+      <Tree></Tree>
+    </Modal>
   </div>
 </template>
 
 <script>
 import { getTableData, addTableRow, editTableRow, deleteTableRow } from '@/api/server'
+import Tree from '@/pages/components/tree'
 let tableEle = [
   {
     title: 'tf_name',
@@ -51,6 +56,7 @@ export default {
   name: '',
   data () {
     return {
+      modal1: false,
       pageConfig: {
         CRUD: '/terraform/v1/configer/provider',
         researchConfig: {
@@ -236,7 +242,9 @@ export default {
       })
     }
   },
-  components: {}
+  components: {
+    Tree
+  }
 }
 </script>
 
