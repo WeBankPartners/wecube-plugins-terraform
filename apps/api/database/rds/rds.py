@@ -17,6 +17,7 @@ from apps.api.apibase import ApiBase
 # from apps.background.resource.database.rds import RdsDBObject
 from apps.background.resource.vm.instance_type import InstanceTypeObject
 from apps.background.resource.resource_base import CrsObject
+from apps.api.conductor.provider import ProviderConductor
 
 
 class RdsDBApi(ApiBase):
@@ -47,27 +48,39 @@ class RdsDBApi(ApiBase):
         logger.info("before_keys_checks add info: %s" % (format_json_dumps(ext_info)))
         return ext_info
 
-    def create(self, rid, name, provider_id, version,
-               instance_type, subnet_id, port, password,
-               user, disk_type, disk_size,
-               zone, region, extend_info, **kwargs):
+    def generate_create_data(self, zone, create_data, **kwargs):
+        r_create_data = {"subnet_id": create_data.get("subnet_id")}
+
+        password = create_data.get("password") or "Terraform.123"
+        x_create_data = {"name": create_data.get("name"),
+                         "engine": self.resource_name, "zone": zone,
+                         "version": create_data.get("version"),
+                         "instance_type": create_data.get("instance_type"),
+                         "password": password,
+                         "user": create_data.get("user"),
+                         "port": create_data.get("port"),
+                         "disk_type": create_data.get("disk_type"),
+                         "disk_size": create_data.get("disk_size")}
+
+        return x_create_data, r_create_data
+
+    def generate_owner_data(self, create_data, **kwargs):
+        r_id = create_data.get("subnet_id")
+        return None, r_id
+
+    def create(self, rid, provider, region, zone, secret,
+               create_data, extend_info, **kwargs):
 
         '''
 
         :param rid:
-        :param name:
-        :param provider_id:
-        :param version:
-        :param instance_type:
-        :param subnet_id:
-        :param port:
-        :param password:
-        :param user:
-        :param disk_type:
-        :param disk_size:
-        :param zone:
+        :param provider:
         :param region:
+        :param zone:
+        :param secret:
+        :param create_data:
         :param extend_info:
+        :param kwargs:
         :return:
         '''
 
@@ -76,35 +89,34 @@ class RdsDBApi(ApiBase):
             return 1, _exists_data
 
         extend_info = extend_info or {}
-        create_data = {"name": name, "engine": self.resource_name, "zone": zone,
-                       "version": version, "instance_type": instance_type,
-                       "password": password, "user": user, "port": port,
-                       "disk_type": disk_type, "disk_size": disk_size}
+        provider_object, provider_info = ProviderConductor().conductor_provider_info(provider, region, secret)
 
-        _r_create_data = {"subnet_id": subnet_id}
+        zone = ProviderConductor().zone_info(provider=provider_object["name"], zone=zone)
+        x_create_data, r_create_data = self.generate_create_data(zone, create_data,
+                                                                 provider=provider_object["name"])
 
-        origin_type, instance_type_data = InstanceTypeObject().type_resource_id(provider_id, instance_type)
+        origin_type, instance_type_data = InstanceTypeObject().convert_resource_id(provider_object.get("id"),
+                                                                                   create_data.get("instance_type"))
+
         cpu = instance_type_data.get("cpu")
         memory = instance_type_data.get("memory")
+        kwargs["cpu"] = cpu
+        kwargs["memory"] = memory
+        x_create_data["instance_type"] = origin_type
 
-        create_data["instance_type"] = origin_type
-        provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
-        _relations_id_dict = self.before_keys_checks(provider_object["name"], _r_create_data)
+        _relations_id_dict = self.before_keys_checks(provider_object["name"], r_create_data)
 
-        create_data.update(_relations_id_dict)
+        x_create_data.update(_relations_id_dict)
 
-        count, res = self.run_create(rid, provider_id, region, zone=zone,
+        owner_id, relation_id = self.generate_owner_data(create_data)
+        count, res = self.run_create(rid=rid, region=region, zone=zone,
                                      provider_object=provider_object,
                                      provider_info=provider_info,
-                                     owner_id=None,
-                                     relation_id=subnet_id,
-                                     create_data=create_data,
-                                     extend_info=extend_info,
-                                     cpu=cpu, memory=memory,
-                                     **kwargs)
+                                     owner_id=owner_id, relation_id=relation_id,
+                                     create_data=x_create_data,
+                                     extend_info=extend_info, **kwargs)
 
         return count, res
-
 
     def _generate_update_data(self, rid, provider, define_json, update_data):
         resource_keys_config = self.resource_info(provider)
