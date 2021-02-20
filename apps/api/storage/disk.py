@@ -7,9 +7,8 @@ import traceback
 from lib.logs import logger
 from lib.json_helper import format_json_dumps
 from core import local_exceptions
-from apps.api.configer.provider import ProviderApi
 from apps.api.apibase import ApiBase
-from apps.background.resource.resource_base import CrsObject
+from apps.api.conductor.provider import ProviderConductor
 
 
 class DiskApi(ApiBase):
@@ -20,47 +19,23 @@ class DiskApi(ApiBase):
         self._flush_resobj()
         self.resource_keys_config = None
 
-    def create(self, rid, name, provider_id, type, size,
-               zone, region, extend_info, **kwargs):
-
-        '''
-
-        :param rid:
-        :param name:
-        :param provider_id:
-        :param type:
-        :param size:
-        :param zone:
-        :param region:
-        :param extend_info:
-        :return:
-        '''
-
-        _exists_data = self.create_resource_exists(rid)
-        if _exists_data:
-            return 1, _exists_data
-
-        extend_info = extend_info or {}
-        create_data = {"name": name, "type": type, "size": size}
-
-        provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
+    def generate_create_data(self, zone, create_data, **kwargs):
+        r_create_data = {}
 
         if zone:
-            zone = ProviderApi().zone_info(provider_object["name"], zone)
+            zone = ProviderConductor().zone_info(provider=kwargs.get("provider"),
+                                                 zone=zone)
 
-        create_data["zone"] = zone
-        _relations_id_dict = self.before_keys_checks(provider_object["name"], create_data)
-        create_data.update(_relations_id_dict)
+        x_create_data = {"type": create_data.get("type"),
+                         "size": create_data.get("size"),
+                         "name": create_data.get("name"),
+                         "zone": zone}
 
-        count, res = self.run_create(rid, provider_id, region, zone=zone,
-                                     provider_object=provider_object,
-                                     provider_info=provider_info,
-                                     owner_id=None,
-                                     relation_id=None,
-                                     create_data=create_data,
-                                     extend_info=extend_info, **kwargs)
+        return x_create_data, r_create_data
 
-        return count, res
+    def generate_owner_data(self, create_data, **kwargs):
+        owner_id = None
+        return owner_id, None
 
     def destory(self, rid):
         '''
