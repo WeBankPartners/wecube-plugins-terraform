@@ -87,8 +87,6 @@ class MysqlApi(RdsDBApi):
                          "engine": self.resource_name, "zone": zone,
                          "version": create_data.get("version"),
                          "instance_type": create_data.get("instance_type"),
-                         "first_slave_zone": create_data.get("first_slave_zone"),
-                         "second_slave_zone": create_data.get("second_slave_zone"),
                          "password": password,
                          "user": create_data.get("user"),
                          "port": create_data.get("port"),
@@ -98,7 +96,7 @@ class MysqlApi(RdsDBApi):
         return x_create_data, r_create_data
 
     def generate_owner_data(self, create_data, **kwargs):
-        owner_id = create_data.get("vpc_id")
+        owner_id = create_data.get("mysql_id")
         return owner_id, None
 
     def create(self, rid, provider, region, zone, secret,
@@ -107,22 +105,11 @@ class MysqlApi(RdsDBApi):
         '''
 
         :param rid:
-        :param name:
-        :param provider_id:
-        :param version:
-        :param instance_type:
-        :param subnet_id:
-        :param port:
-        :param password:
-        :param user:
-        :param disk_type:
-        :param disk_size:
-        :param vpc_id:
-        :param security_group_id:
-        :param first_slave_zone:
-        :param second_slave_zone:
-        :param zone:
+        :param provider:
         :param region:
+        :param zone:
+        :param secret:
+        :param create_data:
         :param extend_info:
         :param kwargs:
         :return:
