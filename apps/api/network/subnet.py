@@ -44,11 +44,11 @@ class SubnetApi(ApiBase):
 
     def generate_create_data(self, zone, create_data, **kwargs):
         r_create_data = {"vpc_id": create_data.get("vpc_id")}
-        create_data = {"cidr": create_data.get("cidr"),
-                       "name": create_data.get("name"),
-                       "zone": zone}
+        x_create_data = {"cidr": create_data.get("cidr"),
+                         "name": create_data.get("name"),
+                         "zone": zone}
 
-        return create_data, r_create_data
+        return x_create_data, r_create_data
 
     def generate_owner_data(self, create_data, **kwargs):
         owner_id = create_data.get("vpc_id")

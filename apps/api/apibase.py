@@ -360,7 +360,9 @@ class ApiBase(TerraformResource):
         provider_object, provider_info = ProviderConductor().conductor_provider_info(provider, region, secret)
 
         zone = ProviderConductor().zone_info(provider=provider_object["name"], zone=zone)
-        x_create_data, r_create_data = self.generate_create_data(zone, create_data)
+        x_create_data, r_create_data = self.generate_create_data(zone, create_data,
+                                                                 provider=provider_object["name"])
+
         _relations_id_dict = self.before_keys_checks(provider_object["name"], r_create_data)
 
         x_create_data.update(_relations_id_dict)
