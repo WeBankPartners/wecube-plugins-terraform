@@ -61,12 +61,11 @@ class DiskAttachApi(ApiBase):
         '''
 
         :param rid:
-        :param name:
-        :param provider_id:
-        :param disk_id:
-        :param instance_id:
-        :param zone:
+        :param provider:
         :param region:
+        :param zone:
+        :param secret:
+        :param create_data:
         :param extend_info:
         :param kwargs:
         :return:

@@ -70,6 +70,14 @@ class InstanceTypeObject(ResourceBaseObject):
         else:
             return name, {"cpu": 0, "memory": 0}
 
+    def convert_resource_name(self, provider, name):
+        data = self.resource.get(filters={"provider": provider,
+                                          "name": name})
+        if data:
+            return data["origin_name"], data
+        else:
+            return name, {"cpu": 0, "memory": 0}
+
     def ora_delete(self, rid):
         return self.resource.delete(filters={"id": rid})
 
