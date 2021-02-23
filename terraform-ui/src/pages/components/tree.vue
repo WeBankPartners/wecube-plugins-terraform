@@ -1,6 +1,7 @@
 <template>
   <div>
     <Tree :data="data5" :render="renderContent" class="demo-tree-render"></Tree>
+    <Button type="primary" @click="manageData">Primary</Button>
   </div>
 </template>
 <script>
@@ -9,8 +10,9 @@ export default {
     return {
       data5: [
         {
-          title: 'parent 1',
+          title: 'parent',
           expand: true,
+          key: 'parent',
           render: (h, { root, node, data }) => {
             return (
               <span style="display: inline-block;width: 100%">
@@ -30,19 +32,94 @@ export default {
           children: []
         }
       ],
-      childrenT: []
+      childrenT: [],
+      finalJson: {},
+      jsonJ: {
+        instance_id: {
+          convert: 'sdf',
+          allow_null: 0,
+          type: 'string'
+        }
+        // eip_id: {
+        //   convert: 'eip_id',
+        //   allow_null: 0,
+        //   type: 'string'
+        // },
+        // name: '-',
+        // private_ip: {
+        //   convert: 'private_ip',
+        //   allow_null: 1,
+        //   type: 'string'
+        // }
+      }
     }
   },
   mounted () {
     this.initJSON()
   },
   methods: {
+    manageData () {
+      console.log(this.data5[0])
+      // const xx = this.magic(this.data5[0])
+      // console.log(xx)
+    },
+    magic (levelData) {
+      let childrenTmp = []
+      if (levelData.children.length === 0) {
+        childrenTmp.push({
+          [levelData.key]: levelData.value
+        })
+      } else {
+        levelData.children.forEach(item => {
+          let params = {
+            [levelData.key]: this.magic(item)
+          }
+          childrenTmp.push(params)
+        })
+      }
+      return childrenTmp
+    },
     renderContent (h, { root, node, data }) {
       let formateNodeData = (v, tag) => {
         const res = target({ children: this.data5[0].children }, data.nodeKey)
-        console.log(res)
-        res[tag] = v
-        console.log(this.data5[0])
+
+        let attrs = data.path.split('.')
+        console.log('path:', data.path)
+        let xx = attrs.slice(0, attrs.length - 1)
+        console.log(xx, this.jsonJ)
+        const ss = this.renderValue(this.jsonJ, xx)
+        console.log('操作对象', ss, res.key, v)
+        console.log('旧，新：', res.key, v)
+        if (tag === 'key') {
+          if (xx[0] === 'parent') {
+            console.log(1)
+            this.jsonJ[v] = this.jsonJ[res.key]
+            delete this.jsonJ[res.key]
+          } else {
+            console.log(2)
+            ss[v] = ss[res.key]
+            delete ss[res.key]
+          }
+        } else {
+          ss[res.key] = v
+        }
+
+        if (tag === 'key') {
+          if (xx[0] === 'parent') {
+            xx.push(v)
+            data.path = xx.join('.')
+          } else {
+            xx.push(v)
+            data.path = xx.join('.')
+          }
+          res[tag] = res['title'] = v
+        } else {
+          res[tag] = v
+        }
+        console.log(data.path)
+        // this.initJSON()
+        console.log(this.data5[0].children)
+        console.log(this.jsonJ)
       }
 
       let target = (js, nodeKey) => {
@@ -96,44 +173,64 @@ export default {
         )
       }
     },
+    renderValue (item, attrs) {
+      let item_tmp = item
+      let n = 0
+      for (n in attrs) {
+        if (attrs[n] in item_tmp) {
+          item_tmp = item_tmp[attrs[n]]
+        } else {
+          return {}
+        }
+      }
+      return item_tmp
+    },
+    // 添加节点，赋初始值
     append (data) {
+      const tag = 'node' + new Date().getTime()
       const children = data.children || []
       children.push({
-        title: 'appended node',
-        key: 'appended node',
+        title: tag,
+        key: tag,
         expand: true,
         children: [],
-        value: ''
+        value: '',
+        path: data.path + '.' + tag
       })
+      data.value = {
+        [tag]: ''
+      }
       this.$set(data, 'children', children)
+      let attrs = data.path.split('.')
+      let xx = attrs.slice(0, attrs.length - 1)
+      let ss = this.renderValue(this.jsonJ, xx)
+      ss[data.key] = {
+        [tag]: ''
+      }
     },
     remove (root, node, data) {
       const parentKey = root.find(el => el === node).parent
       const parent = root.find(el => el.nodeKey === parentKey).node
       const index = parent.children.indexOf(data)
       parent.children.splice(index, 1)
+      let attrs = data.path.split('.')
+      let xx = attrs.slice(0, attrs.length - 1)
+      let ss = this.renderValue(this.jsonJ, xx)
+      // 父节点包含多节点删除节点，其他父节点置空
+      if (Object.keys(ss).length === 1) {
+        let xx2 = attrs.slice(0, attrs.length - 2)
+        let ss2 = this.renderValue(this.jsonJ, xx2)
+        const key = xx.slice(-1)[0]
+        ss2[key] = {}
+      } else {
+        delete ss[data.key]
+      }
     },
     initJSON () {
-      const jsonJ = {
-        instance_id: {
-          convert: 'instance_id',
-          allow_null: 0,
-          type: 'string'
-        },
-        eip_id: {
-          convert: 'eip_id',
-          allow_null: 0,
-          type: 'string'
-        },
-        name: '-',
-        private_ip: {
-          convert: 'private_ip',
-          allow_null: 1,
-          type: 'string'
-        }
-      }
-      const data = this.formatTreeData(jsonJ)
-      this.data5[0].children = data
+      this.$nextTick(() => {
+        const data = this.formatTreeData(this.jsonJ, 'parent')
+        this.data5[0].children = data
+      })
     },
     isJson (obj) {
       return (
@@ -142,7 +239,7 @@ export default {
         !obj.length
       )
     },
-    formatTreeData (tmp) {
+    formatTreeData (tmp, path) {
       const keys = Object.keys(tmp)
       let childrenTmp = []
       keys.forEach(key => {
@@ -150,10 +247,11 @@ export default {
           title: key,
           expand: true,
           key: key,
-          value: tmp[key]
+          value: tmp[key],
+          path: path + '.' + key
         }
         if (this.isJson(tmp[key])) {
-          params.children = this.formatTreeData(tmp[key])
+          params.children = this.formatTreeData(tmp[key], key)
         } else {
           params.children = []
         }
