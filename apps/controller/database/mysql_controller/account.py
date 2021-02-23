@@ -11,6 +11,54 @@ from lib.uuid_util import get_uuid
 from apps.api.database.mysql.account import MysqlAccountApi
 
 
+class ResBase(object):
+    @classmethod
+    def allow_key(cls, data):
+        validation.allowed_key(data, ["id", "provider", "secret", "region", "zone",
+                                      "name", "mysql_id", "password", "extend_info"])
+
+    @classmethod
+    def not_null(cls, data):
+        validation.not_allowed_null(data=data,
+                                    keys=["region", "provider", "name",
+                                          "password", "mysql_id"]
+                                    )
+
+    @classmethod
+    def validate_keys(cls, data):
+        validation.validate_string("password", data["password"], minlen=7, maxlen=32)
+        validation.validate_collector(data=data,
+                                      strings=["id", "name", "region", "zone",
+                                               "provider", "secret",
+                                               "mysql_id", "password", ],
+                                      dicts=["extend_info"])
+
+    @classmethod
+    def create(cls, resource, data, **kwargs):
+        rid = data.pop("id", None) or get_uuid()
+        secret = data.pop("secret", None)
+        region = data.pop("region", None)
+        zone = data.pop("zone", None)
+        provider = data.pop("provider", None)
+        name = data.pop("name", None)
+        password = data.pop("password", None)
+        mysql_id = data.pop("mysql_id", None)
+
+        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
+        data.update(extend_info)
+
+        create_data = {"name": name, "mysql_id": mysql_id,
+                       "password": password}
+        _, result = resource.create(rid=rid, provider=provider,
+                                    region=region, zone=zone,
+                                    secret=secret,
+                                    create_data=create_data,
+                                    extend_info=data)
+
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
+        return res, result
+
+
 class MysqlAccountController(BackendController):
     allow_methods = ('GET', 'POST')
     resource = MysqlAccountApi()
@@ -33,37 +81,12 @@ class MysqlAccountController(BackendController):
                                                   pagesize=pagesize, orderby=orderby)
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["id", "name", "provider_id", "mysql_id", "password",
-                                      "zone", "region", "extend_info"])
-        validation.not_allowed_null(data=data,
-                                    keys=["region", "provider_id", "name", "password", "mysql_id"]
-                                    )
-
-        validation.validate_string("id", data.get("id"))
-        validation.validate_string("name", data["name"])
-        validation.validate_string("password", data["password"], minlen=7, maxlen=32)
-        validation.validate_string("region", data["region"])
-        validation.validate_string("zone", data.get("zone"))
-        validation.validate_string("mysql_id", data["mysql_id"])
-        validation.validate_string("provider_id", data.get("provider_id"))
-        validation.validate_dict("extend_info", data.get("extend_info"))
+        ResBase.allow_key(data)
+        ResBase.not_null(data)
+        ResBase.validate_keys(data)
 
     def create(self, request, data, **kwargs):
-        rid = data.pop("id", None) or get_uuid()
-        name = data.pop("name", None)
-        password = data.pop("password", None)
-        zone = data.pop("zone", None)
-        region = data.pop("region", None)
-        mysql_id = data.pop("mysql_id", None)
-        provider_id = data.pop("provider_id", None)
-        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
-
-        data.update(extend_info)
-        _, result = self.resource.create(rid, name, provider_id,
-                                         mysql_id, password,
-                                         zone, region, extend_info=data)
-
-        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
+        res, _ = ResBase.create(resource=self.resource, data=data)
         return 1, res
 
 
@@ -93,38 +116,14 @@ class MysqlAccountAddController(BaseController):
     resource = MysqlAccountApi()
 
     def before_handler(self, request, data, **kwargs):
-        validation.not_allowed_null(data=data,
-                                    keys=["region", "provider_id", "name", "password", "mysql_id"]
-                                    )
-
-        validation.validate_string("id", data.get("id"))
-        validation.validate_string("name", data["name"])
-        validation.validate_string("password", data["password"], minlen=7, maxlen=32)
-        validation.validate_string("region", data["region"])
-        validation.validate_string("zone", data.get("zone"))
-        validation.validate_string("mysql_id", data["mysql_id"])
-        validation.validate_string("provider_id", data.get("provider_id"))
-        validation.validate_dict("extend_info", data.get("extend_info"))
+        ResBase.not_null(data)
+        ResBase.validate_keys(data)
 
     def response_templete(self, data):
         return {}
 
     def main_response(self, request, data, **kwargs):
-        rid = data.pop("id", None) or get_uuid()
-        name = data.pop("name", None)
-        password = data.pop("password", None)
-        zone = data.pop("zone", None)
-        region = data.pop("region", None)
-        mysql_id = data.pop("mysql_id", None)
-        provider_id = data.pop("provider_id", None)
-        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
-
-        data.update(extend_info)
-        _, result = self.resource.create(rid, name, provider_id,
-                                         mysql_id, password,
-                                         zone, region, extend_info=data)
-
-        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
+        res, _ = ResBase.create(resource=self.resource, data=data)
         return res
 
 
