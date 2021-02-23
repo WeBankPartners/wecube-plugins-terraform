@@ -19,7 +19,7 @@ class ProviderSecretController(BackendController):
     resource = ProviderSecretObject()
 
     def list(self, request, data, orderby=None, page=None, pagesize=None, **kwargs):
-        validation.allowed_key(data.keys(), ["id", "name", "display_name", "region", "enabled"])
+        validation.allowed_key(data.keys(), ["id", "name", "display_name", "region", "provider", "enabled"])
         return self.resource.list(filters=data, page=page,
                                   pagesize=pagesize, orderby=orderby)
 
@@ -119,7 +119,7 @@ class ProviderSecretIdController(BackendIdController):
 
         if data.get("secret_info") is not None:
             provider_property = validation.validate_dict("secret_info", data.get("secret_info")) or {}
-            data["provider_property"] = json.dumps(provider_property)
+            data["secret_info"] = json.dumps(provider_property)
 
         return self.resource.update(rid, data)
 
