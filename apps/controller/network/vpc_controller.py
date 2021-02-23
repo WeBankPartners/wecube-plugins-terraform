@@ -33,18 +33,19 @@ class ResBase(object):
     @classmethod
     def create(cls, resource, data, **kwargs):
         rid = data.pop("id", None) or get_uuid()
-        name = data.pop("name", None)
-        cidr = data.pop("cidr", None)
         secret = data.pop("secret", None)
         region = data.pop("region", None)
+        zone = data.pop("zone", None)
         provider = data.pop("provider", None)
+        name = data.pop("name", None)
+        cidr = data.pop("cidr", None)
 
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
         data.update(extend_info)
 
         create_data = {"name": name, "cidr": cidr}
         _, result = resource.create(rid=rid, provider=provider,
-                                    region=region, zone=None,
+                                    region=region, zone=zone,
                                     secret=secret,
                                     create_data=create_data,
                                     extend_info=data)
