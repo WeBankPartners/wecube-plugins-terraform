@@ -204,9 +204,16 @@ class InstanceApi(ApiBase):
         if not status:
             raise local_exceptions.ResourceOperateException(self.resource_name,
                                                             msg="delete %s %s failed" % (self.resource_name, rid))
+        
+        return self.resource_object.delete(rid, update_data=None)
 
-        return self.resource_object.delete(rid, update_data={"status": "deleted",
-                                                             "power_state": "stop"})
+        # return self.resource_object.delete(rid, update_data={"status": "deleted",
+        #                                                      "power_state": "stop"})
+
+                                                             
+
+        
+        
 
     def update(self, rid, name, instance_type, image, security_group_id, extend_info):
         '''
