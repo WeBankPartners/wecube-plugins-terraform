@@ -15,18 +15,6 @@ let tableEle = [
     display: true
   },
   {
-    title: 'tf_secret_id',
-    value: 'secret_id', //
-    style: { width: '150px' },
-    display: true
-  },
-  {
-    title: 'tf_secret_key',
-    value: 'secret_key', //
-    style: { width: '150px' },
-    display: true
-  },
-  {
     title: 'tf_provider_property',
     value: 'provider_property', //
     render: item => {
@@ -116,22 +104,6 @@ export default {
             type: 'text'
           },
           {
-            label: 'tf_secret_key',
-            value: 'secret_key',
-            placeholder: 'tips.inputRequired',
-            v_validate: 'required:true|min:2|max:60',
-            disabled: false,
-            type: 'text'
-          },
-          {
-            label: 'tf_secret_id',
-            value: 'secret_id',
-            placeholder: 'tips.inputRequired',
-            v_validate: 'required:true|min:2|max:60',
-            disabled: false,
-            type: 'text'
-          },
-          {
             label: 'tf_provider_property',
             value: 'provider_property',
             placeholder: 'tf_json',
@@ -150,8 +122,6 @@ export default {
         addRow: {
           // [通用]-保存用户新增、编辑时数据
           name: '',
-          secret_key: '',
-          secret_id: '',
           extend_info: '',
           provider_property: ''
         }
