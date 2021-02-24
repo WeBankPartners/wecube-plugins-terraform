@@ -82,7 +82,7 @@ class MysqlApi(RdsDBApi):
                          "subnet_id": create_data.get("subnet_id"),
                          "security_group_id": create_data.get("security_group_id")}
 
-        password = create_data.get("password") or "Terraform.123"
+        password = create_data.get("password") or "Terraform@123"
         x_create_data = {"name": create_data.get("name"),
                          "engine": self.resource_name, "zone": zone,
                          "version": create_data.get("version"),

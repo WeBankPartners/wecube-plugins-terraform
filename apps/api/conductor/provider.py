@@ -79,7 +79,7 @@ class ProviderConductor(object):
 
         secret = self.format_secret(secret)
         if isinstance(secret, dict):
-            logger.debug("secret format json, use secret info")
+            logger.info("secret format json, use secret info")
             return secret
         else:
             logger.debug("search secret info")
@@ -108,6 +108,9 @@ class ProviderConductor(object):
             for key in ["secret_id", "secret_key"]:
                 if provider_data.get(key):
                     secret_info[key] = provider_data.get(key)
+            
+            provider_property = provider_data.get("provider_property", {})
+            secret_info = convert_keys(secret_info, defines=provider_property, is_update=True)
 
         if not secret_info:
             raise ValueError("获取provider 认证信息失败")
@@ -158,9 +161,10 @@ class ProviderConductor(object):
         extend_info = provider_data.get("extend_info", {})
         provider_property = provider_data.get("provider_property", {})
 
-        provider_info.update(secret_info)
         provider_info.update(extend_info)
-        provider_columns = convert_keys(provider_info, defines=provider_property)
+        provider_columns = convert_keys(provider_info, defines=provider_property, is_update=True)
+        provider_columns.update(secret_info)
+        
 
         info = {
             "provider": {
