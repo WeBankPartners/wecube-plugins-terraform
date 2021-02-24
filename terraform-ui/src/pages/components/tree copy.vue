@@ -34,9 +34,11 @@ export default {
       childrenT: [],
       finalJson: {},
       jsonJ: {
-        region: 'region111',
-        secret_key: 'secret_key11',
-        secret_id: 'access_key11'
+        originJSON: {
+          // region: 'region111',
+          // secret_key: 'secret_key11',
+          // secret_id: 'access_key11'
+        }
       }
       // jsonJ: {
       // instance_id: {
@@ -69,18 +71,13 @@ export default {
         data.path = data.path.replace('undefined.', '')
         let attrs = data.path.split('.')
         console.log('path:', data.path)
-        let xx = attrs.slice(1, attrs.length - 1)
-        console.log(xx)
-        let ss
-        if (xx.length === 0) {
-          ss = this.jsonJ
-        } else {
-          ss = this.renderValue(this.jsonJ, xx)
-        }
-        console.log('操作对象', ss)
+        let xx = attrs.slice(0, attrs.length - 1)
+        console.log(xx, this.jsonJ)
+        const ss = this.renderValue(this.jsonJ, xx)
+        console.log('操作对象', ss, res.key, v)
         console.log('旧，新：', res.key, v)
         if (tag === 'key') {
-          if (xx.length === 0) {
+          if (xx[0] === 'parent') {
             console.log(1)
             this.jsonJ[v] = this.jsonJ[res.key]
             delete this.jsonJ[res.key]
@@ -90,7 +87,7 @@ export default {
             delete ss[res.key]
           }
         } else {
-          if (xx.length === 0) {
+          if (xx[0] === 'parent') {
             console.log(11)
             this.jsonJ[res.key] = v
           } else {
@@ -100,12 +97,12 @@ export default {
         }
 
         if (tag === 'key') {
-          if (xx.length === 0) {
+          if (xx[0] === 'parent') {
             xx.push(v)
-            data.path = 'parent.' + xx.join('.')
+            data.path = xx.join('.')
           } else {
             xx.push(v)
-            data.path = 'parent.' + xx.join('.')
+            data.path = xx.join('.')
           }
           res[tag] = res['title'] = v
         } else {
@@ -199,14 +196,8 @@ export default {
       if (data.path) {
         let attrs = data.path.split('.')
         let xx = attrs.slice(0, attrs.length - 1)
-        let ss
-        // console.log(this.jsonJ, xx)
-        // console.log(ss)
-        if (xx.length === 1) {
-          ss = this.jsonJ
-        } else {
-          ss = this.renderValue(this.jsonJ, xx)
-        }
+        let ss = this.renderValue(this.jsonJ, xx)
+        console.log(ss)
         ss[data.key] = {
           [tag]: ''
         }
