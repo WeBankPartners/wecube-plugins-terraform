@@ -4,8 +4,8 @@ CREATE TABLE `cloud_providers` (
   `id` VARCHAR(36) NOT NULL,
   `display_name` VARCHAR(64) DEFAULT NULL,
   `name` VARCHAR(64) NOT NULL,
-  `secret_id` VARCHAR(256) NOT NULL,
-  `secret_key` VARCHAR(256) NOT NULL,
+  `secret_id` VARCHAR(256),
+  `secret_key` VARCHAR(256),
   `region` VARCHAR(64) DEFAULT NULL,
   `zone` VARCHAR(64) DEFAULT NULL,
   `plugin_source` VARCHAR(64) DEFAULT NULL,
@@ -20,6 +20,7 @@ CREATE TABLE `cloud_providers` (
   PRIMARY KEY (`id`),
   UNIQUE INDEX `idx_name` (`name`, `is_deleted`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
+
 
 
 DROP TABLE IF EXISTS `cloud_secret`;
@@ -62,6 +63,7 @@ CREATE TABLE `resource` (
   UNIQUE INDEX `idx_property` (`provider`, `property`, `is_deleted`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
+alter table `resource` add column `data_source` text DEFAULT NULL after  `output_property`;
 
 DROP TABLE IF EXISTS `common_keys`;
 
