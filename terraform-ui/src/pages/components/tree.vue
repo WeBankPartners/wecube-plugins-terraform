@@ -1,7 +1,6 @@
 <template>
   <div>
     <Tree :data="data5" :render="renderContent" class="demo-tree-render"></Tree>
-    <Button type="primary" @click="manageData">Primary</Button>
   </div>
 </template>
 <script>
@@ -10,9 +9,9 @@ export default {
     return {
       data5: [
         {
-          title: 'parent',
+          title: 'JSON',
           expand: true,
-          key: 'parent',
+          key: 'JSON',
           render: (h, { root, node, data }) => {
             return (
               <span style="display: inline-block;width: 100%">
@@ -35,11 +34,11 @@ export default {
       childrenT: [],
       finalJson: {},
       jsonJ: {
-        instance_id: {
-          convert: 'sdf',
-          allow_null: 0,
-          type: 'string'
-        }
+        // instance_id: {
+        //   convert: 'sdf',
+        //   allow_null: 0,
+        //   type: 'string'
+        // }
         // eip_id: {
         //   convert: 'eip_id',
         //   allow_null: 0,
@@ -55,34 +54,14 @@ export default {
     }
   },
   mounted () {
-    this.initJSON()
+    // this.initJSON(this.jsonJ)
   },
   methods: {
-    manageData () {
-      console.log(this.data5[0])
-      // const xx = this.magic(this.data5[0])
-      // console.log(xx)
-    },
-    magic (levelData) {
-      let childrenTmp = []
-      if (levelData.children.length === 0) {
-        childrenTmp.push({
-          [levelData.key]: levelData.value
-        })
-      } else {
-        levelData.children.forEach(item => {
-          let params = {
-            [levelData.key]: this.magic(item)
-          }
-          childrenTmp.push(params)
-        })
-      }
-      return childrenTmp
-    },
     renderContent (h, { root, node, data }) {
       let formateNodeData = (v, tag) => {
         const res = target({ children: this.data5[0].children }, data.nodeKey)
-
+        console.log('res:', res)
+        data.path = data.path.replace('undefined.', '')
         let attrs = data.path.split('.')
         console.log('path:', data.path)
         let xx = attrs.slice(0, attrs.length - 1)
@@ -101,7 +80,13 @@ export default {
             delete ss[res.key]
           }
         } else {
-          ss[res.key] = v
+          if (xx[0] === 'parent') {
+            console.log(11)
+            this.jsonJ[res.key] = v
+          } else {
+            console.log(22)
+            ss[res.key] = v
+          }
         }
 
         if (tag === 'key') {
@@ -117,7 +102,6 @@ export default {
           res[tag] = v
         }
         console.log(data.path)
-        // this.initJSON()
         console.log(this.data5[0].children)
         console.log(this.jsonJ)
       }
@@ -187,7 +171,7 @@ export default {
     },
     // 添加节点，赋初始值
     append (data) {
-      const tag = 'node' + new Date().getTime()
+      const tag = 'key_' + Math.floor(Math.random() * 4000 + 1000)
       const children = data.children || []
       children.push({
         title: tag,
@@ -201,36 +185,55 @@ export default {
         [tag]: ''
       }
       this.$set(data, 'children', children)
-      let attrs = data.path.split('.')
-      let xx = attrs.slice(0, attrs.length - 1)
-      let ss = this.renderValue(this.jsonJ, xx)
-      ss[data.key] = {
-        [tag]: ''
+      console.log(data)
+      if (data.path) {
+        let attrs = data.path.split('.')
+        let xx = attrs.slice(0, attrs.length - 1)
+        let ss = this.renderValue(this.jsonJ, xx)
+        ss[data.key] = {
+          [tag]: ''
+        }
+        console.log(ss)
+        this.jsonJ[tag] = ''
+        debugger
+      } else {
+        this.jsonJ[tag] = ''
       }
+      console.log(this.jsonJ)
     },
     remove (root, node, data) {
       const parentKey = root.find(el => el === node).parent
       const parent = root.find(el => el.nodeKey === parentKey).node
       const index = parent.children.indexOf(data)
       parent.children.splice(index, 1)
+
+      data.path = data.path.replace('undefined.', '')
       let attrs = data.path.split('.')
       let xx = attrs.slice(0, attrs.length - 1)
+      console.log(xx)
       let ss = this.renderValue(this.jsonJ, xx)
-      // 父节点包含多节点删除节点，其他父节点置空
-      if (Object.keys(ss).length === 1) {
-        let xx2 = attrs.slice(0, attrs.length - 2)
-        let ss2 = this.renderValue(this.jsonJ, xx2)
-        const key = xx.slice(-1)[0]
-        ss2[key] = {}
+      if (xx[0] === 'parent') {
+        delete this.jsonJ[data.key]
       } else {
-        delete ss[data.key]
+        // 父节点包含多节点删除节点，其他父节点置空
+        if (Object.keys(ss).length === 1) {
+          let xx2 = attrs.slice(0, attrs.length - 2)
+          let ss2 = this.renderValue(this.jsonJ, xx2)
+          const key = xx.slice(-1)[0]
+          ss2[key] = {}
+        } else {
+          delete ss[data.key]
+        }
       }
+      console.log(ss)
+      console.log(this.jsonJ)
     },
-    initJSON () {
-      this.$nextTick(() => {
-        const data = this.formatTreeData(this.jsonJ, 'parent')
-        this.data5[0].children = data
-      })
+    initJSON (val) {
+      // this.$nextTick(() => {
+      this.jsonJ = val
+      const data = this.formatTreeData(val, 'parent')
+      this.data5[0].children = data
+      // })
     },
     isJson (obj) {
       return (

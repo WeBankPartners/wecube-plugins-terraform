@@ -120,5 +120,6 @@
   "tf_memory": "Memory",
   "tf_cpu": "CPU",
   "tf_network": "Network",
-  "tf_json": "JSON"
+  "tf_json": "JSON",
+  "tf_json_edit": "Edit Json"
 }

@@ -1,10 +1,41 @@
 <template>
   <div class=" ">
     <TerraformPageTable :pageConfig="pageConfig"></TerraformPageTable>
-    <TfModalComponent :modelConfig="modelConfig"></TfModalComponent>
-    <Button type="primary" @click="modal1 = true">树转JSON</Button>
-    <Modal v-model="modal1" title="Common Modal dialog box title">
-      <Tree></Tree>
+    <TfModalComponent :modelConfig="modelConfig">
+      <template #outer-config>
+        <div class="marginbottom params-each">
+          <label class="col-md-2 label-name" style="vertical-align: top;">{{ $t('tf_provider_property') }}:</label>
+          <Input disabled v-model="modelConfig.addRow.provider_property" type="textarea" :rows="5" style="width:70%" />
+          <Icon
+            @click="editJson(modelConfig.addRow.provider_property, 'provider_property')"
+            type="ios-create-outline"
+            size="18"
+            class="json-edit"
+          />
+          <label class="required-tip">*</label>
+        </div>
+        <div class="marginbottom params-each">
+          <label class="col-md-2 label-name" style="vertical-align: top;">{{ $t('tf_extend_info') }}:</label>
+          <Input
+            disabled
+            v-model="modelConfig.addRow.extend_info"
+            class="json-edit"
+            type="textarea"
+            :rows="5"
+            style="width:70%"
+          />
+          <Icon
+            @click="editJson(modelConfig.addRow.extend_info, 'extend_info')"
+            type="ios-create-outline"
+            size="18"
+            class="json-edit"
+          />
+          <label class="required-tip">*</label>
+        </div>
+      </template>
+    </TfModalComponent>
+    <Modal :z-index="2000" v-model="showEdit" :title="$t('tf_json_edit')" @on-ok="confirmJsonData">
+      <Tree ref="jsonTree" :jsonData="jsonData"></Tree>
     </Modal>
   </div>
 </template>
@@ -56,7 +87,9 @@ export default {
   name: '',
   data () {
     return {
-      modal1: false,
+      showEdit: false,
+      jsonData: {},
+      editKey: '',
       pageConfig: {
         CRUD: '/terraform/v1/configer/provider',
         researchConfig: {
@@ -137,29 +170,30 @@ export default {
             disabled: false,
             type: 'text'
           },
-          {
-            label: 'tf_provider_property',
-            value: 'provider_property',
-            placeholder: 'tf_json',
-            v_validate: 'required:true',
-            disabled: false,
-            type: 'textarea'
-          },
-          {
-            label: 'tf_extend_info',
-            value: 'extend_info',
-            placeholder: 'tf_json',
-            disabled: false,
-            type: 'textarea'
-          }
+          // {
+          //   label: 'tf_provider_property',
+          //   value: 'provider_property',
+          //   placeholder: 'tf_json',
+          //   v_validate: 'required:true',
+          //   disabled: false,
+          //   type: 'textarea'
+          // },
+          // {
+          //   label: 'tf_extend_info',
+          //   value: 'extend_info',
+          //   placeholder: 'tf_json',
+          //   disabled: false,
+          //   type: 'textarea'
+          // }
+          { name: 'outer-config', type: 'slot' }
         ],
         addRow: {
           // [通用]-保存用户新增、编辑时数据
           name: '',
           secret_key: '',
           secret_id: '',
-          extend_info: '',
-          provider_property: ''
+          extend_info: '{}',
+          provider_property: '{}'
         }
       },
       modelTip: {
@@ -173,6 +207,19 @@ export default {
     this.initTableData()
   },
   methods: {
+    editJson (value = '{}', key) {
+      console.log(value)
+      this.editKey = key
+      this.$refs.jsonTree.initJSON(JSON.parse(value))
+      this.jsonData = value
+      this.showEdit = true
+    },
+    confirmJsonData () {
+      const ss = this.$refs.jsonTree.jsonJ
+      console.log(ss)
+      this.modelConfig.addRow[this.editKey] = JSON.stringify(ss)
+      this.showEdit = false
+    },
     async initTableData () {
       const params = this.$tfCommonUtil.managementUrl(this)
       const { status, data } = await getTableData(params)
@@ -201,10 +248,14 @@ export default {
     async addPost () {
       const params = this.beautyParams(this.modelConfig.addRow)
       const { status, message } = await addTableRow(this.pageConfig.CRUD, params)
+      console.log(status)
       if (status === 'OK') {
         this.initTableData()
         this.$Message.success(message)
         this.$root.JQ('#add_edit_Modal').modal('hide')
+      } else {
+        this.modelConfig.addRow.extend_info = JSON.stringify(this.modelConfig.addRow.extend_info)
+        this.modelConfig.addRow.provider_property = JSON.stringify(this.modelConfig.addRow.provider_property)
       }
     },
     async editF (rowData) {
@@ -225,6 +276,9 @@ export default {
         this.initTableData()
         this.$Message.success(message)
         this.$root.JQ('#add_edit_Modal').modal('hide')
+      } else {
+        this.modelConfig.addRow.extend_info = JSON.stringify(this.modelConfig.addRow.extend_info)
+        this.modelConfig.addRow.provider_property = JSON.stringify(this.modelConfig.addRow.provider_property)
       }
     },
     deleteConfirmModal (rowData) {
@@ -248,4 +302,11 @@ export default {
 }
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.json-edit {
+  position: absolution;
+  vertical-align: top;
+  cursor: pointer;
+  color: #2d8cf0;
+}
+</style>

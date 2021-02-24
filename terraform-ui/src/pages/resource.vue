@@ -242,6 +242,10 @@ export default {
         this.initTableData()
         this.$Message.success(message)
         this.$root.JQ('#add_edit_Modal').modal('hide')
+      } else {
+        this.modelConfig.addRow.extend_info = '{}'
+        this.modelConfig.addRow.resource_property = '{}'
+        this.modelConfig.addRow.output_property = '{}'
       }
     },
     async editF (rowData) {
