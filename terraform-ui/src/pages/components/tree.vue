@@ -34,9 +34,9 @@ export default {
       childrenT: [],
       finalJson: {},
       jsonJ: {
-        region: 'region111',
-        secret_key: 'secret_key11',
-        secret_id: 'access_key11'
+        // region: 'region111',
+        // secret_key: 'secret_key11',
+        // secret_id: 'access_key11'
       }
       // jsonJ: {
       // instance_id: {
@@ -59,17 +59,16 @@ export default {
     }
   },
   mounted () {
-    this.initJSON(this.jsonJ)
+    // this.initJSON(this.jsonJ)
   },
   methods: {
     renderContent (h, { root, node, data }) {
       let formateNodeData = (v, tag) => {
         const res = target({ children: this.data5[0].children }, data.nodeKey)
-        console.log('res:', res)
         data.path = data.path.replace('undefined.', '')
         let attrs = data.path.split('.')
         console.log('path:', data.path)
-        let xx = attrs.slice(1, attrs.length - 1)
+        let xx = attrs.slice(0, attrs.length - 1)
         console.log(xx)
         let ss
         if (xx.length === 0) {
@@ -102,10 +101,10 @@ export default {
         if (tag === 'key') {
           if (xx.length === 0) {
             xx.push(v)
-            data.path = 'parent.' + xx.join('.')
+            data.path = xx.join('.')
           } else {
             xx.push(v)
-            data.path = 'parent.' + xx.join('.')
+            data.path = xx.join('.')
           }
           res[tag] = res['title'] = v
         } else {
@@ -199,20 +198,12 @@ export default {
       if (data.path) {
         let attrs = data.path.split('.')
         let xx = attrs.slice(0, attrs.length - 1)
-        let ss
-        // console.log(this.jsonJ, xx)
-        // console.log(ss)
-        if (xx.length === 1) {
-          ss = this.jsonJ
-        } else {
-          ss = this.renderValue(this.jsonJ, xx)
-        }
+        console.log(xx)
+        let ss = this.renderValue(this.jsonJ, xx)
+        console.log(ss)
         ss[data.key] = {
           [tag]: ''
         }
-        // console.log(ss)
-        // this.jsonJ[tag] = ''
-        // debugger
       } else {
         this.jsonJ[tag] = ''
       }
@@ -226,29 +217,62 @@ export default {
 
       data.path = data.path.replace('undefined.', '')
       let attrs = data.path.split('.')
+
       let xx = attrs.slice(0, attrs.length - 1)
       console.log(xx)
       let ss = this.renderValue(this.jsonJ, xx)
-      if (xx[0] === 'parent') {
-        delete this.jsonJ[data.key]
-      } else {
-        // 父节点包含多节点删除节点，其他父节点置空
-        if (Object.keys(ss).length === 1) {
-          let xx2 = attrs.slice(0, attrs.length - 2)
-          let ss2 = this.renderValue(this.jsonJ, xx2)
-          const key = xx.slice(-1)[0]
-          ss2[key] = {}
-        } else {
-          delete ss[data.key]
-        }
-      }
       console.log(ss)
+      if (Object.keys(ss).length === 1) {
+        let xx2 = attrs.slice(0, attrs.length - 2)
+        let ss2 = this.renderValue(this.jsonJ, xx2)
+        const key = xx.slice(-1)[0]
+        ss2[key] = ''
+      } else {
+        delete ss[data.key]
+      }
+
+      // let xx = attrs.slice(0, attrs.length - 1)
+      // console.log(xx)
+      // let ss
+      // if (xx.length === 0) {
+      //   ss = this.jsonJ
+      //   delete this.jsonJ[data.key]
+      // } else {
+      //   ss = this.renderValue(this.jsonJ, xx)
+      //   console.log(ss)
+      //   if (Object.keys(ss).length === 1) {
+      //     let xx2 = attrs.slice(1, attrs.length - 2)
+      //     let ss2 = this.renderValue(this.jsonJ, xx2)
+      //     const key = xx.slice(-1)[0]
+      //     ss2[key] = ''
+      //   } else {
+      //     delete ss[data.key]
+      //   }
+      // }
+
+      // let xx = attrs.slice(0, attrs.length - 1)
+      // console.log(xx)
+      // let ss = this.renderValue(this.jsonJ, xx)
+      // if (xx[0] === 'parent') {
+      //   delete this.jsonJ[data.key]
+      // } else {
+      //   // 父节点包含多节点删除节点，其他父节点置空
+      //   if (Object.keys(ss).length === 1) {
+      //     let xx2 = attrs.slice(0, attrs.length - 2)
+      //     let ss2 = this.renderValue(this.jsonJ, xx2)
+      //     const key = xx.slice(-1)[0]
+      //     ss2[key] = {}
+      //   } else {
+      //     delete ss[data.key]
+      //   }
+      // }
+      // console.log(ss)
       console.log(this.jsonJ)
     },
     initJSON (val) {
       // this.$nextTick(() => {
-      // this.jsonJ = val
-      const data = this.formatTreeData(this.jsonJ, 'parent')
+      this.jsonJ = val
+      const data = this.formatTreeData(this.jsonJ, '')
       this.data5[0].children = data
       // })
     },
@@ -268,7 +292,7 @@ export default {
           expand: true,
           key: key,
           value: tmp[key],
-          path: path + '.' + key
+          path: path === '' ? key : path + '.' + key
         }
         if (this.isJson(tmp[key])) {
           params.children = this.formatTreeData(tmp[key], key)

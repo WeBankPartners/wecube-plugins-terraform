@@ -5,7 +5,7 @@
       <template #outer-config>
         <div class="marginbottom params-each">
           <label class="col-md-2 label-name" style="vertical-align: top;">{{ $t('tf_provider_property') }}:</label>
-          <Input disabled v-model="modelConfig.addRow.provider_property" type="textarea" :rows="5" style="width:70%" />
+          <Input v-model="modelConfig.addRow.provider_property" type="textarea" :rows="5" style="width:70%" />
           <Icon
             @click="editJson(modelConfig.addRow.provider_property, 'provider_property')"
             type="ios-create-outline"
@@ -17,7 +17,6 @@
         <div class="marginbottom params-each">
           <label class="col-md-2 label-name" style="vertical-align: top;">{{ $t('tf_extend_info') }}:</label>
           <Input
-            disabled
             v-model="modelConfig.addRow.extend_info"
             class="json-edit"
             type="textarea"
@@ -170,21 +169,6 @@ export default {
             disabled: false,
             type: 'text'
           },
-          // {
-          //   label: 'tf_provider_property',
-          //   value: 'provider_property',
-          //   placeholder: 'tf_json',
-          //   v_validate: 'required:true',
-          //   disabled: false,
-          //   type: 'textarea'
-          // },
-          // {
-          //   label: 'tf_extend_info',
-          //   value: 'extend_info',
-          //   placeholder: 'tf_json',
-          //   disabled: false,
-          //   type: 'textarea'
-          // }
           { name: 'outer-config', type: 'slot' }
         ],
         addRow: {
@@ -208,16 +192,14 @@ export default {
   },
   methods: {
     editJson (value = '{}', key) {
-      console.log(value)
       this.editKey = key
       this.$refs.jsonTree.initJSON(JSON.parse(value))
       this.jsonData = value
       this.showEdit = true
     },
     confirmJsonData () {
-      const ss = this.$refs.jsonTree.jsonJ
-      console.log(ss)
-      this.modelConfig.addRow[this.editKey] = JSON.stringify(ss)
+      const jsonJ = this.$refs.jsonTree.jsonJ
+      this.modelConfig.addRow[this.editKey] = JSON.stringify(jsonJ)
       this.showEdit = false
     },
     async initTableData () {
@@ -246,16 +228,12 @@ export default {
       return params
     },
     async addPost () {
-      const params = this.beautyParams(this.modelConfig.addRow)
+      const params = this.beautyParams(JSON.parse(JSON.stringify(this.modelConfig.addRow)))
       const { status, message } = await addTableRow(this.pageConfig.CRUD, params)
-      console.log(status)
       if (status === 'OK') {
         this.initTableData()
         this.$Message.success(message)
         this.$root.JQ('#add_edit_Modal').modal('hide')
-      } else {
-        this.modelConfig.addRow.extend_info = JSON.stringify(this.modelConfig.addRow.extend_info)
-        this.modelConfig.addRow.provider_property = JSON.stringify(this.modelConfig.addRow.provider_property)
       }
     },
     async editF (rowData) {
@@ -276,9 +254,6 @@ export default {
         this.initTableData()
         this.$Message.success(message)
         this.$root.JQ('#add_edit_Modal').modal('hide')
-      } else {
-        this.modelConfig.addRow.extend_info = JSON.stringify(this.modelConfig.addRow.extend_info)
-        this.modelConfig.addRow.provider_property = JSON.stringify(this.modelConfig.addRow.provider_property)
       }
     },
     deleteConfirmModal (rowData) {
