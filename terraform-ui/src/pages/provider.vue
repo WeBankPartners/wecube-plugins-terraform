@@ -29,7 +29,6 @@
             size="18"
             class="json-edit"
           />
-          <label class="required-tip">*</label>
         </div>
       </template>
     </TfModalComponent>
