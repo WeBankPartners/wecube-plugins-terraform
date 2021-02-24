@@ -140,22 +140,6 @@ export default {
             disabled: true,
             type: 'text'
           },
-          {
-            label: 'tf_secret_key',
-            value: 'secret_key',
-            placeholder: 'tips.inputRequired',
-            v_validate: 'required:true|min:2|max:60',
-            disabled: false,
-            type: 'text'
-          },
-          {
-            label: 'tf_secret_id',
-            value: 'secret_id',
-            placeholder: 'tips.inputRequired',
-            v_validate: 'required:true|min:2|max:60',
-            disabled: false,
-            type: 'text'
-          },
           { name: 'outer-config', type: 'slot' }
         ],
         addRow: {
