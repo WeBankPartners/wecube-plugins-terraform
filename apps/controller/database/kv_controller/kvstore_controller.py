@@ -12,6 +12,75 @@ from lib.uuid_util import get_uuid
 from apps.api.database.kvstore.kvstore import KvStoreApi
 
 
+class ResBase(object):
+    @classmethod
+    def allow_key(cls, data):
+        validation.allowed_key(data, ["id", "provider", "secret", "region", "zone",
+                                      "name", "extend_info", "subnet_id",
+                                      "password", "port", "version", "instance_type",
+                                      "vpc_id", "security_group_id", "engine"])
+
+    @classmethod
+    def not_null(cls, data):
+        validation.not_allowed_null(data=data,
+                                    keys=["region", "provider", "zone", "name",
+                                          "version", "subnet_id", "instance_type"]
+                                    )
+
+    @classmethod
+    def validate_keys(cls, data):
+        validation.validate_collector(data=data,
+                                      strings=["id", "name", "region", "zone",
+                                               "provider", "secret", "subnet_id",
+                                               "password", "port", "version",
+                                               "instance_type",
+                                               "vpc_id", "engine"],
+                                      lists=["security_group_id"],
+                                      dicts=["extend_info"])
+
+    @classmethod
+    def create(cls, resource, data, **kwargs):
+        rid = data.pop("id", None) or get_uuid()
+        secret = data.pop("secret", None)
+        region = data.pop("region", None)
+        zone = data.pop("zone", None)
+        provider = data.pop("provider", None)
+        name = data.pop("name", None)
+        subnet_id = data.pop("subnet_id", None)
+        port = data.pop("port", None)
+        password = data.pop("password", None)
+        version = data.pop("version", None)
+        instance_type = data.pop("instance_type", None)
+        engine = data.pop("engine", None)
+        vpc_id = data.pop("vpc_id", None)
+        security_group_id = validation.validate_list("security_group_id", data.pop("security_group_id", None))
+
+        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
+        data.update(extend_info)
+
+        d = dict(version=version, port=port,
+                 password=password, engine=engine,
+                 instance_type=instance_type,
+                 vpc_id=vpc_id,
+                 security_group_id=security_group_id,
+                 subnet_id=subnet_id)
+
+        create_data = {"name": name}
+        create_data.update(d)
+        _, result = resource.create(rid=rid, provider=provider,
+                                    region=region, zone=zone,
+                                    secret=secret,
+                                    create_data=create_data,
+                                    extend_info=data)
+
+        # _password = base64.b64decode(result.get("password")) if result.get("password") else None
+        res = {"id": rid, "ipaddress": result.get("ipaddress"),
+               "port": result.get("port"),
+               "resource_id": str(result.get("resource_id"))[:64]}
+
+        return res, result
+
+
 class KvStoreController(BackendController):
     allow_methods = ('GET', 'POST')
     resource = KvStoreApi()
@@ -37,60 +106,13 @@ class KvStoreController(BackendController):
                                                   pagesize=pagesize, orderby=orderby)
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["id", "name", "provider_id", "subnet_id",
-                                      "password", "port", "version", "instance_type",
-                                      "vpc_id", "security_group_id", "engine",
-                                      "zone", "region", "extend_info"])
-        validation.not_allowed_null(data=data,
-                                    keys=["region", "provider_id", "zone", "name",
-                                          "version", "subnet_id", "instance_type"]
-                                    )
-
-        validation.validate_string("id", data.get("id"))
-        validation.validate_string("name", data["name"])
-        validation.validate_string("region", data["region"])
-        validation.validate_string("zone", data.get("zone"))
-        validation.validate_string("engine", data.get("engine"))
-        validation.validate_string("subnet_id", data["subnet_id"])
-        validation.validate_string("version", data["version"])
-        validation.validate_string("password", data.get("password"))
-        validation.validate_string("instance_type", data.get("instance_type"))
-        validation.validate_list("security_group_id", data.get("security_group_id"))
-        validation.validate_string("vpc_id", data.get("vpc_id"))
-        validation.validate_string("provider_id", data.get("provider_id"))
-        validation.validate_dict("extend_info", data.get("extend_info"))
+        ResBase.allow_key(data)
+        ResBase.not_null(data)
+        ResBase.validate_keys(data)
 
     def create(self, request, data, **kwargs):
-        rid = data.pop("id", None) or get_uuid()
-        name = data.pop("name", None)
-        zone = data.pop("zone", None)
-        region = data.pop("region", None)
-        subnet_id = data.pop("subnet_id", None)
-        port = data.pop("port", None)
-        password = data.pop("password", None)
-        version = data.pop("version", None)
-        instance_type = data.pop("instance_type", None)
-        provider_id = data.pop("provider_id", None)
-        engine = data.pop("engine", None)
-        vpc_id = data.pop("vpc_id", None)
-        security_group_id = validation.validate_list("security_group_id", data.pop("security_group_id", None))
-        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
-
-        data.update(extend_info)
-
-        _, result = self.resource.create(rid, name=name, provider_id=provider_id,
-                                         version=version, port=port,
-                                         password=password, engine=engine,
-                                         instance_type=instance_type,
-                                         vpc_id=vpc_id,
-                                         security_group_id=security_group_id,
-                                         subnet_id=subnet_id, zone=zone,
-                                         region=region, extend_info=data)
-
-        _password = base64.b64decode(result.get("password")) if result.get("password") else None
-        return 1, {"id": rid, "ipaddress": result.get("ipaddress"),
-                   "port": result.get("port"),
-                   "resource_id": str(result.get("resource_id"))[:64]}
+        res, _ = ResBase.create(resource=self.resource, data=data)
+        return 1, res
 
 
 class KvStoreIdController(BackendIdController):
@@ -120,59 +142,15 @@ class KvStoreAddController(BaseController):
     resource = KvStoreApi()
 
     def before_handler(self, request, data, **kwargs):
-        validation.not_allowed_null(data=data,
-                                    keys=["region", "provider_id", "zone", "name",
-                                          "version", "subnet_id", "instance_type"]
-                                    )
-
-        validation.validate_string("id", data.get("id"))
-        validation.validate_string("name", data["name"])
-        validation.validate_string("region", data["region"])
-        validation.validate_string("zone", data.get("zone"))
-        validation.validate_string("engine", data.get("engine"))
-        validation.validate_string("subnet_id", data["subnet_id"])
-        validation.validate_string("version", data["version"])
-        validation.validate_string("password", data.get("password"))
-        validation.validate_string("instance_type", data.get("instance_type"))
-        validation.validate_list("security_group_id", data.get("security_group_id"))
-        validation.validate_string("vpc_id", data.get("vpc_id"))
-        validation.validate_string("provider_id", data.get("provider_id"))
-        validation.validate_dict("extend_info", data.get("extend_info"))
+        ResBase.not_null(data)
+        ResBase.validate_keys(data)
 
     def response_templete(self, data):
         return {}
 
     def main_response(self, request, data, **kwargs):
-        rid = data.pop("id", None) or get_uuid()
-        name = data.pop("name", None)
-        zone = data.pop("zone", None)
-        region = data.pop("region", None)
-        subnet_id = data.pop("subnet_id", None)
-        port = data.pop("port", None)
-        password = data.pop("password", None)
-        version = data.pop("version", None)
-        instance_type = data.pop("instance_type", None)
-        provider_id = data.pop("provider_id", None)
-        engine = data.pop("engine", None)
-        vpc_id = data.pop("vpc_id", None)
-        security_group_id = validation.validate_list("security_group_id", data.pop("security_group_id", None))
-        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
-
-        data.update(extend_info)
-
-        _, result = self.resource.create(rid, name=name, provider_id=provider_id,
-                                         version=version, port=port,
-                                         password=password, engine=engine,
-                                         instance_type=instance_type,
-                                         vpc_id=vpc_id,
-                                         security_group_id=security_group_id,
-                                         subnet_id=subnet_id, zone=zone,
-                                         region=region, extend_info=data)
-
-        _password = base64.b64decode(result.get("password")) if result.get("password") else None
-        return {"id": rid, "ipaddress": result.get("ipaddress"),
-                "port": result.get("port"),
-                "resource_id": str(result.get("resource_id"))[:64]}
+        res, _ = ResBase.create(resource=self.resource, data=data)
+        return res
 
 
 class KvStoreDeleteController(BaseController):

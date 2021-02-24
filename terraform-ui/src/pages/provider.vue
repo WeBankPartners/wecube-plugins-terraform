@@ -49,18 +49,6 @@ let tableEle = [
     display: true
   },
   {
-    title: 'tf_secret_id',
-    value: 'secret_id', //
-    style: { width: '150px' },
-    display: true
-  },
-  {
-    title: 'tf_secret_key',
-    value: 'secret_key', //
-    style: { width: '150px' },
-    display: true
-  },
-  {
     title: 'tf_provider_property',
     value: 'provider_property', //
     render: item => {

@@ -10,6 +10,58 @@ from lib.uuid_util import get_uuid
 from apps.api.storage.bucket_object import BucketObjectApi
 
 
+class ResBase(object):
+    @classmethod
+    def allow_key(cls, data):
+        validation.allowed_key(data, ["id", "provider", "secret", "region", "zone",
+                                      "name", "extend_info", "bucket_id",
+                                      "key", "content", "source"])
+
+    @classmethod
+    def not_null(cls, data):
+        validation.not_allowed_null(data=data,
+                                    keys=["region", "provider", "bucket_id"]
+                                    )
+
+    @classmethod
+    def validate_keys(cls, data):
+        validation.validate_collector(data=data,
+                                      strings=["id", "name", "region", "zone",
+                                               "provider", "secret", "bucket_id",
+                                               "key", "content", "source"],
+                                      dicts=["extend_info"])
+
+    @classmethod
+    def create(cls, resource, data, **kwargs):
+        rid = data.pop("id", None) or get_uuid()
+        secret = data.pop("secret", None)
+        region = data.pop("region", None)
+        zone = data.pop("zone", None)
+        provider = data.pop("provider", None)
+        name = data.pop("name", None)
+        bucket_id = data.pop("bucket_id", None)
+        key = data.pop("appid", None)
+        content = data.pop("content", None)
+        source = data.pop("source", None)
+
+        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
+        data.update(extend_info)
+
+        if source is None and content is None:
+            raise ValueError("source 和 content 不能同时为null")
+
+        create_data = {"name": name, "bucket_id": bucket_id, "key": key,
+                       "content": content, "source": source}
+        _, result = resource.create(rid=rid, provider=provider,
+                                    region=region, zone=zone,
+                                    secret=secret,
+                                    create_data=create_data,
+                                    extend_info=data)
+
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
+        return res, result
+
+
 class BucketObjectController(BackendController):
     allow_methods = ('GET', 'POST')
     resource = BucketObjectApi()
@@ -32,46 +84,12 @@ class BucketObjectController(BackendController):
                                                   pagesize=pagesize, orderby=orderby)
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["id", "name", "provider_id", "bucket_id",
-                                      "key", "content", "source",
-                                      "zone", "region", "extend_info"])
-        validation.not_allowed_null(data=data,
-                                    keys=["region", "provider_id", "bucket_id"]
-                                    )
-
-        validation.validate_string("id", data.get("id"))
-        validation.validate_string("name", data["name"])
-        validation.validate_string("region", data["region"])
-        validation.validate_string("zone", data.get("zone"))
-        validation.validate_string("appid", data.get("appid"))
-        validation.validate_string("acl", data.get("acl"))
-        validation.validate_string("content", data.get("content"))
-        validation.validate_string("source", data.get("source"))
-        validation.validate_string("provider_id", data.get("provider_id"))
-        validation.validate_dict("extend_info", data.get("extend_info"))
+        ResBase.allow_key(data)
+        ResBase.not_null(data)
+        ResBase.validate_keys(data)
 
     def create(self, request, data, **kwargs):
-        rid = data.pop("id", None) or get_uuid()
-        name = data.pop("name", None)
-        zone = data.pop("zone", None)
-        region = data.pop("region", None)
-        bucket_id = data.pop("bucket_id", None)
-        key = data.pop("appid", None)
-        content = data.pop("content", None)
-        source = data.pop("source", None)
-        provider_id = data.pop("provider_id", None)
-        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
-
-        data.update(extend_info)
-
-        if source is None and content is None:
-            raise ValueError("source 和 content 不能同时为null")
-
-        _, result = self.resource.create(rid, name, provider_id, bucket_id,
-                                      key, content, source,
-                                      zone, region, extend_info=data)
-
-        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
+        res, _ = ResBase.create(resource=self.resource, data=data)
         return 1, res
 
 
@@ -101,46 +119,14 @@ class BucketObjectAddController(BaseController):
     resource = BucketObjectApi()
 
     def before_handler(self, request, data, **kwargs):
-        validation.not_allowed_null(data=data,
-                                    keys=["region", "provider_id", "bucket_id"]
-                                    )
-
-        validation.validate_string("id", data.get("id"))
-        validation.validate_string("name", data["name"])
-        validation.validate_string("region", data["region"])
-        validation.validate_string("zone", data.get("zone"))
-        validation.validate_string("appid", data.get("appid"))
-        validation.validate_string("acl", data.get("acl"))
-        validation.validate_string("content", data.get("content"))
-        validation.validate_string("source", data.get("source"))
-        validation.validate_string("provider_id", data.get("provider_id"))
-        validation.validate_dict("extend_info", data.get("extend_info"))
+        ResBase.not_null(data)
+        ResBase.validate_keys(data)
 
     def response_templete(self, data):
         return {}
 
     def main_response(self, request, data, **kwargs):
-        rid = data.pop("id", None) or get_uuid()
-        name = data.pop("name", None)
-        zone = data.pop("zone", None)
-        region = data.pop("region", None)
-        bucket_id = data.pop("bucket_id", None)
-        key = data.pop("appid", None)
-        content = data.pop("content", None)
-        source = data.pop("source", None)
-        provider_id = data.pop("provider_id", None)
-        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
-
-        data.update(extend_info)
-
-        if source is None and content is None:
-            raise ValueError("source 和 content 不能同时为null")
-
-        _, result = self.resource.create(rid, name, provider_id, bucket_id,
-                                      key, content, source,
-                                      zone, region, extend_info=data)
-
-        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
+        res, _ = ResBase.create(resource=self.resource, data=data)
         return res
 
 

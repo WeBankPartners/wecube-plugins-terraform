@@ -10,6 +10,62 @@ from lib.uuid_util import get_uuid
 from apps.api.loadbalance.listener import LBListenerApi
 
 
+class ResBase(object):
+    @classmethod
+    def allow_key(cls, data):
+        validation.allowed_key(data, ["id", "provider", "secret", "region", "zone",
+                                      "name", "extend_info", "lb_id",
+                                      "port", "protocol", "backend_port",
+                                      "health_check", "health_check_uri", ])
+
+    @classmethod
+    def not_null(cls, data):
+        validation.not_allowed_null(data=data,
+                                    keys=["region", "provider", "lb_id", "port"]
+                                    )
+
+    @classmethod
+    def validate_keys(cls, data):
+        validation.validate_port(data.get("port"))
+        validation.validate_port(data.get("backend_port"), permit_null=True)
+        validation.validate_collector(data=data,
+                                      strings=["id", "name", "region", "zone",
+                                               "provider", "secret", "lb_id", "protocol",
+                                               "health_check", "health_check_uri"],
+                                      dicts=["extend_info"])
+
+    @classmethod
+    def create(cls, resource, data, **kwargs):
+        rid = data.pop("id", None) or get_uuid()
+        secret = data.pop("secret", None)
+        region = data.pop("region", None)
+        zone = data.pop("zone", None)
+        provider = data.pop("provider", None)
+        name = data.pop("name", None)
+        lb_id = data.pop("lb_id", None)
+        port = int(data.pop("port"))
+        protocol = data.pop("protocol", None)
+        backend_port = validation.validate_port(data.pop("backend_port", None), permit_null=True)
+        health_check = data.pop("health_check", None)
+        health_check_uri = data.pop("health_check_uri", None)
+
+        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
+        data.update(extend_info)
+
+        create_data = {"name": name, "lb_id": lb_id, "port": port,
+                       "protocol": protocol, "backend_port": backend_port,
+                       "health_check": health_check,
+                       "health_check_uri": health_check_uri}
+        _, result = resource.create(rid=rid, provider=provider,
+                                    region=region, zone=zone,
+                                    secret=secret,
+                                    create_data=create_data,
+                                    extend_info=data)
+
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
+        return res, result
+
+
 class LBListenerController(BackendController):
     allow_methods = ('GET', 'POST')
     resource = LBListenerApi()
@@ -32,48 +88,12 @@ class LBListenerController(BackendController):
                                                   pagesize=pagesize, orderby=orderby)
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["id", "name", "provider_id", "lb_id",
-                                      "port", "protocol", "backend_port",
-                                      "health_check", "health_check_uri",
-                                      "zone", "region", "extend_info"])
-        validation.not_allowed_null(data=data,
-                                    keys=["region", "provider_id", "lb_id", "port"]
-                                    )
-
-        validation.validate_string("id", data.get("id"))
-        validation.validate_string("name", data["name"])
-        validation.validate_string("region", data["region"])
-        validation.validate_string("zone", data.get("zone"))
-        validation.validate_string("lb_id", data["lb_id"])
-        validation.validate_port(data.get("port"))
-        validation.validate_string("protocol", data.get("protocol"))
-        validation.validate_port(data.get("backend_port"), permit_null=True)
-        validation.validate_string("health_check", data.get("health_check"))
-        validation.validate_string("health_check_uri", data.get("health_check_uri"))
-        validation.validate_string("provider_id", data.get("provider_id"))
-        validation.validate_dict("extend_info", data.get("extend_info"))
+        ResBase.allow_key(data)
+        ResBase.not_null(data)
+        ResBase.validate_keys(data)
 
     def create(self, request, data, **kwargs):
-        rid = data.pop("id", None) or get_uuid()
-        name = data.pop("name", None)
-        zone = data.pop("zone", None)
-        region = data.pop("region", None)
-        lb_id = data.pop("lb_id", None)
-        port = int(data.pop("port"))
-        protocol = data.pop("protocol", None)
-        backend_port = validation.validate_port(data.pop("backend_port", None), permit_null=True)
-        health_check = data.pop("health_check", None)
-        health_check_uri = data.pop("health_check_uri", None)
-        provider_id = data.pop("provider_id", None)
-        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
-
-        data.update(extend_info)
-        _, result = self.resource.create(rid, name, provider_id,
-                                         lb_id, port, protocol, backend_port,
-                                         health_check, health_check_uri,
-                                         zone, region, extend_info=data)
-
-        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
+        res, _ = ResBase.create(resource=self.resource, data=data)
         return 1, res
 
 
@@ -103,47 +123,14 @@ class LBListenerAddController(BaseController):
     resource = LBListenerApi()
 
     def before_handler(self, request, data, **kwargs):
-        validation.not_allowed_null(data=data,
-                                    keys=["region", "provider_id", "lb_id", "port"]
-                                    )
-
-        validation.validate_string("id", data.get("id"))
-        validation.validate_string("name", data["name"])
-        validation.validate_string("region", data["region"])
-        validation.validate_string("zone", data.get("zone"))
-        validation.validate_string("lb_id", data["lb_id"])
-        validation.validate_port(data.get("port"))
-        validation.validate_string("protocol", data.get("protocol"))
-        validation.validate_port(data.get("backend_port"), permit_null=True)
-        validation.validate_string("health_check", data.get("health_check"))
-        validation.validate_string("health_check_uri", data.get("health_check_uri"))
-        validation.validate_string("provider_id", data.get("provider_id"))
-        validation.validate_dict("extend_info", data.get("extend_info"))
+        ResBase.not_null(data)
+        ResBase.validate_keys(data)
 
     def response_templete(self, data):
         return {}
 
     def main_response(self, request, data, **kwargs):
-        rid = data.pop("id", None) or get_uuid()
-        name = data.pop("name", None)
-        zone = data.pop("zone", None)
-        region = data.pop("region", None)
-        lb_id = data.pop("lb_id", None)
-        port = int(data.pop("port"))
-        protocol = data.pop("protocol", None)
-        backend_port = validation.validate_port(data.get("backend_port"), permit_null=True)
-        health_check = data.pop("health_check", None)
-        health_check_uri = data.pop("health_check_uri", None)
-        provider_id = data.pop("provider_id", None)
-        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
-
-        data.update(extend_info)
-        _, result = self.resource.create(rid, name, provider_id,
-                                         lb_id, port, protocol, backend_port,
-                                         health_check, health_check_uri,
-                                         zone, region, extend_info=data)
-
-        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
+        res, _ = ResBase.create(resource=self.resource, data=data)
         return res
 
 

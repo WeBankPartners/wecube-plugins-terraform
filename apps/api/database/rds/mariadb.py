@@ -3,7 +3,7 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 from apps.background.resource.database.rds import MariaDBObject
-from apps.api.database.rds import RdsDBApi
+from apps.api.database.rds.rds import RdsDBApi
 
 
 class MariaDBApi(RdsDBApi):

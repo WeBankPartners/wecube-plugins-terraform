@@ -1,5 +1,6 @@
 import terraformIndex from '@/pages/terraform-index'
 import keyconfig from '@/pages/keyconfig'
+import secret from '@/pages/secret'
 import resource from '@/pages/resource'
 import provider from '@/pages/provider'
 import instanceType from '@/pages/instance-type'
@@ -19,6 +20,13 @@ const router = [
         title: '策略',
         meta: {},
         component: keyconfig
+      },
+      {
+        path: 'secret',
+        name: 'secret',
+        title: '云认证',
+        meta: {},
+        component: secret
       },
       {
         path: 'resource',

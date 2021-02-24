@@ -43,7 +43,8 @@
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">cidr</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
@@ -71,7 +72,8 @@
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">vpc_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
@@ -101,7 +103,8 @@
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">vpc_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
@@ -130,7 +133,8 @@
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">vpc_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">destination</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">route_table_id</parameter>
@@ -163,7 +167,8 @@
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">vpc_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
@@ -193,7 +198,8 @@
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">security_group_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
@@ -228,7 +234,8 @@
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">vpc_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">subnet_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">eip</parameter>
@@ -260,7 +267,8 @@
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
@@ -287,7 +295,8 @@
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">eip_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">instance_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">private_ip</parameter>
@@ -318,7 +327,8 @@
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
@@ -344,7 +354,8 @@
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">ccn_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">instance_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">instance_type</parameter>
@@ -374,7 +385,8 @@
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">ccn_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">from_region</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">dest_region</parameter>
@@ -406,7 +418,8 @@
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">type</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">size</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">zone</parameter>
@@ -436,7 +449,8 @@
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">acl</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">appid</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
@@ -467,7 +481,8 @@
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">subnet_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">hostname</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">image</parameter>
@@ -553,7 +568,8 @@
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">ipaddress</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">subnet_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">vpc_id</parameter>
@@ -584,7 +600,8 @@
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">network_interface_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">instance_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">zone</parameter>
@@ -614,7 +631,8 @@
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">subnet_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">network_type</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">vpc_id</parameter>
@@ -644,7 +662,8 @@
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">lb_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">port</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">protocol</parameter>
@@ -676,7 +695,8 @@
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">lb_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">listener_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">backend_servers</parameter>
@@ -721,7 +741,8 @@
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">subnet_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">user</parameter>
 					<parameter datatype="string" mappingType="entity" required="N" sensitiveData="Y">password</parameter>
@@ -763,7 +784,8 @@
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">mysql_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
@@ -790,7 +812,8 @@
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">mysql_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y" sensitiveData="Y">password</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
@@ -817,7 +840,8 @@
 			<interface action="create_account_privilege" path="/terraform/v1/database/backend/mysql_privilege/create" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">mysql_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">username</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">database</parameter>
@@ -847,7 +871,8 @@
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">provider_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">mysql_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">backup_model</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">backup_time</parameter>

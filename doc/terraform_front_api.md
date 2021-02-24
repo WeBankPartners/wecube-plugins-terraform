@@ -860,3 +860,197 @@ url:  /terraform/v1/vm/instance_type/{id}
     }
 }
 ```
+
+---
+
+---
+
+
+#### secret (云厂商认证信息)
+
+##### list:
+
+url: /terraform/v1/configer/secret
+
+参数： "id", "name", "display_name", "region", 
+
+输出：
+
+```
+{
+    "status":"OK",
+    "message":"OK",
+    "code":0,
+    "data":{
+        "count":1,
+        "data":[
+            {
+                "secret_info":"{cipher_a}oc+hXvxxxxxxxxxxxxx",
+                "display_name":"alicloud_secret",
+                "name":"alicloud_secret",
+                "deleted_time":null,
+                "region":null,
+                "enabled":1,
+                "updated_time":"2021-02-22 16:47:45",
+                "extend_info":{
+
+                },
+                "provider":"alicloud",
+                "created_time":"2021-02-22 16:47:45",
+                "is_deleted":0,
+                "id":"443318b72e91438896fc5b901901c285"
+            }
+        ]
+    }
+}
+```
+
+
+
+##### create:
+
+url: /terraform/v1/configer/secret
+
+字段：
+
+
+
+输入：
+
+
+```
+name         string  必填
+display_name  string  选填
+provider    string  云厂商  必填
+secret_info    json  认证信息 必填
+region        string  选填
+extend_info    json
+
+
+
+示例：
+{
+"name": "xxxxx", 
+"display_name": "tencenssst", 
+"provider": "tencentcloud",
+"secret_info": {"secret_id": "xxxxxx", "secret_key": "xxxx"}, 
+"region": null, 
+"extend_info": {}
+}
+
+```
+
+
+
+输出：
+
+```
+{
+    "status":"OK",
+    "message":"OK",
+    "code":0,
+    "data":{
+        "count":1,
+        "data":"8a772999c34e40faa503b59a026971aa"
+    }
+}
+```
+
+
+
+##### 详情:
+
+url: /terraform/v1/configer/secret/{id}
+
+参数： "id", 
+
+输出：
+
+```
+{
+    "status":"OK",
+    "message":"OK",
+    "code":0,
+    "data":{
+        "secret_info":"{cipher_a}Rxxxxxxxxxxxx",
+        "display_name":"tencenssst",
+        "name":"xxxxx",
+        "deleted_time":null,
+        "region":null,
+        "enabled":1,
+        "updated_time":"2021-02-23 11:23:08",
+        "extend_info":{
+
+        },
+        "provider":"tencentcloud",
+        "created_time":"2021-02-23 11:23:08",
+        "is_deleted":0,
+        "id":"8a772999c34e40faa503b59a026971aa"
+    }
+}
+```
+
+
+##### update:
+
+url: /terraform/v1/configer/secret/{id}
+
+参数： 
+name         string  
+display_name  string 
+provider    string  
+secret_info    json 
+region        string 
+extend_info    json
+
+输出：
+
+```
+{
+    "status":"OK",
+    "message":"OK",
+    "code":0,
+    "data":{
+        "count":1,
+        "data":{
+            "secret_info":"{cipher_a}+vvvvvv",
+            "display_name":"tencenssst",
+            "name":"xxxxx",
+            "deleted_time":null,
+            "region":null,
+            "enabled":1,
+            "updated_time":"2021-02-23 11:27:04",
+            "extend_info":{
+
+            },
+            "provider":"tencentcloud",
+            "created_time":"2021-02-23 11:23:08",
+            "is_deleted":0,
+            "id":"8a772999c34e40faa503b59a026971aa"
+        }
+    }
+}
+```
+
+
+##### delete:
+
+url: /terraform/v1/configer/secret/{id}
+
+参数： id
+
+
+输出：
+
+```
+{
+    "status":"OK",
+    "message":"OK",
+    "code":0,
+    "data":{
+        "data":1
+    }
+}
+```
+
+-----

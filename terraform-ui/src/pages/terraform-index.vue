@@ -20,7 +20,8 @@ export default {
       tabs: [
         { label: 'tf_provider', path: '/terraformIndex/provider' },
         { label: 'tf_resource', path: '/terraformIndex/resource' },
-        { label: 'tf_keyconfig', path: '/terraformIndex/keyconfig' }
+        { label: 'tf_keyconfig', path: '/terraformIndex/keyconfig' },
+        { label: 'tf_secret', path: '/terraformIndex/secret' }
         // { label: 'tf_instance_type', path: '/terraformIndex/instanceType' }
       ]
     }

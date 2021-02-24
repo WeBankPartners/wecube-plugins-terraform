@@ -92,50 +92,22 @@ class BucketObjectApi(ApiBase):
             logger.info(format_json_dumps(_info))
         return _info
 
-    def create(self, rid, name, provider_id, bucket_id,
-               key, content, source,
-               zone, region, extend_info, **kwargs):
+    def generate_create_data(self, zone, create_data, **kwargs):
+        r_create_data = {"bucket_id": create_data.get("bucket_id")}
 
-        '''
-
-        :param rid:
-        :param name:
-        :param provider_id:
-        :param type:
-        :param size:
-        :param zone:
-        :param region:
-        :param extend_info:
-        :return:
-        '''
-
-        _exists_data = self.create_resource_exists(rid)
-        if _exists_data:
-            return 1, _exists_data
-
-        extend_info = extend_info or {}
-        create_data = {"key": key}
-        _r_create_data = {"bucket_id": bucket_id}
-
+        content = create_data.get("content")
+        source = create_data.get("source")
+        x_create_data = {"key": create_data.get("key")}
         if content:
-            create_data["context"] = content
+            x_create_data["context"] = content
         if source:
-            create_data["source"] = source
+            x_create_data["source"] = source
 
-        provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
-        _relations_id_dict = self.before_keys_checks(provider_object["name"], _r_create_data)
+        return x_create_data, r_create_data
 
-        create_data.update(_relations_id_dict)
-
-        count, res = self.run_create(rid, provider_id, region, zone=zone,
-                                     provider_object=provider_object,
-                                     provider_info=provider_info,
-                                     owner_id=None,
-                                     relation_id=None,
-                                     create_data=create_data,
-                                     extend_info=extend_info, **kwargs)
-
-        return count, res
+    def generate_owner_data(self, create_data, **kwargs):
+        owner_id = None
+        return owner_id, None
 
     def destory(self, rid):
         '''

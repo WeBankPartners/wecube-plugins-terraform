@@ -40,45 +40,14 @@ class MysqlBackupApi(ApiBase):
         logger.info("before_keys_checks add info: %s" % (format_json_dumps(ext_info)))
         return ext_info
 
-    def create(self, rid, name, provider_id,
-               mysql_id, backup_model, backup_time,
-               zone, region, extend_info, **kwargs):
+    def generate_create_data(self, zone, create_data, **kwargs):
+        r_create_data = {"mysql_id": create_data.get("mysql_id")}
 
-        '''
+        x_create_data = {"backup_model": create_data.get("backup_model"),
+                         "backup_time": create_data.get("backup_time")}
 
-        :param rid:
-        :param name:
-        :param provider_id:
-        :param mysql_id:
-        :param backup_model:
-        :param backup_time:
-        :param zone:
-        :param region:
-        :param extend_info:
-        :param kwargs:
-        :return:
-        '''
+        return x_create_data, r_create_data
 
-        _exists_data = self.create_resource_exists(rid)
-        if _exists_data:
-            return 1, _exists_data
-
-        extend_info = extend_info or {}
-
-        create_data = {"backup_model": backup_model, "backup_time": backup_time}
-        _r_create_data = {"mysql_id": mysql_id}
-
-        provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
-        _relations_id_dict = self.before_keys_checks(provider_object["name"], _r_create_data)
-
-        create_data.update(_relations_id_dict)
-
-        count, res = self.run_create(rid, provider_id, region, zone=zone,
-                                     provider_object=provider_object,
-                                     provider_info=provider_info,
-                                     owner_id=mysql_id,
-                                     relation_id=None,
-                                     create_data=create_data,
-                                     extend_info=extend_info, **kwargs)
-
-        return count, res
+    def generate_owner_data(self, create_data, **kwargs):
+        owner_id = create_data.get("mysql_id")
+        return owner_id, None

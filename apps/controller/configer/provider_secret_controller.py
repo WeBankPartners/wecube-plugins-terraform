@@ -19,7 +19,7 @@ class ProviderSecretController(BackendController):
     resource = ProviderSecretObject()
 
     def list(self, request, data, orderby=None, page=None, pagesize=None, **kwargs):
-        validation.allowed_key(data.keys(), ["id", "name", "display_name", "region", "enabled"])
+        validation.allowed_key(data.keys(), ["id", "name", "display_name", "region", "provider", "enabled"])
         return self.resource.list(filters=data, page=page,
                                   pagesize=pagesize, orderby=orderby)
 
@@ -34,7 +34,7 @@ class ProviderSecretController(BackendController):
         validation.validate_string("name", data["name"])
         validation.validate_string("display_name", data.get("display_name"))
         validation.validate_string("provider", data.get("provider"))
-        validation.validate_dict("secret_info", data.get("secret_info"))
+        validation.validate_string("secret_info", data.get("secret_info"))
         validation.validate_dict("extend_info", data.get("extend_info"))
         validation.validate_string("region", data.get("region"))
 
@@ -54,7 +54,8 @@ class ProviderSecretController(BackendController):
         validate_column_line(name)
 
         extend_info = validation.validate_dict("extend_info", data.get("extend_info")) or {}
-        secret_info = validation.validate_dict("secret_info", data.get("secret_info"))
+        secret_info = data.get("secret_info") #validation.validate_dict("secret_info", data.get("secret_info"))
+
 
         if not secret_info:
             raise ValueError("secret 认证信息不能为空,数据格式为JSON")
@@ -67,7 +68,7 @@ class ProviderSecretController(BackendController):
                        "display_name": data.get("display_name"),
                        "region": data.get("region"),
                        "extend_info": json.dumps(extend_info),
-                       "secret_info": json.dumps(secret_info)
+                       "secret_info": secret_info
                        }
 
         return self.resource.create(create_data)
@@ -106,7 +107,7 @@ class ProviderSecretIdController(BackendIdController):
         validation.validate_string("name", data["name"])
         validation.validate_string("display_name", data.get("display_name"))
         validation.validate_string("provider", data.get("provider"))
-        validation.validate_dict("secret_info", data.get("secret_info"))
+        validation.validate_string("secret_info", data.get("secret_info"))
         validation.validate_dict("extend_info", data.get("extend_info"))
         validation.validate_string("region", data.get("region"))
 
@@ -118,8 +119,8 @@ class ProviderSecretIdController(BackendIdController):
             data["extend_info"] = json.dumps(extend_info)
 
         if data.get("secret_info") is not None:
-            provider_property = validation.validate_dict("secret_info", data.get("secret_info")) or {}
-            data["provider_property"] = json.dumps(provider_property)
+            provider_property = data.get("secret_info") #validation.validate_dict("secret_info", data.get("secret_info")) or {}
+            data["secret_info"] = provider_property
 
         return self.resource.update(rid, data)
 

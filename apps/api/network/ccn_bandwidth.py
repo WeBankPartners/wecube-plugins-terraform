@@ -11,6 +11,7 @@ from apps.api.configer.provider import ProviderApi
 from apps.common.convert_keys import define_relations_key
 from apps.background.resource.configr.resource import ResourceObject
 from apps.background.resource.resource_base import CrsObject
+from apps.api.conductor.provider import ProviderConductor
 
 
 class CCNBandwidthApi(ApiBase):
@@ -46,17 +47,30 @@ class CCNBandwidthApi(ApiBase):
     def region_name(self, provider, region):
         return ProviderApi().region_info(provider, region)
 
-    def create(self, rid, name, provider_id, ccn_id,
-               from_region, dest_region, bandwidth,
-               region, zone, extend_info, **kwargs):
+    def generate_create_data(self, zone, create_data, **kwargs):
+        r_create_data = {"ccn_id": create_data.get("ccn_id")}
+        create_data = {
+            "bandwidth": create_data.get("bandwidth"),
+            "ccn_id": create_data.get("ccn_id")
+        }
+
+        return create_data, r_create_data
+
+    def generate_owner_data(self, create_data, **kwargs):
+        owner_id = None
+        return owner_id, None
+
+    def create(self, rid, provider, region, zone, secret,
+               create_data, extend_info, **kwargs):
         '''
 
         :param rid:
-        :param name:
-        :param provider_id:
+        :param provider:
         :param region:
-        :param zone:
+        :param secret:
+        :param create_data:
         :param extend_info:
+        :param kwargs:
         :return:
         '''
 
@@ -65,26 +79,27 @@ class CCNBandwidthApi(ApiBase):
             return 1, _exists_data
 
         extend_info = extend_info or {}
-        create_data = {"bandwidth": bandwidth, "ccn_id": ccn_id}
-        _r_create_data = {"ccn_id": ccn_id}
+        provider_object, provider_info = ProviderConductor().conductor_provider_info(provider, region, secret)
 
-        provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
+        zone = ProviderConductor().zone_info(provider=provider_object["name"], zone=zone)
+        x_create_data, r_create_data = self.generate_create_data(zone, create_data)
+        _relations_id_dict = self.before_keys_checks(provider_object["name"], r_create_data)
 
+        from_region = create_data.get("from_region")
+        dest_region = create_data.get("dest_region")
         if from_region:
-            create_data["from_region"] = self.region_name(provider_object["name"], from_region)
+            x_create_data["from_region"] = self.region_name(provider_object["name"], from_region)
         if dest_region:
-            create_data["dest_region"] = self.region_name(provider_object["name"], dest_region)
+            x_create_data["dest_region"] = self.region_name(provider_object["name"], dest_region)
 
-        _relations_id_dict = self.before_keys_checks(provider_object["name"], _r_create_data)
+        x_create_data.update(_relations_id_dict)
 
-        create_data.update(_relations_id_dict)
-
-        count, res = self.run_create(rid, provider_id, region, zone=zone,
+        owner_id, relation_id = self.generate_owner_data(create_data)
+        count, res = self.run_create(rid=rid, region=region, zone=zone,
                                      provider_object=provider_object,
                                      provider_info=provider_info,
-                                     owner_id=ccn_id,
-                                     relation_id=None,
-                                     create_data=create_data,
+                                     owner_id=owner_id, relation_id=relation_id,
+                                     create_data=x_create_data,
                                      extend_info=extend_info, **kwargs)
 
         return count, res

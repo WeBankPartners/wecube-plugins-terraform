@@ -11,6 +11,81 @@ from lib.uuid_util import get_uuid
 from apps.api.vm.instance import InstanceApi
 
 
+class ResBase(object):
+    @classmethod
+    def allow_key(cls, data):
+        validation.allowed_key(data, ["id", "provider", "secret", "region", "zone",
+                                      "name", "extend_info", "subnet_id",
+                                      "hostname", "image", "instance_type",
+                                      "disk_type", "disk_size", "password",
+                                      "security_group_id", "vpc_id", "data_disks"])
+
+    @classmethod
+    def not_null(cls, data):
+        validation.not_allowed_null(data=data,
+                                    keys=["region", "provider", "name",
+                                          "hostname", "subnet_id", "image",
+                                          "instance_type"]
+                                    )
+
+    @classmethod
+    def validate_keys(cls, data):
+        validation.validate_collector(data=data,
+                                      strings=["id", "name", "region", "zone",
+                                               "provider", "secret", "subnet_id",
+                                               "hostname", "image", "instance_type",
+                                               "disk_type", "password",
+                                               "security_group_id", "vpc_id"],
+                                      ints=["disk_size"],
+                                      dicts=["extend_info", "data_disks"])
+
+    @classmethod
+    def create(cls, resource, data, **kwargs):
+        rid = data.pop("id", None) or get_uuid()
+        secret = data.pop("secret", None)
+        region = data.pop("region", None)
+        zone = data.pop("zone", None)
+        provider = data.pop("provider", None)
+        name = data.pop("name", None)
+        subnet_id = data.pop("subnet_id", None)
+        hostname = data.pop("hostname", None)
+        image = data.pop("image", None)
+        disk_type = data.pop("disk_type")
+        disk_size = data.pop("disk_size", 40)
+        instance_type = data.pop("instance_type", None)
+        password = data.pop("password", None)
+        vpc_id = data.pop("vpc_id", None)
+        security_group_id = data.pop("security_group_id", None)
+        data_disks = validation.validate_dict("data_disks", data.pop("data_disks", None))
+
+        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
+        data.update(extend_info)
+
+        d = dict(hostname=hostname, image=image,
+                 instance_type=instance_type,
+                 password=password, vpc_id=vpc_id,
+                 security_group_id=security_group_id,
+                 data_disks=data_disks,
+                 disk_type=disk_type,
+                 disk_size=disk_size,
+                 subnet_id=subnet_id)
+
+        create_data = {"name": name}
+        create_data.update(d)
+
+        _, result = resource.create(rid=rid, provider=provider,
+                                    region=region, zone=zone,
+                                    secret=secret,
+                                    create_data=create_data,
+                                    extend_info=data)
+
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64],
+               "ipaddress": result.get("ipaddress"),
+               "cpu": result.get("cpu"),
+               "memory": result.get("memory")}
+        return res, result
+
+
 class InstanceController(BackendController):
     allow_methods = ('GET', 'POST')
     resource = InstanceApi()
@@ -37,66 +112,12 @@ class InstanceController(BackendController):
                                                   pagesize=pagesize, orderby=orderby)
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["id", "name", "provider_id", "subnet_id",
-                                      "hostname", "image", "instance_type",
-                                      "disk_type", "disk_size", "password",
-                                      "security_group_id", "vpc_id", "data_disks",
-                                      "zone", "region", "extend_info"])
-        validation.not_allowed_null(data=data,
-                                    keys=["region", "provider_id", "zone", "name",
-                                          "hostname", "subnet_id", "image", "instance_type"]
-                                    )
-
-        validation.validate_string("id", data.get("id"))
-        validation.validate_string("name", data["name"])
-        validation.validate_string("region", data["region"])
-        validation.validate_string("zone", data.get("zone"))
-        validation.validate_string("subnet_id", data["subnet_id"])
-        validation.validate_string("hostname", data.get("hostname"))
-        validation.validate_string("image", data.get("image"))
-        validation.validate_string("instance_type", data.get("instance_type"))
-        validation.validate_string("disk_type", data.get("disk_type"))
-        validation.validate_int("disk_size", data.get("disk_size"))
-        validation.validate_string("provider_id", data.get("provider_id"))
-        validation.validate_string("password", data.get("password"))
-        # validation.validate_list("security_group_id", data.get("security_group_id"))
-        validation.validate_string("vpc_id", data.get("vpc_id"))
-        validation.validate_dict("data_disks", data.get("data_disks"))
-        validation.validate_dict("extend_info", data.get("extend_info"))
+        ResBase.allow_key(data)
+        ResBase.not_null(data)
+        ResBase.validate_keys(data)
 
     def create(self, request, data, **kwargs):
-        rid = data.pop("id", None) or get_uuid()
-        name = data.pop("name", None)
-        zone = data.pop("zone", None)
-        region = data.pop("region", None)
-        subnet_id = data.pop("subnet_id", None)
-        hostname = data.pop("hostname", None)
-        image = data.pop("image", None)
-        disk_type = data.pop("disk_type")
-        disk_size = data.pop("disk_size", 40)
-        instance_type = data.pop("instance_type", None)
-        provider_id = data.pop("provider_id", None)
-        password = data.pop("password", None)
-        vpc_id = data.pop("vpc_id", None)
-        security_group_id = data.pop("security_group_id", None)
-        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
-        data_disks = validation.validate_dict("data_disks", data.pop("data_disks", None))
-
-        data.update(extend_info)
-        _, result = self.resource.create(rid, name=name, provider_id=provider_id,
-                                         hostname=hostname, image=image,
-                                         instance_type=instance_type,
-                                         password=password, vpc_id=vpc_id,
-                                         security_group_id=security_group_id,
-                                         data_disks=data_disks,
-                                         disk_type=disk_type, disk_size=disk_size,
-                                         subnet_id=subnet_id, zone=zone,
-                                         region=region, extend_info=data)
-
-        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64],
-               "ipaddress": result.get("ipaddress"),
-               "cpu": result.get("cpu"),
-               "memory": result.get("memory")}
+        res, _ = ResBase.create(resource=self.resource, data=data)
         return 1, res
 
 
@@ -171,64 +192,14 @@ class InstanceAddController(BaseController):
     resource = InstanceApi()
 
     def before_handler(self, request, data, **kwargs):
-        validation.not_allowed_null(data=data,
-                                    keys=["region", "provider_id", "zone", "name",
-                                          "hostname", "subnet_id", "image", "instance_type"]
-                                    )
-
-        validation.validate_string("id", data.get("id"))
-        validation.validate_string("name", data["name"])
-        validation.validate_string("region", data["region"])
-        validation.validate_string("zone", data.get("zone"))
-        validation.validate_string("subnet_id", data["subnet_id"])
-        validation.validate_string("hostname", data.get("hostname"))
-        validation.validate_string("image", data.get("image"))
-        validation.validate_string("instance_type", data.get("instance_type"))
-        validation.validate_string("disk_type", data.get("disk_type"))
-        validation.validate_int("disk_size", data.get("disk_size"))
-        validation.validate_string("provider_id", data.get("provider_id"))
-        validation.validate_string("password", data.get("password"))
-        # validation.validate_list("security_group_id", data.get("security_group_id"))
-        validation.validate_string("vpc_id", data.get("vpc_id"))
-        validation.validate_dict("data_disks", data.get("data_disks"))
-        validation.validate_dict("extend_info", data.get("extend_info"))
+        ResBase.not_null(data)
+        ResBase.validate_keys(data)
 
     def response_templete(self, data):
         return {}
 
     def main_response(self, request, data, **kwargs):
-        rid = data.pop("id", None) or get_uuid()
-        name = data.pop("name", None)
-        zone = data.pop("zone", None)
-        region = data.pop("region", None)
-        subnet_id = data.pop("subnet_id", None)
-        hostname = data.pop("hostname", None)
-        image = data.pop("image", None)
-        disk_type = data.pop("disk_type")
-        disk_size = data.pop("disk_size", 40)
-        instance_type = data.pop("instance_type", None)
-        provider_id = data.pop("provider_id", None)
-        password = data.pop("password", None)
-        vpc_id = data.pop("vpc_id", None)
-        security_group_id = data.pop("security_group_id", None)
-        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
-        data_disks = validation.validate_dict("data_disks", data.pop("data_disks", None))
-
-        data.update(extend_info)
-        _, result = self.resource.create(rid, name=name, provider_id=provider_id,
-                                         hostname=hostname, image=image,
-                                         instance_type=instance_type,
-                                         password=password, vpc_id=vpc_id,
-                                         security_group_id=security_group_id,
-                                         data_disks=data_disks,
-                                         disk_type=disk_type, disk_size=disk_size,
-                                         subnet_id=subnet_id, zone=zone,
-                                         region=region, extend_info=data)
-
-        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64],
-               "ipaddress": result.get("ipaddress"),
-               "cpu": result.get("cpu"),
-               "memory": result.get("memory")}
+        res, _ = ResBase.create(resource=self.resource, data=data)
         return res
 
 

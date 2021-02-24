@@ -42,34 +42,15 @@ class SecGroupRuleApi(ApiBase):
         logger.info("before_keys_checks add info: %s" % (format_json_dumps(ext_info)))
         return ext_info
 
-    def create(self, rid, name, provider_id,
-               security_group_id, type,
-               cidr_ip, ip_protocol,
-               ports, policy, description,
-               zone, region, extend_info, **kwargs):
-        '''
+    def generate_create_data(self, zone, create_data, **kwargs):
+        r_create_data = {"security_group_id": create_data.get("security_group_id")}
 
-        :param rid:
-        :param name:
-        :param provider_id:
-        :param security_group_id:
-        :param type:
-        :param cidr_ip:
-        :param ip_protocol:
-        :param ports:
-        :param policy:
-        :param description:
-        :param zone:
-        :param region:
-        :param extend_info:
-        :return:
-        '''
-
-        _exists_data = self.create_resource_exists(rid)
-        if _exists_data:
-            return 1, _exists_data
-
-        extend_info = extend_info or {}
+        type = create_data.get("type")
+        ports = create_data.get("ports")
+        cidr_ip = create_data.get("cidr_ip")
+        policy = create_data.get("policy")
+        ip_protocol = create_data.get("ip_protocol")
+        description = create_data.get("description")
         description = description or "%s_%s_%s" % (type, ip_protocol, ports)
 
         create_data = {"description": description,
@@ -78,19 +59,8 @@ class SecGroupRuleApi(ApiBase):
                        "ip_protocol": ip_protocol,
                        "policy": policy}
 
-        _r_create_data = {"security_group_id": security_group_id}
+        return create_data, r_create_data
 
-        provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
-        _relations_id_dict = self.before_keys_checks(provider_object["name"], _r_create_data)
-
-        create_data.update(_relations_id_dict)
-
-        count, res = self.run_create(rid, provider_id, region, zone=zone,
-                                     provider_object=provider_object,
-                                     provider_info=provider_info,
-                                     owner_id=security_group_id,
-                                     relation_id=None,
-                                     create_data=create_data,
-                                     extend_info=extend_info, **kwargs)
-
-        return count, res
+    def generate_owner_data(self, create_data, **kwargs):
+        owner_id = create_data.get("security_group_id")
+        return owner_id, None

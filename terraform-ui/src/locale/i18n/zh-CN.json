@@ -105,6 +105,7 @@
   "tf_provider": "云厂商",
   "tf_resource": "资源",
   "tf_keyconfig": "属性",
+  "tf_secret": "云认证",
   "tf_instance_type": "实例规格",
   "tf_id": "ID",
   "tf_name": "名称",
@@ -121,5 +122,7 @@
   "tf_cpu": "CPU",
   "tf_network": "Network",
   "tf_json": "JSON",
-  "tf_json_edit": "编辑JSON"
+  "tf_json_edit": "编辑JSON",
+  "tf_display_name": "显示名",
+  "tf_secret_info": "认证信息"
 }

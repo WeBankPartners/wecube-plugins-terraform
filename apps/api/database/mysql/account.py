@@ -45,48 +45,18 @@ class MysqlAccountApi(ApiBase):
         logger.info("before_keys_checks add info: %s" % (format_json_dumps(ext_info)))
         return ext_info
 
-    def create(self, rid, name, provider_id,
-               mysql_id, password,
-               zone, region, extend_info, **kwargs):
+    def generate_create_data(self, zone, create_data, **kwargs):
+        r_create_data = {"mysql_id": create_data.get("mysql_id")}
 
-        '''
+        password = create_data.get("password") or "Terraform.123"
+        x_create_data = {"password": password,
+                         "name": create_data.get("name")}
 
-        :param rid:
-        :param name:
-        :param provider_id:
-        :param mysql_id:
-        :param password:
-        :param zone:
-        :param region:
-        :param extend_info:
-        :param kwargs:
-        :return:
-        '''
+        return x_create_data, r_create_data
 
-        _exists_data = self.create_resource_exists(rid)
-        if _exists_data:
-            return 1, _exists_data
-
-        password = password or "Terraform.123"
-        extend_info = extend_info or {}
-
-        create_data = {"name": name, "password": password}
-        _r_create_data = {"mysql_id": mysql_id}
-
-        provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
-        _relations_id_dict = self.before_keys_checks(provider_object["name"], _r_create_data)
-
-        create_data.update(_relations_id_dict)
-
-        count, res = self.run_create(rid, provider_id, region, zone=zone,
-                                     provider_object=provider_object,
-                                     provider_info=provider_info,
-                                     owner_id=mysql_id,
-                                     relation_id=None,
-                                     create_data=create_data,
-                                     extend_info=extend_info, **kwargs)
-
-        return count, res
+    def generate_owner_data(self, create_data, **kwargs):
+        owner_id = create_data.get("mysql_id")
+        return owner_id, None
 
 
 class MysqlPrivilegeApi(ApiBase):
@@ -155,46 +125,19 @@ class MysqlPrivilegeApi(ApiBase):
         logger.info("format_privilege add info: %s" % (format_json_dumps(ext_info)))
         return ext_info
 
-    def create(self, rid, username, provider_id,
-               mysql_id, database, privileges,
-               zone, region, extend_info, **kwargs):
+    def generate_create_data(self, zone, create_data, **kwargs):
+        r_create_data = {"mysql_id": create_data.get("mysql_id")}
 
-        '''
+        database = create_data.get("database")
+        privileges = create_data.get("privileges")
+        x_create_data = {"username": create_data.get("username")}
 
-        :param rid:
-        :param username:
-        :param provider_id:
-        :param mysql_id:
-        :param database:
-        :param privileges:
-        :param zone:
-        :param region:
-        :param extend_info:
-        :param kwargs:
-        :return:
-        '''
+        x_create_data.update(self.format_privilege(provider=kwargs.get("provider"),
+                                                   database=database,
+                                                   privileges=privileges))
 
-        extend_info = extend_info or {}
+        return x_create_data, r_create_data
 
-        create_data = {"username": username}
-        _r_create_data = {"mysql_id": mysql_id}
-
-        # CrsObject("mysql_account").query_account(username=username, where_data={"id": mysql_id})
-        provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
-        _relations_id_dict = self.before_keys_checks(provider_object["name"], _r_create_data)
-
-        create_data.update(self.format_privilege(provider=provider_object["name"],
-                                                 database=database,
-                                                 privileges=privileges))
-
-        create_data.update(_relations_id_dict)
-
-        count, res = self.run_create(rid, provider_id, region, zone=zone,
-                                     provider_object=provider_object,
-                                     provider_info=provider_info,
-                                     owner_id=mysql_id,
-                                     relation_id=None,
-                                     create_data=create_data,
-                                     extend_info=extend_info, **kwargs)
-
-        return count, res
+    def generate_owner_data(self, create_data, **kwargs):
+        owner_id = create_data.get("mysql_id")
+        return owner_id, None

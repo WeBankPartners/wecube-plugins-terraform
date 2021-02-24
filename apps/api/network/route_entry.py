@@ -46,53 +46,18 @@ class RouteEntryApi(ApiBase):
         logger.info("before_keys_checks add info: %s" % (format_json_dumps(ext_info)))
         return ext_info
 
-    def create(self, rid, name, provider_id, zone, region,
-               vpc_id, route_table, next_type, next_hub,
-               destination, extend_info, **kwargs):
+    def generate_create_data(self, zone, create_data, **kwargs):
+        r_create_data = {"vpc_id": create_data.get("vpc_id"),
+                         "route_table_id": create_data.get("route_table_id")}
 
-        '''
-
-        :param rid:
-        :param name:
-        :param provider_id:
-        :param zone:
-        :param region:
-        :param vpc_id:
-        :param route_table:
-        :param next_type:
-        :param next_hub:
-        :param destination:
-        :param extend_info:
-        :return:
-        '''
-
-        _exists_data = self.create_resource_exists(rid)
-        if _exists_data:
-            return 1, _exists_data
-
-        # todo 依据不同的next type转化不同的id
-        extend_info = extend_info or {}
-
-        create_data = {"name": name,
-                       "destination": destination,
-                       "next_type": next_type,
-                       "next_hub": next_hub
+        create_data = {"name": create_data.get("name"),
+                       "destination": create_data.get("destination"),
+                       "next_type": create_data.get("next_type"),
+                       "next_hub": create_data.get("next_hub")
                        }
 
-        _r_create_data = {"vpc_id": vpc_id,
-                          "route_table_id": route_table}
+        return create_data, r_create_data
 
-        provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
-        _relations_id_dict = self.before_keys_checks(provider_object["name"], _r_create_data)
-
-        create_data.update(_relations_id_dict)
-
-        count, res = self.run_create(rid, provider_id, region, zone=zone,
-                                     provider_object=provider_object,
-                                     provider_info=provider_info,
-                                     owner_id=route_table,
-                                     relation_id=None,
-                                     create_data=create_data,
-                                     extend_info=extend_info, **kwargs)
-
-        return count, res
+    def generate_owner_data(self, create_data, **kwargs):
+        owner_id = create_data.get("route_table_id")
+        return owner_id, None

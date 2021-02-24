@@ -42,54 +42,24 @@ class LBListenerApi(ApiBase):
         logger.info("before_keys_checks add info: %s" % (format_json_dumps(ext_info)))
         return ext_info
 
-    def create(self, rid, name, provider_id,
-               lb_id, port, protocol, backend_port,
-               health_check, health_check_uri,
-               zone, region, extend_info, **kwargs):
-        '''
+    def generate_create_data(self, zone, create_data, **kwargs):
+        r_create_data = {"lb_id": create_data.get("lb_id")}
 
-        :param rid:
-        :param name:
-        :param provider_id:
-        :param lb_id:
-        :param port:
-        :param protocol:
-        :param backend_port:
-        :param health_check:
-        :param health_check_uri:
-        :param zone:
-        :param region:
-        :param extend_info:
-        :param kwargs:
-        :return:
-        '''
-
-        _exists_data = self.create_resource_exists(rid)
-        if _exists_data:
-            return 1, _exists_data
-
+        name = create_data.get("name")
+        protocol = create_data.get("protocol")
+        port = create_data.get("port")
         name = name or "%s_%s" % (protocol, port)
-        extend_info = extend_info or {}
-        create_data = {"name": name, "port": port, "protocol": protocol,
-                       "backend_port": backend_port, "health_check": health_check,
-                       "health_check_uri": health_check_uri}
 
-        _r_create_data = {"lb_id": lb_id}
+        x_create_data = {"name": name, "port": port, "protocol": protocol,
+                         "backend_port": create_data.get("backend_port"),
+                         "health_check": create_data.get("health_check"),
+                         "health_check_uri": create_data.get("health_check_uri")}
 
-        provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
-        _relations_id_dict = self.before_keys_checks(provider_object["name"], _r_create_data)
+        return x_create_data, r_create_data
 
-        create_data.update(_relations_id_dict)
-
-        count, res = self.run_create(rid, provider_id, region, zone=zone,
-                                     provider_object=provider_object,
-                                     provider_info=provider_info,
-                                     owner_id=lb_id,
-                                     relation_id=None,
-                                     create_data=create_data,
-                                     extend_info=extend_info, **kwargs)
-
-        return count, res
+    def generate_owner_data(self, create_data, **kwargs):
+        owner_id = create_data.get("lb_id")
+        return owner_id, None
 
     def destory(self, rid):
         '''

@@ -17,7 +17,7 @@ class VpcApi(ApiBase):
         self._flush_resobj()
         self.resource_keys_config = None
 
-    def generate_create_data(self, zone, create_data):
+    def generate_create_data(self, zone, create_data, **kwargs):
         create_data = {"cidr": create_data.get("cidr"),
                        "name": create_data.get("name")}
         return create_data, {}

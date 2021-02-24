@@ -13,6 +13,96 @@ from lib.encrypt_helper import decrypt_str
 from apps.api.database.mysql.instance import MysqlApi
 
 
+class ResBase(object):
+    @classmethod
+    def allow_key(cls, data):
+        validation.allowed_key(data, ["id", "provider", "secret", "region", "zone",
+                                      "name", "extend_info", "subnet_id",
+                                      "user", "password", "port", "disk_type",
+                                      "disk_size", "version", "instance_type",
+                                      "vpc_id", "security_group_id",
+                                      "second_slave_zone", "first_slave_zone"])
+
+    @classmethod
+    def not_null(cls, data):
+        validation.not_allowed_null(data=data,
+                                    keys=["region", "provider", "name",
+                                          "version", "subnet_id", "instance_type"]
+                                    )
+
+    @classmethod
+    def validate_keys(cls, data):
+        validation.validate_collector(data=data,
+                                      strings=["id", "name", "region", "zone",
+                                               "provider", "secret", "subnet_id",
+                                               "user", "password",  "disk_type",
+                                               "version", "instance_type",
+                                               "vpc_id", "second_slave_zone",
+                                               "first_slave_zone"],
+                                      ports=["port"],
+                                      ints=["disk_size"],
+                                      lists=["security_group_id"],
+                                      dicts=["extend_info"])
+
+    @classmethod
+    def decrypt_key(cls, str):
+        if str:
+            if str.startswith("{cipher_a}"):
+                str = str[len("{cipher_a}"):]
+                str = decrypt_str(str)
+
+        return str
+
+    @classmethod
+    def create(cls, resource, data, **kwargs):
+        rid = data.pop("id", None) or get_uuid()
+        secret = data.pop("secret", None)
+        region = data.pop("region", None)
+        zone = data.pop("zone", None)
+        provider = data.pop("provider", None)
+        name = data.pop("name", None)
+        subnet_id = data.pop("subnet_id", None)
+        port = data.pop("port", None)
+        password = data.pop("password", None)
+        user = data.pop("user", None)
+        version = data.pop("version", None)
+        disk_type = data.pop("disk_type", None)
+        disk_size = data.pop("disk_size", None)
+        instance_type = data.pop("instance_type", None)
+        first_slave_zone = data.pop("first_slave_zone", None)
+        second_slave_zone = data.pop("second_slave_zone", None)
+        vpc_id = data.pop("vpc_id", None)
+        security_group_id = validation.validate_list("security_group_id", data.pop("security_group_id", None))
+
+        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
+        data.update(extend_info)
+
+        d = dict(version=version, port=port,
+                 password=password, user=user,
+                 instance_type=instance_type,
+                 vpc_id=vpc_id, first_slave_zone=first_slave_zone,
+                 second_slave_zone=second_slave_zone,
+                 security_group_id=security_group_id,
+                 disk_type=disk_type, disk_size=disk_size,
+                 subnet_id=subnet_id)
+
+        create_data = {"name": name}
+        create_data.update(d)
+        _, result = resource.create(rid=rid, provider=provider,
+                                    region=region, zone=zone,
+                                    secret=secret,
+                                    create_data=create_data,
+                                    extend_info=data)
+
+        _password = cls.decrypt_key(result.get("password"))
+        res = {"id": rid, "ipaddress": result.get("ipaddress"),
+               "port": result.get("port"), "user": result.get("user"),
+               "password": _password,
+               "resource_id": str(result.get("resource_id"))[:64]}
+
+        return res, result
+
+
 class MysqlController(BackendController):
     allow_methods = ('GET', 'POST')
     resource = MysqlApi()
@@ -39,81 +129,13 @@ class MysqlController(BackendController):
                                                   pagesize=pagesize, orderby=orderby)
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["id", "name", "provider_id", "subnet_id",
-                                      "user", "password", "port", "disk_type",
-                                      "disk_size", "version", "instance_type",
-                                      "vpc_id", "security_group_id",
-                                      "second_slave_zone", "first_slave_zone",
-                                      "zone", "region", "extend_info"])
-        validation.not_allowed_null(data=data,
-                                    keys=["region", "provider_id", "zone", "name",
-                                          "version", "subnet_id", "instance_type"]
-                                    )
-
-        validation.validate_string("id", data.get("id"))
-        validation.validate_string("name", data["name"])
-        validation.validate_string("region", data["region"])
-        validation.validate_string("zone", data.get("zone"))
-        validation.validate_string("subnet_id", data["subnet_id"])
-        validation.validate_string("version", data["version"])
-        validation.validate_string("user", data.get("user"))
-        validation.validate_string("password", data.get("password"))
-        validation.validate_string("instance_type", data.get("instance_type"))
-        validation.validate_string("disk_type", data.get("disk_type"))
-        validation.validate_string("first_slave_zone", data.get("first_slave_zone"))
-        validation.validate_string("second_slave_zone", data.get("second_slave_zone"))
-        validation.validate_list("security_group_id", data.get("security_group_id"))
-        validation.validate_string("vpc_id", data.get("vpc_id"))
-        validation.validate_int("disk_size", data.get("disk_size"))
-        validation.validate_string("provider_id", data.get("provider_id"))
-        validation.validate_dict("extend_info", data.get("extend_info"))
-
-    def decrypt_key(self, str):
-        if str:
-            if str.startswith("{cipher_a}"):
-                str = str[len("{cipher_a}"):]
-                str = decrypt_str(str)
-
-        return str
+        ResBase.allow_key(data)
+        ResBase.not_null(data)
+        ResBase.validate_keys(data)
 
     def create(self, request, data, **kwargs):
-        rid = data.pop("id", None) or get_uuid()
-        name = data.pop("name", None)
-        zone = data.pop("zone", None)
-        region = data.pop("region", None)
-        subnet_id = data.pop("subnet_id", None)
-        port = data.pop("port", None)
-        password = data.pop("password", None)
-        user = data.pop("user", None)
-        version = data.pop("version", None)
-        disk_type = data.pop("disk_type", None)
-        disk_size = data.pop("disk_size", None)
-        instance_type = data.pop("instance_type", None)
-        provider_id = data.pop("provider_id", None)
-        first_slave_zone = data.pop("first_slave_zone", None)
-        second_slave_zone = data.pop("second_slave_zone", None)
-        vpc_id = data.pop("vpc_id", None)
-        security_group_id = validation.validate_list("security_group_id", data.pop("security_group_id", None))
-        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
-
-        data.update(extend_info)
-
-        _, result = self.resource.create(rid, name=name, provider_id=provider_id,
-                                         version=version, port=port,
-                                         password=password, user=user,
-                                         instance_type=instance_type,
-                                         vpc_id=vpc_id, first_slave_zone=first_slave_zone,
-                                         second_slave_zone=second_slave_zone,
-                                         security_group_id=security_group_id,
-                                         disk_type=disk_type, disk_size=disk_size,
-                                         subnet_id=subnet_id, zone=zone,
-                                         region=region, extend_info=data)
-
-        _password = self.decrypt_key(result.get("password"))
-        return 1, {"id": rid, "ipaddress": result.get("ipaddress"),
-                   "port": result.get("port"), "user": result.get("user"),
-                   "password": _password,
-                   "resource_id": str(result.get("resource_id"))[:64]}
+        res, _ = ResBase.create(resource=self.resource, data=data)
+        return 1, res
 
 
 class MysqlIdController(BackendIdController):
@@ -142,79 +164,16 @@ class MysqlAddController(BaseController):
     allow_methods = ("POST",)
     resource = MysqlApi()
 
-    def decrypt_key(self, str):
-        if str:
-            if str.startswith("{cipher_a}"):
-                str = str[len("{cipher_a}"):]
-                str = decrypt_str(str)
-
-        return str
-
     def before_handler(self, request, data, **kwargs):
-        validation.not_allowed_null(data=data,
-                                    keys=["region", "provider_id", "zone", "name",
-                                          "version", "subnet_id", "instance_type"]
-                                    )
-
-        validation.validate_string("id", data.get("id"))
-        validation.validate_string("name", data["name"])
-        validation.validate_string("region", data["region"])
-        validation.validate_string("zone", data.get("zone"))
-        validation.validate_string("subnet_id", data["subnet_id"])
-        validation.validate_string("version", data["version"])
-        validation.validate_string("user", data.get("user"))
-        validation.validate_string("password", data.get("password"))
-        validation.validate_string("instance_type", data.get("instance_type"))
-        validation.validate_string("disk_type", data.get("disk_type"))
-        validation.validate_string("first_slave_zone", data.get("first_slave_zone"))
-        validation.validate_string("second_slave_zone", data.get("second_slave_zone"))
-        validation.validate_list("security_group_id", data.get("security_group_id"))
-        validation.validate_string("vpc_id", data.get("vpc_id"))
-        validation.validate_int("disk_size", data.get("disk_size"))
-        validation.validate_string("provider_id", data.get("provider_id"))
-        validation.validate_dict("extend_info", data.get("extend_info"))
+        ResBase.not_null(data)
+        ResBase.validate_keys(data)
 
     def response_templete(self, data):
         return {}
 
     def main_response(self, request, data, **kwargs):
-        rid = data.pop("id", None) or get_uuid()
-        name = data.pop("name", None)
-        zone = data.pop("zone", None)
-        region = data.pop("region", None)
-        subnet_id = data.pop("subnet_id", None)
-        port = data.pop("port", None)
-        password = data.pop("password", None)
-        user = data.pop("user", None)
-        version = data.pop("version", None)
-        disk_type = data.pop("disk_type", None)
-        disk_size = data.pop("disk_size", None)
-        instance_type = data.pop("instance_type", None)
-        provider_id = data.pop("provider_id", None)
-        first_slave_zone = data.pop("first_slave_zone", None)
-        second_slave_zone = data.pop("second_slave_zone", None)
-        vpc_id = data.pop("vpc_id", None)
-        security_group_id = validation.validate_list("security_group_id", data.pop("security_group_id", None))
-        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
-
-        data.update(extend_info)
-
-        _, result = self.resource.create(rid, name=name, provider_id=provider_id,
-                                         version=version, port=port,
-                                         password=password, user=user,
-                                         instance_type=instance_type,
-                                         vpc_id=vpc_id, first_slave_zone=first_slave_zone,
-                                         second_slave_zone=second_slave_zone,
-                                         security_group_id=security_group_id,
-                                         disk_type=disk_type, disk_size=disk_size,
-                                         subnet_id=subnet_id, zone=zone,
-                                         region=region, extend_info=data)
-
-        _password = self.decrypt_key(result.get("password"))
-        return {"id": rid, "ipaddress": result.get("ipaddress"),
-                "port": result.get("port"), "user": result.get("user"),
-                "password": _password,
-                "resource_id": str(result.get("resource_id"))[:64]}
+        res, _ = ResBase.create(resource=self.resource, data=data)
+        return res
 
 
 class MysqlDeleteController(BaseController):

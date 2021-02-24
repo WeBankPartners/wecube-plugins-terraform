@@ -13,10 +13,10 @@ from apps.common.convert_keys import convert_value
 from apps.common.convert_keys import validate_type
 from apps.common.convert_keys import convert_extend_propertys
 from apps.common.convert_keys import define_relations_key
-from apps.api.configer.provider import ProviderApi
 from apps.api.apibase import ApiBase
 from apps.background.resource.vm.instance_type import InstanceTypeObject
 from apps.background.resource.resource_base import CrsObject
+from apps.api.conductor.provider import ProviderConductor
 
 
 class InstanceApi(ApiBase):
@@ -105,68 +105,72 @@ class InstanceApi(ApiBase):
         logger.info(format_json_dumps(define_json))
         return define_json
 
-    def create(self, rid, name, provider_id, hostname,
-               instance_type, image, disk_type,
-               subnet_id, disk_size, password,
-               security_group_id, vpc_id, data_disks,
-               zone, region, extend_info, **kwargs):
+    def generate_create_data(self, zone, create_data, **kwargs):
+        r_create_data = {"vpc_id": create_data.get("vpc_id"),
+                         "subnet_id": create_data.get("subnet_id"),
+                         "security_group_id": create_data.get("security_group_id")}
 
+        x_create_data = {"name": create_data.get("name"),
+                         "hostname": create_data.get("hostname"),
+                         "disk_type": create_data.get("disk_type"),
+                         "disk_size": create_data.get("disk_size"),
+                         "data_disks": create_data.get("data_disks"),
+                         "zone": zone, "image": create_data.get("image")}
+
+        return x_create_data, r_create_data
+
+    def generate_owner_data(self, create_data, **kwargs):
+        r_id = {"subnet_id": create_data.get("subnet_id")}
+        return None, r_id
+
+    def create(self, rid, provider, region, zone, secret,
+               create_data, extend_info, **kwargs):
         '''
 
         :param rid:
-        :param name:
-        :param provider_id:
-        :param hostname:
-        :param instance_type:
-        :param image:
-        :param disk_type:
-        :param subnet_id:
-        :param disk_size:
-        :param zone:
+        :param provider:
         :param region:
+        :param secret:
+        :param create_data:
         :param extend_info:
         :param kwargs:
         :return:
         '''
-
-        # todo 校验 data disks ， 定义type模型
 
         _exists_data = self.create_resource_exists(rid)
         if _exists_data:
             return 1, _exists_data
 
         extend_info = extend_info or {}
-        create_data = {"name": name, "hostname": hostname,
-                       "disk_type": disk_type,
-                       "disk_size": disk_size,
-                       "data_disks": data_disks,
-                       "zone": zone, "image": image}
+        provider_object, provider_info = ProviderConductor().conductor_provider_info(provider, region, secret)
 
-        _r_create_data = {"vpc_id": vpc_id, "subnet_id": subnet_id,
-                          "security_group_id": security_group_id}
+        zone = ProviderConductor().zone_info(provider=provider_object["name"], zone=zone)
+        x_create_data, r_create_data = self.generate_create_data(zone, create_data,
+                                                                 provider=provider_object["name"])
 
-        password = password or "Terraform.123"
-        origin_type, instance_type_data = InstanceTypeObject().convert_resource_id(provider_id, instance_type)
+        password = create_data.get("password") or "Terraform.123"
+        origin_type, instance_type_data = InstanceTypeObject().convert_resource_id(provider_object.get("id"),
+                                                                                   create_data.get("instance_type"))
+
         cpu = instance_type_data.get("cpu")
         memory = instance_type_data.get("memory")
+        kwargs["cpu"] = cpu
+        kwargs["memory"] = memory
 
-        create_data["password"] = password
-        create_data["instance_type"] = origin_type
+        x_create_data["password"] = password
+        x_create_data["instance_type"] = origin_type
 
-        provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
-        _relations_id_dict = self.before_keys_checks(provider_object["name"], _r_create_data)
+        _relations_id_dict = self.before_keys_checks(provider_object["name"], r_create_data)
 
-        create_data.update(_relations_id_dict)
+        x_create_data.update(_relations_id_dict)
 
-        count, res = self.run_create(rid, provider_id, region, zone=zone,
+        owner_id, relation_id = self.generate_owner_data(create_data)
+        count, res = self.run_create(rid=rid, region=region, zone=zone,
                                      provider_object=provider_object,
                                      provider_info=provider_info,
-                                     owner_id=vpc_id,
-                                     relation_id=None,
-                                     create_data=create_data,
-                                     extend_info=extend_info,
-                                     cpu=cpu, memory=memory,
-                                     **kwargs)
+                                     owner_id=owner_id, relation_id=relation_id,
+                                     create_data=x_create_data,
+                                     extend_info=extend_info, **kwargs)
 
         return count, res
 
@@ -200,9 +204,16 @@ class InstanceApi(ApiBase):
         if not status:
             raise local_exceptions.ResourceOperateException(self.resource_name,
                                                             msg="delete %s %s failed" % (self.resource_name, rid))
+        
+        return self.resource_object.delete(rid, update_data=None)
 
-        return self.resource_object.delete(rid, update_data={"status": "deleted",
-                                                             "power_state": "stop"})
+        # return self.resource_object.delete(rid, update_data={"status": "deleted",
+        #                                                      "power_state": "stop"})
+
+                                                             
+
+        
+        
 
     def update(self, rid, name, instance_type, image, security_group_id, extend_info):
         '''

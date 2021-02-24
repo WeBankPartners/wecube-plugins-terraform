@@ -19,46 +19,22 @@ class ObjectStorageApi(ApiBase):
         self._flush_resobj()
         self.resource_keys_config = None
 
-    def create(self, rid, name, provider_id, acl, appid,
-               zone, region, extend_info, **kwargs):
+    def generate_create_data(self, zone, create_data, **kwargs):
+        r_create_data = {}
 
-        '''
-
-        :param rid:
-        :param name:
-        :param provider_id:
-        :param type:
-        :param size:
-        :param zone:
-        :param region:
-        :param extend_info:
-        :return:
-        '''
-
-        _exists_data = self.create_resource_exists(rid)
-        if _exists_data:
-            return 1, _exists_data
-
+        name = create_data.get("name")
+        appid = create_data.get("appid")
         if appid:
             name = "%s-%s" % (name, appid)
 
-        extend_info = extend_info or {}
-        create_data = {"name": name, "acl": acl}
+        x_create_data = {"acl": create_data.get("acl"),
+                         "name": name}
 
-        provider_object, provider_info = ProviderApi().provider_info(provider_id, region)
-        _relations_id_dict = self.before_keys_checks(provider_object["name"], create_data)
+        return x_create_data, r_create_data
 
-        create_data.update(_relations_id_dict)
-
-        count, res = self.run_create(rid, provider_id, region, zone=zone,
-                                     provider_object=provider_object,
-                                     provider_info=provider_info,
-                                     owner_id=None,
-                                     relation_id=None,
-                                     create_data=create_data,
-                                     extend_info=extend_info, **kwargs)
-
-        return count, res
+    def generate_owner_data(self, create_data, **kwargs):
+        owner_id = None
+        return owner_id, None
 
     def destory(self, rid):
         '''
