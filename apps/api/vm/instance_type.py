@@ -43,6 +43,6 @@ class InstanceTypeApi(object):
             if not data.get("provider_id"):
                 raise ValueError("provider id not permit set null")
             provider_info = ProviderObject().provider_object(provider_id=data.get("provider_id"))
-            data["provider"] = provider_info.get("provider")
+            data["provider"] = provider_info.get("name")
 
         return self.resource_object.update(rid, data)
