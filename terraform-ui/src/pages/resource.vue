@@ -134,6 +134,7 @@ export default {
             label: 'tf_provider',
             value: 'provider',
             placeholder: 'tips.inputRequired',
+            v_validate: 'required:true',
             option: 'providerOption',
             disabled: true,
             type: 'select'

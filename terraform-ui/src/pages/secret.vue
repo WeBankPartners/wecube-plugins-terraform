@@ -9,28 +9,39 @@
 import { getTableData, addTableRow, editTableRow, deleteTableRow } from '@/api/server'
 let tableEle = [
   {
+    title: 'tf_name',
+    value: 'name', //
+    style: { width: '150px' },
+    display: true
+  },
+  {
+    title: 'tf_display_name',
+    value: 'display_name', //
+    style: { width: '150px' },
+    display: true
+  },
+  {
     title: 'tf_provider',
     value: 'provider', //
     style: { width: '150px' },
     display: true
   },
   {
-    title: 'tf_resource',
-    value: 'resource', //
+    title: 'tf_region',
+    value: 'region ', //
     style: { width: '150px' },
     display: true
   },
   {
-    title: 'tf_property', // 不必
-    value: 'property', //
-    style: { width: '150px' },
+    title: 'tf_secret_info',
+    value: 'secret_info',
     display: true
   },
   {
-    title: 'tf_provider_property',
-    value: 'value_config',
+    title: 'tf_extend_info',
+    value: 'extend_info',
     render: item => {
-      return JSON.stringify(item.value_config)
+      return JSON.stringify(item.extend_info)
     },
     display: true
   }
@@ -44,7 +55,7 @@ export default {
   data () {
     return {
       pageConfig: {
-        CRUD: '/terraform/v1/configer/keyconfig',
+        CRUD: '/terraform/v1/configer/secret',
         researchConfig: {
           input_conditions: [
             {
@@ -54,15 +65,9 @@ export default {
               style: ''
             },
             {
-              value: 'property',
+              value: 'name',
               type: 'input',
-              placeholder: 'tf_property',
-              style: ''
-            },
-            {
-              value: 'resource',
-              type: 'input',
-              placeholder: 'tf_resource',
+              placeholder: 'tf_name',
               style: ''
             }
           ],
@@ -99,14 +104,22 @@ export default {
       },
       modelConfig: {
         modalId: 'add_edit_Modal',
-        modalTitle: 'tf_keyconfig',
+        modalTitle: 'tf_secret',
         isAdd: true,
         config: [
           {
-            label: 'tf_resource',
-            value: 'resource',
+            label: 'tf_name',
+            value: 'name',
             placeholder: 'tips.inputRequired',
             v_validate: 'required:true|min:2|max:60',
+            disabled: false,
+            type: 'text'
+          },
+          {
+            label: 'tf_display_name',
+            value: 'display_name',
+            placeholder: '',
+            v_validate: '',
             disabled: false,
             type: 'text'
           },
@@ -120,35 +133,43 @@ export default {
             type: 'select'
           },
           {
-            label: 'tf_property',
-            value: 'property',
-            placeholder: 'tips.inputRequired',
-            v_validate: 'required:true|min:2|max:60',
+            label: 'tf_region',
+            value: 'region',
+            placeholder: '',
             disabled: false,
             type: 'text'
           },
           {
-            label: 'tf_provider_property',
-            value: 'value_config',
+            label: 'tf_secret_info',
+            value: 'secret_info',
             placeholder: 'tips.inputRequired',
             v_validate: 'required:true',
+            disabled: false,
+            type: 'textarea'
+          },
+          {
+            label: 'tf_extend_info',
+            value: 'extend_info',
+            placeholder: '',
             disabled: false,
             type: 'textarea'
           }
         ],
         addRow: {
           // [通用]-保存用户新增、编辑时数据
-          resource: '',
+          name: '',
+          display_name: '',
           provider: '',
-          property: '',
-          value_config: ''
+          region: '',
+          secret_info: '',
+          extend_info: ''
         },
         v_select_configs: {
           providerOption: []
         }
       },
       modelTip: {
-        key: 'resource',
+        key: 'name',
         value: null
       },
       id: ''
@@ -183,10 +204,10 @@ export default {
       this.modelConfig.isAdd = true
     },
     beautyParams (params) {
-      if (params.value_config) {
-        params.value_config = JSON.parse(params.value_config)
+      if (params.extend_info) {
+        params.extend_info = JSON.parse(params.extend_info)
       } else {
-        params.value_config = {}
+        params.extend_info = {}
       }
       return params
     },
@@ -205,7 +226,7 @@ export default {
       this.modelConfig.isAdd = false
       this.modelTip.value = rowData[this.modelTip.key]
       this.modelConfig.addRow = this.$tfCommonUtil.manageEditParams(this.modelConfig.addRow, rowData)
-      this.modelConfig.addRow.value_config = JSON.stringify(this.modelConfig.addRow.value_config)
+      this.modelConfig.addRow.extend_info = JSON.stringify(this.modelConfig.addRow.extend_info)
     },
     async editPost () {
       let editData = JSON.parse(JSON.stringify(this.modelConfig.addRow))

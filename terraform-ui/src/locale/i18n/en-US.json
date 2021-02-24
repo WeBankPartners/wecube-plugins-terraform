@@ -105,6 +105,7 @@
   "tf_provider": "Cloud Vendor",
   "tf_resource": "Resource",
   "tf_keyconfig": "Key Config",
+  "tf_secret": "Cloud Authentication",
   "tf_instance_type": "Instance Type",
   "tf_id": "ID",
   "tf_name": "Name",
@@ -120,5 +121,7 @@
   "tf_memory": "Memory",
   "tf_cpu": "CPU",
   "tf_network": "Network",
-  "tf_json": "JSON"
+  "tf_json": "JSON",
+  "tf_display_name": "Display Name",
+  "tf_secret_info": "Secret Info"
 }

@@ -25,6 +25,13 @@ export default new Router({
               component: () => import('@/pages/keyconfig')
             },
             {
+              path: 'secret',
+              name: 'secret',
+              title: '云认证',
+              meta: {},
+              component: () => import('@/pages/secret')
+            },
+            {
               path: 'resource',
               name: 'resource',
               title: '资源',
