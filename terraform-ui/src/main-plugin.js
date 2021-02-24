@@ -37,6 +37,10 @@ const implicitRoute = {
   'terraformIndex/resource': {
     parentBreadcrumb: { 'zh-CN': 'Terraform配置', 'en-US': 'Terraform Config' },
     childBreadcrumb: { 'zh-CN': '资源', 'en-US': 'resource' }
+  },
+  'terraformIndex/secret': {
+    parentBreadcrumb: { 'zh-CN': 'Terraform配置', 'en-US': 'Terraform Config' },
+    childBreadcrumb: { 'zh-CN': '云认证', 'en-US': 'secret' }
   }
 }
 window.addImplicitRoute(implicitRoute)
