@@ -207,9 +207,9 @@ export default {
           resource_name: '',
           provider: '',
           property: '',
-          extend_info: '',
-          resource_property: '',
-          output_property: ''
+          extend_info: '{}',
+          resource_property: '{}',
+          output_property: '{}'
         },
         v_select_configs: {
           providerOption: []
@@ -226,8 +226,9 @@ export default {
     this.initTableData()
   },
   methods: {
-    editJson (value = '{}', key) {
+    editJson (value, key) {
       this.editKey = key
+      value = value || '{}'
       this.$refs.jsonTree.initJSON(JSON.parse(value))
       this.jsonData = value
       this.showEdit = true

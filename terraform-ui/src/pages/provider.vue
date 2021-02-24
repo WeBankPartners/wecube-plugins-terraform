@@ -190,8 +190,9 @@ export default {
     this.initTableData()
   },
   methods: {
-    editJson (value = '{}', key) {
+    editJson (value, key) {
       this.editKey = key
+      value = value || '{}'
       this.$refs.jsonTree.initJSON(JSON.parse(value))
       this.jsonData = value
       this.showEdit = true
