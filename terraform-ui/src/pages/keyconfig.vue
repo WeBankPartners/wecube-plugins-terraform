@@ -1,12 +1,36 @@
 <template>
   <div class=" ">
     <TerraformPageTable :pageConfig="pageConfig"></TerraformPageTable>
-    <TfModalComponent :modelConfig="modelConfig"></TfModalComponent>
+    <TfModalComponent :modelConfig="modelConfig">
+      <template #outer-config>
+        <div class="marginbottom params-each">
+          <label class="col-md-2 label-name" style="vertical-align: top;">{{ $t('tf_provider_property') }}:</label>
+          <Input
+            v-model="modelConfig.addRow.value_config"
+            class="json-edit"
+            type="textarea"
+            :rows="5"
+            style="width:70%"
+          />
+          <Icon
+            @click="editJson(modelConfig.addRow.value_config, 'value_config')"
+            type="ios-create-outline"
+            size="18"
+            class="json-edit"
+          />
+          <label class="required-tip">*</label>
+        </div>
+      </template>
+    </TfModalComponent>
+    <Modal :z-index="2000" v-model="showEdit" :title="$t('tf_json_edit')" @on-ok="confirmJsonData">
+      <Tree ref="jsonTree" :jsonData="jsonData"></Tree>
+    </Modal>
   </div>
 </template>
 
 <script>
 import { getTableData, addTableRow, editTableRow, deleteTableRow } from '@/api/server'
+import Tree from '@/pages/components/tree'
 let tableEle = [
   {
     title: 'tf_provider',
@@ -43,6 +67,9 @@ export default {
   name: '',
   data () {
     return {
+      showEdit: false,
+      jsonData: {},
+      editKey: '',
       pageConfig: {
         CRUD: '/terraform/v1/configer/keyconfig',
         researchConfig: {
@@ -127,21 +154,14 @@ export default {
             disabled: false,
             type: 'text'
           },
-          {
-            label: 'tf_provider_property',
-            value: 'value_config',
-            placeholder: 'tips.inputRequired',
-            v_validate: 'required:true',
-            disabled: false,
-            type: 'textarea'
-          }
+          { name: 'outer-config', type: 'slot' }
         ],
         addRow: {
           // [通用]-保存用户新增、编辑时数据
           resource: '',
           provider: '',
           property: '',
-          value_config: ''
+          value_config: '{}'
         },
         v_select_configs: {
           providerOption: []
@@ -158,6 +178,18 @@ export default {
     this.initTableData()
   },
   methods: {
+    editJson (value, key) {
+      this.editKey = key
+      value = value || '{}'
+      this.$refs.jsonTree.initJSON(JSON.parse(value))
+      this.jsonData = value
+      this.showEdit = true
+    },
+    confirmJsonData () {
+      const jsonJ = this.$refs.jsonTree.jsonJ
+      this.modelConfig.addRow[this.editKey] = JSON.stringify(jsonJ)
+      this.showEdit = false
+    },
     async initTableData () {
       const params = this.$tfCommonUtil.managementUrl(this)
       const { status, data } = await getTableData(params)
@@ -191,7 +223,7 @@ export default {
       return params
     },
     async addPost () {
-      const params = this.beautyParams(this.modelConfig.addRow)
+      const params = this.beautyParams(JSON.parse(JSON.stringify(this.modelConfig.addRow)))
       const { status, message } = await addTableRow(this.pageConfig.CRUD, params)
       if (status === 'OK') {
         this.initTableData()
@@ -232,8 +264,17 @@ export default {
       })
     }
   },
-  components: {}
+  components: {
+    Tree
+  }
 }
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.json-edit {
+  position: absolution;
+  vertical-align: top;
+  cursor: pointer;
+  color: #2d8cf0;
+}
+</style>

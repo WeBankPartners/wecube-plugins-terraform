@@ -122,6 +122,7 @@
   "tf_cpu": "CPU",
   "tf_network": "Network",
   "tf_json": "JSON",
+  "tf_json_edit": "Edit Json",
   "tf_display_name": "Display Name",
   "tf_secret_info": "Secret Info"
 }
