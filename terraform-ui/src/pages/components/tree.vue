@@ -33,12 +33,19 @@ export default {
       ],
       childrenT: [],
       finalJson: {},
+      // jsonJ: {
+      //   haha: {
+      //     region: 'region111',
+      //     secret_key: 'secret_key11',
+      //     secret_id: 'access_key11'
+      //   }
+      // }
       jsonJ: {
         // instance_id: {
         //   convert: 'sdf',
         //   allow_null: 0,
         //   type: 'string'
-        // }
+        // },
         // eip_id: {
         //   convert: 'eip_id',
         //   allow_null: 0,
@@ -54,7 +61,7 @@ export default {
     }
   },
   mounted () {
-    // this.initJSON(this.jsonJ)
+    this.initJSON(this.jsonJ)
   },
   methods: {
     renderContent (h, { root, node, data }) {
@@ -190,12 +197,13 @@ export default {
         let attrs = data.path.split('.')
         let xx = attrs.slice(0, attrs.length - 1)
         let ss = this.renderValue(this.jsonJ, xx)
+        console.log(ss)
         ss[data.key] = {
           [tag]: ''
         }
-        console.log(ss)
-        this.jsonJ[tag] = ''
-        debugger
+        // console.log(ss)
+        // this.jsonJ[tag] = ''
+        // debugger
       } else {
         this.jsonJ[tag] = ''
       }
@@ -230,8 +238,8 @@ export default {
     },
     initJSON (val) {
       // this.$nextTick(() => {
-      this.jsonJ = val
-      const data = this.formatTreeData(val, 'parent')
+      // this.jsonJ = val
+      const data = this.formatTreeData(this.jsonJ, 'parent')
       this.data5[0].children = data
       // })
     },
