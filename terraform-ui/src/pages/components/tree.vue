@@ -181,29 +181,53 @@ export default {
     append (data) {
       const tag = 'key_' + Math.floor(Math.random() * 4000 + 1000)
       const children = data.children || []
+      console.log(data.path)
       children.push({
         title: tag,
         key: tag,
         expand: true,
         children: [],
         value: '',
-        path: data.path + '.' + tag
+        path: data.path ? data.path + '.' + tag : tag
       })
       data.value = {
         [tag]: ''
       }
       this.$set(data, 'children', children)
-      console.log(data)
       if (data.path) {
         let attrs = data.path.split('.')
-        let xx = attrs.slice(0, attrs.length - 1)
-        console.log(xx)
-        let ss = this.renderValue(this.jsonJ, xx)
-        console.log(ss)
-        ss[data.key] = {
-          [tag]: ''
+        let xx
+        if (attrs.length !== 1) {
+          xx = attrs.slice(0, attrs.length - 1)
+          console.log(xx)
+          let ss = this.renderValue(this.jsonJ, xx)
+          console.log(ss)
+          if (this.isJson(ss[data.key])) {
+            ss[data.key] = {
+              ...ss[data.key],
+              [tag]: ''
+            }
+          } else {
+            ss[data.key] = {
+              [tag]: ''
+            }
+          }
+        } else {
+          let ss = this.renderValue(this.jsonJ, xx)
+          console.log(ss)
+          if (this.isJson(ss[data.key])) {
+            ss[data.key] = {
+              ...ss[data.key],
+              [tag]: ''
+            }
+          } else {
+            ss[data.key] = {
+              [tag]: ''
+            }
+          }
         }
       } else {
+        // 根节点
         this.jsonJ[tag] = ''
       }
       console.log(this.jsonJ)
@@ -213,17 +237,15 @@ export default {
       const parent = root.find(el => el.nodeKey === parentKey).node
       const index = parent.children.indexOf(data)
       parent.children.splice(index, 1)
-
-      data.path = data.path.replace('undefined.', '')
       let attrs = data.path.split('.')
 
       let xx = attrs.slice(0, attrs.length - 1)
-      console.log(xx)
       let ss = this.renderValue(this.jsonJ, xx)
-      console.log(ss)
+      console.log(xx, JSON.stringify(ss))
       if (Object.keys(ss).length === 1) {
         let xx2 = attrs.slice(0, attrs.length - 2)
         let ss2 = this.renderValue(this.jsonJ, xx2)
+        console.log(xx2, JSON.stringify(ss2))
         const key = xx.slice(-1)[0]
         ss2[key] = ''
       } else {
@@ -233,7 +255,7 @@ export default {
     },
     initJSON (val) {
       this.jsonJ = val
-      const data = this.formatTreeData(this.jsonJ, '')
+      const data = this.formatTreeData(this.jsonJ, {})
       this.data5[0].children = data
     },
     isJson (obj) {
@@ -243,7 +265,7 @@ export default {
         !obj.length
       )
     },
-    formatTreeData (tmp, path) {
+    formatTreeData (tmp, parentNode) {
       const keys = Object.keys(tmp)
       let childrenTmp = []
       keys.forEach(key => {
@@ -252,10 +274,10 @@ export default {
           expand: true,
           key: key,
           value: tmp[key],
-          path: path === '' ? key : path + '.' + key
+          path: JSON.stringify(parentNode) === '{}' ? key : parentNode.path + '.' + key
         }
         if (this.isJson(tmp[key])) {
-          params.children = this.formatTreeData(tmp[key], key)
+          params.children = this.formatTreeData(tmp[key], params)
         } else {
           params.children = []
         }
@@ -273,7 +295,8 @@ export default {
 </style>
 <style scoped lang="less">
 .tree-style {
-  overflow-y: auto;
+  overflow: auto;
+  width: 100%;
   max-height: ~'calc(100vh - 300px)';
 }
 </style>
