@@ -5,7 +5,7 @@
       <template #outer-config>
         <div class="marginbottom params-each">
           <label class="col-md-2 label-name" style="vertical-align: top;">{{ $t('tf_provider_property') }}:</label>
-          <Input v-model="modelConfig.addRow.provider_property" type="textarea" :rows="5" style="width:70%" />
+          <Input v-model="modelConfig.addRow.provider_property" type="textarea" :rows="3" style="width:70%" />
           <Icon
             @click="editJson(modelConfig.addRow.provider_property, 'provider_property')"
             type="ios-create-outline"
@@ -20,7 +20,7 @@
             v-model="modelConfig.addRow.extend_info"
             class="json-edit"
             type="textarea"
-            :rows="5"
+            :rows="3"
             style="width:70%"
           />
           <Icon

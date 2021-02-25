@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="tree-style">
     <Tree :data="data5" :render="renderContent" class="demo-tree-render"></Tree>
   </div>
 </template>
@@ -67,7 +67,6 @@ export default {
         const res = target({ children: this.data5[0].children }, data.nodeKey)
         data.path = data.path.replace('undefined.', '')
         let attrs = data.path.split('.')
-        console.log('path:', data.path)
         let xx = attrs.slice(0, attrs.length - 1)
         console.log(xx)
         let ss
@@ -230,51 +229,12 @@ export default {
       } else {
         delete ss[data.key]
       }
-
-      // let xx = attrs.slice(0, attrs.length - 1)
-      // console.log(xx)
-      // let ss
-      // if (xx.length === 0) {
-      //   ss = this.jsonJ
-      //   delete this.jsonJ[data.key]
-      // } else {
-      //   ss = this.renderValue(this.jsonJ, xx)
-      //   console.log(ss)
-      //   if (Object.keys(ss).length === 1) {
-      //     let xx2 = attrs.slice(1, attrs.length - 2)
-      //     let ss2 = this.renderValue(this.jsonJ, xx2)
-      //     const key = xx.slice(-1)[0]
-      //     ss2[key] = ''
-      //   } else {
-      //     delete ss[data.key]
-      //   }
-      // }
-
-      // let xx = attrs.slice(0, attrs.length - 1)
-      // console.log(xx)
-      // let ss = this.renderValue(this.jsonJ, xx)
-      // if (xx[0] === 'parent') {
-      //   delete this.jsonJ[data.key]
-      // } else {
-      //   // 父节点包含多节点删除节点，其他父节点置空
-      //   if (Object.keys(ss).length === 1) {
-      //     let xx2 = attrs.slice(0, attrs.length - 2)
-      //     let ss2 = this.renderValue(this.jsonJ, xx2)
-      //     const key = xx.slice(-1)[0]
-      //     ss2[key] = {}
-      //   } else {
-      //     delete ss[data.key]
-      //   }
-      // }
-      // console.log(ss)
       console.log(this.jsonJ)
     },
     initJSON (val) {
-      // this.$nextTick(() => {
       this.jsonJ = val
       const data = this.formatTreeData(this.jsonJ, '')
       this.data5[0].children = data
-      // })
     },
     isJson (obj) {
       return (
@@ -308,6 +268,12 @@ export default {
 </script>
 <style>
 .demo-tree-render .ivu-tree-title {
-  width: 100%;
+  width: 96%;
+}
+</style>
+<style scoped lang="less">
+.tree-style {
+  overflow-y: auto;
+  max-height: ~'calc(100vh - 300px)';
 }
 </style>

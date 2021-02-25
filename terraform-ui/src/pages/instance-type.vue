@@ -230,7 +230,7 @@ export default {
       this.$root.JQ('#add_edit_Modal').modal('show')
     },
     async addPost () {
-      const params = this.beautyParams(this.modelConfig.addRow)
+      const params = this.beautyParams(JSON.parse(JSON.stringify(this.modelConfig.addRow)))
       const { status, message } = await addTableRow(this.pageConfig.CRUD, params)
       if (status === 'OK') {
         this.initTableData()

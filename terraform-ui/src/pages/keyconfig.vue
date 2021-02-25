@@ -9,7 +9,7 @@
             v-model="modelConfig.addRow.value_config"
             class="json-edit"
             type="textarea"
-            :rows="5"
+            :rows="3"
             style="width:70%"
           />
           <Icon

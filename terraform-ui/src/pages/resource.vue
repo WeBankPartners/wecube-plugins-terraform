@@ -5,7 +5,7 @@
       <template #outer-config>
         <div class="marginbottom params-each">
           <label class="col-md-2 label-name" style="vertical-align: top;">{{ $t('tf_provider_property') }}:</label>
-          <Input v-model="modelConfig.addRow.resource_property" type="textarea" :rows="5" style="width:70%" />
+          <Input disabled v-model="modelConfig.addRow.resource_property" type="textarea" :rows="3" style="width:70%" />
           <Icon
             @click="editJson(modelConfig.addRow.resource_property, 'resource_property')"
             type="ios-create-outline"
@@ -20,7 +20,7 @@
             v-model="modelConfig.addRow.output_property"
             class="json-edit"
             type="textarea"
-            :rows="5"
+            :rows="3"
             style="width:70%"
           />
           <Icon
@@ -37,7 +37,7 @@
             v-model="modelConfig.addRow.extend_info"
             class="json-edit"
             type="textarea"
-            :rows="5"
+            :rows="3"
             style="width:70%"
           />
           <Icon
@@ -49,7 +49,7 @@
         </div>
       </template>
     </TfModalComponent>
-    <Modal :z-index="2000" v-model="showEdit" :title="$t('tf_json_edit')" @on-ok="confirmJsonData">
+    <Modal :z-index="2000" v-model="showEdit" :title="$t('tf_json_edit')" @on-ok="confirmJsonData" width="700">
       <Tree ref="jsonTree" :jsonData="jsonData"></Tree>
     </Modal>
   </div>
