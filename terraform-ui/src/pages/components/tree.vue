@@ -68,31 +68,24 @@ export default {
         data.path = data.path.replace('undefined.', '')
         let attrs = data.path.split('.')
         let xx = attrs.slice(0, attrs.length - 1)
-        console.log(xx)
         let ss
         if (xx.length === 0) {
           ss = this.jsonJ
         } else {
           ss = this.renderValue(this.jsonJ, xx)
         }
-        console.log('操作对象', ss)
-        console.log('旧，新：', res.key, v)
         if (tag === 'key') {
           if (xx.length === 0) {
-            console.log(1)
             this.jsonJ[v] = this.jsonJ[res.key]
             delete this.jsonJ[res.key]
           } else {
-            console.log(2)
             ss[v] = ss[res.key]
             delete ss[res.key]
           }
         } else {
           if (xx.length === 0) {
-            console.log(11)
             this.jsonJ[res.key] = v
           } else {
-            console.log(22)
             ss[res.key] = v
           }
         }
@@ -109,9 +102,6 @@ export default {
         } else {
           res[tag] = v
         }
-        console.log(data.path)
-        console.log(this.data5[0].children)
-        console.log(this.jsonJ)
       }
 
       let target = (js, nodeKey) => {
@@ -181,7 +171,6 @@ export default {
     append (data) {
       const tag = 'key_' + Math.floor(Math.random() * 4000 + 1000)
       const children = data.children || []
-      console.log(data.path)
       children.push({
         title: tag,
         key: tag,
@@ -199,9 +188,7 @@ export default {
         let xx
         if (attrs.length !== 1) {
           xx = attrs.slice(0, attrs.length - 1)
-          console.log(xx)
           let ss = this.renderValue(this.jsonJ, xx)
-          console.log(ss)
           if (this.isJson(ss[data.key])) {
             ss[data.key] = {
               ...ss[data.key],
@@ -214,7 +201,6 @@ export default {
           }
         } else {
           let ss = this.renderValue(this.jsonJ, xx)
-          console.log(ss)
           if (this.isJson(ss[data.key])) {
             ss[data.key] = {
               ...ss[data.key],
@@ -230,7 +216,6 @@ export default {
         // 根节点
         this.jsonJ[tag] = ''
       }
-      console.log(this.jsonJ)
     },
     remove (root, node, data) {
       const parentKey = root.find(el => el === node).parent
@@ -241,17 +226,14 @@ export default {
 
       let xx = attrs.slice(0, attrs.length - 1)
       let ss = this.renderValue(this.jsonJ, xx)
-      console.log(xx, JSON.stringify(ss))
       if (Object.keys(ss).length === 1) {
         let xx2 = attrs.slice(0, attrs.length - 2)
         let ss2 = this.renderValue(this.jsonJ, xx2)
-        console.log(xx2, JSON.stringify(ss2))
         const key = xx.slice(-1)[0]
         ss2[key] = ''
       } else {
         delete ss[data.key]
       }
-      console.log(this.jsonJ)
     },
     initJSON (val) {
       this.jsonJ = val

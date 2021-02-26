@@ -182,7 +182,7 @@ export default {
           provider: '',
           region: '',
           secret_info: '',
-          extend_info: ''
+          extend_info: '{}'
         },
         v_select_configs: {
           providerOption: []
