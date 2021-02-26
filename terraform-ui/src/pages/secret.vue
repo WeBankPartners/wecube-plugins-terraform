@@ -30,6 +30,7 @@
 <script>
 import { getTableData, addTableRow, editTableRow, deleteTableRow } from '@/api/server'
 import Tree from '@/pages/components/tree'
+import { isJSONStr } from '@/assets/js/utils'
 let tableEle = [
   {
     title: 'tf_name',
@@ -85,15 +86,15 @@ export default {
         researchConfig: {
           input_conditions: [
             {
-              value: 'provider',
-              type: 'input',
-              placeholder: 'tf_provider',
-              style: ''
-            },
-            {
               value: 'name',
               type: 'input',
               placeholder: 'tf_name',
+              style: ''
+            },
+            {
+              value: 'provider',
+              type: 'input',
+              placeholder: 'tf_provider',
               style: ''
             }
           ],
@@ -235,16 +236,24 @@ export default {
       await this.getProvider()
       this.modelConfig.isAdd = true
     },
-    beautyParams (params) {
-      if (params.extend_info) {
-        params.extend_info = JSON.parse(params.extend_info)
-      } else {
-        params.extend_info = {}
+    beautyParams (params, transformFields) {
+      for (let p of transformFields) {
+        if (isJSONStr(params[p])) {
+          params[p] = JSON.parse(params[p])
+        } else {
+          this.$Notice.error({
+            title: 'Error',
+            desc: this.$t('tf_' + p) + this.$t('tf_json_require'),
+            duration: 10
+          })
+          return false
+        }
       }
       return params
     },
     async addPost () {
-      const params = this.beautyParams(JSON.parse(JSON.stringify(this.modelConfig.addRow)))
+      const params = this.beautyParams(JSON.parse(JSON.stringify(this.modelConfig.addRow)), ['extend_info'])
+      if (!params) return
       const { status, message } = await addTableRow(this.pageConfig.CRUD, params)
       if (status === 'OK') {
         this.initTableData()
@@ -262,7 +271,8 @@ export default {
     },
     async editPost () {
       let editData = JSON.parse(JSON.stringify(this.modelConfig.addRow))
-      const params = this.beautyParams(editData)
+      const params = this.beautyParams(editData, ['extend_info'])
+      if (!params) return
       const { status, message } = await editTableRow(this.pageConfig.CRUD, this.id, params)
       if (status === 'OK') {
         this.initTableData()

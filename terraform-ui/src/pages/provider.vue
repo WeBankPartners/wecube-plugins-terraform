@@ -41,6 +41,7 @@
 <script>
 import { getTableData, addTableRow, editTableRow, deleteTableRow } from '@/api/server'
 import Tree from '@/pages/components/tree'
+import { isJSONStr } from '@/assets/js/utils'
 let tableEle = [
   {
     title: 'tf_name',
@@ -85,12 +86,6 @@ export default {
               type: 'input',
               placeholder: 'tf_name',
               style: ''
-            },
-            {
-              value: 'region',
-              type: 'input',
-              placeholder: 'tf_region',
-              style: ''
             }
           ],
           btn_group: [
@@ -108,8 +103,7 @@ export default {
             }
           ],
           filters: {
-            name: '',
-            region: ''
+            name: ''
           }
         },
         table: {
@@ -186,21 +180,27 @@ export default {
       this.modelConfig.isAdd = true
       this.$root.JQ('#add_edit_Modal').modal('show')
     },
-    beautyParams (params) {
-      if (params.extend_info) {
-        params.extend_info = JSON.parse(params.extend_info)
-      } else {
-        params.extend_info = {}
-      }
-      if (params.provider_property) {
-        params.provider_property = JSON.parse(params.provider_property)
-      } else {
-        params.provider_property = {}
+    beautyParams (params, transformFields) {
+      for (let p of transformFields) {
+        if (isJSONStr(params[p])) {
+          params[p] = JSON.parse(params[p])
+        } else {
+          this.$Notice.error({
+            title: 'Error',
+            desc: this.$t('tf_' + p) + this.$t('tf_json_require'),
+            duration: 10
+          })
+          return false
+        }
       }
       return params
     },
     async addPost () {
-      const params = this.beautyParams(JSON.parse(JSON.stringify(this.modelConfig.addRow)))
+      const params = this.beautyParams(JSON.parse(JSON.stringify(this.modelConfig.addRow)), [
+        'extend_info',
+        'provider_property'
+      ])
+      if (!params) return
       const { status, message } = await addTableRow(this.pageConfig.CRUD, params)
       if (status === 'OK') {
         this.initTableData()
@@ -220,7 +220,8 @@ export default {
     async editPost () {
       let editData = JSON.parse(JSON.stringify(this.modelConfig.addRow))
       delete editData.name
-      const params = this.beautyParams(editData)
+      const params = this.beautyParams(editData, ['extend_info', 'provider_property'])
+      if (!params) return
       const { status, message } = await editTableRow(this.pageConfig.CRUD, this.id, params)
       if (status === 'OK') {
         this.initTableData()
