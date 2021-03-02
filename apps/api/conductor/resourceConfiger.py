@@ -11,6 +11,7 @@ from apps.common.convert_keys import convert_extend_propertys
 from apps.common.convert_keys import convert_keys
 from apps.common.convert_keys import convert_value
 from apps.common.convert_keys import output_line
+from apps.common.convert_keys import ConvertMetadata
 from apps.background.resource.configr.resource import ResourceObject
 
 
@@ -51,6 +52,27 @@ class ResourceConfiger(object):
         resource_property = self.resource_keys_config["resource_property"]
         resource_columns = convert_keys(resource_data, defines=resource_property)
 
+        resource_columns = self.reduce_key(resource_columns)
+        return resource_columns, self.resource_keys_config
+
+    def conductor_upgrade_property(self, provider, resource_name, resource_data):
+        '''
+
+        :param provider:
+        :param resource_name:
+        :param resource_data:
+        :return:
+        '''
+
+        self.resource_info(provider, resource_name)
+
+        resource_property = self.resource_keys_config["resource_property"]
+        resource_columns = ConvertMetadata.upgrade_keys(resource_data, defines=resource_property)
+
+        resource_columns = self.reduce_key(resource_columns)
+
+        # origin_data.update(resource_columns)
+        # return origin_data, self.resource_keys_config
         return resource_columns, self.resource_keys_config
 
     def conductor_apply_extend(self, provider, resource_name, extend_info):
@@ -76,7 +98,20 @@ class ResourceConfiger(object):
         logger.info("extend info: %s" % (format_json_dumps(_extend_columns)))
         resource_columns.update(_extend_columns)
 
+        resource_columns = self.reduce_key(resource_columns)
         return resource_columns, self.resource_keys_config
+
+    def reduce_key(self, data):
+        result = {}
+        for key, value in data.items():
+            if value:
+                result[key] = value
+            elif isinstance(value, (int, bool)):
+                result[key] = value
+            else:
+                logger.info("key %s value: %s is null, remove it" % (key, str(value)))
+
+        return result
 
     def _generate_output(self, provider, resource_name, label_name):
         '''
@@ -112,18 +147,33 @@ class ResourceConfiger(object):
 
         return self._generate_output(provider, resource_name, label_name)
 
-    def conductor_update_property(self, provider, resource_name, resource_data):
+    def conductor_upgrade_extend(self, provider, resource_name, extend_info):
         '''
 
         :param provider:
         :param resource_name:
-        :param resource_data:
+        :param extend_info:
         :return:
         '''
 
         self.resource_info(provider, resource_name)
 
+        resource_columns = {}
         resource_property = self.resource_keys_config["resource_property"]
-        resource_columns = convert_keys(resource_data, defines=resource_property, is_update=True)
+        resource_extend_info = self.resource_keys_config["extend_info"]
 
+        _extend_columns = ConvertMetadata.upgrade_extend_keys(datas=extend_info, defines=resource_property)
+        logger.info("property extend info: %s" % (format_json_dumps(_extend_columns)))
+        resource_columns.update(_extend_columns)
+
+        _extend_columns = ConvertMetadata.upgrade_extend_info(datas=extend_info, extend_info=resource_extend_info)
+        logger.info("extend info: %s" % (format_json_dumps(_extend_columns)))
+        resource_columns.update(_extend_columns)
+
+        resource_columns = self.reduce_key(resource_columns)
+
+        # origin_data.update(resource_columns)
+        #
+        # result = self.reduce_key(origin_data)
+        # return result, self.resource_keys_config
         return resource_columns, self.resource_keys_config

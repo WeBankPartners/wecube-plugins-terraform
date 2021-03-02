@@ -78,3 +78,78 @@ class ResourceConductor(object):
 
         define_json.update(output_json)
         return define_json, resource_keys_config
+
+    def fetch_resource_propertys(self, resource_name, label_name, define_json):
+        _t = define_json["resource"][resource_name]
+        origin_columns = _t[label_name]
+        return origin_columns
+
+    def _generate_upgrade_resource(self, provider, resource_name,
+                                   label_name, update_data,
+                                   extend_info, origin_data):
+        '''
+
+        :param provider: name
+        :param resource_name:
+        :param label_name:
+        :param update_data:
+
+        :param extend_info:
+        :return:
+        '''
+
+        update_data = ValueConductor().conductor_apply_values(provider=provider,
+                                                              resource_name=resource_name,
+                                                              data=update_data)
+
+        configer = ResourceConfiger()
+        resource_columns, resource_keys_config = configer.conductor_upgrade_property(provider=provider,
+                                                                                     resource_name=resource_name,
+                                                                                     resource_data=update_data,
+                                                                                     )
+
+        extend_json, _ = configer.conductor_upgrade_extend(provider=provider,
+                                                           resource_name=resource_name,
+                                                           extend_info=extend_info,
+                                                           )
+
+        resource_columns.update(extend_json)
+        property = resource_keys_config["property"]
+
+        origin_columns = self.fetch_resource_propertys(resource_name, label_name, origin_data)
+        origin_columns.update(resource_columns)
+
+        _info = {
+            "resource": {
+                property: {
+                    label_name: origin_columns
+                }
+            }
+        }
+
+        logger.info(format_json_dumps(_info))
+        return _info, resource_keys_config
+
+    def conductor_upgrade_resource(self, provider, resource_name,
+                                   label_name, update_data,
+                                   extend_info, origin_data):
+        '''
+
+        :param provider:
+        :param resource_name:
+        :param label_name:
+        :param update_data:
+        :param extend_info:
+        :param origin_data:
+        :return:
+        '''
+
+        update_json, resource_keys_config = self._generate_upgrade_resource(provider=provider,
+                                                                            resource_name=resource_name,
+                                                                            label_name=label_name,
+                                                                            update_data=update_data,
+                                                                            extend_info=extend_info,
+                                                                            origin_data=origin_data)
+
+        origin_data.update(update_json)
+        return origin_data, resource_keys_config
