@@ -161,7 +161,8 @@ def convert_keys(datas, defines, is_update=False, is_extend=False):
             if defines.get(key) is not None:
                 result.update(convert_key(key, value, define=defines[key]))
             else:
-                raise ValueError("未定义的关键词 %s, 若需移除关键词，则定义为 'key': '-'" % key)
+                logger.info("not define key %s, skip it. can use define ('key': '-')  remove it" % key)
+                # raise ValueError("未定义的关键词 %s, 若需移除关键词，则定义为 'key': '-'" % key)
 
         return result
 
@@ -386,6 +387,9 @@ def define_relations_key(key, value, define):
     :return:
     '''
 
+    if not define:
+        return True
+
     if isinstance(define, basestring):
         if define == '-':
             return True
@@ -408,3 +412,113 @@ def output_line(key, define):
         raise ValueError("output define error")
 
     return {key: define}
+
+
+class ConvertMetadata(object):
+    @classmethod
+    def apply_extend_info(cls, datas, extend_info):
+        '''
+
+        :param datas:
+        :param extend_info:
+        :return:
+        '''
+
+        if not extend_info:
+            logger.info(
+                "data: %s extend info define is null, so extend keys will be removed" % (format_json_dumps(datas)))
+            return {}
+
+        ora_ext_info = {}
+        for key, define in extend_info.items():
+            if isinstance(define, (int, basestring, int, float, bool)):
+                if isinstance(define, basestring) and define == "-":
+                    logger.info("key: %s removed" % key)
+                else:
+                    value = datas.get(key) if datas.get(key) is not None else define
+                    if value or isinstance(value, (int, bool)):
+                        ora_ext_info[key] = value
+                    else:
+                        logger.info("key %s value is null, remove it" % key)
+            elif isinstance(define, dict):
+                value = datas.get(key)
+                if define.get("value") is not None:
+                    value = value if value is not None else define.get("value")
+                if define.get("type") is not None and (key in datas.keys()):
+                    if value is not None:
+                        value = validate_type(value, type=define.get("type", "string"))
+
+                if value or isinstance(value, (int, bool)):
+                    ora_ext_info[key] = value
+                else:
+                    logger.info("key %s value is null, remove it" % key)
+
+        return ora_ext_info
+
+    @classmethod
+    def upgrade_extend_info(cls, datas, extend_info):
+        '''
+
+        :param datas:
+        :param extend_info:
+        :return:
+        '''
+
+        datas = datas or {}
+        if not extend_info:
+            logger.info(
+                "data: %s extend info define is null, so extend keys will be removed" % (format_json_dumps(datas)))
+            return {}
+
+        ora_ext_info = {}
+        for key, define in extend_info.items():
+            if isinstance(define, (int, basestring, int, float, bool)):
+                if isinstance(define, basestring) and define == "-":
+                    logger.info("key: %s removed" % key)
+                elif key in datas.keys():
+                    ora_ext_info[key] = datas.get(key)  # if datas.get(key) is not None else define
+                else:
+                    logger.info("key: %s, not set in data" % key)
+            elif isinstance(define, dict):
+                if key in datas.keys():
+                    if define.get("value") is not None:
+                        ora_ext_info[key] = datas.get(key)  # if datas.get(key) is not None else define.get("value")
+                    else:
+                        if datas.get(key) is not None:
+                            ora_ext_info[key] = datas.get(key)
+                else:
+                    logger.info("key: %s, not set in data" % key)
+
+                if define.get("type") is not None and (key in ora_ext_info.keys()):
+                    ora_ext_info[key] = validate_type(ora_ext_info.get(key), type=define.get("type", "string"))
+
+        return ora_ext_info
+
+    @classmethod
+    def upgrade_keys(cls, datas, defines):
+        '''
+
+        :param datas:
+        :param defines:
+        :return:
+        '''
+
+        result = {}
+        for key, value in datas.items():
+            if defines.get(key) is not None:
+                result.update(convert_key(key, value, define=defines[key]))
+            else:
+                logger.info("not define key %s, skip it. can use define ('key': '-')  remove it" % key)
+
+        return result
+
+    @classmethod
+    def upgrade_extend_keys(cls, datas, defines):
+        '''
+
+        :param datas:
+        :param defines:
+        :return:
+        '''
+
+        return cls.upgrade_keys(datas, defines)
