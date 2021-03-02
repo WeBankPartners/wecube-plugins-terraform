@@ -170,7 +170,9 @@ class InstanceApi(ApiBase):
                                      provider_info=provider_info,
                                      owner_id=owner_id, relation_id=relation_id,
                                      create_data=x_create_data,
-                                     extend_info=extend_info, **kwargs)
+                                     extend_info=extend_info,
+                                     power_state="running",
+                                     **kwargs)
 
         return count, res
 
@@ -204,16 +206,81 @@ class InstanceApi(ApiBase):
         if not status:
             raise local_exceptions.ResourceOperateException(self.resource_name,
                                                             msg="delete %s %s failed" % (self.resource_name, rid))
-        
+
         return self.resource_object.delete(rid, update_data=None)
 
         # return self.resource_object.delete(rid, update_data={"status": "deleted",
         #                                                      "power_state": "stop"})
 
-                                                             
+    def generate_update_data(self, zone, update_data, **kwargs):
+        # r_create_data = {"vpc_id": create_data.get("vpc_id"),
+        #                  "subnet_id": create_data.get("subnet_id"),
+        #                  "security_group_id": create_data.get("security_group_id")}
+        #
+        # x_create_data = {"name": create_data.get("name"),
+        #                  "hostname": create_data.get("hostname"),
+        #                  "disk_type": create_data.get("disk_type"),
+        #                  "disk_size": create_data.get("disk_size"),
+        #                  "data_disks": create_data.get("data_disks"),
+        #                  "zone": zone, "image": create_data.get("image")}
+        #
+        # return x_create_data, r_create_data
 
-        
-        
+        x_update_data = {}
+        for key in ["name", "image"]:
+            if update_data.get(key):
+                x_update_data[key] = update_data.get(key)
+
+        r_update_data = {}
+        return x_update_data, r_update_data
+
+    def update(self, rid, provider, region, zone,
+               update_data, extend_info, **kwargs):
+        '''
+
+        :param rid:
+        :param provider:
+        :param region:
+        :param secret:
+        :param update_data:
+        :param extend_info:
+        :param kwargs:
+        :return:
+        '''
+
+        resource_obj = self.resource_object.show(rid)
+        if not resource_obj:
+            raise local_exceptions.ResourceNotFoundError("%s:%s 不存在" % (self.resource_name, rid))
+
+        extend_info = extend_info or {}
+
+        zone = ProviderConductor().zone_info(provider=resource_obj["provider"], zone=zone)
+
+        x_update_data, r_update_data = self.generate_update_data(zone, update_data,
+                                                                 provider=resource_obj["provider"])
+
+        if update_data.get("instance_type"):
+            origin_type, instance_type_data = InstanceTypeObject().convert_resource_id(resource_obj.get("provider_id"),
+                                                                                       update_data.get("instance_type"))
+
+            kwargs["cpu"] = instance_type_data.get("cpu")
+            kwargs["memory"] = instance_type_data.get("memory")
+            update_data["instance_type"] = origin_type
+
+        _relations_id_dict = self.before_keys_checks(provider=resource_obj["provider"],
+                                                     create_data=x_update_data)
+
+        x_update_data.update(_relations_id_dict)
+
+        owner_id, relation_id = self.generate_owner_update_data(update_data)
+        count, res = self.run_update(rid=rid, region=resource_obj["region"],
+                                     zone=zone, owner_id=owner_id,
+                                     relation_id=relation_id,
+                                     origin_data=resource_obj,
+                                     update_data=x_update_data,
+                                     extend_info=extend_info, **kwargs)
+
+        return count, res
 
     def update(self, rid, name, instance_type, image, security_group_id, extend_info):
         '''
@@ -285,35 +352,46 @@ class InstanceApi(ApiBase):
         :return:
         '''
 
-        _obj = self.resource_object.show(rid)
-        if not _obj:
-            raise local_exceptions.ResourceNotFoundError("instance %s 不存在" % rid)
+        resource_obj = self.resource_object.show(rid)
+        if not resource_obj:
+            raise local_exceptions.ResourceNotFoundError("%s:%s 不存在" % (self.resource_name, rid))
 
         update_data = {"power_action": "start"}
 
-        _path = self.create_workpath(rid,
-                                     provider=_obj["provider"],
-                                     region=_obj["region"])
+        # _path = self.create_workpath(rid,
+        #                              provider=_obj["provider"],
+        #                              region=_obj["region"])
+        #
+        # define_json = self._generate_update_data(rid, _obj["provider"],
+        #                                          define_json=_obj["define_json"],
+        #                                          update_data=update_data,
+        #                                          extend_info={})
+        #
+        # self.update_data(rid, data={"status": "starting"})
+        # self.write_define(rid, _path, define_json=define_json)
 
-        define_json = self._generate_update_data(rid, _obj["provider"],
-                                                 define_json=_obj["define_json"],
-                                                 update_data=update_data,
-                                                 extend_info={})
+        # try:
+        #     result = self.run(_path)
+        # except Exception, e:
+        #     self.rollback_data(rid)
+        #     raise e
+        #
+        # result = self.formate_result(result)
+        # logger.info(format_json_dumps(result))
 
-        self.update_data(rid, data={"status": "starting"})
-        self.write_define(rid, _path, define_json=define_json)
+        count, res = self.run_update(rid=rid, region=resource_obj["region"],
+                                     zone=resource_obj.get("zone"),
+                                     owner_id=None,
+                                     relation_id=None,
+                                     origin_data=resource_obj,
+                                     update_data=update_data,
+                                     extend_info={},
+                                     power_state="running")
 
-        try:
-            result = self.run(_path)
-        except Exception, e:
-            self.rollback_data(rid)
-            raise e
+        # return self.update_data(rid, data={"status": "ok", "power_state": "start",
+        #                                    "define_json": json.dumps(define_json)})
 
-        result = self.formate_result(result)
-        logger.info(format_json_dumps(result))
-
-        return self.update_data(rid, data={"status": "ok", "power_state": "start",
-                                           "define_json": json.dumps(define_json)})
+        return count, res
 
     def stop(self, rid):
         '''
@@ -322,32 +400,47 @@ class InstanceApi(ApiBase):
         :return:
         '''
 
-        _obj = self.resource_object.show(rid)
-        if not _obj:
-            raise local_exceptions.ResourceNotFoundError("instance %s 不存在" % rid)
+        # _obj = self.resource_object.show(rid)
+        # if not _obj:
+        #     raise local_exceptions.ResourceNotFoundError("instance %s 不存在" % rid)
+
+        resource_obj = self.resource_object.show(rid)
+        if not resource_obj:
+            raise local_exceptions.ResourceNotFoundError("%s:%s 不存在" % (self.resource_name, rid))
 
         update_data = {"power_action": "stop"}
 
-        _path = self.create_workpath(rid,
-                                     provider=_obj["provider"],
-                                     region=_obj["region"])
+        # _path = self.create_workpath(rid,
+        #                              provider=_obj["provider"],
+        #                              region=_obj["region"])
 
-        define_json = self._generate_update_data(rid, _obj["provider"],
-                                                 define_json=_obj["define_json"],
-                                                 update_data=update_data,
-                                                 extend_info={})
+        # define_json = self._generate_update_data(rid, _obj["provider"],
+        #                                          define_json=_obj["define_json"],
+        #                                          update_data=update_data,
+        #                                          extend_info={})
 
-        self.update_data(rid, data={"status": "stopping"})
-        self.write_define(rid, _path, define_json=define_json)
+        # self.update_data(rid, data={"status": "stopping"})
+        # self.write_define(rid, _path, define_json=define_json)
+        #
+        # try:
+        #     result = self.run(_path)
+        # except Exception, e:
+        #     self.rollback_data(rid)
+        #     raise e
 
-        try:
-            result = self.run(_path)
-        except Exception, e:
-            self.rollback_data(rid)
-            raise e
+        count, res = self.run_update(rid=rid, region=resource_obj["region"],
+                                     zone=resource_obj.get("zone"),
+                                     owner_id=None,
+                                     relation_id=None,
+                                     origin_data=resource_obj,
+                                     update_data=update_data,
+                                     extend_info={},
+                                     power_state="stopped")
 
-        result = self.formate_result(result)
-        logger.info(format_json_dumps(result))
+        # result = self.formate_result(result)
+        # logger.info(format_json_dumps(result))
 
-        return self.update_data(rid, data={"status": "ok", "power_state": "stop",
-                                           "define_json": json.dumps(define_json)})
+        # return self.update_data(rid, data={"status": "ok", "power_state": "stop",
+        #                                    "define_json": json.dumps(define_json)})
+
+        return count, res

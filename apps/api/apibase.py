@@ -83,7 +83,8 @@ class ApiBase(TerraformResource):
                                      provider=provider_name,
                                      region=region)
 
-        self.write_provider_define(_path, define_json=provider_json)
+        if provider_json:
+            self.write_provider_define(_path, define_json=provider_json)
         self.init_workspace(_path, provider_name)
 
         return _path
@@ -251,7 +252,7 @@ class ApiBase(TerraformResource):
 
         return {}
 
-    def _run_and_read_result(self, rid, provider, region, provider_info, define_json):
+    def _run_create_and_read_result(self, rid, provider, region, provider_info, define_json):
         '''
 
         :param rid:
@@ -311,9 +312,9 @@ class ApiBase(TerraformResource):
                        create_data=create_data,
                        result_json={}, **kwargs)
 
-        result = self._run_and_read_result(rid, provider=provider_object["name"],
-                                           region=region, provider_info=provider_info,
-                                           define_json=define_json)
+        result = self._run_create_and_read_result(rid, provider=provider_object["name"],
+                                                  region=region, provider_info=provider_info,
+                                                  define_json=define_json)
 
         output_json = self.read_output_controller(result)
         count, res = self.update_db_controller(rid, result, output_json)
@@ -409,3 +410,212 @@ class ApiBase(TerraformResource):
                                                             msg="delete %s %s failed" % (self.resource_name, rid))
 
         return self.resource_object.delete(rid)
+
+    def _run_upgrade_and_read_result(self, rid, provider, region, define_json):
+        '''
+
+        :param rid:
+        :param provider:
+        :param region:
+        :param provider_info:
+        :param define_json:
+        :return:
+        '''
+
+        _path = ""
+        backupfile = ""
+        try:
+            _path = self.workspace_controller(rid, provider, region, provider_json={})
+            backupfile = self.write_define(rid, _path, define_json=define_json)
+
+            result = self.run(_path)
+            return result
+        except Exception, e:
+            logger.info("update %s %s failed, and define file updated,the origin file: %s" % (self.resource_name,
+                                                                                              rid,
+                                                                                              backupfile))
+            raise e
+
+    def resource_upgrade_controller(self, provider_name, label_name, update_data, extend_info, origin_data):
+        '''
+
+        :param provider_name:
+        :param label_name:
+        :param update_data:
+        :param extend_info:
+        :return:
+        '''
+
+        define_json, _ = ResourceConductor().conductor_upgrade_resource(provider=provider_name,
+                                                                        resource_name=self.resource_name,
+                                                                        label_name=label_name,
+                                                                        update_data=update_data,
+                                                                        extend_info=extend_info,
+                                                                        origin_data=origin_data)
+        return define_json
+
+    def run_update(self, rid, region, zone,
+                   owner_id, relation_id, origin_data,
+                   update_data, extend_info, **kwargs):
+        '''
+
+        :param rid:
+        :param region:
+        :param zone:
+        :param owner_id:
+        :param relation_id:
+        :param origin_data:
+        :param update_data:
+        :param extend_info:
+        :param kwargs:
+        :return:
+        '''
+
+        extend_info = extend_info or {}
+        label_name = self.resource_name + "_" + rid
+
+        define_json = self.resource_upgrade_controller(provider_name=origin_data.get("provider"),
+                                                       label_name=label_name,
+                                                       update_data=update_data,
+                                                       extend_info=extend_info,
+                                                       origin_data=origin_data.get("define_json"))
+
+        result = self._run_upgrade_and_read_result(rid, provider=origin_data.get("provider"),
+                                                   region=region, define_json=define_json)
+
+        output_json = self.read_output_controller(result)
+        # count, res = self.update_db_controller(rid, result, output_json)
+
+        _propertys = origin_data.get("propertys", {})
+        _propertys.update(kwargs)
+        _propertys.update(update_data)
+
+        _extend_info = origin_data.get("extend_info")
+        _extend_info.update(extend_info)
+
+        count, res = self.update_metadata(rid=rid, owner_id=owner_id,
+                                          relation_id=relation_id,
+                                          extend_info=_extend_info,
+                                          define_json=define_json,
+                                          status="ok", update_data=_propertys,
+                                          output_json=output_json,
+                                          result_json=result)
+        return count, self.result_return_controller(res)
+
+    def update_metadata(self, rid, owner_id, relation_id, extend_info,
+                        define_json, status, update_data,
+                        output_json, result_json, **kwargs):
+
+        '''
+
+        :param rid:
+        :param owner_id:
+        :param relation_id:
+        :param extend_info:
+        :param define_json:
+        :param status:
+        :param update_data:
+        :param kwargs:
+        :return:
+        '''
+
+        save_data = {"propertys": update_data,
+                     "status": status,
+                     "extend_info": extend_info,
+                     "define_json": define_json,
+                     "output_json": output_json,
+                     "result_json": result_json}
+
+        update_data.update(kwargs)
+        if owner_id and self.owner_resource:
+            save_data["owner_id"] = self.owner_resource + "_" + owner_id
+        if relation_id and self.relation_resource:
+            save_data["relation_id"] = self.relation_resource + "_" + relation_id
+
+        return self.resource_object.update(rid=rid, update_data=save_data)
+
+    def _generate_update_data(self, rid, provider, define_json, update_data, extend_info):
+        self.resource_info(provider)
+        resource_values_config = self.values_config(provider)
+
+        resource_name = self.resource_keys_config["property"]
+        resource_property = self.resource_keys_config["resource_property"]
+        resource_extend_info = self.resource_keys_config["extend_info"]
+
+        resource_columns = {}
+        for key, value in update_data.items():
+            if resource_values_config.get(key):
+                _values_configs = resource_values_config.get(key)
+                value = convert_value(value, _values_configs.get(value))
+
+            resource_columns[key] = value
+
+        resource_columns = convert_keys(resource_columns, defines=resource_property, is_update=True)
+        if extend_info:
+            _extend_columns = convert_extend_propertys(datas=extend_info,
+                                                       extend_info=resource_extend_info,
+                                                       is_update=True)
+            resource_columns.update(_extend_columns)
+
+        _t = define_json["resource"][resource_name]
+        label_name = self.resource_name + "_" + rid
+        origin_columns = _t[label_name]
+
+        origin_columns.update(resource_columns)
+
+        define_json["resource"] = {
+            resource_name: {
+                label_name: origin_columns
+            }
+        }
+        logger.info(format_json_dumps(define_json))
+        return define_json
+
+    def generate_update_data(self, zone, update_data, **kwargs):
+        r_update_data = {}
+        return update_data, r_update_data
+
+    def generate_owner_update_data(self, update_data, **kwargs):
+        return None, None
+
+    def update(self, rid, provider, region, zone,
+               update_data, extend_info, **kwargs):
+        '''
+
+        :param rid:
+        :param provider:
+        :param region:
+        :param secret:
+        :param update_data:
+        :param extend_info:
+        :param kwargs:
+        :return:
+        '''
+
+        resource_obj = self.resource_object.show(rid)
+        if not resource_obj:
+            raise local_exceptions.ResourceNotFoundError("%s:%s 不存在" % (self.resource_name, rid))
+
+        extend_info = extend_info or {}
+
+        zone = ProviderConductor().zone_info(provider=resource_obj["provider"], zone=zone)
+        # x_create_data, r_create_data = self.generate_create_data(zone, create_data,
+        #                                                          provider=provider_object["name"])
+
+        x_update_data, r_update_data = self.generate_update_data(zone, update_data,
+                                                                 provider=resource_obj["provider"])
+
+        _relations_id_dict = self.before_keys_checks(provider=resource_obj["provider"],
+                                                     create_data=x_update_data)
+
+        x_update_data.update(_relations_id_dict)
+
+        owner_id, relation_id = self.generate_owner_update_data(update_data)
+        count, res = self.run_update(rid=rid, region=resource_obj["region"],
+                                     zone=zone, owner_id=owner_id,
+                                     relation_id=relation_id,
+                                     origin_data=resource_obj,
+                                     update_data=x_update_data,
+                                     extend_info=extend_info, **kwargs)
+
+        return count, res
