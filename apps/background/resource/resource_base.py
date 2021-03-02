@@ -95,6 +95,14 @@ class CrsObject(object):
         if self.resource_name:
             where_data["resource_name"] = self.resource_name
 
+        propertys = update_data.get("propertys", {})
+        if propertys.get("password"):
+            password = propertys.get("password")
+            if not password.startswith("{cipher_a}"):
+                propertys["password"] = "{cipher_a}" + encrypt_str(password)
+
+            update_data["propertys"] = propertys
+
         _after_data = {}
         for key, value in update_data.items():
             if isinstance(value, dict):

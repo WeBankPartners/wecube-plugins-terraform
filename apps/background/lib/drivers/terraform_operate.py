@@ -66,6 +66,7 @@ class TerraformResource(object):
         :return:
         '''
 
+        backupfile = ""
         file = os.path.join(path, "%s.tf.json" % rid)
         if os.path.exists(file):
             backupfile = file + "_" + get_datetime_point_str()
@@ -75,6 +76,7 @@ class TerraformResource(object):
             json.dump(define_json, f, ensure_ascii=False, indent=4)
 
         logger.info(format_json_dumps(define_json))
+        return backupfile
 
     def rewrite_state(self, path, state_file):
         '''
