@@ -378,7 +378,7 @@ def read_output(key, define, result):
     return {key: value}
 
 
-def define_relations_key(key, value, define):
+def define_relations_key(key, value, define, is_update=None):
     '''
 
     :param key:
@@ -395,6 +395,8 @@ def define_relations_key(key, value, define):
             return True
     else:
         if (not value) and (not define.get("allow_null", 1)):
+            if is_update:
+                return True
             raise ValueError("key %s 不允许为空" % key)
 
     return False

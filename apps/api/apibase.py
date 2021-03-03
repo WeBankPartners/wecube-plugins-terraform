@@ -2,6 +2,7 @@
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
+import os
 import base64
 import json
 import traceback
@@ -38,14 +39,25 @@ class ApiBase(TerraformResource):
         self.resource_object = CrsObject(self.resource_name)
 
     def create_resource_exists(self, rid):
-        # todo 接入refresh, 如果数据不存在,则清除, 如果数据存在, 则更新状态
         _exists_data = self.resource_object.ora_show(rid)
         if _exists_data:
-            if _exists_data.get("is_deleted"):
+            remote_status = self.flush_create_resource(rid=rid, origin_data=_exists_data)
+
+            if _exists_data.get("is_deleted") and not remote_status:
                 logger.info("create resource check id exists and status is deleted, clear it")
                 HistoryObject().create(create_data={"id": rid, "resource": self.resource_name,
                                                     "ora_data": _exists_data})
 
+                self.resource_object.ora_delete(rid)
+                return
+            elif _exists_data.get("is_deleted") and remote_status:
+                logger.info("create resource remote exists, update db status")
+                _, data = self.resource_object.update(rid=rid, update_data={"is_deleted": 0})
+                return data
+            elif not _exists_data.get("is_deleted") and not remote_status:
+                logger.info("db data exists, create resource remote not exists, clear db info")
+                HistoryObject().create(create_data={"id": rid, "resource": self.resource_name,
+                                                    "ora_data": _exists_data})
                 self.resource_object.ora_delete(rid)
                 return
             else:
@@ -53,7 +65,23 @@ class ApiBase(TerraformResource):
         else:
             return
 
-    def refresh_remote_state(self, path):
+    def flush_create_resource(self, rid, origin_data):
+        path = self.get_workpath(rid=rid, provider=origin_data.get("provider"),
+                                 region=origin_data.get("region")
+                                 )
+
+        is_deleted = origin_data.get("is_deleted")
+        return self.refresh_remote_state(path, is_deleted=is_deleted)
+
+    def refresh_remote_state(self, path, is_deleted=None):
+        if not os.path.exists(path):
+            if is_deleted:
+                logger.info("refresh resource path %s not exists" % path)
+                return []
+            else:
+                raise local_exceptions.ResourceValidateError(self.resource_name,
+                                                             "资源不是最新状态,请检查, 并确保数据文件状态正常")
+
         result = self.refresh(path)
         return result.get("resources")
 
@@ -125,7 +153,7 @@ class ApiBase(TerraformResource):
 
         return self.update_data(rid, data=_update_data)
 
-    def before_keys_checks(self, provider, create_data):
+    def before_keys_checks(self, provider, create_data, is_update=None):
         '''
         校验依赖的id的合法性
         :param kwargs:

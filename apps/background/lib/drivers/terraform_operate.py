@@ -19,6 +19,9 @@ class TerraformResource(object):
         self.resource_name = None
         self.resource_workspace = None
 
+    def get_workpath(self, rid, provider, region, **kwargs):
+        return os.path.join(TERRAFORM_BASE_PATH, provider, region, self.resource_workspace, rid)
+
     def create_workpath(self, rid, provider, region, **kwargs):
         '''
 
