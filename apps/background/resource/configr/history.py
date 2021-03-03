@@ -24,13 +24,13 @@ class HistoryObject(object):
         return count, data
 
     def create(self, create_data):
-        create_data["id"] = create_data.get("id") or get_uuid()
+        create_data["xid"] = create_data.get("xid") or get_uuid()
         create_data["ora_data"] = format_json_dumps(create_data.get("ora_data", {}))
         return self.resource.create(data=create_data)
 
     def show(self, rid, where_data=None):
         where_data = where_data or {}
-        where_data.update({"id": rid})
+        where_data.update({"xid": rid})
 
         data = self.resource.get(filters=where_data)
         if data:
@@ -47,7 +47,7 @@ class HistoryObject(object):
 
     def update(self, rid, update_data, where_data=None):
         where_data = where_data or {}
-        where_data.update({"id": rid})
+        where_data.update({"xid": rid})
         count, data = self.resource.update(filters=where_data, data=update_data)
         if data:
             data["ora_data"] = json.loads(data["ora_data"])
@@ -56,8 +56,8 @@ class HistoryObject(object):
 
     def delete(self, rid, where_data=None):
         where_data = where_data or {}
-        where_data.update({"id": rid})
+        where_data.update({"xid": rid})
         return self.resource.delete(filters=where_data)
 
     def ora_delete(self, rid):
-        return self.resource.delete(filters={"id": rid})
+        return self.resource.delete(filters={"xid": rid})
