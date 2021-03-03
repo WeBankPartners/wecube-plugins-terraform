@@ -26,7 +26,7 @@ class RedisBackupApi(KvBackupApi):
         self.resource_workspace = "redis_backup"
         self._flush_resobj()
 
-    def before_keys_checks(self, provider, kvstore_id):
+    def before_keys_checks(self, provider, kvstore_id, is_update=None):
         '''
 
         :param provider:

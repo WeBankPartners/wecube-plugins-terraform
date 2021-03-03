@@ -24,7 +24,7 @@ class ENIAttachApi(ApiBase):
         self._flush_resobj()
         self.resource_keys_config = None
 
-    def before_keys_checks(self, provider, create_data):
+    def before_keys_checks(self, provider, create_data, is_update=None):
         '''
 
         :param provider:

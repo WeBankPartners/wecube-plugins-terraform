@@ -26,7 +26,7 @@ class MemcachedBackupApi(KvBackupApi):
         self.resource_workspace = "memcached_backup"
         self._flush_resobj()
 
-    def before_keys_checks(self, provider, create_data):
+    def before_keys_checks(self, provider, create_data, is_update=None):
         '''
 
         :param provider:
