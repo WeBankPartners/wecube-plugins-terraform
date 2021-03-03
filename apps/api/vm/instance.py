@@ -27,7 +27,7 @@ class InstanceApi(ApiBase):
         self._flush_resobj()
         self.resource_keys_config = None
 
-    def before_keys_checks(self, provider, create_data):
+    def before_keys_checks(self, provider, create_data, is_update=None):
         '''
 
         :param provider:
@@ -41,9 +41,12 @@ class InstanceApi(ApiBase):
 
         self.resource_info(provider)
         resource_property = self.resource_keys_config["resource_property"]
-        _vpc_status = define_relations_key("vpc_id", vpc_id, resource_property.get("vpc_id"))
-        _subnet_status = define_relations_key("subnet", subnet_id, resource_property.get("subnet_id"))
-        _sg_status = define_relations_key("security_group_id", sg_id, resource_property.get("security_group_id"))
+        _vpc_status = define_relations_key("vpc_id", vpc_id,
+                                           resource_property.get("vpc_id"), is_update)
+        _subnet_status = define_relations_key("subnet", subnet_id,
+                                              resource_property.get("subnet_id"), is_update)
+        _sg_status = define_relations_key("security_group_id", sg_id,
+                                          resource_property.get("security_group_id"), is_update)
 
         ext_info = {}
         if vpc_id and (not _vpc_status):
@@ -255,7 +258,6 @@ class InstanceApi(ApiBase):
         extend_info = extend_info or {}
 
         zone = ProviderConductor().zone_info(provider=resource_obj["provider"], zone=zone)
-
         x_update_data, r_update_data = self.generate_update_data(zone, update_data,
                                                                  provider=resource_obj["provider"])
 
@@ -265,10 +267,11 @@ class InstanceApi(ApiBase):
 
             kwargs["cpu"] = instance_type_data.get("cpu")
             kwargs["memory"] = instance_type_data.get("memory")
-            update_data["instance_type"] = origin_type
+            x_update_data["instance_type"] = origin_type
 
         _relations_id_dict = self.before_keys_checks(provider=resource_obj["provider"],
-                                                     create_data=x_update_data)
+                                                     create_data=x_update_data,
+                                                     is_update=True)
 
         x_update_data.update(_relations_id_dict)
 
@@ -281,69 +284,6 @@ class InstanceApi(ApiBase):
                                      extend_info=extend_info, **kwargs)
 
         return count, res
-
-    def update(self, rid, name, instance_type, image, security_group_id, extend_info):
-        '''
-
-        :param rid:
-        :param name:
-        :param instance_type:
-        :param image:
-        :param security_group_id:
-        :param extend_info:
-        :return:
-        '''
-
-        _update_data = {}
-        _obj = self.resource_object.show(rid)
-        if not _obj:
-            raise local_exceptions.ResourceNotFoundError("instance %s 不存在" % rid)
-
-        update_data = {}
-        if name:
-            update_data["name"] = name
-        if instance_type:
-            origin_type, instance_type_data = InstanceTypeObject().type_resource_id(_obj["provider_id"], instance_type)
-            cpu = instance_type_data.get("cpu")
-            memory = instance_type_data.get("memory")
-            _update_data = {"cpu": cpu, "memory": memory}
-            update_data["instance_type"] = instance_type
-        if image:
-            update_data["image"] = image
-        if security_group_id:
-            _relations_id_dict = self.before_keys_checks(_obj["provider"],
-                                                         vpc_id=None,
-                                                         subnet_id=None,
-                                                         sg_id=security_group_id)
-
-            update_data.update(_relations_id_dict)
-
-        define_json = self._generate_update_data(rid, _obj["provider"],
-                                                 define_json=_obj["define_json"],
-                                                 update_data=update_data,
-                                                 extend_info=extend_info)
-
-        _path = self.create_workpath(rid,
-                                     provider=_obj["provider"],
-                                     region=_obj["region"])
-
-        update_data["status"] = "updating"
-        self.update_data(rid, data=update_data)
-        self.write_define(rid, _path, define_json=define_json)
-
-        try:
-            result = self.run(_path)
-        except Exception, e:
-            self.rollback_data(rid)
-            raise e
-
-        result = self.formate_result(result)
-        logger.info(format_json_dumps(result))
-
-        _update_data.update({"status": "ok",
-                             "result_json": format_json_dumps(result)})
-
-        return self.update_data(rid, data=_update_data)
 
     def start(self, rid):
         '''

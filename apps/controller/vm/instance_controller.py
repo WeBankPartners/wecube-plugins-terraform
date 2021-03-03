@@ -21,6 +21,14 @@ class ResBase(object):
                                       "security_group_id", "vpc_id", "data_disks"])
 
     @classmethod
+    def allow_upgrade_key(cls, data):
+        if not data:
+            raise ValueError("没有需要更新的配置")
+
+        validation.allowed_key(data, ["name", "instance_type", "image",
+                                      "extend_info", "security_group_id"])
+
+    @classmethod
     def not_null(cls, data):
         validation.not_allowed_null(data=data,
                                     keys=["region", "provider", "name",
@@ -38,6 +46,13 @@ class ResBase(object):
                                                "security_group_id", "vpc_id"],
                                       ints=["disk_size"],
                                       dicts=["extend_info", "data_disks"])
+
+    @classmethod
+    def validate_upgrade_keys(cls, data):
+        validation.validate_collector(data=data,
+                                      strings=["name", "instance_type",
+                                               "image", "security_group_id"],
+                                      dicts=["extend_info"])
 
     @classmethod
     def create(cls, resource, data, **kwargs):
@@ -83,6 +98,38 @@ class ResBase(object):
                "ipaddress": result.get("ipaddress"),
                "cpu": result.get("cpu"),
                "memory": result.get("memory")}
+        return res, result
+
+    @classmethod
+    def update(cls, resource, data, **kwargs):
+        rid = kwargs.pop("rid", None)
+        name = data.pop("name", None)
+        instance_type = data.pop("instance_type")
+        image = data.pop("image")
+        security_group_id = data.pop("security_group_id", None)
+        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
+
+        update_data = {}
+        if name:
+            update_data["name"] = name
+        if instance_type:
+            update_data["instance_type"] = instance_type
+        if security_group_id:
+            update_data["security_group_id"] = security_group_id
+        if image:
+            update_data["image"] = image
+
+        data.update(extend_info)
+        _, result = resource.update(rid=rid, provider=None,
+                                    region=None, zone=None,
+                                    update_data=update_data,
+                                    extend_info=data)
+
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64],
+               "ipaddress": result.get("ipaddress"),
+               "cpu": result.get("cpu"),
+               "memory": result.get("memory")}
+
         return res, result
 
 
@@ -143,25 +190,12 @@ class InstanceIdController(BackendIdController):
         return self.resource.destory(rid, force_delete=force_delete)
 
     def before_handler(self, request, data, **kwargs):
-        if not data:
-            raise ValueError("没有需要更新的配置")
+        ResBase.allow_upgrade_key(data)
+        ResBase.validate_upgrade_keys(data)
 
-        validation.allowed_key(data, ["name", "instance_type", "image", "extend_info", "security_group_id"])
-        validation.validate_string("name", data.get("name"))
-        validation.validate_string("instance_type", data.get("instance_type"))
-        validation.validate_string("image", data.get("image"))
-        validation.validate_list("security_group_id", data.get("security_group_id"))
-        validation.validate_dict("extend_info", data.get("extend_info"))
-
-    def update(self, request, data, **kwargs):
-        rid = kwargs.pop("rid", None)
-        name = data.pop("name", None)
-        instance_type = data.pop("instance_tpe")
-        image = data.pop("image")
-        security_group_id = validation.validate_list("security_group_id", data.get("security_group_id"))
-        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
-
-        return self.resource.update(rid, name, instance_type, image, security_group_id, extend_info)
+    def create(self, request, data, **kwargs):
+        res, _ = ResBase.update(resource=self.resource, data=data)
+        return 1, res
 
 
 class InstanceActionController(BackendIdController):
@@ -230,39 +264,19 @@ class InstanceUpdateController(BaseController):
     allow_methods = ('POST',)
     resource = InstanceApi()
 
-    def before_handler(self, request, data, **kwargs):
-        if not data:
-            raise ValueError("没有需要更新的配置")
-
-        validation.not_allowed_null(data=data,
-                                    keys=["id"]
-                                    )
-
-        validation.allowed_key(data, ["id", "name", "instance_type", "image", "extend_info", "security_group_id"])
-        validation.validate_string("id", data.get("id"))
-        validation.validate_string("name", data.get("name"))
-        validation.validate_string("instance_type", data.get("instance_type"))
-        validation.validate_string("image", data.get("image"))
-        validation.validate_list("security_group_id", data.get("security_group_id"))
-        validation.validate_dict("extend_info", data.get("extend_info"))
-
     def response_templete(self, data):
         return {}
 
+    def before_handler(self, request, data, **kwargs):
+        ResBase.allow_upgrade_key(data)
+        ResBase.validate_upgrade_keys(data)
+
+    def create(self, request, data, **kwargs):
+        res, _ = ResBase.update(resource=self.resource, data=data)
+        return 1, res
+
     def main_response(self, request, data, **kwargs):
-        rid = data.pop("id", None)
-        name = data.pop("name", None)
-        instance_type = data.pop("instance_tpe")
-        image = data.pop("image")
-        security_group_id = validation.validate_list("security_group_id", data.pop("security_group_id", None))
-        extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
-
-        count, result = self.resource.update(rid, name, instance_type, image, security_group_id, extend_info)
-
-        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64],
-               "ipaddress": result.get("ipaddress"),
-               "cpu": result.get("cpu"),
-               "memory": result.get("memory")}
+        res, _ = ResBase.update(resource=self.resource, data=data)
         return res
 
 
