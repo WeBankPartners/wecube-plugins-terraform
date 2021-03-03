@@ -20,11 +20,15 @@ Base.to_dict = to_dict
 class ResourceHistory(Base):
     __tablename__ = "resource_history"
 
+    xid = Column(String(36), primary_key=True)
     id = Column(String(36), primary_key=True)
     resource = Column(String(36))
     ora_data = Column(String(65535))
+    created_time = Column(DateTime)
 
     def __init__(self, data):
+        self.created_time = datetime.datetime.now()
+        self.xid = data.get("xid")
         self.id = data.get("id")
         self.resource = data.get("resource")
         self.ora_data = data.get("ora_data")

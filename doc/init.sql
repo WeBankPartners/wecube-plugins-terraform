@@ -154,9 +154,12 @@ CREATE TABLE `instance_type` (
 DROP TABLE IF EXISTS `resource_history`;
 
 CREATE TABLE `resource_history` (
+  `xid` VARCHAR(36) NOT NULL,
   `id` VARCHAR(36) DEFAULT NULL,
   `resource` VARCHAR(36) DEFAULT NULL,
   `ora_data` text DEFAULT NULL,
-  INDEX `idx_id` (`id`)
+  `created_time` DATETIME DEFAULT NULL,
+    PRIMARY KEY (`id`),
+  INDEX `idx_id` (`id`, `created_time`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
