@@ -64,6 +64,7 @@ CREATE TABLE `resource` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 alter table `resource` add column `data_source` text DEFAULT NULL after  `output_property`;
+alter table `resource` add column `source_property` VARCHAR(64) NOT NULL after  `output_property`;
 
 DROP TABLE IF EXISTS `common_keys`;
 

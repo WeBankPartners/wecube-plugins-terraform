@@ -471,3 +471,14 @@ def output_necessary(resource_name, output_property):
     for key in output_property.keys():
         if key not in columns_property:
             raise ValueError("不合法的output property: %s， 允许值：%s" % (key, ",".join(columns_property)))
+
+
+def source_necessary(resource_name, data_source):
+    if resource_name not in output_property_models.keys():
+        return
+
+    if not data_source:
+        return
+
+    if "resource_id" not in data_source.items():
+        raise ValueError("source 缺少必要的定义resource_id")

@@ -114,6 +114,8 @@ class Resource(Base):
     extend_info = Column(String(1024))
     resource_property = Column(String(2048), nullable=False)
     output_property = Column(String(1024), nullable=False)
+    source_property = Column(String(64))
+    data_source = Column(String(1024))
     is_locked = Column(TINYINT(1), server_default=text("'0'"))
     created_time = Column(DateTime)
     updated_time = Column(DateTime)
@@ -131,6 +133,8 @@ class Resource(Base):
         self.property = data.get("property")
         self.provider = data.get("provider")
         self.resource_name = data.get("resource_name")
+        self.source_property = data.get("source_property")
+        self.data_source = data.get("data_source")
         self.extend_info = data.get("extend_info") or '{}'
         self.resource_property = data.get("resource_property") or '{}'
         self.output_property = data.get("output_property") or '{}'

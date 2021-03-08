@@ -13,19 +13,22 @@ from apps.api.configer.resource import ResourceObject
 from apps.api.configer.provider import ProviderObject
 from .model_args import property_necessary
 from .model_args import output_necessary
+from .model_args import source_necessary
 
 
 class ResourceController(BackendController):
     resource = ResourceObject()
 
     def list(self, request, data, orderby=None, page=None, pagesize=None, **kwargs):
-        validation.allowed_key(data, ["id", "provider", "property", "resource_name"])
+        validation.allowed_key(data, ["id", "provider", "property", "resource_name",
+                                      "data_source", "source_property"])
         return self.resource.list(filters=data, page=page,
                                   pagesize=pagesize, orderby=orderby)
 
     def before_handler(self, request, data, **kwargs):
         validation.allowed_key(data, ["id", "provider", "property", "extend_info",
-                                      "resource_name", "resource_property", "output_property"])
+                                      "resource_name", "resource_property", "output_property",
+                                      "data_source", "source_property"])
         validation.not_allowed_null(data=data,
                                     keys=["provider", "property",
                                           "resource_name", "resource_property"]
@@ -35,9 +38,11 @@ class ResourceController(BackendController):
         validation.validate_string("provider", data["provider"])
         validation.validate_string("property", data.get("property"))
         validation.validate_string("resource_name", data.get("resource_name"))
+        validation.validate_string("source_property", data.get("source_property"))
         validation.validate_dict("extend_info", data.get("extend_info"))
         validation.validate_dict("resource_property", data.get("resource_property"))
         validation.validate_dict("output_property", data.get("output_property"))
+        validation.validate_dict("data_source", data.get("data_source"))
 
     def create(self, request, data, **kwargs):
         '''
@@ -55,6 +60,7 @@ class ResourceController(BackendController):
         extend_info = validation.validate_dict("extend_info", data.get("extend_info")) or {}
         resource_property = validation.validate_dict("resource_property", data.get("resource_property")) or {}
         output_property = validation.validate_dict("output_property", data.get("output_property")) or {}
+        data_source = validation.validate_dict("data_source", data.get("data_source"))
         validate_convert_key(resource_property)
         validate_convert_value(extend_info)
         validate_convert_value(output_property)
@@ -64,6 +70,9 @@ class ResourceController(BackendController):
         output_necessary(resource_name=data["resource_name"],
                          output_property=output_property)
 
+        source_necessary(resource_name=data["resource_name"],
+                         data_source=data_source)
+
         ProviderObject().provider_name_object(data["provider"])
         create_data = {"id": data.get("id") or get_uuid(),
                        "provider": data["provider"],
@@ -71,7 +80,9 @@ class ResourceController(BackendController):
                        "resource_name": data.get("resource_name"),
                        "extend_info": json.dumps(extend_info),
                        "resource_property": json.dumps(resource_property),
-                       "output_property": json.dumps(output_property)
+                       "output_property": json.dumps(output_property),
+                       "source_property": data.get("source_property"),
+                       "data_source": json.dumps(data_source)
                        }
 
         return self.resource.create(create_data)
@@ -87,14 +98,17 @@ class ResourceIdController(BackendIdController):
     def before_handler(self, request, data, **kwargs):
         validation.allowed_key(data, ["provider", "property", "extend_info",
                                       "resource_name", "resource_property",
+                                      "data_source", "source_property",
                                       "enabled", "output_property"])
 
         validation.validate_string("provider", data["provider"])
         validation.validate_string("property", data.get("property"))
+        validation.validate_string("source_property", data.get("source_property"))
         validation.validate_string("resource_name", data.get("resource_name"))
         validation.validate_dict("extend_info", data.get("extend_info"))
         validation.validate_dict("resource_property", data.get("resource_property"))
         validation.validate_dict("output_property", data.get("output_property"))
+        validation.validate_dict("data_source", data.get("data_source"))
 
     def update(self, request, data, **kwargs):
         rid = kwargs.pop("rid", None)
@@ -118,6 +132,14 @@ class ResourceIdController(BackendIdController):
                              output_property=output_property)
 
             data["output_property"] = json.dumps(output_property)
+
+        if data.get("data_source") is not None:
+            data_source = validation.validate_dict("data_source", data.get("data_source"))
+            source_necessary(resource_name=data["resource_name"],
+                             data_source=data_source)
+
+            data["data_source"] = json.dumps(data_source)
+
         if "provider" in data.keys():
             if not data.get("provider"):
                 raise ValueError("provider 不能为空")
