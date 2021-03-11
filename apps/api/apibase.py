@@ -23,6 +23,7 @@ from apps.background.resource.configr.value_config import ValueConfigObject
 from apps.background.resource.resource_base import CrsObject
 from apps.api.conductor.provider import ProviderConductor
 from apps.api.conductor.resource import ResourceConductor
+from apps.api.conductor.valueReverse import ValueResetConductor
 
 
 class ApiBase(TerraformResource):
@@ -647,3 +648,96 @@ class ApiBase(TerraformResource):
                                      extend_info=extend_info, **kwargs)
 
         return count, res
+
+    def source_filter_controller(self, provider_name, label_name, query_data):
+        '''
+
+        :param provider_name:
+        :param label_name:
+        :param query_data:
+        :return:
+        '''
+
+        define_json, resource_keys_config = ResourceConductor().conductor_reset_resource(provider=provider_name,
+                                                                                         resource_name=self.resource_name,
+                                                                                         label_name=label_name,
+                                                                                         resource_data=query_data)
+        return define_json, resource_keys_config
+
+    def read_query_result_controller(self, provider, result, data_source_output):
+        instance_define = {}
+        if not data_source_output:
+            raise ValueError("data_source_output not config")
+
+        logger.info(format_json_dumps(result))
+        try:
+            _data = result.get("resources")[0]
+            _instances = _data.get("instances")[0]
+            _attributes = _instances.get("attributes")
+            instance_list = _attributes.get(data_source_output)
+            instance_define = instance_list[0]
+        except:
+            logger.info(traceback.format_exc())
+            raise ValueError("query remote source failed, result read faild")
+
+        res = {}
+        define_columns = ResourceConductor().conductor_reset_filter(provider, self.resource_name)
+
+        for key, value in define_columns.items():
+            res[value] = instance_define.get(key)
+
+        logger.info(format_json_dumps(res))
+        return res
+
+    def run_query(self, rid, region, zone,
+                  provider_object, provider_info,
+                  query_data, **kwargs):
+        '''
+
+        :param rid:
+        :param region:
+        :param zone:
+        :param owner_id:
+        :param relation_id:
+        :param create_data:
+        :param extend_info:
+        :param kwargs:
+        :return:
+        '''
+
+        # extend_info = extend_info or {}
+        label_name = self.resource_name + "_q_" + rid
+
+        define_json, resource_keys_config = self.source_filter_controller(provider_name=provider_object["name"],
+                                                                          label_name=label_name,
+                                                                          query_data=query_data
+                                                                          )
+
+        result = self._run_create_and_read_result(rid, provider=provider_object["name"],
+                                                  region=region, provider_info=provider_info,
+                                                  define_json=define_json)
+
+        data_source_output = resource_keys_config.get("data_source_output")
+        output_json = self.read_query_result_controller(provider_object["name"], result,
+                                                        data_source_output)
+
+        output_json = ValueResetConductor().reset_values(provider=provider_object["name"],
+                                                         resource_name=self.resource_name,
+                                                         data=output_json)
+
+        return output_json
+
+    def get_remote_source(self, rid, provider, region, zone, secret,
+                          resource_id, **kwargs):
+
+        rid = rid or resource_id
+        query_data = {"resource_id": resource_id}
+        provider_object, provider_info = ProviderConductor().conductor_provider_info(provider, region, secret)
+
+        result = self.run_query(rid=rid, region=region, zone=zone,
+                                provider_object=provider_object,
+                                provider_info=provider_info,
+                                query_data=query_data, **kwargs)
+
+        result["resource_id"] = resource_id
+        return result
