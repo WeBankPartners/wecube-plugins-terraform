@@ -142,3 +142,48 @@ class VPCDeleteController(BaseController):
         rid = data.pop("id", None)
         result = self.resource.destory(rid)
         return {"result": result}
+
+
+class VPCSourceController(BaseController):
+    name = "VPC"
+    resource_describe = "VPC"
+    allow_methods = ("POST",)
+    resource = VpcApi()
+
+    @classmethod
+    def allow_key(cls, data):
+        validation.allowed_key(data, ["id", "provider", "secret", "region", "zone",
+                                      "name", "cidr", "extend_info"])
+
+    @classmethod
+    def not_null(cls, data):
+        validation.not_allowed_null(data=data,
+                                    keys=["region", "provider", "name", "cidr"]
+                                    )
+
+    def before_handler(self, request, data, **kwargs):
+        validation.allowed_key(data, ["id", "resource_id", "provider", "secret", "region", "zone"])
+
+        validation.not_allowed_null(data=data,
+                                    keys=["resource_id", "provider", "region"]
+                                    )
+
+        validation.validate_collector(data=data,
+                                      strings=["id", "resource_id", "provider",
+                                               "secret", "region", "zone"])
+
+    def response_templete(self, data):
+        return {}
+
+    def main_response(self, request, data, **kwargs):
+        rid = data.pop("id", None)
+        secret = data.pop("secret", None)
+        region = data.pop("region", None)
+        zone = data.pop("zone", None)
+        provider = data.pop("provider", None)
+        resource_id = data.get("resource_id")
+
+        result = self.resource.get_remote_source(rid=rid, provider=provider,
+                                                 region=region, zone=zone,
+                                                 secret=secret, resource_id=resource_id)
+        return result

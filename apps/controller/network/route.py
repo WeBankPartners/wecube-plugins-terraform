@@ -2,17 +2,13 @@
 
 from django.conf.urls import include, url
 
+import vpc_controller
 import nat_controller
 import eip_controller
 import eip_association_controller
 import ccn_controller
 import ccn_attach_controller
 import ccn_bandwidth_controller
-
-from vpc_controller import VPCController
-from vpc_controller import VPCAddController
-from vpc_controller import VPCIdController
-from vpc_controller import VPCDeleteController
 
 from subnet_controller import SubnetController
 from subnet_controller import SubnetAddController
@@ -40,10 +36,11 @@ from security_group_rule_controller import SecGroupRuleAddController
 from security_group_rule_controller import SecGroupRuleDeleteController
 
 urlpatterns = [
-    url(r'^vpc$', VPCController()),
-    url(r'^vpc/(?P<rid>[\w-]+)$', VPCIdController()),
-    url(r'^backend/vpc/create$', VPCAddController()),
-    url(r'^backend/vpc/delete$', VPCDeleteController()),
+    url(r'^vpc$', vpc_controller.VPCController()),
+    url(r'^vpc/(?P<rid>[\w-]+)$', vpc_controller.VPCIdController()),
+    url(r'^backend/vpc/create$', vpc_controller.VPCAddController()),
+    url(r'^backend/vpc/delete$', vpc_controller.VPCDeleteController()),
+    url(r'^backend/vpc/source$', vpc_controller.VPCSourceController()),
     url(r'^subnet$', SubnetController()),
     url(r'^subnet/(?P<rid>[\w-]+)$', SubnetIdController()),
     url(r'^backend/subnet/create$', SubnetAddController()),
