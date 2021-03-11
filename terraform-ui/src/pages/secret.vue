@@ -1,12 +1,36 @@
 <template>
   <div class=" ">
     <TerraformPageTable :pageConfig="pageConfig"></TerraformPageTable>
-    <TfModalComponent :modelConfig="modelConfig"></TfModalComponent>
+    <TfModalComponent :modelConfig="modelConfig">
+      <template #outer-config>
+        <div class="marginbottom params-each">
+          <label class="col-md-2 label-name" style="vertical-align: top;">{{ $t('tf_extend_info') }}:</label>
+          <Input
+            v-model="modelConfig.addRow.extend_info"
+            class="json-edit"
+            type="textarea"
+            :rows="3"
+            style="width:70%"
+          />
+          <Icon
+            @click="editJson(modelConfig.addRow.extend_info, 'extend_info')"
+            type="ios-create-outline"
+            size="18"
+            class="json-edit"
+          />
+        </div>
+      </template>
+    </TfModalComponent>
+    <Modal :z-index="2000" v-model="showEdit" :title="$t('tf_json_edit')" @on-ok="confirmJsonData">
+      <Tree ref="jsonTree" :jsonData="jsonData"></Tree>
+    </Modal>
   </div>
 </template>
 
 <script>
 import { getTableData, addTableRow, editTableRow, deleteTableRow } from '@/api/server'
+import Tree from '@/pages/components/tree'
+import { isJSONStr } from '@/assets/js/utils'
 let tableEle = [
   {
     title: 'tf_name',
@@ -54,20 +78,23 @@ export default {
   name: '',
   data () {
     return {
+      showEdit: false,
+      jsonData: {},
+      editKey: '',
       pageConfig: {
         CRUD: '/terraform/v1/configer/secret',
         researchConfig: {
           input_conditions: [
             {
-              value: 'provider',
-              type: 'input',
-              placeholder: 'tf_provider',
-              style: ''
-            },
-            {
               value: 'name',
               type: 'input',
               placeholder: 'tf_name',
+              style: ''
+            },
+            {
+              value: 'provider',
+              type: 'input',
+              placeholder: 'tf_provider',
               style: ''
             }
           ],
@@ -147,13 +174,7 @@ export default {
             disabled: false,
             type: 'textarea'
           },
-          {
-            label: 'tf_extend_info',
-            value: 'extend_info',
-            placeholder: '',
-            disabled: false,
-            type: 'textarea'
-          }
+          { name: 'outer-config', type: 'slot' }
         ],
         addRow: {
           // [通用]-保存用户新增、编辑时数据
@@ -162,7 +183,7 @@ export default {
           provider: '',
           region: '',
           secret_info: '',
-          extend_info: ''
+          extend_info: '{}'
         },
         v_select_configs: {
           providerOption: []
@@ -179,6 +200,18 @@ export default {
     this.initTableData()
   },
   methods: {
+    editJson (value, key) {
+      this.editKey = key
+      value = value || '{}'
+      this.$refs.jsonTree.initJSON(JSON.parse(value))
+      this.jsonData = value
+      this.showEdit = true
+    },
+    confirmJsonData () {
+      const jsonJ = this.$refs.jsonTree.jsonJ
+      this.modelConfig.addRow[this.editKey] = JSON.stringify(jsonJ)
+      this.showEdit = false
+    },
     async initTableData () {
       const params = this.$tfCommonUtil.managementUrl(this)
       const { status, data } = await getTableData(params)
@@ -203,16 +236,24 @@ export default {
       await this.getProvider()
       this.modelConfig.isAdd = true
     },
-    beautyParams (params) {
-      if (params.extend_info) {
-        params.extend_info = JSON.parse(params.extend_info)
-      } else {
-        params.extend_info = {}
+    beautyParams (params, transformFields) {
+      for (let p of transformFields) {
+        if (isJSONStr(params[p])) {
+          params[p] = JSON.parse(params[p])
+        } else {
+          this.$Notice.error({
+            title: 'Error',
+            desc: this.$t('tf_' + p) + this.$t('tf_json_require'),
+            duration: 10
+          })
+          return false
+        }
       }
       return params
     },
     async addPost () {
-      const params = this.beautyParams(this.modelConfig.addRow)
+      const params = this.beautyParams(JSON.parse(JSON.stringify(this.modelConfig.addRow)), ['extend_info'])
+      if (!params) return
       const { status, message } = await addTableRow(this.pageConfig.CRUD, params)
       if (status === 'OK') {
         this.initTableData()
@@ -230,7 +271,8 @@ export default {
     },
     async editPost () {
       let editData = JSON.parse(JSON.stringify(this.modelConfig.addRow))
-      const params = this.beautyParams(editData)
+      const params = this.beautyParams(editData, ['extend_info'])
+      if (!params) return
       const { status, message } = await editTableRow(this.pageConfig.CRUD, this.id, params)
       if (status === 'OK') {
         this.initTableData()
@@ -253,8 +295,17 @@ export default {
       })
     }
   },
-  components: {}
+  components: {
+    Tree
+  }
 }
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.json-edit {
+  position: absolution;
+  vertical-align: top;
+  cursor: pointer;
+  color: #2d8cf0;
+}
+</style>

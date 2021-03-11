@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="tree-style">
     <Tree :data="data5" :render="renderContent" class="demo-tree-render"></Tree>
   </div>
 </template>
@@ -67,33 +67,25 @@ export default {
         const res = target({ children: this.data5[0].children }, data.nodeKey)
         data.path = data.path.replace('undefined.', '')
         let attrs = data.path.split('.')
-        console.log('path:', data.path)
         let xx = attrs.slice(0, attrs.length - 1)
-        console.log(xx)
         let ss
         if (xx.length === 0) {
           ss = this.jsonJ
         } else {
           ss = this.renderValue(this.jsonJ, xx)
         }
-        console.log('操作对象', ss)
-        console.log('旧，新：', res.key, v)
         if (tag === 'key') {
           if (xx.length === 0) {
-            console.log(1)
             this.jsonJ[v] = this.jsonJ[res.key]
             delete this.jsonJ[res.key]
           } else {
-            console.log(2)
             ss[v] = ss[res.key]
             delete ss[res.key]
           }
         } else {
           if (xx.length === 0) {
-            console.log(11)
             this.jsonJ[res.key] = v
           } else {
-            console.log(22)
             ss[res.key] = v
           }
         }
@@ -110,9 +102,6 @@ export default {
         } else {
           res[tag] = v
         }
-        console.log(data.path)
-        console.log(this.data5[0].children)
-        console.log(this.jsonJ)
       }
 
       let target = (js, nodeKey) => {
@@ -188,40 +177,55 @@ export default {
         expand: true,
         children: [],
         value: '',
-        path: data.path + '.' + tag
+        path: data.path ? data.path + '.' + tag : tag
       })
       data.value = {
         [tag]: ''
       }
       this.$set(data, 'children', children)
-      console.log(data)
       if (data.path) {
         let attrs = data.path.split('.')
-        let xx = attrs.slice(0, attrs.length - 1)
-        console.log(xx)
-        let ss = this.renderValue(this.jsonJ, xx)
-        console.log(ss)
-        ss[data.key] = {
-          [tag]: ''
+        let xx
+        if (attrs.length !== 1) {
+          xx = attrs.slice(0, attrs.length - 1)
+          let ss = this.renderValue(this.jsonJ, xx)
+          if (this.isJson(ss[data.key])) {
+            ss[data.key] = {
+              ...ss[data.key],
+              [tag]: ''
+            }
+          } else {
+            ss[data.key] = {
+              [tag]: ''
+            }
+          }
+        } else {
+          let ss = this.renderValue(this.jsonJ, xx)
+          if (this.isJson(ss[data.key])) {
+            ss[data.key] = {
+              ...ss[data.key],
+              [tag]: ''
+            }
+          } else {
+            ss[data.key] = {
+              [tag]: ''
+            }
+          }
         }
       } else {
+        // 根节点
         this.jsonJ[tag] = ''
       }
-      console.log(this.jsonJ)
     },
     remove (root, node, data) {
       const parentKey = root.find(el => el === node).parent
       const parent = root.find(el => el.nodeKey === parentKey).node
       const index = parent.children.indexOf(data)
       parent.children.splice(index, 1)
-
-      data.path = data.path.replace('undefined.', '')
       let attrs = data.path.split('.')
 
       let xx = attrs.slice(0, attrs.length - 1)
-      console.log(xx)
       let ss = this.renderValue(this.jsonJ, xx)
-      console.log(ss)
       if (Object.keys(ss).length === 1) {
         let xx2 = attrs.slice(0, attrs.length - 2)
         let ss2 = this.renderValue(this.jsonJ, xx2)
@@ -230,51 +234,11 @@ export default {
       } else {
         delete ss[data.key]
       }
-
-      // let xx = attrs.slice(0, attrs.length - 1)
-      // console.log(xx)
-      // let ss
-      // if (xx.length === 0) {
-      //   ss = this.jsonJ
-      //   delete this.jsonJ[data.key]
-      // } else {
-      //   ss = this.renderValue(this.jsonJ, xx)
-      //   console.log(ss)
-      //   if (Object.keys(ss).length === 1) {
-      //     let xx2 = attrs.slice(1, attrs.length - 2)
-      //     let ss2 = this.renderValue(this.jsonJ, xx2)
-      //     const key = xx.slice(-1)[0]
-      //     ss2[key] = ''
-      //   } else {
-      //     delete ss[data.key]
-      //   }
-      // }
-
-      // let xx = attrs.slice(0, attrs.length - 1)
-      // console.log(xx)
-      // let ss = this.renderValue(this.jsonJ, xx)
-      // if (xx[0] === 'parent') {
-      //   delete this.jsonJ[data.key]
-      // } else {
-      //   // 父节点包含多节点删除节点，其他父节点置空
-      //   if (Object.keys(ss).length === 1) {
-      //     let xx2 = attrs.slice(0, attrs.length - 2)
-      //     let ss2 = this.renderValue(this.jsonJ, xx2)
-      //     const key = xx.slice(-1)[0]
-      //     ss2[key] = {}
-      //   } else {
-      //     delete ss[data.key]
-      //   }
-      // }
-      // console.log(ss)
-      console.log(this.jsonJ)
     },
     initJSON (val) {
-      // this.$nextTick(() => {
       this.jsonJ = val
-      const data = this.formatTreeData(this.jsonJ, '')
+      const data = this.formatTreeData(this.jsonJ, {})
       this.data5[0].children = data
-      // })
     },
     isJson (obj) {
       return (
@@ -283,7 +247,7 @@ export default {
         !obj.length
       )
     },
-    formatTreeData (tmp, path) {
+    formatTreeData (tmp, parentNode) {
       const keys = Object.keys(tmp)
       let childrenTmp = []
       keys.forEach(key => {
@@ -292,10 +256,10 @@ export default {
           expand: true,
           key: key,
           value: tmp[key],
-          path: path === '' ? key : path + '.' + key
+          path: JSON.stringify(parentNode) === '{}' ? key : parentNode.path + '.' + key
         }
         if (this.isJson(tmp[key])) {
-          params.children = this.formatTreeData(tmp[key], key)
+          params.children = this.formatTreeData(tmp[key], params)
         } else {
           params.children = []
         }
@@ -308,6 +272,13 @@ export default {
 </script>
 <style>
 .demo-tree-render .ivu-tree-title {
+  width: 96%;
+}
+</style>
+<style scoped lang="less">
+.tree-style {
+  overflow: auto;
   width: 100%;
+  max-height: ~'calc(100vh - 300px)';
 }
 </style>

@@ -115,6 +115,8 @@
   "tf_zone": "区域",
   "tf_extend_info": "其他信息",
   "tf_provider_property": "转换信息",
+  "tf_resource_property": "转换信息",
+  "tf_value_config": "转换信息",
   "tf_property": "资源属性",
   "tf_output_property": "输出属性",
   "tf_origin_name": "原名称",
@@ -124,5 +126,6 @@
   "tf_json": "JSON",
   "tf_json_edit": "编辑JSON",
   "tf_display_name": "显示名",
-  "tf_secret_info": "认证信息"
+  "tf_secret_info": "认证信息",
+  "tf_json_require": "需为Json"
 }
