@@ -153,3 +153,54 @@ class ResourceConductor(object):
 
         origin_data.update(update_json)
         return origin_data, resource_keys_config
+
+    def _generate_data_source(self, provider, resource_name, label_name, resource_data):
+        '''
+
+        :param provider:
+        :param resource_name:
+        :param label_name:
+        :param resource_data:
+        :return:
+        '''
+
+        configer = ResourceConfiger()
+        resource_columns, resource_keys_config = configer.conductor_source_property(provider=provider,
+                                                                                    resource_name=resource_name,
+                                                                                    resource_data=resource_data)
+
+        property = resource_keys_config.get("source_property") or resource_keys_config["property"]
+
+        _info = {
+            "data": {
+                property: {
+                    label_name: resource_columns
+                }
+            }
+        }
+        logger.info(format_json_dumps(_info))
+        return _info, resource_keys_config
+
+    def conductor_reset_resource(self, provider, resource_name, label_name, resource_data):
+        '''
+
+        :param provider: name
+        :param region:
+        :param secret:
+        :param create_data:
+        :param extend_info:
+        :return:
+        '''
+
+        define_json, resource_keys_config = self._generate_data_source(provider=provider,
+                                                                       resource_name=resource_name,
+                                                                       label_name=label_name,
+                                                                       resource_data=resource_data)
+
+        return define_json, resource_keys_config
+
+    def conductor_reset_filter(self, provider, resource_name):
+        configer = ResourceConfiger()
+        resource_columns, _ = configer.conductor_reset_property(provider=provider,
+                                                                resource_name=resource_name)
+        return resource_columns
