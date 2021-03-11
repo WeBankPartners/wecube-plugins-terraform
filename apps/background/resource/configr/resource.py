@@ -19,6 +19,9 @@ class ResourceObject(object):
             res["extend_info"] = json.loads(res["extend_info"])
             res["resource_property"] = json.loads(res["resource_property"])
             res["output_property"] = json.loads(res["output_property"]) if res["output_property"] else {}
+            res["data_source"] = json.loads(res["data_source"]) if res.get("data_source") else {}
+            t = json.loads(res["data_source_extend"]) if res.get("data_source_extend") else {}
+            res["data_source_extend"] = t
             data.append(res)
 
         return count, data
@@ -40,6 +43,9 @@ class ResourceObject(object):
             data["extend_info"] = json.loads(data["extend_info"])
             data["resource_property"] = json.loads(data["resource_property"])
             data["output_property"] = json.loads(data["output_property"]) if data["output_property"] else {}
+            data["data_source"] = json.loads(data["data_source"]) if data.get("data_source") else {}
+            t = json.loads(data["data_source_extend"]) if data.get("data_source_extend") else {}
+            data["data_source_extend"] = t
         return data
 
     def update(self, rid, update_data, where_data=None):
@@ -51,6 +57,9 @@ class ResourceObject(object):
             data["extend_info"] = json.loads(data["extend_info"])
             data["resource_property"] = json.loads(data["resource_property"])
             data["output_property"] = json.loads(data["output_property"]) if data["output_property"] else {}
+            data["data_source"] = json.loads(data["data_source"]) if data.get("data_source") else {}
+            t = json.loads(data["data_source_extend"]) if data.get("data_source_extend") else {}
+            data["data_source_extend"] = t
         return count, data
 
     def delete(self, rid, where_data=None):
