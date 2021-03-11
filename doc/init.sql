@@ -65,6 +65,7 @@ CREATE TABLE `resource` (
 
 alter table `resource` add column `data_source` text DEFAULT NULL after  `output_property`;
 alter table `resource` add column `source_property` VARCHAR(64) NOT NULL after  `output_property`;
+alter table `resource` add column `data_source_output` VARCHAR(64) NOT NULL after  `source_property`;
 
 DROP TABLE IF EXISTS `common_keys`;
 

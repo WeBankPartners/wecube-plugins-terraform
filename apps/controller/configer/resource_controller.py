@@ -28,7 +28,7 @@ class ResourceController(BackendController):
     def before_handler(self, request, data, **kwargs):
         validation.allowed_key(data, ["id", "provider", "property", "extend_info",
                                       "resource_name", "resource_property", "output_property",
-                                      "data_source", "source_property"])
+                                      "data_source", "source_property", "data_source_output"])
         validation.not_allowed_null(data=data,
                                     keys=["provider", "property",
                                           "resource_name", "resource_property"]
@@ -39,6 +39,8 @@ class ResourceController(BackendController):
         validation.validate_string("property", data.get("property"))
         validation.validate_string("resource_name", data.get("resource_name"))
         validation.validate_string("source_property", data.get("source_property"))
+        validation.validate_string("data_source_output",
+                                   data.get("data_source_output"))
         validation.validate_dict("extend_info", data.get("extend_info"))
         validation.validate_dict("resource_property", data.get("resource_property"))
         validation.validate_dict("output_property", data.get("output_property"))
@@ -82,6 +84,7 @@ class ResourceController(BackendController):
                        "resource_property": json.dumps(resource_property),
                        "output_property": json.dumps(output_property),
                        "source_property": data.get("source_property"),
+                       "data_source_output": data.get("data_source_output"),
                        "data_source": json.dumps(data_source)
                        }
 
@@ -99,12 +102,15 @@ class ResourceIdController(BackendIdController):
         validation.allowed_key(data, ["provider", "property", "extend_info",
                                       "resource_name", "resource_property",
                                       "data_source", "source_property",
-                                      "enabled", "output_property"])
+                                      "enabled", "output_property",
+                                      "data_source_output"])
 
         validation.validate_string("provider", data["provider"])
         validation.validate_string("property", data.get("property"))
         validation.validate_string("source_property", data.get("source_property"))
         validation.validate_string("resource_name", data.get("resource_name"))
+        validation.validate_string("data_source_output",
+                                   data.get("data_source_output"))
         validation.validate_dict("extend_info", data.get("extend_info"))
         validation.validate_dict("resource_property", data.get("resource_property"))
         validation.validate_dict("output_property", data.get("output_property"))
