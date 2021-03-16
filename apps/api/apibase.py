@@ -665,7 +665,7 @@ class ApiBase(TerraformResource):
         return define_json, resource_keys_config
 
     def read_query_result_controller(self, provider, result, data_source_output):
-        instance_define = {}
+        # instance_define = {}
         if not data_source_output:
             raise ValueError("data_source_output not config")
 
@@ -674,7 +674,13 @@ class ApiBase(TerraformResource):
             _data = result.get("resources")[0]
             _instances = _data.get("instances")[0]
             _attributes = _instances.get("attributes")
-            instance_list = _attributes.get(data_source_output)
+
+            outlines = data_source_output.split(".")
+            for outline in outlines:
+                _attributes = _attributes.get(outline)
+
+            instance_list = _attributes
+            # todo dict change to list
             instance_define = instance_list[0]
         except:
             logger.info(traceback.format_exc())
