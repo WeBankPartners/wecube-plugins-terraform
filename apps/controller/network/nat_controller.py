@@ -8,6 +8,7 @@ from core.controller import BaseController
 from core.controller import BackendIdController
 from lib.uuid_util import get_uuid
 from apps.api.network.nat_gateway import NatGatewayApi
+from apps.controller.source_controller import BaseSourceController
 
 
 class ResBase(object):
@@ -154,3 +155,11 @@ class NatGatewayDeleteController(BaseController):
         rid = data.pop("id", None)
         result = self.resource.destory(rid)
         return {"result": result}
+
+
+class NatSourceController(BaseSourceController):
+    name = "NatGateway"
+    resource_describe = "NatGateway"
+    allow_methods = ("POST",)
+    resource = NatGatewayApi()
+
