@@ -8,6 +8,7 @@ from core.controller import BackendIdController
 from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.vm.eni import EniApi
+from apps.controller.source_controller import BaseSourceController
 
 
 class ResBase(object):
@@ -151,3 +152,11 @@ class EniDeleteController(BaseController):
         rid = data.pop("id", None)
         result = self.resource.destory(rid)
         return {"result": result}
+
+
+class ENISourceController(BaseSourceController):
+    name = "Eni"
+    resource_describe = "Eni"
+    allow_methods = ("POST",)
+    resource = EniApi()
+

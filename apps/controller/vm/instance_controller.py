@@ -9,6 +9,7 @@ from core.controller import BaseController
 from core.controller import BackendIdController
 from lib.uuid_util import get_uuid
 from apps.api.vm.instance import InstanceApi
+from apps.controller.source_controller import BaseSourceController
 
 
 class ResBase(object):
@@ -309,3 +310,11 @@ class InstanceStartController(BaseController):
         res = {"result": count, "action": action,
                "power_status": result.get("power_status")}
         return res
+
+
+class InstanceSourceController(BaseSourceController):
+    name = "Instance"
+    resource_describe = "Instance"
+    allow_methods = ("POST",)
+    resource = InstanceApi()
+
