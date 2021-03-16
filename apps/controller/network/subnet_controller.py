@@ -8,6 +8,7 @@ from core.controller import BackendIdController
 from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.network.subnet import SubnetApi
+from apps.controller.source_controller import BaseSourceController
 
 
 class ResBase(object):
@@ -143,3 +144,10 @@ class SubnetDeleteController(BaseController):
         rid = data.pop("id", None)
         result = self.resource.destory(rid)
         return {"result": result}
+
+
+class SubnetSourceController(BaseSourceController):
+    name = "Subnet"
+    resource_describe = "Subnet"
+    allow_methods = ("POST",)
+    resource = SubnetApi()
