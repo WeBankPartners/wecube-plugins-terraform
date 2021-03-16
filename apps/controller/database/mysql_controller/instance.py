@@ -11,6 +11,7 @@ from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from lib.encrypt_helper import decrypt_str
 from apps.api.database.mysql.instance import MysqlApi
+from apps.controller.source_controller import BaseSourceController
 
 
 class ResBase(object):
@@ -197,3 +198,11 @@ class MysqlDeleteController(BaseController):
         force_delete = data.get("force_delete", False)
         result = self.resource.destory(rid, force_delete=force_delete)
         return {"result": result}
+
+
+class MysqlSourceController(BaseSourceController):
+    name = "Mysql"
+    resource_describe = "Mysql"
+    allow_methods = ("POST",)
+    resource = MysqlApi()
+
