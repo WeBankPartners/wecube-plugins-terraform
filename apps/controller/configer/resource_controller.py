@@ -114,7 +114,7 @@ class ResourceIdController(BackendIdController):
                                       "enabled", "output_property",
                                       "data_source_output", "data_source_extend"])
 
-        validation.validate_string("provider", data["provider"])
+        validation.validate_string("provider", data.get("provider"))
         validation.validate_string("property", data.get("property"))
         validation.validate_string("source_property", data.get("source_property"))
         validation.validate_string("resource_name", data.get("resource_name"))
@@ -151,7 +151,7 @@ class ResourceIdController(BackendIdController):
 
         if data.get("data_source") is not None:
             data_source = validation.validate_dict("data_source", data.get("data_source"))
-            source_necessary(resource_name=data["resource_name"],
+            source_necessary(resource_name=data["data_source"],
                              data_source=data_source)
 
             data["data_source"] = json.dumps(data_source)
