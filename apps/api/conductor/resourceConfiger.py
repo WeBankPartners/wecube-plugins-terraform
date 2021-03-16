@@ -68,6 +68,9 @@ class ResourceConfiger(object):
         self.resource_info(provider, resource_name)
 
         data_source = self.resource_keys_config["data_source"]
+        if not data_source:
+            raise ValueError("source资源未定义")
+
         resource_columns = convert_keys(resource_data, defines=data_source)
 
         resource_columns = self.reduce_key(resource_columns)
