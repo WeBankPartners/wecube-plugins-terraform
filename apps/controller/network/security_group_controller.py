@@ -8,6 +8,7 @@ from core.controller import BackendIdController
 from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.network.security_group import SecGroupApi
+from apps.controller.source_controller import BaseSourceController
 
 
 class ResBase(object):
@@ -141,3 +142,11 @@ class SecGroupDeleteController(BaseController):
         rid = data.pop("id", None)
         result = self.resource.destory(rid)
         return {"result": result}
+
+
+class SGSourceController(BaseSourceController):
+    name = "SecGroup"
+    resource_describe = "SecGroup"
+    allow_methods = ("POST",)
+    resource = SecGroupApi()
+
