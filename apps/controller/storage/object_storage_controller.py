@@ -8,6 +8,7 @@ from core.controller import BackendIdController
 from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.storage.object_storage import ObjectStorageApi
+from apps.controller.source_controller import BaseSourceController
 
 
 class ResBase(object):
@@ -143,3 +144,10 @@ class ObjectStorageDeleteController(BaseController):
         rid = data.pop("id", None)
         result = self.resource.destory(rid)
         return {"result": result}
+
+
+class OSSSourceController(BaseSourceController):
+    name = "ObjectStorage"
+    resource_describe = "ObjectStorage"
+    allow_methods = ("POST",)
+    resource = ObjectStorageApi()
