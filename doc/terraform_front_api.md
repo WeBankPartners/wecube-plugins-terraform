@@ -298,6 +298,11 @@ url: /terraform/v1/configer/resource
 "extend_info"      资源其他属性字段  json
 "resource_property"  资源转换的属性字段  json   如： cider需要转换为cider_block  则为｛“cider”: "cider_block"｝
 "output_property"  输出属性： 例如｛“resource_id”: "id"｝或｛“resource_id”: {"type": "string", "value": "id"}｝
+
+source_property  查询data source资源名称 string 选填
+data_source_output  data source输出资源字段 如: instance.configs   string 选填
+data_source   data source查询字段转换    string  选填
+data_source_extend  data source其他资源输出转换字段  string 选填
 ```
 
 
@@ -384,6 +389,19 @@ url: /terraform/v1/configer/resource/{id}
 "resource_name", 
 "resource_property"
 "output_property"
+source_property  
+data_source_output  
+data_source  
+data_source_extend 
+```
+例如:
+```
+{
+"source_property": "tencentcloud_vpc_subnets",
+"data_source_output": "instance_list",
+"data_source": {"resource_id": "subnet_id"},
+"data_source_extend": {}
+}
 ```
 
 输出：

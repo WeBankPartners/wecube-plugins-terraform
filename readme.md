@@ -138,6 +138,7 @@ provider_property配置字段的转换： 如secret_id 需要转换为api_id 则
 
 url: /terraform/v1/configer/resource
 
+1).资源
 ```
 {
 "resource_name": "vpc",
@@ -151,6 +152,22 @@ url: /terraform/v1/configer/resource
 "output_property": {}
 }
 ```
+
+2).回刷云上已有资源信息
+```
+{
+"source_property": "tencentcloud_vpc_subnets",
+"data_source_output": "instance_list",
+"data_source": {"resource_id": "subnet_id"},
+"data_source_extend": {}
+}
+```
+<p>
+source_property回刷data名称
+data_source_output 获取回刷数据的字段名称, 可使用层级, 如: instance.configs
+data_source 设置查询的字段转换信息
+data_source_extend 其他需要逆转换输出的字段
+</p>
 
 3. 配置通用值
 
