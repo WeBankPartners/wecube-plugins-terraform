@@ -158,7 +158,7 @@ class MysqlIdController(BackendIdController):
     def delete(self, request, data, **kwargs):
         rid = kwargs.pop("rid", None)
         force_delete = data.get("force_delete", False)
-        return self.resource.destory(rid, force_delete=force_delete)
+        return self.resource.destory(rid)
 
 
 class MysqlAddController(BaseController):
@@ -196,7 +196,7 @@ class MysqlDeleteController(BaseController):
     def main_response(self, request, data, **kwargs):
         rid = data.pop("id", None)
         force_delete = data.get("force_delete", False)
-        result = self.resource.destory(rid, force_delete=force_delete)
+        result = self.resource.destory(rid)
         return {"result": result}
 
 
