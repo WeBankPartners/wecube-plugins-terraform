@@ -11,4 +11,7 @@ class MariaDBApi(RdsDBApi):
         super(MariaDBApi, self).__init__()
         self.resource_name = "mariadb"
         self.resource_workspace = "mariadb"
-        self.resource_object = MariaDBObject()
+        self.relation_resource = "subnet"
+        self._flush_resobj()
+        self.resource_keys_config = None
+
