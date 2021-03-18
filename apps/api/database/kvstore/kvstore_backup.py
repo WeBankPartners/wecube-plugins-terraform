@@ -10,7 +10,7 @@ from lib.json_helper import format_json_dumps
 from core import local_exceptions
 from apps.common.convert_keys import define_relations_key
 from apps.api.apibase import ApiBase
-from apps.api.configer.provider import ProviderApi
+# from apps.api.configer.provider import ProviderApi
 from apps.background.resource.resource_base import CrsObject
 
 
@@ -56,28 +56,3 @@ class KvBackupApi(ApiBase):
         owner_id = create_data.get("kvstore_id")
         return owner_id, None
 
-    def destory(self, rid, force_delete=False):
-        '''
-
-        :param rid:
-        :param force_delete:
-        :return:
-        '''
-
-        resource_info = self.resource_object.show(rid)
-        if not resource_info:
-            return 0
-
-        _path = self.create_workpath(rid,
-                                     provider=resource_info["provider"],
-                                     region=resource_info["region"])
-
-        if not self.destory_ensure_file(rid, path=_path):
-            self.write_define(rid, _path, define_json=resource_info["define_json"])
-
-        status = self.run_destory(_path)
-        if not status:
-            raise local_exceptions.ResourceOperateException(self.resource_name,
-                                                            msg="delete %s %s failed" % (self.resource_name, rid))
-
-        return self.resource_object.delete(rid, update_data={"status": "deleted"})
