@@ -193,6 +193,8 @@ resouce_property_models = {
         "security_group_id",
         "port",
         "user",
+        "first_slave_zone",
+        "second_slave_zone",
         "password",
         "force_delete"
     ],
@@ -209,6 +211,8 @@ resouce_property_models = {
         "security_group_id",
         "port",
         "user",
+        "first_slave_zone",
+        "second_slave_zone",
         "password",
         "force_delete"
     ],
@@ -246,7 +250,8 @@ resouce_property_models = {
         "version",
         "subnet_id",
         "instance_type",
-        "port",
+        # "port",
+        "disk_size",
         "password",
         "force_delete"
     ],
