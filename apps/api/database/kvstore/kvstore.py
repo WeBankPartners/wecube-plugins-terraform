@@ -68,32 +68,26 @@ class KvStoreApi(ApiBase):
         logger.info("before_keys_checks add info: %s" % (format_json_dumps(ext_info)))
         return ext_info
 
-    def chose_engine(self, engine):
-        engine = engine or self.resource_name
-        if not engine:
-            raise ValueError("engine 不能为null")
-
-        return engine
-
     def generate_create_data(self, zone, create_data, **kwargs):
         r_create_data = {"vpc_id": create_data.get("vpc_id"),
                          "subnet_id": create_data.get("subnet_id"),
                          "security_group_id": create_data.get("security_group_id")}
 
-        engine = self.chose_engine(create_data.get("engine"))
-
+        password = create_data.get("password")
         x_create_data = {"name": create_data.get("name"),
-                         "engine": engine, "zone": zone,
+                         "engine": self.resource_name, "zone": zone,
                          "version": create_data.get("version"),
-                         "password": create_data.get("password"),
-                         "port": create_data.get("port")
+                         "port": create_data.get("port"),
+                         "instance_type": create_data.get("instance_type")
                          }
+
+        if password:
+            x_create_data["password"] = password
 
         return x_create_data, r_create_data
 
     def generate_owner_data(self, create_data, **kwargs):
-        owner_id = create_data.get("subnet_id")
-        return owner_id, None
+        return None, None
 
     def create(self, rid, provider, region, zone, secret,
                create_data, extend_info, **kwargs):
@@ -140,73 +134,3 @@ class KvStoreApi(ApiBase):
 
         return count, res
 
-    def _generate_update_data(self, rid, provider, define_json, update_data, extend_info):
-        self.resource_info(provider)
-        resource_values_config = self.values_config(provider)
-
-        resource_name = self.resource_keys_config["property"]
-        resource_property = self.resource_keys_config["resource_property"]
-        resource_extend_info = self.resource_keys_config["extend_info"]
-
-        resource_columns = {}
-        for key, value in update_data.items():
-            if resource_values_config.get(key):
-                _values_configs = resource_values_config.get(key)
-                value = convert_value(value, _values_configs.get(value))
-
-            resource_columns[key] = value
-
-        resource_columns = convert_keys(resource_columns, defines=resource_property, is_update=True)
-        if extend_info:
-            _extend_columns = convert_extend_propertys(datas=extend_info,
-                                                       extend_info=resource_extend_info,
-                                                       is_update=True)
-            resource_columns.update(_extend_columns)
-
-        _t = define_json["resource"][resource_name]
-        label_name = self.resource_name + "_" + rid
-        origin_columns = _t[label_name]
-
-        origin_columns.update(resource_columns)
-
-        define_json["resource"] = {
-            resource_name: {
-                label_name: origin_columns
-            }
-        }
-        logger.info(format_json_dumps(define_json))
-        return define_json
-
-    def destory(self, rid, force_delete=False):
-        '''
-
-        :param rid:
-        :param force_delete:
-        :return:
-        '''
-
-        resource_info = self.resource_object.show(rid)
-        if not resource_info:
-            return 0
-
-        _path = self.create_workpath(rid,
-                                     provider=resource_info["provider"],
-                                     region=resource_info["region"])
-
-        if not self.destory_ensure_file(rid, path=_path):
-            self.write_define(rid, _path, define_json=resource_info["define_json"])
-
-        if force_delete:
-            update_data = {"force_delete": "true"}
-            define_json = self._generate_update_data(rid, resource_info["provider"],
-                                                     define_json=resource_info["define_json"],
-                                                     update_data=update_data, extend_info={})
-
-            self.write_define(rid, _path, define_json=define_json)
-
-        status = self.run_destory(_path)
-        if not status:
-            raise local_exceptions.ResourceOperateException(self.resource_name,
-                                                            msg="delete %s %s failed" % (self.resource_name, rid))
-
-        return self.resource_object.delete(rid, update_data={"status": "deleted"})
