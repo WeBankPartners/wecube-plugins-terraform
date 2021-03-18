@@ -8,13 +8,12 @@ import traceback
 from lib.logs import logger
 from lib.json_helper import format_json_dumps
 from core import local_exceptions
+from apps.common.convert_keys import validate_type
 from apps.common.convert_keys import convert_keys
 from apps.common.convert_keys import convert_value
 from apps.common.convert_keys import define_relations_key
 from apps.api.configer.provider import ProviderApi
 from apps.api.apibase import ApiBase
-# from apps.background.resource.network.subnet import SubnetObject
-# from apps.background.resource.database.rds import RdsDBObject
 from apps.background.resource.vm.instance_type import InstanceTypeObject
 from apps.background.resource.resource_base import CrsObject
 from apps.api.conductor.provider import ProviderConductor
@@ -35,23 +34,59 @@ class RdsDBApi(ApiBase):
         :param vpc_id:
         :return:
         '''
+
+        vpc_id = create_data.get("vpc_id")
         subnet_id = create_data.get("subnet_id")
+        sg_id = create_data.get("security_group_id")
 
         self.resource_info(provider)
         resource_property = self.resource_keys_config["resource_property"]
         _subnet_status = define_relations_key("subnet_id", subnet_id, resource_property.get("subnet_id"))
+        _vpc_status = define_relations_key("vpc_id", vpc_id, resource_property.get("vpc_id"))
+        _sg_status = define_relations_key("security_group_id", sg_id, resource_property.get("security_group_id"))
 
         ext_info = {}
         if subnet_id and (not _subnet_status):
-            ext_info["subnet_id"] = CrsObject("rds").object_resource_id(subnet_id)
+            ext_info["subnet_id"] = CrsObject("subnet").object_resource_id(subnet_id)
+        if vpc_id and (not _vpc_status):
+            ext_info["vpc_id"] = CrsObject("vpc").object_resource_id(vpc_id)
+        if sg_id and (not _sg_status):
+            sg_property = resource_property.get("security_group_id")
+            if isinstance(sg_property, dict):
+                if sg_property.get("type", "string") == "list":
+                    sg_list = validate_type(sg_id, "list")
+                    _sg_resource_ids = []
+                    for _sg in sg_list:
+                        _sg_resource_ids.append(CrsObject("security_group").object_resource_id(_sg))
+                else:
+                    _sg_resource_ids = CrsObject("security_group").object_resource_id(sg_id)
+
+                ext_info["security_group_id"] = _sg_resource_ids
+            else:
+                ext_info["security_group_id"] = CrsObject("security_group").object_resource_id(sg_id)
 
         logger.info("before_keys_checks add info: %s" % (format_json_dumps(ext_info)))
         return ext_info
 
-    def generate_create_data(self, zone, create_data, **kwargs):
-        r_create_data = {"subnet_id": create_data.get("subnet_id")}
+    def zone_info(self, provider, zone):
+        return ProviderApi().zone_info(provider, zone)
 
-        password = create_data.get("password") or "Terraform.123"
+    def _generate_slave_zone(self, provider, first_slave_zone, second_slave_zone):
+        create_data = {}
+        if first_slave_zone:
+            create_data["first_slave_zone"] = self.zone_info(provider, first_slave_zone)
+        if second_slave_zone:
+            create_data["second_slave_zone"] = self.zone_info(provider, second_slave_zone)
+
+        logger.info("_generate_slave_zone format json: %s" % (format_json_dumps(create_data)))
+        return create_data
+
+    def generate_create_data(self, zone, create_data, **kwargs):
+        r_create_data = {"vpc_id": create_data.get("vpc_id"),
+                         "subnet_id": create_data.get("subnet_id"),
+                         "security_group_id": create_data.get("security_group_id")}
+
+        password = create_data.get("password") or "Terraform@123"
         x_create_data = {"name": create_data.get("name"),
                          "engine": self.resource_name, "zone": zone,
                          "version": create_data.get("version"),
@@ -65,8 +100,7 @@ class RdsDBApi(ApiBase):
         return x_create_data, r_create_data
 
     def generate_owner_data(self, create_data, **kwargs):
-        r_id = create_data.get("subnet_id")
-        return None, r_id
+        return None, None
 
     def create(self, rid, provider, region, zone, secret,
                create_data, extend_info, **kwargs):
@@ -104,6 +138,13 @@ class RdsDBApi(ApiBase):
         kwargs["memory"] = memory
         x_create_data["instance_type"] = origin_type
 
+        first_slave_zone = create_data.get("first_slave_zone")
+        second_slave_zone = create_data.get("second_slave_zone")
+
+        x_create_data.update(self._generate_slave_zone(provider=provider_object["name"],
+                                                       first_slave_zone=first_slave_zone,
+                                                       second_slave_zone=second_slave_zone))
+
         _relations_id_dict = self.before_keys_checks(provider_object["name"], r_create_data)
 
         x_create_data.update(_relations_id_dict)
@@ -118,69 +159,3 @@ class RdsDBApi(ApiBase):
 
         return count, res
 
-    def _generate_update_data(self, rid, provider, define_json, update_data):
-        resource_keys_config = self.resource_info(provider)
-        resource_values_config = self.values_config(provider)
-
-        resource_name = resource_keys_config["resource_name"]
-        resource_property = resource_keys_config["resource_property"]
-
-        resource_columns = {}
-        for key, value in update_data.items():
-            if resource_values_config.get(key):
-                value = convert_value(value, resource_values_config.get(key))
-
-            resource_columns[key] = value
-
-        resource_columns = convert_keys(resource_columns,
-                                        defines=resource_property,
-                                        is_update=True)
-
-        _t = define_json["resource"][resource_name]
-        origin_columns = _t[rid]
-
-        origin_columns.update(resource_columns)
-
-        _info = {
-            "resource": {
-                resource_name: {
-                    rid: origin_columns
-                }
-            }
-        }
-        logger.info(format_json_dumps(_info))
-        return _info
-
-    def destory(self, rid, force_delete=False):
-        '''
-
-        :param rid:
-        :param force_delete:
-        :return:
-        '''
-
-        resource_info = self.resource_object.show(rid)
-        if not resource_info:
-            return 0
-
-        _path = self.create_workpath(rid,
-                                     provider=resource_info["provider"],
-                                     region=resource_info["region"])
-
-        if not self.destory_ensure_file(rid, path=_path):
-            self.write_define(rid, _path, define_json=resource_info["define_json"])
-
-        if force_delete:
-            update_data = {"force_delete": "true"}
-            define_json = self._generate_update_data(rid, resource_info["provider"],
-                                                     define_json=resource_info["define_json"],
-                                                     update_data=update_data)
-
-            self.write_define(rid, _path, define_json=define_json)
-
-        status = self.run_destory(_path)
-        if not status:
-            raise local_exceptions.ResourceOperateException(self.resource_name,
-                                                            msg="delete %s %s failed" % (self.resource_name, rid))
-
-        return self.resource_object.delete(rid, update_data={"status": "deleted"})
