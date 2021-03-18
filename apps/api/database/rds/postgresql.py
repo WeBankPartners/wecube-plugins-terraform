@@ -2,7 +2,7 @@
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-from apps.background.resource.database.rds import PostgreSQLObject
+# from apps.background.resource.database.rds import PostgreSQLObject
 from apps.api.database.rds.rds import RdsDBApi
 
 
@@ -11,4 +11,6 @@ class PostgreSQLApi(RdsDBApi):
         super(PostgreSQLApi, self).__init__()
         self.resource_name = "postgreSQL"
         self.resource_workspace = "postgreSQL"
-        self.resource_object = PostgreSQLObject()
+        self.relation_resource = "subnet"
+        self._flush_resobj()
+        self.resource_keys_config = None
