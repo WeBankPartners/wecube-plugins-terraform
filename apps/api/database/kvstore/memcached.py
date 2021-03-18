@@ -17,6 +17,7 @@ class MemcachedApi(KvStoreApi):
         self.resource_name = "memcached"
         self.resource_workspace = "memcached"
         self._flush_resobj()
+        self.resource_keys_config = None
 
 
 class MemcachedBackupApi(KvBackupApi):
@@ -25,6 +26,7 @@ class MemcachedBackupApi(KvBackupApi):
         self.resource_name = "memcached_backup"
         self.resource_workspace = "memcached_backup"
         self._flush_resobj()
+        self.resource_keys_config = None
 
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
@@ -34,7 +36,7 @@ class MemcachedBackupApi(KvBackupApi):
         :return:
         '''
 
-        kvstore_id = create_data.get("kvstore_id")
+        kvstore_id = create_data.get("memcached_id")
 
         self.resource_info(provider)
         resource_property = self.resource_keys_config["resource_property"]
