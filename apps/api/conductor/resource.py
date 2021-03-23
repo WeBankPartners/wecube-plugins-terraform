@@ -197,6 +197,12 @@ class ResourceConductor(object):
                                                                        label_name=label_name,
                                                                        resource_data=resource_data)
 
+        output_json, _ = ResourceConfiger().conductor_data_output(provider=provider,
+                                                                  resource_name=resource_name,
+                                                                  label_name=label_name
+                                                                  )
+
+        # define_json.update(output_json)
         return define_json, resource_keys_config
 
     def conductor_reset_filter(self, provider, resource_name):

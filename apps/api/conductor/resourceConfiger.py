@@ -194,6 +194,30 @@ class ResourceConfiger(object):
         result = {"output": ext_output_config} if ext_output_config else {}
         return result, self.resource_keys_config
 
+    def _generate_source_output(self, provider, resource_name, label_name):
+        '''
+        转换output 输出参数，生成配置
+        :param label_name:
+        :return:
+        '''
+
+        self.resource_info(provider, resource_name)
+
+        output_configs = self.resource_keys_config["output_property"]
+        resource_name = self.resource_keys_config["property"]
+
+        _ext_output = {}
+        for key, define in output_configs.items():
+            _ext_output.update(output_line(key, define))
+
+        ext_output_config = {}
+        for column, ora_column in _ext_output.items():
+            if column != "resource_id":
+                ext_output_config[column] = {"value": "${data.%s.%s.%s}" % (resource_name, label_name, ora_column)}
+
+        result = {"output": ext_output_config} if ext_output_config else {}
+        return result, self.resource_keys_config
+
     def conductor_apply_output(self, provider, resource_name, label_name):
         '''
 
@@ -204,6 +228,17 @@ class ResourceConfiger(object):
         '''
 
         return self._generate_output(provider, resource_name, label_name)
+
+    def conductor_data_output(self, provider, resource_name, label_name):
+        '''
+
+        :param provider:
+        :param resource_name:
+        :param label_name:
+        :return:
+        '''
+
+        return self._generate_source_output(provider, resource_name, label_name)
 
     def conductor_upgrade_extend(self, provider, resource_name, extend_info):
         '''

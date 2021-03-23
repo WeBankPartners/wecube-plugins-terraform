@@ -10,6 +10,7 @@ from apps.common.convert_keys import convert_value
 from apps.common.reverse import Reverse
 from apps.common.reverse_convert_keys import ReverseProperty
 from apps.background.resource.configr.value_config import ValueConfigObject
+from .provider import ProviderConductor
 
 
 class ValueResetConductor(object):
@@ -45,5 +46,10 @@ class ValueResetConductor(object):
                 logger.debug("key: %s value config is null, skip..." % key)
 
             resource_columns[key] = value
+
+        if "zone" in data.keys():
+            zone = ProviderConductor().zone_reverse_info(provider, zone=data["zone"])
+            logger.info("find zone %s" % zone)
+            resource_columns["zone"] = zone
 
         return resource_columns
