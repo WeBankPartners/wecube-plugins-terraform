@@ -16,6 +16,7 @@ urlpatterns = [
     url(r'^mysql/(?P<rid>[\w-]+)$', mysql_instance.MysqlIdController()),
     url(r'^backend/mysql/create$', mysql_instance.MysqlAddController()),
     url(r'^backend/mysql/delete$', mysql_instance.MysqlDeleteController()),
+    url(r'^backend/mysql/source$', mysql_instance.MysqlSourceController()),
 
     url(r'^mysql_database$', mysql_database.MysqlDatabaseController()),
     url(r'^mysql_database/(?P<rid>[\w-]+)$', mysql_database.MysqlDatabaseIdController()),
