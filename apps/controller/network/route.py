@@ -9,16 +9,10 @@ import eip_association_controller
 import ccn_controller
 import ccn_attach_controller
 import ccn_bandwidth_controller
-
-from subnet_controller import SubnetController
-from subnet_controller import SubnetAddController
-from subnet_controller import SubnetIdController
-from subnet_controller import SubnetDeleteController
-
-from routetable_controller import RouteTableController
-from routetable_controller import RouteTableIdController
-from routetable_controller import RouteTableAddController
-from routetable_controller import RouteTableDeleteController
+import subnet_controller
+import routetable_controller
+import route_entry_controller
+import security_group_controller
 
 from route_entry_controller import RouteEntryController
 from route_entry_controller import RouteEntryIdController
@@ -41,15 +35,18 @@ urlpatterns = [
     url(r'^backend/vpc/create$', vpc_controller.VPCAddController()),
     url(r'^backend/vpc/delete$', vpc_controller.VPCDeleteController()),
     url(r'^backend/vpc/source$', vpc_controller.VPCSourceController()),
-    url(r'^subnet$', SubnetController()),
-    url(r'^subnet/(?P<rid>[\w-]+)$', SubnetIdController()),
-    url(r'^backend/subnet/create$', SubnetAddController()),
-    url(r'^backend/subnet/delete$', SubnetDeleteController()),
 
-    url(r'^route_table$', RouteTableController()),
-    url(r'^route_table/(?P<rid>[\w-]+)$', RouteTableIdController()),
-    url(r'^backend/route_table/create$', RouteTableAddController()),
-    url(r'^backend/route_table/delete$', RouteTableDeleteController()),
+    url(r'^subnet$', subnet_controller.SubnetController()),
+    url(r'^subnet/(?P<rid>[\w-]+)$', subnet_controller.SubnetIdController()),
+    url(r'^backend/subnet/create$', subnet_controller.SubnetAddController()),
+    url(r'^backend/subnet/delete$', subnet_controller.SubnetDeleteController()),
+    url(r'^backend/subnet/source$', subnet_controller.SubnetSourceController()),
+
+    url(r'^route_table$', routetable_controller.RouteTableController()),
+    url(r'^route_table/(?P<rid>[\w-]+)$', routetable_controller.RouteTableIdController()),
+    url(r'^backend/route_table/create$', routetable_controller.RouteTableAddController()),
+    url(r'^backend/route_table/delete$', routetable_controller.RouteTableDeleteController()),
+    url(r'^backend/route_table/source$', routetable_controller.RouteTableSourceController()),
 
     url(r'^route_entry$', RouteEntryController()),
     url(r'^route_entry/(?P<rid>[\w-]+)$', RouteEntryIdController()),
@@ -60,6 +57,7 @@ urlpatterns = [
     url(r'^security_group/(?P<rid>[\w-]+)$', SecGroupIdController()),
     url(r'^backend/security_group/create$', SecGroupAddController()),
     url(r'^backend/security_group/delete$', SecGroupDeleteController()),
+    url(r'^backend/security_group/source$', security_group_controller.SGSourceController()),
 
     url(r'^security_group_rule$', SecGroupRuleController()),
     url(r'^security_group_rule/(?P<rid>[\w-]+)$', SecGroupRuleIdController()),
@@ -70,11 +68,13 @@ urlpatterns = [
     url(r'^nat/(?P<rid>[\w-]+)$', nat_controller.NatGatewayIdController()),
     url(r'^backend/nat/create$', nat_controller.NatGatewayAddController()),
     url(r'^backend/nat/delete$', nat_controller.NatGatewayDeleteController()),
+    url(r'^backend/nat/source$', nat_controller.NatSourceController()),
 
     url(r'^eip$', eip_controller.EipController()),
     url(r'^eip/(?P<rid>[\w-]+)$', eip_controller.EipIdController()),
     url(r'^backend/eip/create$', eip_controller.EipAddController()),
     url(r'^backend/eip/delete$', eip_controller.EipDeleteController()),
+    url(r'^backend/eip/source$', eip_controller.EipSourceController()),
 
     url(r'^eip_association$', eip_association_controller.EipAssociationController()),
     url(r'^eip_association/(?P<rid>[\w-]+)$', eip_association_controller.EipAssociationIdController()),
@@ -85,6 +85,7 @@ urlpatterns = [
     url(r'^ccn/(?P<rid>[\w-]+)$', ccn_controller.CCNIdController()),
     url(r'^backend/ccn/create$', ccn_controller.CCNAddController()),
     url(r'^backend/ccn/delete$', ccn_controller.CCNDeleteController()),
+    url(r'^backend/ccn/source$', ccn_controller.CCNSourceController()),
 
     url(r'^ccn_attach$', ccn_attach_controller.CCNAttachController()),
     url(r'^ccn_attach/(?P<rid>[\w-]+)$', ccn_attach_controller.CCNAttachIdController()),

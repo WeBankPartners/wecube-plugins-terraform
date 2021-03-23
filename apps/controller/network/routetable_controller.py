@@ -157,7 +157,7 @@ class RouteTableDeleteController(BaseController):
         return {"result": result}
 
 
-class SubnetSourceController(BaseSourceController):
+class RouteTableSourceController(BaseSourceController):
     name = "RouteTable"
     resource_describe = "RouteTable"
     allow_methods = ("POST",)
