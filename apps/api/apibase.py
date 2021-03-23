@@ -7,6 +7,7 @@ import base64
 import json
 import traceback
 from lib.logs import logger
+from lib.uuid_util import get_uuid
 from lib.json_helper import format_json_dumps
 from core import local_exceptions
 from apps.common.convert_keys import convert_keys
@@ -24,6 +25,26 @@ from apps.background.resource.resource_base import CrsObject
 from apps.api.conductor.provider import ProviderConductor
 from apps.api.conductor.resource import ResourceConductor
 from apps.api.conductor.valueReverse import ValueResetConductor
+
+
+def fetech_property(instance_define, define_columns):
+    res = {}
+    for key, value in define_columns.items():
+        if "." in key:
+            _keys = key.split(".")
+            tmp = instance_define
+            for x_key in _keys:
+                try:
+                    x_key = int(x_key)
+                    tmp = tmp[x_key]
+                except:
+                    tmp = tmp.get(x_key)
+
+            res[value] = tmp
+        else:
+            res[value] = instance_define.get(key)
+
+    return res
 
 
 class ApiBase(TerraformResource):
@@ -664,6 +685,18 @@ class ApiBase(TerraformResource):
                                                                                          resource_data=query_data)
         return define_json, resource_keys_config
 
+    def read_data_output_controller(self, result):
+        result_output = result.get("outputs")
+
+        ext_result = {}
+        for column, res in result_output.items():
+            _out_dict = read_output(key=column, define=column,
+                                    result=res.get("value"))
+            ext_result.update(_out_dict)
+
+        logger.info(format_json_dumps(ext_result))
+        return ext_result
+
     def read_query_result_controller(self, provider, result, data_source_output):
         # instance_define = {}
         if not data_source_output:
@@ -681,17 +714,21 @@ class ApiBase(TerraformResource):
 
             instance_list = _attributes
             # todo dict change to list
-            instance_define = instance_list[0]
+            instance_define = instance_list
         except:
             logger.info(traceback.format_exc())
             raise ValueError("query remote source failed, result read faild")
 
-        res = {}
         define_columns = ResourceConductor().conductor_reset_filter(provider, self.resource_name)
 
-        for key, value in define_columns.items():
-            res[value] = instance_define.get(key)
+        res = []
+        for out_data in instance_define:
+            x_res = fetech_property(out_data, define_columns)
+            res.append(x_res)
 
+        # output_json = self.read_data_output_controller(result)
+
+        # res.update(output_json)
         logger.info(format_json_dumps(res))
         return res
 
@@ -727,17 +764,24 @@ class ApiBase(TerraformResource):
         output_json = self.read_query_result_controller(provider_object["name"], result,
                                                         data_source_output)
 
-        output_json = ValueResetConductor().reset_values(provider=provider_object["name"],
-                                                         resource_name=self.resource_name,
-                                                         data=output_json)
+        result_list = []
+        for out_data in output_json:
+            x_json = ValueResetConductor().reset_values(provider=provider_object["name"],
+                                                        resource_name=self.resource_name,
+                                                        data=out_data)
+            result_list.append(x_json)
 
-        return output_json
+        return result_list
 
     def get_remote_source(self, rid, provider, region, zone, secret,
                           resource_id, **kwargs):
 
-        rid = rid or resource_id
-        query_data = {"resource_id": resource_id}
+        rid = rid or resource_id or "rand_%s" % (get_uuid())
+
+        query_data = {}
+        if resource_id:
+            query_data = {"resource_id": resource_id}
+
         provider_object, provider_info = ProviderConductor().conductor_provider_info(provider, region, secret)
 
         result = self.run_query(rid=rid, region=region, zone=zone,
@@ -745,5 +789,13 @@ class ApiBase(TerraformResource):
                                 provider_info=provider_info,
                                 query_data=query_data, **kwargs)
 
-        result["resource_id"] = resource_id
-        return result
+        res = []
+
+        if resource_id:
+            for x_result in result:
+                x_result["resource_id"] = resource_id
+                res.append(x_result)
+        else:
+            res = result
+
+        return res
