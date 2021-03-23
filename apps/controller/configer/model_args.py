@@ -487,3 +487,15 @@ def source_necessary(resource_name, data_source):
 
     if "resource_id" not in data_source.items():
         raise ValueError("source 缺少必要的定义resource_id")
+
+
+def source_columns_outputs(resource_name):
+    res = resouce_property_models.get(resource_name) or []
+    res2 = output_property_models.get(resource_name) or []
+
+    x_res = res + res2
+    result = {}
+    for key in x_res:
+        result[key] = ""
+
+    return result

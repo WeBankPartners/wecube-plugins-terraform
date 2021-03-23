@@ -23,8 +23,11 @@ exception_common_classes = get_all_class_for_module(exception_common)
 def format_string(data):
     result = {}
     for key, value in data.items():
-        if isinstance(value, dict):
-            result[key] = format_json_dumps(value)
+        if isinstance(value, (dict, list)):
+            if key == "datas":
+                result[key] = value
+            else:
+                result[key] = format_json_dumps(value)
         else:
             result[key] = str(value)
 
@@ -75,17 +78,19 @@ class ResponseController(object):
                     outputs.append(format_string(_res))
             except Exception, e:
                 _res["errorCode"] = "1"
-                _res["errorMessage"] = e.__class__.__name__
                 response_data["resultCode"] = "1"
                 if e.__class__.__name__ in ['UnicodeDecodeError', 'ValueError', 'TypeError', "KeyError",
                                             'ResourceNotCompleteError', "ResourceNotSearchError",
                                             'AllowedForbidden', 'RequestDataTooBig', 'DataToolangError',
                                             'ResourceNotFoundError', 'AuthFailedError', 'TerrformExecError']:
-                    response_data["resultMessage"] = "type: %s, info: %s" % (e.__class__.__name__, e.message)
+                    x_msg = "type: %s, info: %s" % (e.__class__.__name__, e.message)
                 elif e.__class__.__name__ in exception_common_classes:
-                    response_data["resultMessage"] = "type: %s, info: %s" % (e.__class__.__name__, e.message)
+                    x_msg = "type: %s, info: %s" % (e.__class__.__name__, e.message)
                 else:
-                    response_data["resultMessage"] = "type: %s" % (e.__class__.__name__)
+                     x_msg = "type: %s" % (e.__class__.__name__)
+
+                response_data["resultMessage"] = x_msg
+                _res["errorMessage"] = x_msg
                 logger.info(traceback.format_exc())
                 _res.update(self.response_templete(data))
                 outputs.append(format_string(_res))
