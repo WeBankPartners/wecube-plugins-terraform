@@ -10,6 +10,7 @@ urlpatterns = [
     url(r'^lb/(?P<rid>[\w-]+)$', lb_controller.LBIdController()),
     url(r'^backend/lb/create$', lb_controller.LBAddController()),
     url(r'^backend/lb/delete$', lb_controller.LBDeleteController()),
+    url(r'^backend/lb/source$', lb_controller.LBSourceController()),
 
     url(r'^lb_listener$', listener_controller.LBListenerController()),
     url(r'^lb_listener/(?P<rid>[\w-]+)$', listener_controller.LBListenerIdController()),
