@@ -117,6 +117,10 @@ class ReverseProperty(object):
     def format_value(cls, value, defines):
         if not defines:
             return value
+
+        if isinstance(defines, (basestring, bool, int, float)):
+            return defines
+
         for key, define in defines.items():
             if isinstance(define, (basestring, bool, int, float)):
                 if value == define:
