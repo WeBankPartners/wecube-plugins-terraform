@@ -18,7 +18,6 @@ from apps.common.convert_keys import convert_keys
 from apps.common.convert_keys import convert_value
 from apps.common.reverse_convert_keys import ReverseProperty
 
-
 if not os.path.exists(TERRAFORM_BASE_PATH):
     os.makedirs(TERRAFORM_BASE_PATH)
 
@@ -56,6 +55,22 @@ class ProviderApi(object):
         _config = data["value_config"]
 
         return convert_value(zone, _config.get(zone))
+
+    def region_reverse_info(self, provider, region):
+        '''
+
+        :param provider:  provider name
+        :param region:
+        :return:
+        '''
+        data = ValueConfigObject().query_one(where_data={"provider": provider,
+                                                         "resource": "region"})
+        if not data:
+            return region
+
+        _config = data["value_config"]
+
+        return ReverseProperty.format_value(region, _config)
 
     def zone_reverse_info(self, provider, zone):
         '''

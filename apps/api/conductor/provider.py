@@ -49,11 +49,23 @@ class ProviderConductor(object):
 
         return zone
 
+    def region_info(self, provider, region):
+        if region:
+            return ProviderApi().region_info(provider, region)
+
+        return region
+
     def zone_reverse_info(self, provider, zone):
         if zone:
             return ProviderApi().zone_reverse_info(provider, zone)
 
         return zone
+
+    def region_reverse_info(self, provider, region):
+        if region:
+            return ProviderApi().region_reverse_info(provider, region)
+
+        return region
 
     def format_secret(self, secret):
         '''

@@ -105,6 +105,7 @@ class ResourceConfiger(object):
         columns = {}
         for key, value in origin_columns.items():
             if value in data_source_extend.keys():
+                # todo dirct reverse ?
                 continue
             columns[key] = value
 
