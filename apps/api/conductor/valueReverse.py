@@ -52,4 +52,14 @@ class ValueResetConductor(object):
             logger.info("find zone %s" % zone)
             resource_columns["zone"] = zone
 
+        if "peer_region" in data.keys():
+            peer_region = ProviderConductor().region_reverse_info(provider, region=data["peer_region"])
+            logger.info("find region %s" % peer_region)
+            resource_columns["peer_region"] = peer_region
+
+        if "region" in data.keys():
+            peer_region = ProviderConductor().region_reverse_info(provider, region=data["region"])
+            logger.info("find region %s" % peer_region)
+            resource_columns["region"] = peer_region
+
         return resource_columns
