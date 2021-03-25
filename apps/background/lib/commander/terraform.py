@@ -277,3 +277,25 @@ class TerraformDriver(object):
             return True
         else:
             raise TerrformExecError("destroy error, msg: %s" % err)
+
+    def import_state(self, from_source, dest_source, dir_or_plan=None, state=None):
+        '''
+
+        :param dir_path:
+        :param state: path
+        :return:
+        '''
+
+        workdir = dir_or_plan or self.workdir or ''
+
+        if state:
+            exec_cmd = "import -state=%s %s %s" % (state, dest_source, from_source)
+        else:
+            exec_cmd = "import %s %s" % (dest_source, from_source)
+
+        x_command = "cd %s; %s" % (workdir, self._format_cmd(exec_cmd))
+        code, out, err = command(x_command, workdir=workdir)
+        if code == 0:
+            return True
+        else:
+            raise TerrformExecError("import error, msg: %s" % err)
