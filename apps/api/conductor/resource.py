@@ -41,7 +41,7 @@ class ResourceConductor(object):
                                                          extend_info=extend_info)
 
         resource_columns.update(extend_json)
-        property = resource_keys_config["property"]
+        property = resource_keys_config["resource_name"]
 
         _info = {
             "resource": {
@@ -114,7 +114,7 @@ class ResourceConductor(object):
                                                            )
 
         resource_columns.update(extend_json)
-        property = resource_keys_config["property"]
+        property = resource_keys_config["resource_name"]
 
         origin_columns = self.fetch_resource_propertys(resource_name, label_name, origin_data)
         origin_columns.update(resource_columns)
@@ -169,7 +169,7 @@ class ResourceConductor(object):
                                                                                     resource_name=resource_name,
                                                                                     resource_data=resource_data)
 
-        property = resource_keys_config.get("source_property") or resource_keys_config["property"]
+        property = resource_keys_config.get("data_source_name") or resource_keys_config["resource_name"]
 
         _info = {
             "data": {

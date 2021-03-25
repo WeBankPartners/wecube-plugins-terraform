@@ -32,7 +32,7 @@ class ResourceConfiger(object):
             return self.resource_keys_config
 
         resource_keys_config = ResourceObject().query_one(where_data={"provider": provider,
-                                                                      "resource_name": resource_name})
+                                                                      "resource_type": resource_name})
         if not resource_keys_config:
             raise local_exceptions.ResourceConfigError("%s 资源未初始化完成配置" % resource_name)
 
@@ -90,27 +90,27 @@ class ResourceConfiger(object):
         origin_columns = {}
         resource_property = self.resource_keys_config["resource_property"]
         extend_info = self.resource_keys_config["extend_info"]
-        output_property = self.resource_keys_config["output_property"]
-        data_source_extend = self.resource_keys_config["data_source_extend"]
+        resource_output = self.resource_keys_config["resource_output"]
+        data_source_output = self.resource_keys_config["data_source_output"]
 
         propertys = ReverseProperty.reverse_keys(resource_property)
         extend = ReverseProperty.reverse_extend_keys(extend_info)
 
-        output_property.pop("resource_id", None)
-        output = ReverseProperty.reverse_output_lines(output_property)
+        resource_output.pop("resource_id", None)
+        output = ReverseProperty.reverse_output_lines(resource_output)
         origin_columns.update(propertys)
         origin_columns.update(extend)
         origin_columns.update(output)
 
         columns = {}
         for key, value in origin_columns.items():
-            if value in data_source_extend.keys():
+            if value in data_source_output.keys():
                 # todo dirct reverse ?
                 continue
             columns[key] = value
 
-        data_source_extend = ReverseProperty.reverse_keys(data_source_extend)
-        columns.update(data_source_extend)
+        data_source_output = ReverseProperty.reverse_keys(data_source_output)
+        columns.update(data_source_output)
 
         return columns, self.resource_keys_config
 
@@ -181,8 +181,8 @@ class ResourceConfiger(object):
 
         self.resource_info(provider, resource_name)
 
-        output_configs = self.resource_keys_config["output_property"]
-        resource_name = self.resource_keys_config["property"]
+        output_configs = self.resource_keys_config["resource_output"]
+        resource_name = self.resource_keys_config["resource_name"]
 
         _ext_output = {}
         for key, define in output_configs.items():
@@ -204,8 +204,8 @@ class ResourceConfiger(object):
 
         self.resource_info(provider, resource_name)
 
-        output_configs = self.resource_keys_config["output_property"]
-        resource_name = self.resource_keys_config["property"]
+        output_configs = self.resource_keys_config["resource_output"]
+        resource_name = self.resource_keys_config["resource_type"]
 
         _ext_output = {}
         for key, define in output_configs.items():
