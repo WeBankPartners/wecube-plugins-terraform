@@ -210,6 +210,55 @@
 				</outputParameters>
 			</interface>
 		</plugin>
+		<plugin name="peer_connection">
+			<interface action="create" path="/terraform/v1/network/backend/peer_connection/create" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">vpc_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="Y">peer_vpc_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">peer_region</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">id</parameter>
+					<parameter datatype="string">resource_id</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="delete" path="/terraform/v1/network/backend/peer_connection/delete" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+            <interface action="fetch_source" path="/terraform/v1/network/backend/peer_connection/source" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+                    <parameter datatype="string" mappingType="entity" required="Y">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="Y">secret</parameter>
+                    <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">name</parameter>
+					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">vpc_id</parameter>
+                    <parameter datatype="string">peer_vpc_id</parameter>
+                    <parameter datatype="string">peer_region</parameter>
+				</outputParameters>
+			</interface>
+		</plugin>
 		<plugin name="security_group">
 			<interface action="create" path="/terraform/v1/network/backend/security_group/create" httpMethod='POST'>
 				<inputParameters>
