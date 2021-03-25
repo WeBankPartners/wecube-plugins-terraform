@@ -8,6 +8,7 @@ from core.controller import BackendIdController
 from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.network.eip_association import EipAssociationApi
+from apps.controller.source_controller import BaseSourceController
 
 
 class ResBase(object):
@@ -148,3 +149,11 @@ class EipAssociationDeleteController(BaseController):
         rid = data.pop("id", None)
         result = self.resource.destory(rid)
         return {"result": result}
+
+
+class EipAssSourceController(BaseSourceController):
+    name = "EipAssociation"
+    resource_describe = "EipAssociation"
+    allow_methods = ("POST",)
+    resource = EipAssociationApi()
+
