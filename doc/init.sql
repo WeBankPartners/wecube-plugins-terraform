@@ -46,27 +46,26 @@ CREATE TABLE `cloud_secret` (
 DROP TABLE IF EXISTS `resource`;
 
 CREATE TABLE `resource` (
-  `id` VARCHAR(36) NOT NULL,
-  `provider` VARCHAR(32) NOT NULL,
-  `property` VARCHAR(64) NOT NULL,
-  `resource_name` VARCHAR(64) NOT NULL,
+  `id` varchar(36) NOT NULL,
+  `provider` varchar(32) NOT NULL,
+  `resource_type` varchar(64) NOT NULL,
+  `resource_name` varchar(64) NOT NULL,
   `extend_info` text NOT NULL,
   `resource_property` text NOT NULL,
-  `output_property` text DEFAULT NULL,
-  `is_locked` BOOL DEFAULT FALSE,
-  `created_time` DATETIME DEFAULT NULL,
-  `updated_time` DATETIME DEFAULT NULL,
-  `deleted_time` DATETIME DEFAULT NULL,
-  `enabled` BOOL DEFAULT TRUE,
-  `is_deleted` BOOL DEFAULT FALSE,
+  `resource_output` text,
+  `data_source_name` varchar(64) NOT NULL,
+  `data_source_argument` varchar(64) NOT NULL,
+  `data_source` text,
+  `data_source_output` varchar(2048) DEFAULT NULL,
+  `is_locked` tinyint(1) DEFAULT '0',
+  `created_time` datetime DEFAULT NULL,
+  `updated_time` datetime DEFAULT NULL,
+  `deleted_time` datetime DEFAULT NULL,
+  `enabled` tinyint(1) DEFAULT '1',
+  `is_deleted` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `idx_property` (`provider`, `property`, `is_deleted`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8;
-
-alter table `resource` add column `data_source` text DEFAULT NULL after  `output_property`;
-alter table `resource` add column `data_source_extend` VARCHAR(512) DEFAULT NULL after `data_source`;
-alter table `resource` add column `source_property` VARCHAR(64) NOT NULL after  `output_property`;
-alter table `resource` add column `data_source_output` VARCHAR(64) NOT NULL after  `source_property`;
+  UNIQUE KEY `idx_property` (`provider`,`resource_type`,`is_deleted`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `common_keys`;
 
