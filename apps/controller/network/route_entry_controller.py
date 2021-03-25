@@ -8,6 +8,7 @@ from core.controller import BackendIdController
 from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.network.route_entry import RouteEntryApi
+from apps.controller.source_controller import BaseSourceController
 
 
 class ResBase(object):
@@ -152,3 +153,11 @@ class RouteEntryDeleteController(BaseController):
         rid = data.pop("id", None)
         result = self.resource.destory(rid)
         return {"result": result}
+
+
+class RTRuleSourceController(BaseSourceController):
+    name = "RouteEntry"
+    resource_describe = "RouteEntry"
+    allow_methods = ("POST",)
+    resource = RouteEntryApi()
+
