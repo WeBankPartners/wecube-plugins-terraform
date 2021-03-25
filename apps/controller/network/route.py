@@ -13,6 +13,7 @@ import subnet_controller
 import routetable_controller
 import route_entry_controller
 import security_group_controller
+import peer_connection_controller
 
 from route_entry_controller import RouteEntryController
 from route_entry_controller import RouteEntryIdController
@@ -96,4 +97,10 @@ urlpatterns = [
     url(r'^ccn_bandwidth/(?P<rid>[\w-]+)$', ccn_bandwidth_controller.CCNBandwidthIdController()),
     url(r'^backend/ccn_bandwidth/create$', ccn_bandwidth_controller.CCNBandwidthAddController()),
     url(r'^backend/ccn_bandwidth/delete$', ccn_bandwidth_controller.CCNBandwidthDeleteController()),
+
+    url(r'^peer_connection$', peer_connection_controller.PeerConnController()),
+    url(r'^peer_connection/(?P<rid>[\w-]+)$', peer_connection_controller.PeerConnIdController()),
+    url(r'^backend/peer_connection/create$', peer_connection_controller.PeerConnAddController()),
+    url(r'^backend/peer_connection/delete$', peer_connection_controller.PeerConnDeleteController()),
+    url(r'^backend/peer_connection/source$', peer_connection_controller.PeerConnSourceController()),
 ]
