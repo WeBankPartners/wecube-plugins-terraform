@@ -115,7 +115,7 @@ class ApiBase(TerraformResource):
         '''
 
         self.resource_keys_config = ResourceObject().query_one(where_data={"provider": provider,
-                                                                           "resource_name": self.resource_name})
+                                                                           "resource_type": self.resource_name})
         if not self.resource_keys_config:
             raise local_exceptions.ResourceConfigError("%s 资源未初始化完成配置" % self.resource_name)
 
@@ -282,7 +282,7 @@ class ApiBase(TerraformResource):
         :return:
         '''
 
-        models = self.resource_keys_config["output_property"]
+        models = self.resource_keys_config["resource_output"]
         if models:
             result_output = result.get("outputs")
 
@@ -588,7 +588,7 @@ class ApiBase(TerraformResource):
         self.resource_info(provider)
         resource_values_config = self.values_config(provider)
 
-        resource_name = self.resource_keys_config["property"]
+        resource_name = self.resource_keys_config["resource_name"]
         resource_property = self.resource_keys_config["resource_property"]
         resource_extend_info = self.resource_keys_config["extend_info"]
 
@@ -697,10 +697,10 @@ class ApiBase(TerraformResource):
         logger.info(format_json_dumps(ext_result))
         return ext_result
 
-    def read_query_result_controller(self, provider, result, data_source_output):
+    def read_query_result_controller(self, provider, result, data_source_argument):
         # instance_define = {}
-        if not data_source_output:
-            raise ValueError("data_source_output not config")
+        if not data_source_argument:
+            raise ValueError("data_source_argument not config")
 
         logger.info(format_json_dumps(result))
         try:
@@ -708,7 +708,7 @@ class ApiBase(TerraformResource):
             _instances = _data.get("instances")[0]
             _attributes = _instances.get("attributes")
 
-            outlines = data_source_output.split(".")
+            outlines = data_source_argument.split(".")
             for outline in outlines:
                 _attributes = _attributes.get(outline)
 
@@ -760,9 +760,9 @@ class ApiBase(TerraformResource):
                                                   region=region, provider_info=provider_info,
                                                   define_json=define_json)
 
-        data_source_output = resource_keys_config.get("data_source_output")
+        data_source_argument = resource_keys_config.get("data_source_argument")
         output_json = self.read_query_result_controller(provider_object["name"], result,
-                                                        data_source_output)
+                                                        data_source_argument)
 
         result_list = []
         for out_data in output_json:
