@@ -62,7 +62,7 @@ class BucketObjectApi(ApiBase):
         self.resource_info(provider)
         resource_values_config = self.values_config(provider)
 
-        resource_name = self.resource_keys_config["property"]
+        resource_name = self.resource_keys_config["resource_type"]
         resource_property = self.resource_keys_config["resource_property"]
         resource_extend_info = self.resource_keys_config["extend_info"]
 
