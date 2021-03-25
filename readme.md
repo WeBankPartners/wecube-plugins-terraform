@@ -142,31 +142,31 @@ url: /terraform/v1/configer/resource
 ```
 {
 "resource_name": "vpc",
-"property": "tencentcloud_vpc",
+"resource_type": "tencentcloud_vpc",
 "provider": "tencentcloud",
 "extend_info": {"is_multicast": false,"tags":{"type": "json"}},
 "resource_property": {
 	"name": {"type": "string", "allow_null": 0, "convert": "name"},
 	"cider": {"type": "string", "allow_null": 0, "convert": "cidr_block"}
 },
-"output_property": {}
+"resource_output": {}
 }
 ```
 
 2).回刷云上已有资源信息
 ```
 {
-"source_property": "tencentcloud_vpc_subnets",
+"data_source_name": "tencentcloud_vpc_subnets",
 "data_source_output": "instance_list",
 "data_source": {"resource_id": "subnet_id"},
-"data_source_extend": {}
+"data_source_output": {}
 }
 ```
 <p>
 source_property回刷data名称
 data_source_output 获取回刷数据的字段名称, 可使用层级, 如: instance.configs
 data_source 设置查询的字段转换信息
-data_source_extend 其他需要逆转换输出的字段
+data_source_output 其他需要逆转换输出的字段
 </p>
 
 3. 配置通用值
@@ -183,7 +183,7 @@ url: /terraform/v1/configer/keyconfig
 ```
 {
 "resource": "subnet",
-"property": "cidr",
+"resource_type": "cidr",
 "provider": "tencentcloud",
 "value_config": {
 	"subnet_20": "10.0.20.0/24",
