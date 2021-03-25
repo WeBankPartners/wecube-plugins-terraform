@@ -101,7 +101,7 @@ class ResourceController(BackendController):
                        "resource_output": json.dumps(resource_output),
                        "data_source_name": data.get("data_source_name"),
                        "data_source_argument": data.get("data_source_argument"),
-                       "data_source_output": data_source_output,
+                       "data_source_output": json.dumps(data_source_output),
                        "data_source": json.dumps(data_source)
                        }
 
