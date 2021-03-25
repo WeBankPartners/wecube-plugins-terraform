@@ -8,6 +8,7 @@ from core.controller import BackendIdController
 from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.storage.disk_attach import DiskAttachApi
+from apps.controller.source_controller import BaseSourceController
 
 
 class ResBase(object):
@@ -144,3 +145,11 @@ class DiskDetachController(BaseController):
         rid = data.pop("id", None)
         result = self.resource.detach(rid)
         return {"result": result}
+
+
+class RTRuleSourceController(BaseSourceController):
+    name = "DiskDetach"
+    resource_describe = "DiskDetach"
+    allow_methods = ("POST",)
+    resource = DiskAttachApi()
+
