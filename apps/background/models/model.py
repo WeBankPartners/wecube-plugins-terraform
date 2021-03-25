@@ -109,15 +109,15 @@ class Resource(Base):
 
     id = Column(String(36), primary_key=True)
     provider = Column(String(32), nullable=False)
-    property = Column(String(64), nullable=False)
+    resource_type = Column(String(64), nullable=False)
     resource_name = Column(String(64), nullable=False)
     extend_info = Column(String(1024))
     resource_property = Column(String(2048), nullable=False)
-    output_property = Column(String(1024), nullable=False)
-    source_property = Column(String(64))
-    data_source_output = Column(String(64))
-    data_source_extend = Column(String(512))
-    data_source = Column(String(1024))
+    resource_output = Column(String(1024), nullable=False)
+    data_source_name = Column(String(64))
+    data_source_argument = Column(String(64))
+    data_source_output = Column(String(512))
+    data_source = Column(String(2048))
     is_locked = Column(TINYINT(1), server_default=text("'0'"))
     created_time = Column(DateTime)
     updated_time = Column(DateTime)
@@ -132,16 +132,16 @@ class Resource(Base):
         self.id = data.get("id")
         self.is_deleted = data.get("is_deleted")
         self.is_locked = data.get("is_locked")
-        self.property = data.get("property")
+        self.resource_type = data.get("resource_type")
         self.provider = data.get("provider")
+        self.data_source_argument = data.get("data_source_argument")
         self.data_source_output = data.get("data_source_output")
-        self.data_source_extend = data.get("data_source_extend")
         self.resource_name = data.get("resource_name")
-        self.source_property = data.get("source_property")
+        self.data_source_name = data.get("data_source_name")
         self.data_source = data.get("data_source")
         self.extend_info = data.get("extend_info") or '{}'
         self.resource_property = data.get("resource_property") or '{}'
-        self.output_property = data.get("output_property") or '{}'
+        self.resource_output = data.get("resource_output") or '{}'
         self.updated_time = data.get("updated_time")
 
 

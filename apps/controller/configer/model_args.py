@@ -464,16 +464,16 @@ def property_necessary(resource_name, resource_property):
             raise ValueError("缺少必要的property: %s" % column)
 
 
-def output_necessary(resource_name, output_property):
+def output_necessary(resource_name, resource_output):
     if resource_name not in output_property_models.keys():
         return
 
     columns_property = output_property_models.get(resource_name)
     for column in columns_property:
-        if column not in output_property.keys():
+        if column not in resource_output.keys():
             raise ValueError("缺少必要的output property: %s" % column)
 
-    for key in output_property.keys():
+    for key in resource_output.keys():
         if key not in columns_property:
             raise ValueError("不合法的output property: %s， 允许值：%s" % (key, ",".join(columns_property)))
 
