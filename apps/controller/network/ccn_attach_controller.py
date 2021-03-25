@@ -8,6 +8,7 @@ from core.controller import BackendIdController
 from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.network.ccn_attach import CCNAttachApi
+from apps.controller.source_controller import BaseSourceController
 
 
 class ResBase(object):
@@ -150,3 +151,11 @@ class CCNAttachDeleteController(BaseController):
         rid = data.pop("id", None)
         result = self.resource.destory(rid)
         return {"result": result}
+
+
+class CCNAttachSourceController(BaseSourceController):
+    name = "CCNAttach"
+    resource_describe = "CCNAttach"
+    allow_methods = ("POST",)
+    resource = CCNAttachApi()
+

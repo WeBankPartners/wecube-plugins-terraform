@@ -8,6 +8,7 @@ from core.controller import BackendIdController
 from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.network.ccn_bandwidth import CCNBandwidthApi
+from apps.controller.source_controller import BaseSourceController
 
 
 class ResBase(object):
@@ -151,3 +152,11 @@ class CCNBandwidthDeleteController(BaseController):
         rid = data.pop("id", None)
         result = self.resource.destory(rid)
         return {"result": result}
+
+
+class CCNBandSourceController(BaseSourceController):
+    name = "CCNBandwidth"
+    resource_describe = "CCNBandwidth"
+    allow_methods = ("POST",)
+    resource = CCNBandwidthApi()
+
