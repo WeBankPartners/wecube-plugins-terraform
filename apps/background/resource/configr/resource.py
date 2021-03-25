@@ -18,10 +18,10 @@ class ResourceObject(object):
         for res in results:
             res["extend_info"] = json.loads(res["extend_info"])
             res["resource_property"] = json.loads(res["resource_property"])
-            res["output_property"] = json.loads(res["output_property"]) if res["output_property"] else {}
+            res["resource_output"] = json.loads(res["resource_output"]) if res["resource_output"] else {}
             res["data_source"] = json.loads(res["data_source"]) if res.get("data_source") else {}
-            t = json.loads(res["data_source_extend"]) if res.get("data_source_extend") else {}
-            res["data_source_extend"] = t
+            t = json.loads(res["data_source_output"]) if res.get("data_source_output") else {}
+            res["data_source_output"] = t
             data.append(res)
 
         return count, data
@@ -42,10 +42,10 @@ class ResourceObject(object):
         if data:
             data["extend_info"] = json.loads(data["extend_info"])
             data["resource_property"] = json.loads(data["resource_property"])
-            data["output_property"] = json.loads(data["output_property"]) if data["output_property"] else {}
+            data["resource_output"] = json.loads(data["resource_output"]) if data["resource_output"] else {}
             data["data_source"] = json.loads(data["data_source"]) if data.get("data_source") else {}
-            t = json.loads(data["data_source_extend"]) if data.get("data_source_extend") else {}
-            data["data_source_extend"] = t
+            t = json.loads(data["data_source_output"]) if data.get("data_source_output") else {}
+            data["data_source_output"] = t
         return data
 
     def update(self, rid, update_data, where_data=None):
@@ -56,10 +56,10 @@ class ResourceObject(object):
         if data:
             data["extend_info"] = json.loads(data["extend_info"])
             data["resource_property"] = json.loads(data["resource_property"])
-            data["output_property"] = json.loads(data["output_property"]) if data["output_property"] else {}
+            data["resource_output"] = json.loads(data["resource_output"]) if data["resource_output"] else {}
             data["data_source"] = json.loads(data["data_source"]) if data.get("data_source") else {}
-            t = json.loads(data["data_source_extend"]) if data.get("data_source_extend") else {}
-            data["data_source_extend"] = t
+            t = json.loads(data["data_source_output"]) if data.get("data_source_output") else {}
+            data["data_source_output"] = t
         return count, data
 
     def delete(self, rid, where_data=None):
