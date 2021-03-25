@@ -120,6 +120,19 @@ class TerraformResource(object):
         self.terraformDriver.apply(path, auto_approve="")
         return self.terraformDriver.resource_result(path)
 
+    def run_import(self, from_source, dest_source, path, state=None):
+        '''
+        # todo  非资产类型资源没有id, 使用两个字段  资产id  + 标识id 进行识别才能导入
+        :param from_source:
+        :param dest_source:
+        :param path:
+        :param state:
+        :return:
+        '''
+
+        self.terraformDriver.import_state(from_source, dest_source, path, state)
+        return self.terraformDriver.resource_result(path)
+
     def refresh(self, path):
         '''
 
