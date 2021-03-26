@@ -128,6 +128,9 @@ CREATE TABLE `cloud_resource` (
   INDEX `idx_id` (`resource_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
+ALTER TABLE `terraform`.`cloud_resource`
+  CHANGE `resource_id` `resource_id` VARCHAR(512) CHARSET utf8 COLLATE utf8_general_ci NULL;
+
 
 DROP TABLE IF EXISTS `instance_type`;
 
@@ -161,7 +164,7 @@ CREATE TABLE `resource_history` (
   `resource` VARCHAR(36) DEFAULT NULL,
   `ora_data` text DEFAULT NULL,
   `created_time` DATETIME DEFAULT NULL,
-    PRIMARY KEY (`id`),
+    PRIMARY KEY (`xid`),
   INDEX `idx_id` (`id`, `created_time`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
