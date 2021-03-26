@@ -384,6 +384,9 @@ class ApiBackendBase(TerraformResource):
 
         return count, res
 
+    def create(self, *args, **kwargs):
+        return self.apply(*args, **kwargs)
+
     def destory(self, rid):
         '''
 

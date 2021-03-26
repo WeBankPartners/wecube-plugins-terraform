@@ -19,16 +19,10 @@ from apps.api.configer.provider import ProviderApi
 # from apps.background.resource.loadbalance.lb_attach import LBAttachObject
 # from apps.background.resource.loadbalance.lb_attach import LBAttachInstanceObject
 from apps.background.resource.resource_base import CrsObject
+from apps.api.apibase_backend import ApiBackendBase
 
 
-class LBAttachApi(ApiBase):
-    def __init__(self):
-        super(LBAttachApi, self).__init__()
-        self.resource_name = "lb_attach"
-        self.resource_workspace = "lb_attach"
-        self._flush_resobj()
-        self.resource_keys_config = None
-
+class Common(object):
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
 
@@ -94,6 +88,15 @@ class LBAttachApi(ApiBase):
     def generate_owner_data(self, create_data, **kwargs):
         owner_id = None
         return owner_id, None
+
+
+class LBAttachApi(Common, ApiBase):
+    def __init__(self):
+        super(LBAttachApi, self).__init__()
+        self.resource_name = "lb_attach"
+        self.resource_workspace = "lb_attach"
+        self._flush_resobj()
+        self.resource_keys_config = None
 
     def destory(self, rid):
         '''
@@ -192,3 +195,12 @@ class LBAttachApi(ApiBase):
         count, data = self.resource_object.update(rid, update_data={"define_json": define_json})
 
         return count
+
+
+class LBAttachBackendApi(Common, ApiBackendBase):
+    def __init__(self):
+        super(LBAttachBackendApi, self).__init__()
+        self.resource_name = "lb_attach"
+        self.resource_workspace = "lb_attach"
+        self._flush_resobj()
+        self.resource_keys_config = None

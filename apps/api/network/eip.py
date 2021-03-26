@@ -9,16 +9,10 @@ from apps.common.convert_keys import define_relations_key
 from apps.api.apibase import ApiBase
 from apps.api.configer.provider import ProviderApi
 from apps.background.resource.resource_base import CrsObject
+from apps.api.apibase_backend import ApiBackendBase
 
 
-class EipApi(ApiBase):
-    def __init__(self):
-        super(EipApi, self).__init__()
-        self.resource_name = "eip"
-        self.resource_workspace = "eip"
-        self._flush_resobj()
-        self.resource_keys_config = None
-
+class Common(object):
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
 
@@ -40,3 +34,21 @@ class EipApi(ApiBase):
     def generate_owner_data(self, create_data, **kwargs):
         owner_id = None
         return owner_id, None
+
+
+class EipApi(Common, ApiBase):
+    def __init__(self):
+        super(EipApi, self).__init__()
+        self.resource_name = "eip"
+        self.resource_workspace = "eip"
+        self._flush_resobj()
+        self.resource_keys_config = None
+
+
+class EipBackendApi(Common, ApiBase):
+    def __init__(self):
+        super(EipBackendApi, self).__init__()
+        self.resource_name = "eip"
+        self.resource_workspace = "eip"
+        self._flush_resobj()
+        self.resource_keys_config = None

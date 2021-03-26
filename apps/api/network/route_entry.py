@@ -9,16 +9,10 @@ from apps.common.convert_keys import define_relations_key
 from apps.api.apibase import ApiBase
 from apps.api.configer.provider import ProviderApi
 from apps.background.resource.resource_base import CrsObject
+from apps.api.apibase_backend import ApiBackendBase
 
 
-class RouteEntryApi(ApiBase):
-    def __init__(self):
-        super(RouteEntryApi, self).__init__()
-        self.resource_name = "route_entry"
-        self.resource_workspace = "route_entry"
-        self.owner_resource = "route_table"
-        self._flush_resobj()
-        self.resource_keys_config = None
+class Common(object):
 
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
@@ -61,3 +55,23 @@ class RouteEntryApi(ApiBase):
     def generate_owner_data(self, create_data, **kwargs):
         owner_id = create_data.get("route_table_id")
         return owner_id, None
+
+
+class RouteEntryApi(Common, ApiBase):
+    def __init__(self):
+        super(RouteEntryApi, self).__init__()
+        self.resource_name = "route_entry"
+        self.resource_workspace = "route_entry"
+        self.owner_resource = "route_table"
+        self._flush_resobj()
+        self.resource_keys_config = None
+
+
+class RouteEntryBackendApi(Common, ApiBackendBase):
+    def __init__(self):
+        super(RouteEntryBackendApi, self).__init__()
+        self.resource_name = "route_entry"
+        self.resource_workspace = "route_entry"
+        self.owner_resource = "route_table"
+        self._flush_resobj()
+        self.resource_keys_config = None

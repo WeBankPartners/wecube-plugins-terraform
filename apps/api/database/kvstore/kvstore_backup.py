@@ -12,17 +12,10 @@ from apps.common.convert_keys import define_relations_key
 from apps.api.apibase import ApiBase
 # from apps.api.configer.provider import ProviderApi
 from apps.background.resource.resource_base import CrsObject
+from apps.api.apibase_backend import ApiBackendBase
 
 
-class KvBackupApi(ApiBase):
-    def __init__(self):
-        super(KvBackupApi, self).__init__()
-        self.resource_name = "kvstore_backup"
-        self.resource_workspace = "kvstore_backup"
-        self.relation_resource = "kvstore"
-        self._flush_resobj()
-        self.resource_keys_config = None
-
+class Common(object):
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
 
@@ -56,3 +49,22 @@ class KvBackupApi(ApiBase):
         owner_id = create_data.get("kvstore_id")
         return owner_id, None
 
+
+class KvBackupApi(Common, ApiBase):
+    def __init__(self):
+        super(KvBackupApi, self).__init__()
+        self.resource_name = "kvstore_backup"
+        self.resource_workspace = "kvstore_backup"
+        self.relation_resource = "kvstore"
+        self._flush_resobj()
+        self.resource_keys_config = None
+
+
+class KvBackupBackendApi(Common, ApiBackendBase):
+    def __init__(self):
+        super(KvBackupBackendApi, self).__init__()
+        self.resource_name = "kvstore_backup"
+        self.resource_workspace = "kvstore_backup"
+        self.relation_resource = "kvstore"
+        self._flush_resobj()
+        self.resource_keys_config = None

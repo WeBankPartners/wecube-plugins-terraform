@@ -9,16 +9,10 @@ from apps.api.configer.provider import ProviderApi
 from apps.common.convert_keys import define_relations_key
 from apps.api.apibase import ApiBase
 from apps.background.resource.resource_base import CrsObject
+from apps.api.apibase_backend import ApiBackendBase
 
 
-class MysqlBackupApi(ApiBase):
-    def __init__(self):
-        super(MysqlBackupApi, self).__init__()
-        self.resource_name = "mysql_backup"
-        self.resource_workspace = "mysql_backup"
-        self.owner_resource = "mysql"
-        self._flush_resobj()
-        self.resource_keys_config = None
+class Common(object):
 
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
@@ -51,3 +45,23 @@ class MysqlBackupApi(ApiBase):
     def generate_owner_data(self, create_data, **kwargs):
         owner_id = create_data.get("mysql_id")
         return owner_id, None
+
+
+class MysqlBackupApi(Common, ApiBase):
+    def __init__(self):
+        super(MysqlBackupApi, self).__init__()
+        self.resource_name = "mysql_backup"
+        self.resource_workspace = "mysql_backup"
+        self.owner_resource = "mysql"
+        self._flush_resobj()
+        self.resource_keys_config = None
+
+
+class MysqlBackupBackendApi(Common, ApiBackendBase):
+    def __init__(self):
+        super(MysqlBackupBackendApi, self).__init__()
+        self.resource_name = "mysql_backup"
+        self.resource_workspace = "mysql_backup"
+        self.owner_resource = "mysql"
+        self._flush_resobj()
+        self.resource_keys_config = None

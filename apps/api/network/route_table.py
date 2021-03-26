@@ -12,17 +12,10 @@ from apps.api.configer.provider import ProviderApi
 # from apps.background.resource.network.vpc import VpcObject
 # from apps.background.resource.network.route_table import RouteTableObject
 from apps.background.resource.resource_base import CrsObject
+from apps.api.apibase_backend import ApiBackendBase
 
 
-class RouteTableApi(ApiBase):
-    def __init__(self):
-        super(RouteTableApi, self).__init__()
-        self.resource_name = "route_table"
-        self.resource_workspace = "route_table"
-        self.owner_resource = "vpc"
-        self._flush_resobj()
-        self.resource_keys_config = None
-
+class Common(object):
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
 
@@ -55,6 +48,16 @@ class RouteTableApi(ApiBase):
     def generate_owner_data(self, create_data, **kwargs):
         owner_id = create_data.get("vpc_id")
         return owner_id, None
+
+
+class RouteTableApi(Common, ApiBase):
+    def __init__(self):
+        super(RouteTableApi, self).__init__()
+        self.resource_name = "route_table"
+        self.resource_workspace = "route_table"
+        self.owner_resource = "vpc"
+        self._flush_resobj()
+        self.resource_keys_config = None
 
     def update(self, rid, name, extend_info, **kwargs):
         '''
@@ -98,3 +101,13 @@ class RouteTableApi(ApiBase):
 
         return self.update_data(rid, data={"status": "ok", "name": name,
                                            "define_json": json.dumps(define_json)})
+
+
+class RouteTableBackendApi(Common, ApiBackendBase):
+    def __init__(self):
+        super(RouteTableBackendApi, self).__init__()
+        self.resource_name = "route_table"
+        self.resource_workspace = "route_table"
+        self.owner_resource = "vpc"
+        self._flush_resobj()
+        self.resource_keys_config = None

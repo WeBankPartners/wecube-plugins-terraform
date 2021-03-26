@@ -14,16 +14,10 @@ from apps.api.apibase import ApiBase
 # from apps.background.resource.vm.eni import ENIAttachObject
 # from apps.background.resource.vm.instance import InstanceObject
 from apps.background.resource.resource_base import CrsObject
+from apps.api.apibase_backend import ApiBackendBase
 
 
-class ENIAttachApi(ApiBase):
-    def __init__(self):
-        super(ENIAttachApi, self).__init__()
-        self.resource_name = "network_interface_attach"
-        self.resource_workspace = "network_interface_attach"
-        self._flush_resobj()
-        self.resource_keys_config = None
-
+class Common(object):
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
 
@@ -100,3 +94,21 @@ class ENIAttachApi(ApiBase):
                                                                 self.resource_name, rid))
 
         return self.resource_object.delete(rid)
+
+
+class ENIAttachApi(Common, ApiBase):
+    def __init__(self):
+        super(ENIAttachApi, self).__init__()
+        self.resource_name = "network_interface_attach"
+        self.resource_workspace = "network_interface_attach"
+        self._flush_resobj()
+        self.resource_keys_config = None
+
+
+class ENIAttachBackendApi(Common, ApiBackendBase):
+    def __init__(self):
+        super(ENIAttachBackendApi, self).__init__()
+        self.resource_name = "network_interface_attach"
+        self.resource_workspace = "network_interface_attach"
+        self._flush_resobj()
+        self.resource_keys_config = None

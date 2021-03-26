@@ -10,16 +10,10 @@ from apps.common.convert_keys import define_relations_key
 from apps.api.apibase import ApiBase
 from apps.api.configer.provider import ProviderApi
 from apps.background.resource.resource_base import CrsObject
+from apps.api.apibase_backend import ApiBackendBase
 
 
-class NatGatewayApi(ApiBase):
-    def __init__(self):
-        super(NatGatewayApi, self).__init__()
-        self.resource_name = "nat"
-        self.resource_workspace = "nat"
-        self._flush_resobj()
-        self.resource_keys_config = None
-
+class Common(object):
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
 
@@ -65,3 +59,22 @@ class NatGatewayApi(ApiBase):
     def generate_owner_data(self, create_data, **kwargs):
         owner_id = create_data.get("vpc_id")
         return owner_id, None
+
+
+class NatGatewayApi(Common, ApiBase):
+    def __init__(self):
+        super(NatGatewayApi, self).__init__()
+        self.resource_name = "nat"
+        self.resource_workspace = "nat"
+        self._flush_resobj()
+        self.resource_keys_config = None
+
+
+class NatGatewayBackendApi(Common, ApiBackendBase):
+    def __init__(self):
+        super(NatGatewayBackendApi, self).__init__()
+        self.resource_name = "nat"
+        self.resource_workspace = "nat"
+        self._flush_resobj()
+        self.resource_keys_config = None
+

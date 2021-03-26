@@ -12,16 +12,10 @@ from apps.common.convert_keys import convert_key_only
 from apps.common.convert_keys import define_relations_key
 from apps.api.apibase import ApiBase
 from apps.background.resource.resource_base import CrsObject
+from apps.api.apibase_backend import ApiBackendBase
 
 
-class LBCertificateApi(ApiBase):
-    def __init__(self):
-        super(LBCertificateApi, self).__init__()
-        self.resource_name = "lb_certificate"
-        self.resource_workspace = "lb_certificate"
-        self._flush_resobj()
-        self.resource_keys_config = None
-
+class Common(object):
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
 
@@ -43,3 +37,21 @@ class LBCertificateApi(ApiBase):
     def generate_owner_data(self, create_data, **kwargs):
         owner_id = None
         return owner_id, None
+
+
+class LBCertificateApi(Common, ApiBase):
+    def __init__(self):
+        super(LBCertificateApi, self).__init__()
+        self.resource_name = "lb_certificate"
+        self.resource_workspace = "lb_certificate"
+        self._flush_resobj()
+        self.resource_keys_config = None
+
+
+class LBCertificateBackendApi(Common, ApiBackendBase):
+    def __init__(self):
+        super(LBCertificateBackendApi, self).__init__()
+        self.resource_name = "lb_certificate"
+        self.resource_workspace = "lb_certificate"
+        self._flush_resobj()
+        self.resource_keys_config = None

@@ -9,15 +9,10 @@ from core import local_exceptions
 from apps.common.convert_keys import define_relations_key
 from apps.api.apibase import ApiBase
 from apps.background.resource.resource_base import CrsObject
+from apps.api.apibase_backend import ApiBackendBase
 
 
-class LBApi(ApiBase):
-    def __init__(self):
-        super(LBApi, self).__init__()
-        self.resource_name = "lb"
-        self.resource_workspace = "lb"
-        self._flush_resobj()
-        self.resource_keys_config = None
+class Common(object):
 
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
@@ -55,3 +50,21 @@ class LBApi(ApiBase):
     def generate_owner_data(self, create_data, **kwargs):
         owner_id = None
         return owner_id, None
+
+
+class LBApi(Common, ApiBase):
+    def __init__(self):
+        super(LBApi, self).__init__()
+        self.resource_name = "lb"
+        self.resource_workspace = "lb"
+        self._flush_resobj()
+        self.resource_keys_config = None
+
+
+class LBBackendApi(Common, ApiBackendBase):
+    def __init__(self):
+        super(LBBackendApi, self).__init__()
+        self.resource_name = "lb"
+        self.resource_workspace = "lb"
+        self._flush_resobj()
+        self.resource_keys_config = None

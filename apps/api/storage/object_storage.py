@@ -9,16 +9,10 @@ from lib.json_helper import format_json_dumps
 from core import local_exceptions
 from apps.api.configer.provider import ProviderApi
 from apps.api.apibase import ApiBase
+from apps.api.apibase_backend import ApiBackendBase
 
 
-class ObjectStorageApi(ApiBase):
-    def __init__(self):
-        super(ObjectStorageApi, self).__init__()
-        self.resource_name = "object_storage"
-        self.resource_workspace = "object_storage"
-        self._flush_resobj()
-        self.resource_keys_config = None
-
+class Common(object):
     def generate_create_data(self, zone, create_data, **kwargs):
         r_create_data = {}
 
@@ -35,6 +29,15 @@ class ObjectStorageApi(ApiBase):
     def generate_owner_data(self, create_data, **kwargs):
         owner_id = None
         return owner_id, None
+
+
+class ObjectStorageApi(Common, ApiBase):
+    def __init__(self):
+        super(ObjectStorageApi, self).__init__()
+        self.resource_name = "object_storage"
+        self.resource_workspace = "object_storage"
+        self._flush_resobj()
+        self.resource_keys_config = None
 
     def destory(self, rid):
         '''
@@ -60,3 +63,12 @@ class ObjectStorageApi(ApiBase):
                                                             msg="delete %s %s failed" % (self.resource_name, rid))
 
         return self.resource_object.delete(rid)
+
+
+class ObjectStorageBackendApi(Common, ApiBackendBase):
+    def __init__(self):
+        super(ObjectStorageBackendApi, self).__init__()
+        self.resource_name = "object_storage"
+        self.resource_workspace = "object_storage"
+        self._flush_resobj()
+        self.resource_keys_config = None

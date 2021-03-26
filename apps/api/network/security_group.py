@@ -8,17 +8,10 @@ from lib.json_helper import format_json_dumps
 from apps.common.convert_keys import define_relations_key
 from apps.api.apibase import ApiBase
 from apps.background.resource.resource_base import CrsObject
+from apps.api.apibase_backend import ApiBackendBase
 
 
-class SecGroupApi(ApiBase):
-    def __init__(self):
-        super(SecGroupApi, self).__init__()
-        self.resource_name = "security_group"
-        self.resource_workspace = "security_group"
-        self.relation_resource = "vpc"
-        self._flush_resobj()
-        self.resource_keys_config = None
-
+class Common(object):
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
 
@@ -50,3 +43,22 @@ class SecGroupApi(ApiBase):
         r_id = create_data.get("vpc_id")
         return None, r_id
 
+
+class SecGroupApi(Common, ApiBase):
+    def __init__(self):
+        super(SecGroupApi, self).__init__()
+        self.resource_name = "security_group"
+        self.resource_workspace = "security_group"
+        self.relation_resource = "vpc"
+        self._flush_resobj()
+        self.resource_keys_config = None
+
+
+class SecGroupBackendApi(Common, ApiBackendBase):
+    def __init__(self):
+        super(SecGroupBackendApi, self).__init__()
+        self.resource_name = "security_group"
+        self.resource_workspace = "security_group"
+        self.relation_resource = "vpc"
+        self._flush_resobj()
+        self.resource_keys_config = None

@@ -13,15 +13,10 @@ from apps.common.convert_keys import define_relations_key
 from apps.api.configer.provider import ProviderApi
 from apps.api.apibase import ApiBase
 from apps.background.resource.resource_base import CrsObject
+from apps.api.apibase_backend import ApiBackendBase
 
 
-class EniApi(ApiBase):
-    def __init__(self):
-        super(EniApi, self).__init__()
-        self.resource_name = "network_interface"
-        self.resource_workspace = "network_interface"
-        self._flush_resobj()
-        self.resource_keys_config = None
+class Common(object):
 
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
@@ -77,6 +72,15 @@ class EniApi(ApiBase):
         owner_id = create_data.get("vpc_id")
         return owner_id, None
 
+
+class EniApi(Common, ApiBase):
+    def __init__(self):
+        super(EniApi, self).__init__()
+        self.resource_name = "network_interface"
+        self.resource_workspace = "network_interface"
+        self._flush_resobj()
+        self.resource_keys_config = None
+
     def destory(self, rid):
         '''
 
@@ -102,3 +106,12 @@ class EniApi(ApiBase):
                                                             msg="delete %s %s failed" % (self.resource_name, rid))
 
         return self.resource_object.delete(rid)
+
+
+class EniBackendApi(Common, ApiBackendBase):
+    def __init__(self):
+        super(EniBackendApi, self).__init__()
+        self.resource_name = "network_interface"
+        self.resource_workspace = "network_interface"
+        self._flush_resobj()
+        self.resource_keys_config = None

@@ -10,17 +10,10 @@ from apps.common.convert_keys import define_relations_key
 from apps.api.apibase import ApiBase
 from apps.api.configer.provider import ProviderApi
 from apps.background.resource.resource_base import CrsObject
+from apps.api.apibase_backend import ApiBackendBase
 
 
-class LBListenerApi(ApiBase):
-    def __init__(self):
-        super(LBListenerApi, self).__init__()
-        self.resource_name = "lb_listener"
-        self.resource_workspace = "lb_listener"
-        self.owner_resource = "lb"
-        self._flush_resobj()
-        self.resource_keys_config = None
-
+class Common(object):
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
 
@@ -61,6 +54,16 @@ class LBListenerApi(ApiBase):
         owner_id = create_data.get("lb_id")
         return owner_id, None
 
+
+class LBListenerApi(Common, ApiBase):
+    def __init__(self):
+        super(LBListenerApi, self).__init__()
+        self.resource_name = "lb_listener"
+        self.resource_workspace = "lb_listener"
+        self.owner_resource = "lb"
+        self._flush_resobj()
+        self.resource_keys_config = None
+
     def destory(self, rid):
         '''
 
@@ -84,3 +87,13 @@ class LBListenerApi(ApiBase):
                                                             msg="delete %s %s failed" % (self.resource_name, rid))
 
         return self.resource_object.delete(rid)
+
+
+class LBListenerBackendApi(Common, ApiBackendBase):
+    def __init__(self):
+        super(LBListenerBackendApi, self).__init__()
+        self.resource_name = "lb_listener"
+        self.resource_workspace = "lb_listener"
+        self.owner_resource = "lb"
+        self._flush_resobj()
+        self.resource_keys_config = None

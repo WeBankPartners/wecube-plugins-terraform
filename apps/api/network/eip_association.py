@@ -9,15 +9,10 @@ from apps.common.convert_keys import define_relations_key
 from apps.api.apibase import ApiBase
 from apps.api.configer.provider import ProviderApi
 from apps.background.resource.resource_base import CrsObject
+from apps.api.apibase_backend import ApiBackendBase
 
 
-class EipAssociationApi(ApiBase):
-    def __init__(self):
-        super(EipAssociationApi, self).__init__()
-        self.resource_name = "eip_association"
-        self.resource_workspace = "eip_association"
-        self._flush_resobj()
-        self.resource_keys_config = None
+class Common(object):
 
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
@@ -63,3 +58,21 @@ class EipAssociationApi(ApiBase):
     def generate_owner_data(self, create_data, **kwargs):
         owner_id = None
         return owner_id, None
+
+
+class EipAssociationApi(Common, ApiBase):
+    def __init__(self):
+        super(EipAssociationApi, self).__init__()
+        self.resource_name = "eip_association"
+        self.resource_workspace = "eip_association"
+        self._flush_resobj()
+        self.resource_keys_config = None
+
+
+class EipAssociationBackendApi(Common, ApiBackendBase):
+    def __init__(self):
+        super(EipAssociationBackendApi, self).__init__()
+        self.resource_name = "eip_association"
+        self.resource_workspace = "eip_association"
+        self._flush_resobj()
+        self.resource_keys_config = None

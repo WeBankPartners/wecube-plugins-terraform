@@ -13,16 +13,10 @@ from apps.common.convert_keys import convert_key_only
 from apps.common.convert_keys import define_relations_key
 from apps.api.apibase import ApiBase
 from apps.background.resource.resource_base import CrsObject
+from apps.api.apibase_backend import ApiBackendBase
 
 
-class MysqlAccountApi(ApiBase):
-    def __init__(self):
-        super(MysqlAccountApi, self).__init__()
-        self.resource_name = "mysql_account"
-        self.resource_workspace = "mysql_account"
-        self.owner_resource = "mysql"
-        self._flush_resobj()
-        self.resource_keys_config = None
+class Common(object):
 
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
@@ -59,14 +53,27 @@ class MysqlAccountApi(ApiBase):
         return owner_id, None
 
 
-class MysqlPrivilegeApi(ApiBase):
+class MysqlAccountApi(Common, ApiBase):
     def __init__(self):
-        super(MysqlPrivilegeApi, self).__init__()
-        self.resource_name = "mysql_privilege"
-        self.resource_workspace = "mysql_privilege"
+        super(MysqlAccountApi, self).__init__()
+        self.resource_name = "mysql_account"
+        self.resource_workspace = "mysql_account"
         self.owner_resource = "mysql"
         self._flush_resobj()
         self.resource_keys_config = None
+
+
+class MysqlAccountBackendApi(Common, ApiBackendBase):
+    def __init__(self):
+        super(MysqlAccountBackendApi, self).__init__()
+        self.resource_name = "mysql_account"
+        self.resource_workspace = "mysql_account"
+        self.owner_resource = "mysql"
+        self._flush_resobj()
+        self.resource_keys_config = None
+
+
+class PCommon(object):
 
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
@@ -141,3 +148,23 @@ class MysqlPrivilegeApi(ApiBase):
     def generate_owner_data(self, create_data, **kwargs):
         owner_id = create_data.get("mysql_id")
         return owner_id, None
+
+
+class MysqlPrivilegeApi(PCommon, ApiBase):
+    def __init__(self):
+        super(MysqlPrivilegeApi, self).__init__()
+        self.resource_name = "mysql_privilege"
+        self.resource_workspace = "mysql_privilege"
+        self.owner_resource = "mysql"
+        self._flush_resobj()
+        self.resource_keys_config = None
+
+
+class MysqlPrivilegeBackendApi(PCommon, ApiBackendBase):
+    def __init__(self):
+        super(MysqlPrivilegeBackendApi, self).__init__()
+        self.resource_name = "mysql_privilege"
+        self.resource_workspace = "mysql_privilege"
+        self.owner_resource = "mysql"
+        self._flush_resobj()
+        self.resource_keys_config = None

@@ -12,16 +12,10 @@ from apps.common.convert_keys import convert_key_only
 from apps.common.convert_keys import define_relations_key
 from apps.api.apibase import ApiBase
 from apps.background.resource.resource_base import CrsObject
+from apps.api.apibase_backend import ApiBackendBase
 
 
-class LBRuleApi(ApiBase):
-    def __init__(self):
-        super(LBRuleApi, self).__init__()
-        self.resource_name = "lb_rule"
-        self.resource_workspace = "lb_rule"
-        self._flush_resobj()
-        self.resource_keys_config = None
-
+class Common(object):
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
 
@@ -82,6 +76,15 @@ class LBRuleApi(ApiBase):
         owner_id = None
         return owner_id, None
 
+
+class LBRuleApi(Common, ApiBase):
+    def __init__(self):
+        super(LBRuleApi, self).__init__()
+        self.resource_name = "lb_rule"
+        self.resource_workspace = "lb_rule"
+        self._flush_resobj()
+        self.resource_keys_config = None
+
     def destory(self, rid):
         '''
         :param rid:
@@ -105,3 +108,12 @@ class LBRuleApi(ApiBase):
                                                             msg="delete %s %s failed" % (self.resource_name, rid))
 
         return self.resource_object.delete(rid)
+
+
+class LBRuleBackendApi(Common, ApiBackendBase):
+    def __init__(self):
+        super(LBRuleBackendApi, self).__init__()
+        self.resource_name = "lb_rule"
+        self.resource_workspace = "lb_rule"
+        self._flush_resobj()
+        self.resource_keys_config = None
