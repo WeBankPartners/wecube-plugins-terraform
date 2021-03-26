@@ -121,6 +121,39 @@ class CrsObject(object):
 
         return count, data
 
+    def ora_update(self, rid, update_data, where_data=None):
+        where_data = where_data or {}
+        where_data.update({"id": rid})
+
+        if self.resource_name:
+            where_data["resource_name"] = self.resource_name
+
+        propertys = update_data.get("propertys", {})
+        if propertys.get("password"):
+            password = propertys.get("password")
+            if not password.startswith("{cipher_a}"):
+                propertys["password"] = "{cipher_a}" + encrypt_str(password)
+
+            update_data["propertys"] = propertys
+
+        _after_data = {}
+        for key, value in update_data.items():
+            if isinstance(value, dict):
+                value = format_json_dumps(value)
+
+            _after_data[key] = value
+
+        _after_data["updated_time"] = datetime.datetime.now()
+        count, data = self.resource.update(filters=where_data, data=_after_data)
+        if data:
+            data["propertys"] = json.loads(data["propertys"])
+            data["output_json"] = json.loads(data["output_json"])
+            data["extend_info"] = json.loads(data["extend_info"])
+            data["define_json"] = json.loads(data["define_json"])
+            data["result_json"] = json.loads(data["result_json"])
+
+        return count, data
+
     def delete(self, rid, update_data=None):
         update_data = update_data or {}
         update_data["is_deleted"] = 1

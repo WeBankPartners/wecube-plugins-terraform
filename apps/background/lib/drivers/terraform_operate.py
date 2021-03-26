@@ -32,7 +32,8 @@ class TerraformResource(object):
         :return:
         '''
 
-        _path = os.path.join(TERRAFORM_BASE_PATH, provider, region, self.resource_workspace, rid)
+        # _path = os.path.join(TERRAFORM_BASE_PATH, provider, region, self.resource_workspace, rid)
+        _path = self.get_workpath(rid, provider, region, **kwargs)
         if not os.path.exists(_path):
             os.makedirs(_path)
 

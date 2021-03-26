@@ -21,7 +21,7 @@ class ResourceHistory(Base):
     __tablename__ = "resource_history"
 
     xid = Column(String(36), primary_key=True)
-    id = Column(String(36), primary_key=True)
+    id = Column(String(36))
     resource = Column(String(36))
     ora_data = Column(String(65535))
     created_time = Column(DateTime)

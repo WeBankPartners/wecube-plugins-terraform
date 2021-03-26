@@ -79,6 +79,63 @@ class ResourceConductor(object):
         define_json.update(output_json)
         return define_json, resource_keys_config
 
+    def _generate_import_resource(self, provider, resource_name, label_name):
+        '''
+        # import resource define: {
+             "resource": {
+                 "route_table": {
+                     "example": {
+                     }
+                 }
+             }
+         }
+        :param provider:
+        :param resource_name:
+        :param label_name:
+        :return:
+        '''
+
+        configer = ResourceConfiger()
+        resource_columns, resource_keys_config = configer.conductor_import_property(provider=provider,
+                                                                                    resource_name=resource_name)
+
+        property = resource_keys_config["resource_name"]
+
+        _info = {
+            "resource": {
+                property: {
+                    label_name: resource_columns
+                }
+            }
+        }
+        logger.info(format_json_dumps(_info))
+        return _info, resource_keys_config
+
+    def conductor_import_resource(self, provider, resource_name, label_name):
+        '''
+
+        :param provider: name
+        :param region:
+        :param secret:
+        :param create_data:
+        :param extend_info:
+        :return:
+        '''
+
+        define_json, resource_keys_config = self._generate_resource(provider=provider,
+                                                                    resource_name=resource_name,
+                                                                    label_name=label_name,
+                                                                    create_data=create_data,
+                                                                    extend_info=extend_info)
+
+        output_json, _ = ResourceConfiger().conductor_apply_output(provider=provider,
+                                                                   resource_name=resource_name,
+                                                                   label_name=label_name
+                                                                   )
+
+        define_json.update(output_json)
+        return define_json, resource_keys_config
+
     def fetch_resource_propertys(self, resource_name, label_name, define_json):
         _t = define_json["resource"][resource_name]
         origin_columns = _t[label_name]

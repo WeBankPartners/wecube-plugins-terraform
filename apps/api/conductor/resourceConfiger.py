@@ -56,6 +56,19 @@ class ResourceConfiger(object):
         resource_columns = self.reduce_key(resource_columns)
         return resource_columns, self.resource_keys_config
 
+    def conductor_import_property(self, provider, resource_name):
+        '''
+
+        :param provider:
+        :param resource_name:
+        :param resource_data:
+        :return:
+        '''
+
+        self.resource_info(provider, resource_name)
+
+        return {}, self.resource_keys_config
+
     def conductor_source_property(self, provider, resource_name, resource_data):
         '''
 
@@ -88,30 +101,35 @@ class ResourceConfiger(object):
         self.resource_info(provider, resource_name)
 
         origin_columns = {}
-        resource_property = self.resource_keys_config["resource_property"]
-        extend_info = self.resource_keys_config["extend_info"]
-        resource_output = self.resource_keys_config["resource_output"]
-        data_source_output = self.resource_keys_config["data_source_output"]
+        # resource_property = self.resource_keys_config["resource_property"]
+        # extend_info = self.resource_keys_config["extend_info"]
+        # resource_output = self.resource_keys_config["resource_output"]
+        # data_source_output = self.resource_keys_config["data_source_output"]
+
+        resource_property = self.resource_keys_config["data_source_output"]
+
+        extend_info = resource_property.pop("extend_info", {}) or {}
 
         propertys = ReverseProperty.reverse_keys(resource_property)
         extend = ReverseProperty.reverse_extend_keys(extend_info)
 
-        resource_output.pop("resource_id", None)
-        output = ReverseProperty.reverse_output_lines(resource_output)
+        # resource_output.pop("resource_id", None)
+        # output = ReverseProperty.reverse_output_lines(resource_output)
         origin_columns.update(propertys)
         origin_columns.update(extend)
-        origin_columns.update(output)
+        # origin_columns.update(output)
 
-        columns = {}
-        for key, value in origin_columns.items():
-            if value in data_source_output.keys():
-                # todo dirct reverse ?
-                continue
-            columns[key] = value
+        # columns = {}
+        # for key, value in origin_columns.items():
+        #     if value in data_source_output.keys():
+        #         # todo dirct reverse ?
+        #         continue
+        #     columns[key] = value
 
-        data_source_output = ReverseProperty.reverse_keys(data_source_output)
-        columns.update(data_source_output)
+        # data_source_output = ReverseProperty.reverse_keys(data_source_output)
+        # columns.update(data_source_output)
 
+        columns = origin_columns
         return columns, self.resource_keys_config
 
     def conductor_upgrade_property(self, provider, resource_name, resource_data):

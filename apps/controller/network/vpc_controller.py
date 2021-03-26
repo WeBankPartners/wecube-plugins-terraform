@@ -9,6 +9,7 @@ from core.controller import BackendIdController
 from core.controller import BaseController
 from core import local_exceptions as exception_common
 from apps.api.network.vpc import VpcApi
+from apps.api.network.vpc import VpcBackendApi
 from apps.controller.source_controller import BaseSourceController
 
 
@@ -109,7 +110,7 @@ class VPCIdController(BackendIdController):
 
 class VPCAddController(BaseController):
     allow_methods = ("POST",)
-    resource = VpcApi()
+    resource = VpcBackendApi()
 
     def before_handler(self, request, data, **kwargs):
         ResBase.not_null(data)
@@ -127,7 +128,7 @@ class VPCDeleteController(BaseController):
     name = "VPC"
     resource_describe = "VPC"
     allow_methods = ("POST",)
-    resource = VpcApi()
+    resource = VpcBackendApi()
 
     def before_handler(self, request, data, **kwargs):
         validation.not_allowed_null(data=data,
@@ -149,5 +150,4 @@ class VPCSourceController(BaseSourceController):
     name = "VPC"
     resource_describe = "VPC"
     allow_methods = ("POST",)
-    resource = VpcApi()
-
+    resource = VpcBackendApi()
