@@ -8,6 +8,7 @@ from core.controller import BackendIdController
 from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.network.ccn_attach import CCNAttachApi
+from apps.api.network.ccn_attach import CCNAttachBackendApi
 from apps.controller.source_controller import BaseSourceController
 
 
@@ -45,6 +46,9 @@ class ResBase(object):
         instance_type = data.pop("instance_type", None)
         ccn_id = data.pop("ccn_id", None)
 
+        asset_id = data.pop("asset_id", None)
+        resource_id = data.pop("resource_id", None)
+
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
         data.update(extend_info)
 
@@ -55,6 +59,8 @@ class ResBase(object):
         _, result = resource.create(rid=rid, provider=provider,
                                     region=region, zone=zone,
                                     secret=secret,
+                                    asset_id=asset_id,
+                                    resource_id=resource_id,
                                     create_data=create_data,
                                     extend_info=data)
 
@@ -112,12 +118,12 @@ class CCNAttachIdController(BackendIdController):
 
     def delete(self, request, data, **kwargs):
         rid = kwargs.pop("rid", None)
-        return self.resource.destory(rid)
+        return self.resource.destroy(rid)
 
 
 class CCNAttachAddController(BaseController):
     allow_methods = ("POST",)
-    resource = CCNAttachApi()
+    resource = CCNAttachBackendApi()
 
     def before_handler(self, request, data, **kwargs):
         ResBase.not_null(data)
@@ -135,7 +141,7 @@ class CCNAttachDeleteController(BaseController):
     name = "CCNAttach"
     resource_describe = "CCNAttach"
     allow_methods = ("POST",)
-    resource = CCNAttachApi()
+    resource = CCNAttachBackendApi()
 
     def before_handler(self, request, data, **kwargs):
         validation.not_allowed_null(data=data,
@@ -149,7 +155,7 @@ class CCNAttachDeleteController(BaseController):
 
     def main_response(self, request, data, **kwargs):
         rid = data.pop("id", None)
-        result = self.resource.destory(rid)
+        result = self.resource.destroy(rid)
         return {"result": result}
 
 
@@ -157,5 +163,5 @@ class CCNAttachSourceController(BaseSourceController):
     name = "CCNAttach"
     resource_describe = "CCNAttach"
     allow_methods = ("POST",)
-    resource = CCNAttachApi()
+    resource = CCNAttachBackendApi()
 

@@ -46,10 +46,16 @@ class ResBase(object):
         data.update(extend_info)
 
         create_data = {"name": name, "cidr": cidr}
+
+        asset_id = data.pop("asset_id", None)
+        resource_id = data.pop("resource_id", None)
+
         _, result = resource.create(rid=rid, provider=provider,
                                     region=region, zone=zone,
                                     secret=secret,
                                     create_data=create_data,
+                                    asset_id=asset_id,
+                                    resource_id=resource_id,
                                     extend_info=data)
 
         res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
@@ -105,7 +111,7 @@ class VPCIdController(BackendIdController):
 
     def delete(self, request, data, **kwargs):
         rid = kwargs.pop("rid", None)
-        return self.resource.destory(rid)
+        return self.resource.destroy(rid)
 
 
 class VPCAddController(BaseController):
@@ -142,7 +148,7 @@ class VPCDeleteController(BaseController):
 
     def main_response(self, request, data, **kwargs):
         rid = data.pop("id", None)
-        result = self.resource.destory(rid)
+        result = self.resource.destroy(rid)
         return {"result": result}
 
 

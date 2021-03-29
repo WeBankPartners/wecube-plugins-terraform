@@ -8,6 +8,7 @@ from core.controller import BackendIdController
 from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.network.security_group_rule import SecGroupRuleApi
+from apps.api.network.security_group_rule import SecGroupRuleBackendApi
 from apps.controller.source_controller import BaseSourceController
 
 
@@ -53,6 +54,9 @@ class ResBase(object):
         description = data.pop("description")
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
+        asset_id = data.pop("asset_id", None)
+        resource_id = data.pop("resource_id", None)
+
         data.update(extend_info)
 
         create_data = {"name": name, "security_group_id": security_group_id,
@@ -61,6 +65,8 @@ class ResBase(object):
         _, result = resource.create(rid=rid, provider=provider,
                                     region=region, zone=zone,
                                     secret=secret,
+                                    asset_id=asset_id,
+                                    resource_id=resource_id,
                                     create_data=create_data,
                                     extend_info=data)
 
@@ -117,12 +123,12 @@ class SecGroupRuleIdController(BackendIdController):
 
     def delete(self, request, data, **kwargs):
         rid = kwargs.pop("rid", None)
-        return self.resource.destory(rid)
+        return self.resource.destroy(rid)
 
 
 class SecGroupRuleAddController(BaseController):
     allow_methods = ("POST",)
-    resource = SecGroupRuleApi()
+    resource = SecGroupRuleBackendApi()
 
     def before_handler(self, request, data, **kwargs):
         ResBase.not_null(data)
@@ -140,7 +146,7 @@ class SecGroupRuleDeleteController(BaseController):
     name = "SecGroupRule"
     resource_describe = "SecGroupRule"
     allow_methods = ("POST",)
-    resource = SecGroupRuleApi()
+    resource = SecGroupRuleBackendApi()
 
     def before_handler(self, request, data, **kwargs):
         validation.not_allowed_null(data=data,
@@ -154,7 +160,7 @@ class SecGroupRuleDeleteController(BaseController):
 
     def main_response(self, request, data, **kwargs):
         rid = data.pop("id", None)
-        result = self.resource.destory(rid)
+        result = self.resource.destroy(rid)
         return {"result": result}
 
 
@@ -162,5 +168,5 @@ class SGRuleSourceController(BaseSourceController):
     name = "SecGroupRule"
     resource_describe = "SecGroupRule"
     allow_methods = ("POST",)
-    resource = SecGroupRuleApi()
+    resource = SecGroupRuleBackendApi()
 

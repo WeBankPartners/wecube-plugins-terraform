@@ -8,6 +8,7 @@ from core.controller import BaseController
 from core.controller import BackendIdController
 from lib.uuid_util import get_uuid
 from apps.api.network.nat_gateway import NatGatewayApi
+from apps.api.network.nat_gateway import NatGatewayBackendApi
 from apps.controller.source_controller import BaseSourceController
 
 
@@ -43,6 +44,9 @@ class ResBase(object):
         subnet_id = data.pop("subnet_id", None)
         eip = data.pop("eip", None)
 
+        asset_id = data.pop("asset_id", None)
+        resource_id = data.pop("resource_id", None)
+
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
         data.update(extend_info)
 
@@ -50,6 +54,8 @@ class ResBase(object):
         _, result = resource.create(rid=rid, provider=provider,
                                     region=region, zone=zone,
                                     secret=secret,
+                                    asset_id=asset_id,
+                                    resource_id=resource_id,
                                     create_data=create_data,
                                     extend_info=data)
 
@@ -108,7 +114,7 @@ class NatGatewayIdController(BackendIdController):
 
     def delete(self, request, data, **kwargs):
         rid = kwargs.pop("rid", None)
-        return self.resource.destory(rid)
+        return self.resource.destroy(rid)
 
     def before_handler(self, request, data, **kwargs):
         validation.allowed_key(data, ["name"])
@@ -121,7 +127,7 @@ class NatGatewayIdController(BackendIdController):
 
 class NatGatewayAddController(BaseController):
     allow_methods = ("POST",)
-    resource = NatGatewayApi()
+    resource = NatGatewayBackendApi()
 
     def before_handler(self, request, data, **kwargs):
         ResBase.not_null(data)
@@ -139,7 +145,7 @@ class NatGatewayDeleteController(BaseController):
     name = "NatGateway"
     resource_describe = "NatGateway"
     allow_methods = ("POST",)
-    resource = NatGatewayApi()
+    resource = NatGatewayBackendApi()
 
     def before_handler(self, request, data, **kwargs):
         validation.not_allowed_null(data=data,
@@ -153,7 +159,7 @@ class NatGatewayDeleteController(BaseController):
 
     def main_response(self, request, data, **kwargs):
         rid = data.pop("id", None)
-        result = self.resource.destory(rid)
+        result = self.resource.destroy(rid)
         return {"result": result}
 
 
@@ -161,5 +167,5 @@ class NatSourceController(BaseSourceController):
     name = "NatGateway"
     resource_describe = "NatGateway"
     allow_methods = ("POST",)
-    resource = NatGatewayApi()
+    resource = NatGatewayBackendApi()
 
