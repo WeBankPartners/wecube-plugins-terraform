@@ -11,6 +11,7 @@ from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from lib.encrypt_helper import decrypt_str
 from apps.api.database.nosql.mogodb import MongodbApi
+from apps.api.database.nosql.mogodb import MongodbBackendApi
 from apps.controller.source_controller import BaseSourceController
 
 
@@ -70,6 +71,9 @@ class ResBase(object):
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
         data.update(extend_info)
 
+        asset_id = data.pop("asset_id", None)
+        resource_id = data.pop("resource_id", None)
+
         d = dict(version=version, port=port,
                  password=password,
                  instance_type=instance_type,
@@ -83,6 +87,8 @@ class ResBase(object):
         _, result = resource.create(rid=rid, provider=provider,
                                     region=region, zone=zone,
                                     secret=secret,
+                                    asset_id=asset_id,
+                                    resource_id=resource_id,
                                     create_data=create_data,
                                     extend_info=data)
 
@@ -145,12 +151,12 @@ class MongoDBIdController(BackendIdController):
 
     def delete(self, request, data, **kwargs):
         rid = kwargs.pop("rid", None)
-        return self.resource.destory(rid)
+        return self.resource.destroy(rid)
 
 
 class MongoDBAddController(BaseController):
     allow_methods = ("POST",)
-    resource = MongodbApi()
+    resource = MongodbBackendApi()
 
     def before_handler(self, request, data, **kwargs):
         ResBase.not_null(data)
@@ -168,7 +174,7 @@ class MongoDBDeleteController(BaseController):
     name = "MongoDB"
     resource_describe = "MongoDB"
     allow_methods = ("POST",)
-    resource = MongodbApi()
+    resource = MongodbBackendApi()
 
     def before_handler(self, request, data, **kwargs):
         validation.not_allowed_null(data=data,
@@ -182,7 +188,7 @@ class MongoDBDeleteController(BaseController):
 
     def main_response(self, request, data, **kwargs):
         rid = data.pop("id", None)
-        result = self.resource.destory(rid)
+        result = self.resource.destroy(rid)
         return {"result": result}
 
 
@@ -190,5 +196,5 @@ class MongoDBSourceController(BaseSourceController):
     name = "MongoDB"
     resource_describe = "MongoDB"
     allow_methods = ("POST",)
-    resource = MongodbApi()
+    resource = MongodbBackendApi()
 
