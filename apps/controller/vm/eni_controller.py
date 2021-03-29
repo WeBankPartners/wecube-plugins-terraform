@@ -8,6 +8,7 @@ from core.controller import BackendIdController
 from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.vm.eni import EniApi
+from apps.api.vm.eni import EniBackendApi
 from apps.controller.source_controller import BaseSourceController
 
 
@@ -50,12 +51,17 @@ class ResBase(object):
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
         data.update(extend_info)
 
+        asset_id = data.pop("asset_id", None)
+        resource_id = data.pop("resource_id", None)
+
         create_data = {"name": name, "subnet_id": subnet_id,
                        "vpc_id": vpc_id, "ipaddress": ipaddress,
                        "security_group_id": security_group_id}
         _, result = resource.create(rid=rid, provider=provider,
                                     region=region, zone=zone,
                                     secret=secret,
+                                    asset_id=asset_id,
+                                    resource_id=resource_id,
                                     create_data=create_data,
                                     extend_info=data)
 
@@ -113,12 +119,12 @@ class EniIdController(BackendIdController):
 
     def delete(self, request, data, **kwargs):
         rid = kwargs.pop("rid", None)
-        return self.resource.destory(rid)
+        return self.resource.destroy(rid)
 
 
 class EniAddController(BaseController):
     allow_methods = ("POST",)
-    resource = EniApi()
+    resource = EniBackendApi()
 
     def before_handler(self, request, data, **kwargs):
         ResBase.not_null(data)
@@ -136,7 +142,7 @@ class EniDeleteController(BaseController):
     name = "Eni"
     resource_describe = "Eni"
     allow_methods = ("POST",)
-    resource = EniApi()
+    resource = EniBackendApi()
 
     def before_handler(self, request, data, **kwargs):
         validation.not_allowed_null(data=data,
@@ -150,7 +156,7 @@ class EniDeleteController(BaseController):
 
     def main_response(self, request, data, **kwargs):
         rid = data.pop("id", None)
-        result = self.resource.destory(rid)
+        result = self.resource.destroy(rid)
         return {"result": result}
 
 
@@ -158,5 +164,5 @@ class ENISourceController(BaseSourceController):
     name = "Eni"
     resource_describe = "Eni"
     allow_methods = ("POST",)
-    resource = EniApi()
+    resource = EniBackendApi()
 

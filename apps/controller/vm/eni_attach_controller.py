@@ -8,6 +8,8 @@ from core.controller import BackendIdController
 from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.vm.eni_attach import ENIAttachApi
+from apps.api.vm.eni_attach import ENIAttachBackendApi
+from apps.controller.source_controller import BaseSourceController
 
 
 class ResBase(object):
@@ -43,6 +45,9 @@ class ResBase(object):
         network_interface_id = data.pop("network_interface_id", None)
         instance_id = data.pop("instance_id", None)
 
+        asset_id = data.pop("asset_id", None)
+        resource_id = data.pop("resource_id", None)
+
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
         data.update(extend_info)
 
@@ -51,6 +56,8 @@ class ResBase(object):
         _, result = resource.create(rid=rid, provider=provider,
                                     region=region, zone=zone,
                                     secret=secret,
+                                    asset_id=asset_id,
+                                    resource_id=resource_id,
                                     create_data=create_data,
                                     extend_info=data)
 
@@ -113,7 +120,7 @@ class EniAttachIdController(BackendIdController):
 
 class EniAttachAddController(BaseController):
     allow_methods = ("POST",)
-    resource = ENIAttachApi()
+    resource = ENIAttachBackendApi()
 
     def before_handler(self, request, data, **kwargs):
         ResBase.not_null(data)
@@ -131,7 +138,7 @@ class EniDetachController(BaseController):
     name = "EniDetach"
     resource_describe = "EniDetach"
     allow_methods = ("POST",)
-    resource = ENIAttachApi()
+    resource = ENIAttachBackendApi()
 
     def before_handler(self, request, data, **kwargs):
         validation.not_allowed_null(data=data,
@@ -147,3 +154,11 @@ class EniDetachController(BaseController):
         rid = data.pop("id", None)
         result = self.resource.detach(rid)
         return {"result": result}
+
+
+class ENIAttachSourceController(BaseSourceController):
+    name = "VPC"
+    resource_describe = "VPC"
+    allow_methods = ("POST",)
+    resource = ENIAttachBackendApi()
+

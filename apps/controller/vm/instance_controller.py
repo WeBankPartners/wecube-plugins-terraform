@@ -9,6 +9,7 @@ from core.controller import BaseController
 from core.controller import BackendIdController
 from lib.uuid_util import get_uuid
 from apps.api.vm.instance import InstanceApi
+from apps.api.vm.instance import InstanceBackendApi
 from apps.controller.source_controller import BaseSourceController
 
 
@@ -77,6 +78,9 @@ class ResBase(object):
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
         data.update(extend_info)
 
+        asset_id = data.pop("asset_id", None)
+        resource_id = data.pop("resource_id", None)
+
         d = dict(hostname=hostname, image=image,
                  instance_type=instance_type,
                  password=password, vpc_id=vpc_id,
@@ -92,6 +96,8 @@ class ResBase(object):
         _, result = resource.create(rid=rid, provider=provider,
                                     region=region, zone=zone,
                                     secret=secret,
+                                    asset_id=asset_id,
+                                    resource_id=resource_id,
                                     create_data=create_data,
                                     extend_info=data)
 
@@ -188,7 +194,7 @@ class InstanceIdController(BackendIdController):
     def delete(self, request, data, **kwargs):
         rid = kwargs.pop("rid", None)
         force_delete = data.get("force_delete", False)
-        return self.resource.destory(rid, force_delete=force_delete)
+        return self.resource.destroy(rid, force_delete=force_delete)
 
     def before_handler(self, request, data, **kwargs):
         ResBase.allow_upgrade_key(data)
@@ -224,7 +230,7 @@ class InstanceActionController(BackendIdController):
 
 class InstanceAddController(BaseController):
     allow_methods = ("POST",)
-    resource = InstanceApi()
+    resource = InstanceBackendApi()
 
     def before_handler(self, request, data, **kwargs):
         ResBase.not_null(data)
@@ -242,7 +248,7 @@ class InstanceDeleteController(BaseController):
     name = "Instance"
     resource_describe = "Instance"
     allow_methods = ("POST",)
-    resource = InstanceApi()
+    resource = InstanceBackendApi()
 
     def before_handler(self, request, data, **kwargs):
         validation.not_allowed_null(data=data,
@@ -257,64 +263,13 @@ class InstanceDeleteController(BaseController):
     def main_response(self, request, data, **kwargs):
         rid = data.pop("id", None)
         force_delete = data.get("force_delete", False)
-        result = self.resource.destory(rid, force_delete=force_delete)
+        result = self.resource.destroy(rid)
         return {"result": result}
-
-
-class InstanceUpdateController(BaseController):
-    allow_methods = ('POST',)
-    resource = InstanceApi()
-
-    def response_templete(self, data):
-        return {}
-
-    def before_handler(self, request, data, **kwargs):
-        ResBase.allow_upgrade_key(data)
-        ResBase.validate_upgrade_keys(data)
-
-    def create(self, request, data, **kwargs):
-        res, _ = ResBase.update(resource=self.resource, data=data)
-        return 1, res
-
-    def main_response(self, request, data, **kwargs):
-        res, _ = ResBase.update(resource=self.resource, data=data)
-        return res
-
-
-class InstanceStartController(BaseController):
-    allow_methods = ('POST',)
-    resource = InstanceApi()
-
-    def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["id", "action"])
-        validation.not_allowed_null(data=data,
-                                    keys=["id", "action"]
-                                    )
-
-        validation.validate_string("action", data["action"])
-
-    def response_templete(self, data):
-        return {}
-
-    def main_response(self, request, data, **kwargs):
-        rid = data.pop("id", None)
-
-        action = data.get("action", None)
-        if action.lower() == "start":
-            count, result = self.resource.start(rid)
-        elif action.lower == "stop":
-            count, result = self.resource.stop(rid)
-        else:
-            raise local_exceptions.ValueValidateError("action", "VM 开关机操作，请使用合法值 start/stop")
-
-        res = {"result": count, "action": action,
-               "power_status": result.get("power_status")}
-        return res
 
 
 class InstanceSourceController(BaseSourceController):
     name = "Instance"
     resource_describe = "Instance"
     allow_methods = ("POST",)
-    resource = InstanceApi()
+    resource = InstanceBackendApi()
 
