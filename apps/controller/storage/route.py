@@ -8,8 +8,8 @@ import disk_attach_controller
 urlpatterns = [
     url(r'^disk$', disk_controller.DiskController()),
     url(r'^disk/(?P<rid>[\w-]+)$', disk_controller.DiskIdController()),
-    url(r'^backend/disk/create$', disk_controller.DiskAddController()),
-    url(r'^backend/disk/delete$', disk_controller.DiskDeleteController()),
+    url(r'^backend/disk/apply$', disk_controller.DiskAddController()),
+    url(r'^backend/disk/destroy$', disk_controller.DiskDeleteController()),
     url(r'^backend/disk/source$', disk_controller.DiskSourceController()),
 
     url(r'^disk_attach$', disk_attach_controller.DiskAttachController()),
@@ -19,8 +19,8 @@ urlpatterns = [
 
     url(r'^object_storage$', object_storage_controller.ObjectStorageController()),
     url(r'^object_storage/(?P<rid>[\w-]+)$', object_storage_controller.ObjectStorageIdController()),
-    url(r'^backend/object_storage/create$', object_storage_controller.ObjectStorageAddController()),
-    url(r'^backend/object_storage/delete$', object_storage_controller.ObjectStorageDeleteController()),
+    url(r'^backend/object_storage/apply$', object_storage_controller.ObjectStorageAddController()),
+    url(r'^backend/object_storage/destroy$', object_storage_controller.ObjectStorageDeleteController()),
     url(r'^backend/object_storage/source$', object_storage_controller.OSSSourceController()),
 
 ]

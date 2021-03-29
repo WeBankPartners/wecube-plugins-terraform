@@ -111,7 +111,7 @@ class BucketObjectIdController(BackendIdController):
 
     def delete(self, request, data, **kwargs):
         rid = kwargs.pop("rid", None)
-        return self.resource.destory(rid)
+        return self.resource.destroy(rid)
 
 
 class BucketObjectAddController(BaseController):
@@ -148,5 +148,5 @@ class BucketObjectDeleteController(BaseController):
 
     def main_response(self, request, data, **kwargs):
         rid = data.pop("id", None)
-        result = self.resource.destory(rid)
+        result = self.resource.destroy(rid)
         return {"result": result}

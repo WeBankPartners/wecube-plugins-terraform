@@ -8,6 +8,7 @@ from core.controller import BackendIdController
 from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.storage.disk_attach import DiskAttachApi
+from apps.api.storage.disk_attach import DiskAttachBackendApi
 from apps.controller.source_controller import BaseSourceController
 
 
@@ -43,6 +44,9 @@ class ResBase(object):
         disk_id = data.pop("disk_id", None)
         instance_id = data.pop("instance_id", None)
 
+        asset_id = data.pop("asset_id", None)
+        resource_id = data.pop("resource_id", None)
+
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
         data.update(extend_info)
 
@@ -50,6 +54,8 @@ class ResBase(object):
         _, result = resource.create(rid=rid, provider=provider,
                                     region=region, zone=zone,
                                     secret=secret,
+                                    asset_id=asset_id,
+                                    resource_id=resource_id,
                                     create_data=create_data,
                                     extend_info=data)
 
@@ -111,7 +117,7 @@ class DiskAttachIdController(BackendIdController):
 
 class DiskAttachAddController(BaseController):
     allow_methods = ("POST",)
-    resource = DiskAttachApi()
+    resource = DiskAttachBackendApi()
 
     def before_handler(self, request, data, **kwargs):
         ResBase.not_null(data)
@@ -129,7 +135,7 @@ class DiskDetachController(BaseController):
     name = "DiskDetach"
     resource_describe = "DiskDetach"
     allow_methods = ("POST",)
-    resource = DiskAttachApi()
+    resource = DiskAttachBackendApi()
 
     def before_handler(self, request, data, **kwargs):
         validation.not_allowed_null(data=data,
@@ -151,5 +157,5 @@ class RTRuleSourceController(BaseSourceController):
     name = "DiskDetach"
     resource_describe = "DiskDetach"
     allow_methods = ("POST",)
-    resource = DiskAttachApi()
+    resource = DiskAttachBackendApi()
 
