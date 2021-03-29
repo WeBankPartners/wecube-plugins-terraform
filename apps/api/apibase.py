@@ -428,7 +428,7 @@ class ApiBase(TerraformResource):
 
         return count, res
 
-    def destory(self, rid):
+    def destroy(self, rid):
         '''
 
         :param rid:
@@ -443,7 +443,7 @@ class ApiBase(TerraformResource):
                                      provider=resource_info["provider"],
                                      region=resource_info["region"])
 
-        if not self.destory_ensure_file(rid, path=_path):
+        if not self.destroy_ensure_file(rid, path=_path):
             self.rewrite_state(_path, state_file=resource_info["result_json"])
             self.write_define(rid, _path, define_json=resource_info["define_json"])
 
@@ -454,7 +454,7 @@ class ApiBase(TerraformResource):
                 self.workspace_controller(rid, provider_name=resource_info["provider"],
                                           region=resource_info["region"], provider_json=provider_info)
 
-        status = self.run_destory(_path)
+        status = self.run_destroy(_path)
         if not status:
             raise local_exceptions.ResourceOperateException(self.resource_name,
                                                             msg="delete %s %s failed" % (self.resource_name, rid))
