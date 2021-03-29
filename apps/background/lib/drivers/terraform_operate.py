@@ -148,7 +148,7 @@ class TerraformResource(object):
         self.terraformDriver.refresh(path)
         return self.terraformDriver.resource_result(path)
 
-    def destory_ensure_file(self, rid, path):
+    def destroy_ensure_file(self, rid, path):
         '''
 
         :param rid:
@@ -175,7 +175,7 @@ class TerraformResource(object):
 
         return False
 
-    def run_destory(self, path):
+    def run_destroy(self, path):
         '''
 
         :param path:
