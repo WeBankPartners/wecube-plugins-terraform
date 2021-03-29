@@ -19,7 +19,7 @@ class ResBase(object):
         validation.allowed_key(data, ["id", "provider", "secret", "region", "zone",
                                       "name", "extend_info", "subnet_id",
                                       "hostname", "image", "instance_type",
-                                      "disk_type", "disk_size", "password",
+                                      "disk_type", "disk_size", "password", "power_action",
                                       "security_group_id", "vpc_id", "data_disks"])
 
     @classmethod
@@ -44,7 +44,7 @@ class ResBase(object):
                                       strings=["id", "name", "region", "zone",
                                                "provider", "secret", "subnet_id",
                                                "hostname", "image", "instance_type",
-                                               "disk_type", "password",
+                                               "disk_type", "password", "power_action",
                                                "security_group_id", "vpc_id"],
                                       ints=["disk_size"],
                                       dicts=["extend_info", "data_disks"])
@@ -80,6 +80,7 @@ class ResBase(object):
 
         asset_id = data.pop("asset_id", None)
         resource_id = data.pop("resource_id", None)
+        action = data.pop("power_action", None)
 
         d = dict(hostname=hostname, image=image,
                  instance_type=instance_type,
@@ -92,6 +93,8 @@ class ResBase(object):
 
         create_data = {"name": name}
         create_data.update(d)
+        if action:
+            create_data["power_action"] = action
 
         _, result = resource.create(rid=rid, provider=provider,
                                     region=region, zone=zone,
