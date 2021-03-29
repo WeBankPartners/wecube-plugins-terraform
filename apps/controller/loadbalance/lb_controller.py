@@ -8,6 +8,7 @@ from core.controller import BackendIdController
 from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.loadbalance.lb import LBApi
+from apps.api.loadbalance.lb import LBBackendApi
 from apps.controller.source_controller import BaseSourceController
 
 
@@ -44,6 +45,9 @@ class ResBase(object):
         vpc_id = data.pop("vpc_id", None)
         network_type = data.pop("network_type", None)
 
+        asset_id = data.pop("asset_id", None)
+        resource_id = data.pop("resource_id", None)
+
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
         data.update(extend_info)
 
@@ -52,6 +56,8 @@ class ResBase(object):
         _, result = resource.create(rid=rid, provider=provider,
                                     region=region, zone=zone,
                                     secret=secret,
+                                    asset_id=asset_id,
+                                    resource_id=resource_id,
                                     create_data=create_data,
                                     extend_info=data)
 
@@ -109,7 +115,7 @@ class LBIdController(BackendIdController):
 
     def delete(self, request, data, **kwargs):
         rid = kwargs.pop("rid", None)
-        return self.resource.destory(rid)
+        return self.resource.destroy(rid)
 
 
 class LBIdDettachController(BackendIdController):
@@ -130,12 +136,12 @@ class LBIdDettachController(BackendIdController):
 
     def delete(self, request, data, **kwargs):
         rid = kwargs.pop("rid", None)
-        return self.resource.destory(rid)
+        return self.resource.destroy(rid)
 
 
 class LBAddController(BaseController):
     allow_methods = ("POST",)
-    resource = LBApi()
+    resource = LBBackendApi()
 
     def before_handler(self, request, data, **kwargs):
         ResBase.not_null(data)
@@ -153,7 +159,7 @@ class LBDeleteController(BaseController):
     name = "LB"
     resource_describe = "LB"
     allow_methods = ("POST",)
-    resource = LBApi()
+    resource = LBBackendApi()
 
     def before_handler(self, request, data, **kwargs):
         validation.not_allowed_null(data=data,
@@ -167,7 +173,7 @@ class LBDeleteController(BaseController):
 
     def main_response(self, request, data, **kwargs):
         rid = data.pop("id", None)
-        result = self.resource.destory(rid)
+        result = self.resource.destroy(rid)
         return {"result": result}
 
 
@@ -175,4 +181,4 @@ class LBSourceController(BaseSourceController):
     name = "LB"
     resource_describe = "LB"
     allow_methods = ("POST",)
-    resource = LBApi()
+    resource = LBBackendApi()

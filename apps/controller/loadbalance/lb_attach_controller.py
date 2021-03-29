@@ -9,6 +9,8 @@ from core.controller import BackendIdController
 from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.loadbalance.lb_attach import LBAttachApi
+from apps.api.loadbalance.lb_attach import LBAttachBackendApi
+from apps.controller.source_controller import BaseSourceController
 
 
 class ResBase(object):
@@ -64,12 +66,17 @@ class ResBase(object):
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
         data.update(extend_info)
 
+        asset_id = data.pop("asset_id", None)
+        resource_id = data.pop("resource_id", None)
+
         create_data = {"name": name, "lb_id": lb_id,
                        "listener_id": listener_id,
                        "backend_servers": backend_servers}
         _, result = resource.create(rid=rid, provider=provider,
                                     region=region, zone=zone,
                                     secret=secret,
+                                    asset_id=asset_id,
+                                    resource_id=resource_id,
                                     create_data=create_data,
                                     extend_info=data)
 
@@ -127,7 +134,7 @@ class LBAttachIdController(BackendIdController):
 
     def delete(self, request, data, **kwargs):
         rid = kwargs.pop("rid", None)
-        return self.resource.destory(rid)
+        return self.resource.destroy(rid)
 
 
 class LBDetachController(BackendIdController):
@@ -142,7 +149,7 @@ class LBDetachController(BackendIdController):
 
 class LBAttachAddController(BaseController):
     allow_methods = ("POST",)
-    resource = LBAttachApi()
+    resource = LBAttachBackendApi()
 
     def before_handler(self, request, data, **kwargs):
         ResBase.not_null(data)
@@ -160,7 +167,7 @@ class LBAttachDeleteController(BaseController):
     name = "LBAttach"
     resource_describe = "LBAttach"
     allow_methods = ("POST",)
-    resource = LBAttachApi()
+    resource = LBAttachBackendApi()
 
     def before_handler(self, request, data, **kwargs):
         validation.not_allowed_null(data=data,
@@ -174,29 +181,13 @@ class LBAttachDeleteController(BaseController):
 
     def main_response(self, request, data, **kwargs):
         rid = data.pop("id", None)
-        result = self.resource.destory(rid)
+        result = self.resource.destroy(rid)
         return {"result": result}
 
 
-class LBDetachBackendController(BaseController):
-    name = "LBDetach"
-    resource_describe = "LBDetach"
+class LBAttachSourceController(BaseSourceController):
+    name = "VPC"
+    resource_describe = "VPC"
     allow_methods = ("POST",)
-    resource = LBAttachApi()
+    resource = LBAttachBackendApi()
 
-    def before_handler(self, request, data, **kwargs):
-        validation.not_allowed_null(data=data,
-                                    keys=["id", "instance_id"]
-                                    )
-
-        validation.validate_string("id", data.get("id"))
-        validation.validate_string("instance_id", data.get("instance_id"))
-
-    def response_templete(self, data):
-        return {}
-
-    def main_response(self, request, data, **kwargs):
-        rid = data.pop("id", None)
-        instance_id = data.pop("instance_id", None)
-        result = self.resource.remove_instance(rid, instance_id)
-        return {"result": result}
