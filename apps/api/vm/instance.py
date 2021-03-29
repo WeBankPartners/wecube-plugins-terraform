@@ -180,7 +180,7 @@ class InstanceApi(ApiBase):
 
         return count, res
 
-    def destory(self, rid, force_delete=False):
+    def destroy(self, rid, force_delete=False):
         '''
 
         :param rid:
@@ -195,7 +195,7 @@ class InstanceApi(ApiBase):
                                      provider=resource_info["provider"],
                                      region=resource_info["region"])
 
-        if not self.destory_ensure_file(rid, path=_path):
+        if not self.destroy_ensure_file(rid, path=_path):
             self.write_define(rid, _path, define_json=resource_info["define_json"])
 
         if force_delete:
@@ -206,7 +206,7 @@ class InstanceApi(ApiBase):
 
             self.write_define(rid, _path, define_json=define_json)
 
-        status = self.run_destory(_path)
+        status = self.run_destroy(_path)
         if not status:
             raise local_exceptions.ResourceOperateException(self.resource_name,
                                                             msg="delete %s %s failed" % (self.resource_name, rid))
