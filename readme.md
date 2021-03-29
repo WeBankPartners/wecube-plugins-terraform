@@ -141,15 +141,19 @@ url: /terraform/v1/configer/resource
 1).资源
 ```
 {
-"resource_name": "vpc",
-"resource_type": "tencentcloud_vpc",
+"resource_type": "vpc",
+"resource_name": "tencentcloud_vpc",
 "provider": "tencentcloud",
-"extend_info": {"is_multicast": false,"tags":{"type": "json"}},
+"extend_info": {"tags": {"type": "json"}, "is_multicast": false},
 "resource_property": {
 	"name": {"type": "string", "allow_null": 0, "convert": "name"},
-	"cider": {"type": "string", "allow_null": 0, "convert": "cidr_block"}
+	"cidr": {"type": "string", "allow_null": 0, "convert": "cidr_block"}
 },
-"resource_output": {}
+"resource_output": {"resource_id": {"type": "string", "value": "id"}},
+"data_source_name": "tencentcloud_vpc_instances",
+"data_source_argument": "instance_list",
+"data_source": {"resource_id": "vpc_id"},
+"data_source_output": {"resource_id": "vpc_id"}
 }
 ```
 
@@ -157,16 +161,16 @@ url: /terraform/v1/configer/resource
 ```
 {
 "data_source_name": "tencentcloud_vpc_subnets",
-"data_source_output": "instance_list",
+"data_source_argument": "instance_list",
 "data_source": {"resource_id": "subnet_id"},
-"data_source_output": {}
+"data_source_output": {"resource_id": "vpc_id"}
 }
 ```
 <p>
 source_property回刷data名称
-data_source_output 获取回刷数据的字段名称, 可使用层级, 如: instance.configs
+data_source_argument 获取回刷数据的字段名称, 可使用层级, 如: instance.configs
 data_source 设置查询的字段转换信息
-data_source_output 其他需要逆转换输出的字段
+data_source_output 需要转换统一输出的字段
 </p>
 
 3. 配置通用值
