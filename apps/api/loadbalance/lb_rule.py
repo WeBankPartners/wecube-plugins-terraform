@@ -85,7 +85,7 @@ class LBRuleApi(Common, ApiBase):
         self._flush_resobj()
         self.resource_keys_config = None
 
-    def destory(self, rid):
+    def destroy(self, rid):
         '''
         :param rid:
         :return:
@@ -99,10 +99,10 @@ class LBRuleApi(Common, ApiBase):
                                      provider=resource_info["provider"],
                                      region=resource_info["region"])
 
-        if not self.destory_ensure_file(rid, path=_path):
+        if not self.destroy_ensure_file(rid, path=_path):
             self.write_define(rid, _path, define_json=resource_info["define_json"])
 
-        status = self.run_destory(_path)
+        status = self.run_destroy(_path)
         if not status:
             raise local_exceptions.ResourceOperateException(self.resource_name,
                                                             msg="delete %s %s failed" % (self.resource_name, rid))
