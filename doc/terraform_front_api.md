@@ -294,15 +294,18 @@ url: /terraform/v1/configer/resource
 ```
 "provider"     云厂商   string  必填 
 "resource_type"     类别： 如vpc   string  必填
+
+<resource配置>
 "resource_name"   资源名称 如tencent_vpc  string  必填
 "extend_info"      资源其他属性字段  json
 "resource_property"  资源转换的属性字段  json   如： cider需要转换为cider_block  则为｛“cider”: "cider_block"｝
 "resource_output"  输出属性： 例如｛“resource_id”: "id"｝或｛“resource_id”: {"type": "string", "value": "id"}｝
 
+<data source配置>
 data_source_name  查询data source资源名称 string 选填
-data_source_output  data source输出资源字段 如: instance.configs   string 选填
+data_source_argument  data source输出资源字段 如: instance.configs   string 选填
 data_source   data source查询字段转换    string  选填
-data_source_output  data source其他资源输出转换字段  string 选填
+data_source_output  data source资源输出转换字段  string 选填
 ```
 
 
@@ -340,7 +343,8 @@ url: /terraform/v1/configer/resource/{id}
     "message":"OK",
     "code":0,
     "data":{
-        "resource_name":"vpc",
+        "data_source_name":"tencentcloud_vpc_instances",
+        "resource_name":"tencentcloud_vpc",
         "is_deleted":0,
         "resource_property":{
             "cidr":{
@@ -356,21 +360,41 @@ url: /terraform/v1/configer/resource/{id}
         },
         "is_locked":0,
         "deleted_time":null,
-        "enabled":1,
         "resource_output":{
-            "resource_id":"id"
-        },
-        "updated_time":"2021-01-16 12:35:44",
-        "extend_info":{
-            "is_multicast":false,
-            "tags":{
-                "type":"json"
+            "resource_id":{
+                "type":"string",
+                "value":"id"
             }
         },
+        "enabled":1,
+        "updated_time":"2021-03-25 15:39:17",
+        "data_source":{
+            "resource_id":"vpc_id"
+        },
+        "extend_info":{
+            "tags":{
+                "type":"json"
+            },
+            "is_multicast":false
+        },
+        "data_source_output":{
+            "cidr":{
+                "convert":"cidr_block",
+                "allow_null":0,
+                "type":"string"
+            },
+            "name":{
+                "convert":"name",
+                "allow_null":0,
+                "type":"string",
+                "resource_id":"vpc_id"
+            }
+        },
+        "data_source_argument":"instance_list",
         "provider":"tencentcloud",
-        "created_time":"2021-01-16 12:35:44",
-        "resource_type":"tencentcloud_vpc",
-        "id":"b0126dffc4114d9495b3d22ce8ca99ec"
+        "created_time":"2021-03-25 15:39:17",
+        "id":"074354e0795a4e859cff2c6e7471e6bf",
+        "resource_type":"vpc"
     }
 }
 ```
@@ -390,7 +414,7 @@ url: /terraform/v1/configer/resource/{id}
 "resource_property"
 "resource_output"
 data_source_name  
-data_source_output  
+data_source_argument  
 data_source  
 data_source_output 
 ```
@@ -398,7 +422,7 @@ data_source_output
 ```
 {
 "data_source_name": "tencentcloud_vpc_subnets",
-"data_source_output": "instance_list",
+"data_source_argument": "instance_list",
 "data_source": {"resource_id": "subnet_id"},
 "data_source_output": {}
 }
