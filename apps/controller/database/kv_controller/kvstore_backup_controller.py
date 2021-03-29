@@ -10,6 +10,9 @@ from core.controller import BackendIdController
 from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.database.kvstore.kvstore_backup import KvBackupApi
+from apps.api.database.kvstore.kvstore_backup import KvBackupBackendApi
+from apps.controller.source_controller import BaseSourceController
+
 
 
 class ResBase(object):
@@ -49,6 +52,9 @@ class ResBase(object):
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
         data.update(extend_info)
 
+        asset_id = data.pop("asset_id", None)
+        resource_id = data.pop("resource_id", None)
+
         d = dict(kvstore_id=kvstore_id,
                  backup_time=backup_time,
                  backup_period=backup_period)
@@ -58,6 +64,8 @@ class ResBase(object):
         _, result = resource.create(rid=rid, provider=provider,
                                     region=region, zone=zone,
                                     secret=secret,
+                                    asset_id=asset_id,
+                                    resource_id=resource_id,
                                     create_data=create_data,
                                     extend_info=data)
 
@@ -121,12 +129,12 @@ class KvBackupIdController(BackendIdController):
     def delete(self, request, data, **kwargs):
         rid = kwargs.pop("rid", None)
         force_delete = data.get("force_delete", False)
-        return self.resource.destory(rid)
+        return self.resource.destroy(rid)
 
 
 class KvBackupAddController(BaseController):
     allow_methods = ("POST",)
-    resource = KvBackupApi()
+    resource = KvBackupBackendApi()
 
     def keyname(self):
         return "kvstore_id"
@@ -149,7 +157,7 @@ class KvBackupDeleteController(BaseController):
     name = "KvBackup"
     resource_describe = "KvBackup"
     allow_methods = ("POST",)
-    resource = KvBackupApi()
+    resource = KvBackupBackendApi()
 
     def before_handler(self, request, data, **kwargs):
         validation.not_allowed_null(data=data,
@@ -164,5 +172,13 @@ class KvBackupDeleteController(BaseController):
     def main_response(self, request, data, **kwargs):
         rid = data.pop("id", None)
         force_delete = data.get("force_delete", False)
-        result = self.resource.destory(rid)
+        result = self.resource.destroy(rid)
         return {"result": result}
+
+
+class KvBackupSourceController(BaseSourceController):
+    name = "KvBackup"
+    resource_describe = "KvBackup"
+    allow_methods = ("POST",)
+    resource = KvBackupBackendApi()
+

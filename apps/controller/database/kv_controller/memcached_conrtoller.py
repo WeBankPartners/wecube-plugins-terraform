@@ -6,7 +6,9 @@ import base64
 from core import local_exceptions
 from lib.uuid_util import get_uuid
 from apps.api.database.kvstore.memcached import MemcachedApi
+from apps.api.database.kvstore.memcached import MemcachedBackendApi
 from apps.api.database.kvstore.memcached import MemcachedBackupApi
+from apps.api.database.kvstore.memcached import MemcachedBackupBackendApi
 from .kvstore_controller import KvStoreController
 from .kvstore_controller import KvStoreIdController
 from .kvstore_controller import KvStoreAddController
@@ -29,14 +31,14 @@ class MemcachedIdController(KvStoreIdController):
 
 class MemcachedAddController(KvStoreAddController):
     allow_methods = ("POST",)
-    resource = MemcachedApi()
+    resource = MemcachedBackendApi()
 
 
 class MemcachedDeleteController(KvStoreDeleteController):
     name = "Memcached"
     resource_describe = "Memcached"
     allow_methods = ("POST",)
-    resource = MemcachedApi()
+    resource = MemcachedBackendApi()
 
 
 class MemBackupController(KvBackupController):
@@ -54,7 +56,7 @@ class MemBackupIdController(KvBackupIdController):
 
 class MemBackupAddController(KvBackupAddController):
     allow_methods = ("POST",)
-    resource = MemcachedBackupApi()
+    resource = MemcachedBackupBackendApi()
 
     def keyname(self):
         return "memcached_id"
@@ -64,4 +66,4 @@ class MemBackupDeleteController(KvBackupDeleteController):
     name = "MemBackup"
     resource_describe = "MemBackup"
     allow_methods = ("POST",)
-    resource = MemcachedBackupApi()
+    resource = MemcachedBackupBackendApi()

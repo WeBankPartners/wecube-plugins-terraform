@@ -6,7 +6,9 @@ import base64
 from core import local_exceptions
 from lib.uuid_util import get_uuid
 from apps.api.database.kvstore.redis import RedisApi
+from apps.api.database.kvstore.redis import RedisBackendApi
 from apps.api.database.kvstore.redis import RedisBackupApi
+from apps.api.database.kvstore.redis import RedisBackupBackendApi
 from .kvstore_controller import KvStoreController
 from .kvstore_controller import KvStoreIdController
 from .kvstore_controller import KvStoreAddController
@@ -29,14 +31,14 @@ class RedisIdController(KvStoreIdController):
 
 class RedisAddController(KvStoreAddController):
     allow_methods = ("POST",)
-    resource = RedisApi()
+    resource = RedisBackendApi()
 
 
 class RedisDeleteController(KvStoreDeleteController):
     name = "Redis"
     resource_describe = "Redis"
     allow_methods = ("POST",)
-    resource = RedisApi()
+    resource = RedisBackendApi()
 
 
 class RedisBackupController(KvBackupController):
@@ -54,7 +56,7 @@ class RedisBackupIdController(KvBackupIdController):
 
 class RedisBackupAddController(KvBackupAddController):
     allow_methods = ("POST",)
-    resource = RedisBackupApi()
+    resource = RedisBackupBackendApi()
 
     def keyname(self):
         return "redis_id"
@@ -64,4 +66,4 @@ class RedisBackupDeleteController(KvBackupDeleteController):
     name = "RedisBackup"
     resource_describe = "RedisBackup"
     allow_methods = ("POST",)
-    resource = RedisBackupApi()
+    resource = RedisBackupBackendApi()
