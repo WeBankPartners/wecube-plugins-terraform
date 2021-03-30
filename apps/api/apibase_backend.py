@@ -3,7 +3,6 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import os
-import base64
 import json
 import time
 import traceback
@@ -252,7 +251,7 @@ class ApiBackendBase(TerraformResource):
 
         return {}
 
-    def _run_create_and_read_result(self, rid, provider, region, provider_info, define_json):
+    def _run_create_and_read_result(self, rid, provider, region, provider_info, define_json, skip_backup=None):
         '''
 
         :param rid:
@@ -268,13 +267,67 @@ class ApiBackendBase(TerraformResource):
             _path = self.workspace_controller(rid, provider, region, provider_info)
             self.write_define(rid, _path, define_json=define_json)
 
-            result = self.run(_path)
+            result = self.run(_path, skip_backup=skip_backup)
             return result
         except Exception, e:
             self.rollback_data(rid)
             if _path:
                 self.rollback_workspace(_path)
             raise e
+
+    def source_run_import(self, rid, provider, region, label_name,
+                          provider_info, asset_id, resource_id,
+                          skip_rewrite=None):
+
+        workpath = self.get_workpath(rid, provider, region)
+        import_status = self.is_need_imort(workpath)
+        if import_status:
+            logger.info("state file not exists, try recovery ..")
+            exists_data = self.resource_object.show(rid)
+            if exists_data:
+                logger.info("info found, recovery state ..")
+                self.workspace_controller(rid, provider, region, provider_info)
+                self.rewrite_state(workpath, state_file=exists_data["result_json"])
+                # import_status = False
+                return workpath
+        else:
+            logger.info("state file exists continue ...")
+            return workpath
+
+        if asset_id and resource_id:
+            logger.info("asset id given, try import resource..")
+            try:
+                query_data = {}
+                if resource_id:
+                    query_data = {"resource_id": resource_id}
+
+                self.workspace_controller(rid, provider, region, provider_info)
+                define_json, resource_keys_config = self.source_filter_controller(provider_name=provider,
+                                                                                  label_name="q_" + rid,
+                                                                                  query_data=query_data
+                                                                                  )
+
+                import_define_json, _ = ResourceConductor().conductor_import_resource(provider=provider,
+                                                                                      resource_name=self.resource_name,
+                                                                                      label_name=label_name
+                                                                                      )
+
+                import_define_json.update(define_json)
+                self.write_define(rid, workpath, define_json=import_define_json)
+
+                _cloud_resource_name = resource_keys_config["resource_name"]
+                dest_source = "%s.%s" % (_cloud_resource_name, label_name)
+                self.run_import(from_source=asset_id, dest_source=dest_source, path=workpath, state=None)
+
+                return workpath
+            except Exception, e:
+                # self.rollback_data(rid)
+                # if workpath:
+                #     self.rollback_workspace(workpath)
+                logger.info(traceback.format_exc())
+                logger.info("resource import failed. continue ... ")
+
+        logger.info("state file not recovery, continue apply resource ... ")
 
     def run_create(self, rid, region, zone,
                    provider_object, provider_info,
@@ -303,9 +356,14 @@ class ApiBackendBase(TerraformResource):
                                                       create_data=create_data,
                                                       extend_info=extend_info)
 
+        self.source_run_import(rid=rid, provider=provider_object["name"],
+                               region=region, label_name=label_name,
+                               provider_info=provider_info,
+                               asset_id=asset_id, resource_id=resource_id)
+
         result = self._run_create_and_read_result(rid, provider=provider_object["name"],
                                                   region=region, provider_info=provider_info,
-                                                  define_json=define_json)
+                                                  define_json=define_json, skip_backup=None)
 
         output_json = self.read_output_controller(result)
 
@@ -396,7 +454,8 @@ class ApiBackendBase(TerraformResource):
 
         resource_info = self.resource_object.show(rid)
         if not resource_info:
-            return 0
+            # return 0
+            raise ValueError("资源不存在或没被纳管 %s" % rid)
 
         _path = self.create_workpath(rid,
                                      provider=resource_info["provider"],
