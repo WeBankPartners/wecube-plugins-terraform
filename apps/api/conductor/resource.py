@@ -122,18 +122,11 @@ class ResourceConductor(object):
         :return:
         '''
 
-        define_json, resource_keys_config = self._generate_resource(provider=provider,
-                                                                    resource_name=resource_name,
-                                                                    label_name=label_name,
-                                                                    create_data=create_data,
-                                                                    extend_info=extend_info)
+        define_json, resource_keys_config = self._generate_import_resource(provider=provider,
+                                                                           resource_name=resource_name,
+                                                                           label_name=label_name
+                                                                           )
 
-        output_json, _ = ResourceConfiger().conductor_apply_output(provider=provider,
-                                                                   resource_name=resource_name,
-                                                                   label_name=label_name
-                                                                   )
-
-        define_json.update(output_json)
         return define_json, resource_keys_config
 
     def fetch_resource_propertys(self, resource_name, label_name, define_json):
