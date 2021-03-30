@@ -3,8 +3,18 @@
     <TerraformPageTable :pageConfig="pageConfig"></TerraformPageTable>
     <TfModalComponent :modelConfig="modelConfig">
       <template #outer-config>
+        <Divider>Resource</Divider>
         <div class="marginbottom params-each">
-          <label class="col-md-2 label-name" style="vertical-align: top;">{{ $t('tf_provider_property') }}:</label>
+          <label class="col-md-2 label-name">{{ $t('tf_name') }}:</label>
+          <input
+            v-model="modelConfig.addRow.resource_name"
+            type="text"
+            class="col-md-7 form-control model-input c-dark"
+          />
+          <label class="required-tip">*</label>
+        </div>
+        <div class="marginbottom params-each">
+          <label class="col-md-2 label-name" style="vertical-align: top;">{{ $t('tf_property_conversion') }}:</label>
           <Input v-model="modelConfig.addRow.resource_property" type="textarea" :rows="3" style="width:70%" />
           <Icon
             @click="editJson(modelConfig.addRow.resource_property, 'resource_property')"
@@ -15,33 +25,61 @@
           <label class="required-tip">*</label>
         </div>
         <div class="marginbottom params-each">
-          <label class="col-md-2 label-name" style="vertical-align: top;">{{ $t('tf_output_property') }}:</label>
+          <label class="col-md-2 label-name" style="vertical-align: top;">{{ $t('tf_output_conversion') }}:</label>
           <Input
-            v-model="modelConfig.addRow.output_property"
+            v-model="modelConfig.addRow.resource_output"
             class="json-edit"
             type="textarea"
             :rows="3"
             style="width:70%"
           />
           <Icon
-            @click="editJson(modelConfig.addRow.output_property, 'output_property')"
+            @click="editJson(modelConfig.addRow.output_property, 'resource_output')"
             type="ios-create-outline"
             size="18"
             class="json-edit"
           />
+        </div>
+        <Divider>Data Source</Divider>
+        <div class="marginbottom params-each">
+          <label class="col-md-2 label-name">{{ $t('tf_name') }}:</label>
+          <input
+            v-model="modelConfig.addRow.data_source_name"
+            type="text"
+            class="col-md-7 form-control model-input c-dark"
+          />
           <label class="required-tip">*</label>
         </div>
         <div class="marginbottom params-each">
-          <label class="col-md-2 label-name" style="vertical-align: top;">{{ $t('tf_extend_info') }}:</label>
+          <label class="col-md-2 label-name">{{ $t('tf_output_property') }}:</label>
+          <input
+            v-model="modelConfig.addRow.data_source_argument"
+            type="text"
+            class="col-md-7 form-control model-input c-dark"
+          />
+          <label class="required-tip">*</label>
+        </div>
+        <div class="marginbottom params-each">
+          <label class="col-md-2 label-name" style="vertical-align: top;">{{ $t('tf_parameter_conversion') }}:</label>
+          <Input v-model="modelConfig.addRow.data_source" type="textarea" :rows="3" style="width:70%" />
+          <Icon
+            @click="editJson(modelConfig.addRow.data_source, 'data_source')"
+            type="ios-create-outline"
+            size="18"
+            class="json-edit"
+          />
+        </div>
+        <div class="marginbottom params-each">
+          <label class="col-md-2 label-name" style="vertical-align: top;">{{ $t('tf_output_conversion') }}:</label>
           <Input
-            v-model="modelConfig.addRow.extend_info"
+            v-model="modelConfig.addRow.data_source_output"
             class="json-edit"
             type="textarea"
             :rows="3"
             style="width:70%"
           />
           <Icon
-            @click="editJson(modelConfig.addRow.extend_info, 'extend_info')"
+            @click="editJson(modelConfig.addRow.data_source_output, 'data_source_output')"
             type="ios-create-outline"
             size="18"
             class="json-edit"
@@ -63,42 +101,67 @@ let tableEle = [
   {
     title: 'tf_provider', // 不必
     value: 'provider', //
-    style: { width: '150px' },
+    style: { width: '200px' },
     display: true
   },
   {
     title: 'tf_resource',
+    value: 'resource_type', //
+    style: { width: '150px' },
+    display: true
+  },
+  {
+    title: 'tf_resource_name',
     value: 'resource_name', //
     style: { width: '150px' },
     display: true
   },
   {
-    title: 'tf_property',
-    value: 'property',
+    title: 'tf_resource_property_conversion',
+    value: 'resource_property',
     style: { width: '150px' },
-    display: true
-  },
-  {
-    title: 'tf_resource_property',
-    value: 'resource_property', //
     render: item => {
       return JSON.stringify(item.resource_property)
     },
     display: true
   },
   {
-    title: 'tf_output_property',
-    value: 'output_property',
+    title: 'tf_resource_output_conversion',
+    value: 'resource_output',
+    style: { width: '150px' },
     render: item => {
-      return JSON.stringify(item.output_property)
+      return JSON.stringify(item.resource_output)
+    },
+    display: true
+  },
+
+  {
+    title: 'tf_data_source_name',
+    value: 'data_source_name', //
+    style: { width: '150px' },
+    display: true
+  },
+  {
+    title: 'tf_data_source_output_parameter',
+    value: 'data_source_argument', //
+    style: { width: '200px' },
+    display: true
+  },
+  {
+    title: 'tf_data_source_parameter_conversion',
+    value: 'data_source',
+    style: { width: '200px' },
+    render: item => {
+      return JSON.stringify(item.data_source)
     },
     display: true
   },
   {
-    title: 'tf_extend_info',
-    value: 'extend_info',
+    title: 'tf_data_source_output_conversion',
+    value: 'data_source_output',
+    style: { width: '200px' },
     render: item => {
-      return JSON.stringify(item.extend_info)
+      return JSON.stringify(item.data_source_output)
     },
     display: true
   }
@@ -176,10 +239,11 @@ export default {
         modalId: 'add_edit_Modal',
         modalTitle: 'tf_resource',
         isAdd: true,
+        modalStyle: 'min-width:800px',
         config: [
           {
             label: 'tf_resource',
-            value: 'resource_name',
+            value: 'resource_type',
             placeholder: 'tips.inputRequired',
             v_validate: 'required:true|min:2|max:60',
             disabled: true,
@@ -194,28 +258,24 @@ export default {
             disabled: true,
             type: 'select'
           },
-          {
-            label: 'tf_property',
-            value: 'property',
-            placeholder: 'tips.inputRequired',
-            v_validate: 'required:true|min:2|max:60',
-            disabled: false,
-            type: 'text'
-          },
           { name: 'outer-config', type: 'slot' }
         ],
         addRow: {
           // [通用]-保存用户新增、编辑时数据
           resource_name: '',
           provider: '',
-          property: '',
-          extend_info: '{}',
+          resource_type: '',
           resource_property: '{}',
-          output_property: '{}'
+          resource_output: '{}',
+          data_source_name: '',
+          data_source_argument: '',
+          data_source: '{}',
+          data_source_output: '{}'
         },
         v_select_configs: {
           providerOption: []
-        }
+        },
+        slotConfig: []
       },
       modelTip: {
         key: 'resource_name',
@@ -281,9 +341,8 @@ export default {
     },
     async addPost () {
       const params = this.beautyParams(JSON.parse(JSON.stringify(this.modelConfig.addRow)), [
-        'extend_info',
         'resource_property',
-        'output_property'
+        'resource_output'
       ])
       if (!params) return
       const { status, message } = await addTableRow(this.pageConfig.CRUD, params)
@@ -299,14 +358,15 @@ export default {
       this.modelConfig.isAdd = false
       this.modelTip.value = rowData[this.modelTip.key]
       this.modelConfig.addRow = this.$tfCommonUtil.manageEditParams(this.modelConfig.addRow, rowData)
-      this.modelConfig.addRow.extend_info = JSON.stringify(this.modelConfig.addRow.extend_info)
       this.modelConfig.addRow.resource_property = JSON.stringify(this.modelConfig.addRow.resource_property)
-      this.modelConfig.addRow.output_property = JSON.stringify(this.modelConfig.addRow.output_property)
+      this.modelConfig.addRow.resource_output = JSON.stringify(this.modelConfig.addRow.resource_output)
+      this.modelConfig.addRow.data_source = JSON.stringify(this.modelConfig.addRow.data_source)
+      this.modelConfig.addRow.data_source_output = JSON.stringify(this.modelConfig.addRow.data_source_output)
     },
     async editPost () {
       let editData = JSON.parse(JSON.stringify(this.modelConfig.addRow))
       delete editData.name
-      const params = this.beautyParams(editData, ['extend_info', 'resource_property', 'output_property'])
+      const params = this.beautyParams(editData, ['resource_property', 'resource_output'])
       if (!params) return
       const { status, message } = await editTableRow(this.pageConfig.CRUD, this.id, params)
       if (status === 'OK') {

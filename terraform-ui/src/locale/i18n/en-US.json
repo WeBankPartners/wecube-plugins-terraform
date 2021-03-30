@@ -103,7 +103,7 @@
   },
   "delete_confirm": "Confirm the deletion：",
   "tf_provider": "Cloud Vendor",
-  "tf_resource": "Resource",
+  "tf_resource": "Resource Type",
   "tf_keyconfig": "Key Config",
   "tf_secret": "Cloud Authentication",
   "tf_instance_type": "Instance Type",
@@ -119,6 +119,9 @@
   "tf_value_config": "Resource Property",
   "tf_property": "Property",
   "tf_output_property": "Output Property",
+  "tf_property_conversion": "Conversion Property",
+  "tf_output_conversion": "Conversion Output",
+  "tf_parameter_conversion": "Conversion Parameters",
   "tf_origin_name": "Origin Name",
   "tf_memory": "Memory",
   "tf_cpu": "CPU",
@@ -127,5 +130,12 @@
   "tf_json_edit": "Edit Json",
   "tf_display_name": "Display Name",
   "tf_secret_info": "Secret Info",
-  "tf_json_require": "Is Not Json"
+  "tf_json_require": "Is Not Json",
+  "tf_resource_name": "Resource Name",
+  "tf_resource_property_conversion": "Resource Property Conversion",
+  "tf_resource_output_conversion": "Resource Output Conversion",
+  "tf_data_source_name": "Data Source Name",
+  "tf_data_source_output_parameter": "Data Source Output Parameter",
+  "tf_data_source_parameter_conversion": "Data Source Parameter Conversion",
+  "tf_data_source_output_conversion": "Data Source Output Conversion"
 }
