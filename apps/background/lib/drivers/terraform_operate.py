@@ -107,7 +107,7 @@ class TerraformResource(object):
             logger.info("try rollback workspace %s to %s" % (path, backuppath))
             command(cmd="mv %s %s" % (path, backuppath))
 
-    def run(self, path):
+    def run(self, path, skip_backup=None):
         '''
 
         :param path:
@@ -121,9 +121,21 @@ class TerraformResource(object):
         self.terraformDriver.apply(path, auto_approve="")
         return self.terraformDriver.resource_result(path)
 
+    def is_need_imort(self, path):
+        '''
+
+        :param path:
+        :return:
+        '''
+        _statefile = os.path.join(path, "terraform.tfstate")
+        if os.path.exists(_statefile):
+            return False
+
+        return True
+
     def run_import(self, from_source, dest_source, path, state=None):
         '''
-        # todo  非资产类型资源没有id, 使用两个字段  资产id  + 标识id 进行识别才能导入
+        # 非资产类型资源没有id, 使用两个字段  资产id  + 标识id 进行导入
         :param from_source:
         :param dest_source:
         :param path:
