@@ -18,7 +18,7 @@ class BaseSourceController(BaseController):
 
     def before_handler(self, request, data, **kwargs):
         validation.allowed_key(data, ["id", "resource_id", "provider",
-                                      "secret", "region", "zone"])
+                                      "secret", "region", "zone", "ignore_ids"])
 
         validation.not_allowed_null(data=data,
                                     keys=["provider", "region"]
@@ -26,7 +26,8 @@ class BaseSourceController(BaseController):
 
         validation.validate_collector(data=data,
                                       strings=["id", "resource_id", "provider",
-                                               "secret", "region", "zone"])
+                                               "secret", "region", "zone"],
+                                      lists=["ignore_ids"])
 
     def response_templete(self, data):
         return {}
@@ -38,6 +39,7 @@ class BaseSourceController(BaseController):
         zone = data.pop("zone", None)
         provider = data.pop("provider", None)
         resource_id = data.get("resource_id")
+        ignore_ids = data.get("ignore_ids", [])
 
         result = self.resource.get_remote_source(rid=rid, provider=provider,
                                                  region=region, zone=zone,
@@ -55,6 +57,10 @@ class BaseSourceController(BaseController):
                         res[x] = value
                     else:
                         res[x] = str(value)
+
+            if res.get("resource_id") in ignore_ids:
+                continue
+
             result_data.append(res)
 
         return {"datas": result_data}
