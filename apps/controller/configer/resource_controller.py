@@ -72,13 +72,14 @@ class ResourceController(BackendController):
         data_source = validation.validate_dict("data_source", data.get("data_source"))
         data_source_output = validation.validate_dict("data_source_output", data.get("data_source_output"))
 
-        for _, value in data_source_output.items():
-            if not isinstance(value, basestring):
-                raise ValueError("data_source_output 为key-value定义")
+        # for _, value in data_source_output.items():
+        #     if not isinstance(value, basestring):
+        #         raise ValueError("data_source_output 为key-value定义")
 
         validate_convert_key(resource_property)
         validate_convert_value(extend_info)
         validate_convert_value(resource_output)
+        validate_convert_key(data_source_output)
         property_necessary(resource_name=data["resource_name"],
                            resource_property=resource_property)
 
