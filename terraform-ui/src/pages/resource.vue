@@ -3,7 +3,9 @@
     <TerraformPageTable :pageConfig="pageConfig"></TerraformPageTable>
     <TfModalComponent :modelConfig="modelConfig">
       <template #outer-config>
-        <Divider size="small" orientation="left" style="font-size:12px;">Resource</Divider>
+        <Divider size="small" orientation="left" style="font-size:12px;color:#cccaca"
+          >Resource {{ $t('tf_config') }}</Divider
+        >
         <div class="marginbottom params-each">
           <label class="col-md-2 label-name">{{ $t('tf_name') }}:</label>
           <input
@@ -39,8 +41,9 @@
             size="18"
             class="json-edit"
           />
+          <label class="required-tip">*</label>
         </div>
-        <!-- <Divider size="small" orientation="left" style="font-size:12px;">Data Source</Divider>
+        <!-- <Divider size="small" orientation="left" style="font-size:12px;color:#cccaca">Data Source {{$t('tf_config')</Divider>
         <div class="marginbottom params-each">
           <label class="col-md-2 label-name">{{ $t('tf_name') }}:</label>
           <input
@@ -278,7 +281,7 @@ export default {
         slotConfig: []
       },
       modelTip: {
-        key: 'resource_name',
+        key: 'resource_type',
         value: null
       },
       id: ''
@@ -381,7 +384,7 @@ export default {
     },
     deleteConfirmModal (rowData) {
       this.$Modal.confirm({
-        title: this.$t('delete_confirm') + rowData.name,
+        title: this.$t('delete_confirm') + rowData[this.modelTip.key],
         'z-index': 1000000,
         onOk: async () => {
           const { status, message } = await deleteTableRow(this.pageConfig.CRUD, rowData.id)

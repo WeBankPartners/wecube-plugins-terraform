@@ -138,5 +138,6 @@
   "tf_data_source_name": "Data Source Name",
   "tf_data_source_output_parameter": "Data Source Output Parameter",
   "tf_data_source_parameter_conversion": "Data Source Parameter Conversion",
-  "tf_data_source_output_conversion": "Data Source Output Conversion"
+  "tf_data_source_output_conversion": "Data Source Output Conversion",
+  "tf_config": "Configuration"
 }

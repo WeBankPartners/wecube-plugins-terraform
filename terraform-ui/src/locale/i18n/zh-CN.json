@@ -134,11 +134,11 @@
   "tf_display_name": "显示名",
   "tf_secret_info": "认证信息",
   "tf_json_require": "需为Json",
-  "tf_resource_name": "Resource名称",
   "tf_resource_property_conversion": "Resource属性转换",
   "tf_resource_output_conversion": "Resource输出转换",
   "tf_data_source_name": "Data Source名称",
   "tf_data_source_output_parameter": "Data Source输出参数",
   "tf_data_source_parameter_conversion": "Data Source参数转换",
-  "tf_data_source_output_conversion": "Data Source输出转换"
+  "tf_data_source_output_conversion": "Data Source输出转换",
+  "tf_config": "配置"
 }
