@@ -167,8 +167,14 @@ class ResourceConfiger(object):
         resource_property = self.resource_keys_config["resource_property"]
         resource_extend_info = self.resource_keys_config["extend_info"]
 
+        resource_property_extend = resource_property.pop("extend_info", {}) or {}
+
         _extend_columns = convert_keys(datas=extend_info, defines=resource_property, is_extend=True)
         logger.info("property extend info: %s" % (format_json_dumps(_extend_columns)))
+        resource_columns.update(_extend_columns)
+
+        _extend_columns = convert_keys(datas=extend_info, defines=resource_property_extend, is_extend=True)
+        logger.info("resource_property extend info: %s" % (format_json_dumps(_extend_columns)))
         resource_columns.update(_extend_columns)
 
         _extend_columns = convert_extend_propertys(datas=extend_info, extend_info=resource_extend_info)

@@ -167,6 +167,8 @@ def convert_keys(datas, defines, is_update=False, is_extend=False):
         return result
 
     if is_extend:
+        if not defines:
+            return result
         for key, value in datas.items():
             if defines.get(key) is not None:
                 result.update(convert_key(key, value, define=defines[key]))
