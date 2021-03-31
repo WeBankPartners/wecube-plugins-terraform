@@ -40,7 +40,7 @@ let tableEle = [
     display: true
   },
   {
-    title: 'tf_resource',
+    title: 'tf_resource_type',
     value: 'resource', //
     style: { width: '150px' },
     display: true
@@ -84,7 +84,7 @@ export default {
             {
               value: 'resource',
               type: 'input',
-              placeholder: 'tf_resource',
+              placeholder: 'tf_resource_type',
               style: ''
             },
             {
@@ -131,7 +131,7 @@ export default {
         isAdd: true,
         config: [
           {
-            label: 'tf_resource',
+            label: 'tf_resource_type',
             value: 'resource',
             placeholder: 'tips.inputRequired',
             v_validate: 'required:true|min:2|max:60',

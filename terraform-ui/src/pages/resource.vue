@@ -3,7 +3,7 @@
     <TerraformPageTable :pageConfig="pageConfig"></TerraformPageTable>
     <TfModalComponent :modelConfig="modelConfig">
       <template #outer-config>
-        <Divider>Resource</Divider>
+        <Divider size="small" orientation="left" style="font-size:12px;">Resource</Divider>
         <div class="marginbottom params-each">
           <label class="col-md-2 label-name">{{ $t('tf_name') }}:</label>
           <input
@@ -34,13 +34,13 @@
             style="width:70%"
           />
           <Icon
-            @click="editJson(modelConfig.addRow.output_property, 'resource_output')"
+            @click="editJson(modelConfig.addRow.resource_output, 'resource_output')"
             type="ios-create-outline"
             size="18"
             class="json-edit"
           />
         </div>
-        <Divider>Data Source</Divider>
+        <!-- <Divider size="small" orientation="left" style="font-size:12px;">Data Source</Divider>
         <div class="marginbottom params-each">
           <label class="col-md-2 label-name">{{ $t('tf_name') }}:</label>
           <input
@@ -84,7 +84,7 @@
             size="18"
             class="json-edit"
           />
-        </div>
+        </div> -->
       </template>
     </TfModalComponent>
     <Modal :z-index="2000" v-model="showEdit" :title="$t('tf_json_edit')" @on-ok="confirmJsonData" width="700">
@@ -105,21 +105,21 @@ let tableEle = [
     display: true
   },
   {
-    title: 'tf_resource',
+    title: 'tf_resource_type',
     value: 'resource_type', //
     style: { width: '150px' },
     display: true
   },
   {
     title: 'tf_resource_name',
-    value: 'resource_name', //
-    style: { width: '150px' },
+    value: 'resource_name',
+    // style: { width: '150px' },
     display: true
   },
   {
     title: 'tf_resource_property_conversion',
     value: 'resource_property',
-    style: { width: '150px' },
+    // style: { width: '150px' },
     render: item => {
       return JSON.stringify(item.resource_property)
     },
@@ -128,43 +128,43 @@ let tableEle = [
   {
     title: 'tf_resource_output_conversion',
     value: 'resource_output',
-    style: { width: '150px' },
+    // style: { width: '150px' },
     render: item => {
       return JSON.stringify(item.resource_output)
     },
     display: true
-  },
-
-  {
-    title: 'tf_data_source_name',
-    value: 'data_source_name', //
-    style: { width: '150px' },
-    display: true
-  },
-  {
-    title: 'tf_data_source_output_parameter',
-    value: 'data_source_argument', //
-    style: { width: '200px' },
-    display: true
-  },
-  {
-    title: 'tf_data_source_parameter_conversion',
-    value: 'data_source',
-    style: { width: '200px' },
-    render: item => {
-      return JSON.stringify(item.data_source)
-    },
-    display: true
-  },
-  {
-    title: 'tf_data_source_output_conversion',
-    value: 'data_source_output',
-    style: { width: '200px' },
-    render: item => {
-      return JSON.stringify(item.data_source_output)
-    },
-    display: true
   }
+
+  // {
+  //   title: 'tf_data_source_name',
+  //   value: 'data_source_name', //
+  //   style: { width: '150px' },
+  //   display: true
+  // },
+  // {
+  //   title: 'tf_data_source_output_parameter',
+  //   value: 'data_source_argument', //
+  //   style: { width: '200px' },
+  //   display: true
+  // },
+  // {
+  //   title: 'tf_data_source_parameter_conversion',
+  //   value: 'data_source',
+  //   style: { width: '200px' },
+  //   render: item => {
+  //     return JSON.stringify(item.data_source)
+  //   },
+  //   display: true
+  // },
+  // {
+  //   title: 'tf_data_source_output_conversion',
+  //   value: 'data_source_output',
+  //   style: { width: '200px' },
+  //   render: item => {
+  //     return JSON.stringify(item.data_source_output)
+  //   },
+  //   display: true
+  // }
 ]
 const btn = [
   { btn_name: 'button.edit', btn_func: 'editF' },
@@ -188,15 +188,15 @@ export default {
               style: ''
             },
             {
-              value: 'resource_name',
+              value: 'resource_type',
               type: 'input',
-              placeholder: 'tf_resource',
+              placeholder: 'tf_resource_type',
               style: ''
             },
             {
-              value: 'property',
+              value: 'resource_name',
               type: 'input',
-              placeholder: 'tf_property',
+              placeholder: 'tf_resource_name',
               style: ''
             }
           ],
@@ -242,7 +242,7 @@ export default {
         modalStyle: 'min-width:800px',
         config: [
           {
-            label: 'tf_resource',
+            label: 'tf_resource_type',
             value: 'resource_type',
             placeholder: 'tips.inputRequired',
             v_validate: 'required:true|min:2|max:60',
@@ -321,6 +321,10 @@ export default {
       }
     },
     async add () {
+      this.modelConfig.addRow.resource_property = '{}'
+      this.modelConfig.addRow.resource_output = '{}'
+      this.modelConfig.addRow.data_source = '{}'
+      this.modelConfig.addRow.data_source_output = '{}'
       await this.getProvider()
       this.modelConfig.isAdd = true
     },
