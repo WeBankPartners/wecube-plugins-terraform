@@ -43,7 +43,9 @@
           />
           <label class="required-tip">*</label>
         </div>
-        <!-- <Divider size="small" orientation="left" style="font-size:12px;color:#cccaca">Data Source {{$t('tf_config')</Divider>
+        <Divider size="small" orientation="left" style="font-size:12px;color:#cccaca"
+          >Data Source {{$t('tf_config')</Divider
+        >
         <div class="marginbottom params-each">
           <label class="col-md-2 label-name">{{ $t('tf_name') }}:</label>
           <input
@@ -87,7 +89,7 @@
             size="18"
             class="json-edit"
           />
-        </div> -->
+        </div>
       </template>
     </TfModalComponent>
     <Modal :z-index="2000" v-model="showEdit" :title="$t('tf_json_edit')" @on-ok="confirmJsonData" width="700">
@@ -136,38 +138,38 @@ let tableEle = [
       return JSON.stringify(item.resource_output)
     },
     display: true
-  }
+  },
 
-  // {
-  //   title: 'tf_data_source_name',
-  //   value: 'data_source_name', //
-  //   style: { width: '150px' },
-  //   display: true
-  // },
-  // {
-  //   title: 'tf_data_source_output_parameter',
-  //   value: 'data_source_argument', //
-  //   style: { width: '200px' },
-  //   display: true
-  // },
-  // {
-  //   title: 'tf_data_source_parameter_conversion',
-  //   value: 'data_source',
-  //   style: { width: '200px' },
-  //   render: item => {
-  //     return JSON.stringify(item.data_source)
-  //   },
-  //   display: true
-  // },
-  // {
-  //   title: 'tf_data_source_output_conversion',
-  //   value: 'data_source_output',
-  //   style: { width: '200px' },
-  //   render: item => {
-  //     return JSON.stringify(item.data_source_output)
-  //   },
-  //   display: true
-  // }
+  {
+    title: 'tf_data_source_name',
+    value: 'data_source_name', //
+    style: { width: '150px' },
+    display: true
+  },
+  {
+    title: 'tf_data_source_output_parameter',
+    value: 'data_source_argument', //
+    style: { width: '200px' },
+    display: true
+  },
+  {
+    title: 'tf_data_source_parameter_conversion',
+    value: 'data_source',
+    style: { width: '200px' },
+    render: item => {
+      return JSON.stringify(item.data_source)
+    },
+    display: true
+  },
+  {
+    title: 'tf_data_source_output_conversion',
+    value: 'data_source_output',
+    style: { width: '200px' },
+    render: item => {
+      return JSON.stringify(item.data_source_output)
+    },
+    display: true
+  }
 ]
 const btn = [
   { btn_name: 'button.edit', btn_func: 'editF' },
