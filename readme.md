@@ -91,7 +91,7 @@ sh  bin/start.sh
 转换规则：
 
 字段属性转换定义说明：
-1. string 直接转换为对应的值， 若为空字符串，则不转换， 如 {"cider": ''}
+1. string 直接转换为对应的值， 若为空字符串，则不转换， 如 {"cidr": ''}
 
 2. json 定义约束, 类型为json
    1. type定义类型, 可定义： [string, int, float, json, list]

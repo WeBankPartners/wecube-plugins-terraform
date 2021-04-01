@@ -298,7 +298,7 @@ url: /terraform/v1/configer/resource
 <resource配置>
 "resource_name"   资源名称 如tencent_vpc  string  必填
 "extend_info"      资源其他属性字段  json
-"resource_property"  资源转换的属性字段  json   如： cider需要转换为cider_block  则为｛“cider”: "cider_block"｝
+"resource_property"  资源转换的属性字段  json   如： cidr需要转换为cidr_block  则为｛“cidr”: "cidr_block"｝
 "resource_output"  输出属性： 例如｛“resource_id”: "id"｝或｛“resource_id”: {"type": "string", "value": "id"}｝
 
 <data source配置>
@@ -530,7 +530,7 @@ url: /terraform/v1/configer/keyconfig
                 "enabled":1,
                 "updated_time":null,
                 "value_config":"{
-"cider":"cidr_block"
+"cidr":"cidr_block"
 }",
                 "provider":"tencentcloud",
                 "created_time":null,
@@ -559,7 +559,7 @@ url: /terraform/v1/configer/keyconfig
 ```
 "provider",   云厂商  string  必填
 "resource",   资源名称  string  必填  如vpc
-"resource_type",   资源属性  string 必填 如cider
+"resource_type",   资源属性  string 必填 如cidr
 "value_config"  资源属性值转换配置  json   如： “muliticate” 转换为“muliticate_info” 则配置为： ｛“muliticate”： “muliticate_info”｝
 ```
 
@@ -604,7 +604,7 @@ url: /terraform/v1/configer/keyconfig/{id}
                 "enabled":1,
                 "updated_time":null,
                 "value_config":"{
-"cider":"cidr_block"
+"cidr":"cidr_block"
 }",
                 "provider":"tencentcloud",
                 "created_time":null,
@@ -649,7 +649,7 @@ url: /terraform/v1/configer/keyconfig/{id}
                 "enabled":1,
                 "updated_time":null,
                 "value_config":"{
-"cider":"cidr_block"
+"cidr":"cidr_block"
 }",
                 "provider":"tencentcloud",
                 "created_time":null,
