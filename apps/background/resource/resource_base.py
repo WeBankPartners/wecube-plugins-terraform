@@ -28,6 +28,22 @@ class CrsObject(object):
         self.resource = CrsManager()
         self.resource_name = resource_name
 
+    def query_one(self, where_data=None):
+        where_data = where_data or {}
+
+        if self.resource_name:
+            where_data["resource_name"] = self.resource_name
+
+        data = self.resource.get(filters=where_data)
+        if data:
+            data["propertys"] = json.loads(data["propertys"])
+            data["output_json"] = json.loads(data["output_json"])
+            data["extend_info"] = json.loads(data["extend_info"])
+            data["define_json"] = json.loads(data["define_json"])
+            data["result_json"] = json.loads(data["result_json"])
+
+        return data
+
     def list(self, filters=None, page=None, pagesize=None, orderby=None):
         filters = filters or {}
         filters["is_deleted"] = 0

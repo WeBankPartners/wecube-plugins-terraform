@@ -447,6 +447,34 @@ class ApiBackendBase(TerraformResource):
         logger.info(format_json_dumps(ext_result))
         return ext_result
 
+    def outer_equivalence(self, datas, defines):
+        result = {}
+        if not defines:
+            return result
+        for key, destkey in defines.items():
+            x_data = datas.get(key)
+            if isinstance(x_data, basestring):
+                crs_data = CrsObject().query_one(where_data={"resource_id": x_data})
+                x_resource = ""
+                if crs_data:
+                    x_resource = crs_data.get("id")
+
+                result[destkey] = x_resource
+            elif isinstance(x_data, list):
+                c_resource = []
+                for c_data in x_data:
+                    crs_data = CrsObject().query_one(where_data={"resource_id": c_data})
+
+                    if crs_data:
+                        x_resource = crs_data.get("id")
+                        c_resource.append(x_resource)
+
+                result[destkey] = c_resource
+            else:
+                logger.info("equivalence support type string ot list, %s skip..." % (str(x_data)))
+
+        return result
+
     def read_query_result_controller(self, provider, result, data_source_argument):
         if not data_source_argument:
             raise ValueError("data_source_argument not config")
@@ -467,11 +495,16 @@ class ApiBackendBase(TerraformResource):
             logger.info(traceback.format_exc())
             raise ValueError("query remote source failed, result read faild")
 
-        define_columns = ResourceConductor().conductor_reset_filter(provider, self.resource_name)
+        resourceconduct = ResourceConductor()
+        define_columns = resourceconduct.conductor_reset_filter(provider, self.resource_name)
 
         res = []
         for out_data in instance_define:
             x_res = fetech_property(out_data, define_columns)
+            equivalence_define = resourceconduct.conductor_reset_equivalence(provider, self.resource_name)
+
+            e_res = self.outer_equivalence(datas=x_res, defines=equivalence_define)
+            x_res.update(e_res)
             res.append(x_res)
 
         # output_json = self.read_data_output_controller(result)

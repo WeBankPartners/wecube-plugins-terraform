@@ -267,3 +267,9 @@ class ResourceConductor(object):
         resource_columns, _ = configer.conductor_reset_property(provider=provider,
                                                                 resource_name=resource_name)
         return resource_columns
+
+    def conductor_reset_equivalence(self, provider, resource_name):
+        configer = ResourceConfiger()
+        resource_columns, _ = configer.conductor_reset_equivalence(provider=provider,
+                                                                resource_name=resource_name)
+        return resource_columns
