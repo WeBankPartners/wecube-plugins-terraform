@@ -11,7 +11,7 @@ from apps.api.apibase_backend import ApiBackendBase
 
 
 class Common(object):
-    def generate_create_data(zone, create_data, **kwargs):
+    def generate_create_data(self, zone, create_data, **kwargs):
         create_data = {"cidr": create_data.get("cidr"),
                        "name": create_data.get("name")}
         return create_data, {}

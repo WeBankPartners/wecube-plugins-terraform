@@ -53,8 +53,8 @@ CREATE TABLE `resource` (
   `extend_info` text NOT NULL,
   `resource_property` text NOT NULL,
   `resource_output` text,
-  `data_source_name` varchar(64) NOT NULL,
-  `data_source_argument` varchar(64) NOT NULL,
+  `data_source_name` varchar(64) DEFAULT NULL,
+  `data_source_argument` varchar(64) DEFAULT NULL,
   `data_source` text,
   `data_source_output` varchar(2048) DEFAULT NULL,
   `is_locked` tinyint(1) DEFAULT '0',
@@ -129,7 +129,7 @@ CREATE TABLE `cloud_resource` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 ALTER TABLE `terraform`.`cloud_resource`
-  CHANGE `resource_id` `resource_id` VARCHAR(512) CHARSET utf8 COLLATE utf8_general_ci NULL;
+  CHANGE `resource_id` `resource_id` VARCHAR(255) CHARSET utf8 COLLATE utf8_general_ci NULL;
 
 
 DROP TABLE IF EXISTS `instance_type`;
