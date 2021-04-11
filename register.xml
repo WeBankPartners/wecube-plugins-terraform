@@ -48,6 +48,8 @@
 					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">cidr</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
@@ -94,6 +96,8 @@
 					<parameter datatype="string" mappingType="entity" required="Y">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">cidr</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
@@ -141,6 +145,8 @@
 					<parameter datatype="string" mappingType="entity" required="Y">vpc_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
@@ -190,6 +196,8 @@
 					<parameter datatype="string" mappingType="entity" required="Y">next_hub</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
@@ -222,6 +230,8 @@
                     <parameter datatype="string" mappingType="entity" required="N">peer_region</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
@@ -269,6 +279,8 @@
 					<parameter datatype="string" mappingType="entity" required="Y">vpc_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
@@ -320,6 +332,8 @@
 					<parameter datatype="string" mappingType="entity" required="Y">ip_protocol</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">ports</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">policy</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">description</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
@@ -353,6 +367,8 @@
 					<parameter datatype="string" mappingType="entity" required="N">eip</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
@@ -400,6 +416,8 @@
 					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
@@ -446,6 +464,8 @@
 					<parameter datatype="string" mappingType="entity" required="N">private_ip</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
@@ -475,6 +495,8 @@
 					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
@@ -520,6 +542,8 @@
 					<parameter datatype="string" mappingType="entity" required="N">instance_region</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
@@ -551,6 +575,8 @@
 					<parameter datatype="string" mappingType="entity" required="N">bandwidth</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
@@ -582,6 +608,8 @@
 					<parameter datatype="string" mappingType="entity" required="Y">size</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
@@ -630,6 +658,8 @@
 					<parameter datatype="string" mappingType="entity" required="N">appid</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
@@ -684,6 +714,8 @@
 					<parameter datatype="string" mappingType="entity" required="N">security_group_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">vpc_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">power_action</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">data_disks</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
@@ -750,6 +782,8 @@
 					<parameter datatype="string" mappingType="entity" required="N">security_group_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
@@ -830,6 +864,8 @@
 					<parameter datatype="string" mappingType="entity" required="N">vpc_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
@@ -882,6 +918,8 @@
 					<parameter datatype="string" mappingType="entity" required="N">health_check_uri</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
@@ -967,6 +1005,8 @@
 					<parameter datatype="string" mappingType="entity" required="N">first_slave_zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
@@ -1027,6 +1067,8 @@
 					<parameter datatype="string" mappingType="entity" required="Y">mysql_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
@@ -1056,6 +1098,8 @@
 					<parameter datatype="string" mappingType="entity" required="Y" sensitiveData="Y">password</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
@@ -1086,6 +1130,8 @@
 					<parameter datatype="string" mappingType="entity" required="Y">privileges</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
@@ -1116,6 +1162,8 @@
 					<parameter datatype="string" mappingType="entity" required="Y">backup_time</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>

@@ -40,10 +40,42 @@ class ReverseProperty(object):
             return {}
 
     @classmethod
+    def reverse_key_equivalence(cls, key, define):
+        '''
+
+        :param key:
+        :param define:
+        {
+        "type": "string",
+        "convert": "access_key",
+        "allow_null": 1,
+        "default": ""
+        }
+        :return:
+        '''
+
+        if isinstance(define, basestring):
+            if define == '-':
+                return {}
+        else:
+            if define.get("equivalence"):
+                return {key: define.get("equivalence")}
+
+        return {}
+
+    @classmethod
     def reverse_keys(cls, defines):
         info = {}
         for key, value in defines.items():
             info.update(cls.reverse_key(key, value))
+
+        return info
+
+    @classmethod
+    def reverse_equivalence(cls, defines):
+        info = {}
+        for key, value in defines.items():
+            info.update(cls.reverse_key_equivalence(key, value))
 
         return info
 
@@ -90,6 +122,8 @@ class ReverseProperty(object):
             # newkey = define or key
         elif isinstance(define, dict):
             newkey = key
+            if define.get("convert"):
+                newkey = define.get("convert") or key
 
         if newkey:
             return {newkey: key}
@@ -98,10 +132,42 @@ class ReverseProperty(object):
             return {}
 
     @classmethod
+    def reverse_extend_equivalence(cls, key, define):
+        '''
+
+        :param key:
+        :param define:
+        {
+        "type": "string",
+        "convert": "access_key",
+        "allow_null": 1,
+        "default": ""
+        }
+        :return:
+        '''
+
+        if isinstance(define, (basestring, int, float, bool)):
+            if define == '-':
+                return {}
+        elif isinstance(define, dict):
+            if define.get("equivalence"):
+                return {key: define.get("equivalence")}
+
+        return {}
+
+    @classmethod
     def reverse_extend_keys(cls, defines):
         info = {}
         for key, value in defines.items():
             info.update(cls.reverse_extend_key(key, value))
+
+        return info
+
+    @classmethod
+    def reverse_extend_key_equivalence(cls, defines):
+        info = {}
+        for key, value in defines.items():
+            info.update(cls.reverse_extend_equivalence(key, value))
 
         return info
 
