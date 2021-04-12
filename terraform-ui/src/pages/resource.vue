@@ -44,7 +44,7 @@
           <label class="required-tip">*</label>
         </div>
         <Divider size="small" orientation="left" style="font-size:12px;color:#cccaca"
-          >Data Source {{$t('tf_config')</Divider
+          >Data Source {{ $t('tf_config') }}</Divider
         >
         <div class="marginbottom params-each">
           <label class="col-md-2 label-name">{{ $t('tf_name') }}:</label>

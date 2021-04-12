@@ -3,6 +3,8 @@
     <div
       class="modal fade"
       :id="modelConfig.modalId ? modelConfig.modalId : 'add_edit_Modal'"
+      aria-hidden="false"
+      data-backdrop="static"
       role="dialog"
       aria-labelledby="myModalLabel"
     >
