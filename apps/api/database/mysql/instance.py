@@ -298,3 +298,33 @@ class MysqlBackendApi(RdsDBBackendApi):
                                      extend_info=extend_info, **kwargs)
 
         return count, res
+
+    def sg_mysql_relationship(self, rid, provider, region, zone, secret,
+                              resource_id, **kwargs):
+
+        self.resource_info(provider)
+        resource_property = self.resource_keys_config["resource_property"]
+        _sg_status = define_relations_key("security_group_id", "0000000",
+                                          resource_property.get("security_group_id"))
+        if _sg_status:
+            return []
+        else:
+            result = []
+            instance_datas = self.get_remote_source(rid, provider, region, zone, secret,
+                                                    resource_id=None, **kwargs)
+
+            for instance in instance_datas:
+                sg = instance.get("security_group_id")
+                if isinstance(resource_id, basestring):
+                    if resource_id in sg:
+                        result.append(instance)
+                elif isinstance(resource_id, list):
+                    state = 0
+                    for x_resource in resource_id:
+                        if x_resource in sg:
+                            state = 1
+
+                    if state == 1:
+                        result.append(instance)
+
+            return result
