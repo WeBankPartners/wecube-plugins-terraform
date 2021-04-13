@@ -32,10 +32,16 @@ class BaseSourceController(BaseController):
     def response_templete(self, data):
         return {}
 
+    def fetch_source(self, rid, provider, region, zone, secret, resource_id):
+        return self.resource.get_remote_source(rid=rid, provider=provider,
+                                               region=region, zone=zone,
+                                               secret=secret,
+                                               resource_id=resource_id)
+
     def one_query(self, rid, provider, region, zone, secret, resource_id, ignore_ids):
-        result = self.resource.get_remote_source(rid=rid, provider=provider,
-                                                 region=region, zone=zone,
-                                                 secret=secret, resource_id=resource_id)
+        result = self.fetch_source(rid=rid, provider=provider,
+                                   region=region, zone=zone,
+                                   secret=secret, resource_id=resource_id)
         result_data = []
         for x_result in result:
             x_res = source_columns_outputs(self.resource.resource_name)

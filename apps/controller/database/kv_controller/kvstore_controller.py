@@ -188,3 +188,14 @@ class KvStoreSourceController(BaseSourceController):
     allow_methods = ("POST",)
     resource = KvStoreBackendApi()
 
+
+class KvStoreSGSourceController(BaseSourceController):
+    resource_describe = "KvStore"
+    allow_methods = ("POST",)
+    resource = KvStoreBackendApi()
+
+    def fetch_source(self, rid, provider, region, zone, secret, resource_id):
+        return self.resource.sg_kv_relationship(rid=rid, provider=provider,
+                                                region=region, zone=zone,
+                                                secret=secret,
+                                                resource_id=resource_id)

@@ -276,3 +276,15 @@ class InstanceSourceController(BaseSourceController):
     allow_methods = ("POST",)
     resource = InstanceBackendApi()
 
+
+class InstanceSGSourceController(BaseSourceController):
+    name = "Instance"
+    resource_describe = "Instance"
+    allow_methods = ("POST",)
+    resource = InstanceBackendApi()
+
+    def fetch_source(self, rid, provider, region, zone, secret, resource_id):
+        return self.resource.sg_vm_relationship(rid=rid, provider=provider,
+                                                region=region, zone=zone,
+                                                secret=secret,
+                                                resource_id=resource_id)

@@ -17,6 +17,7 @@ urlpatterns = [
     url(r'^backend/mysql/create$', mysql_instance.MysqlAddController()),
     url(r'^backend/mysql/destroy$', mysql_instance.MysqlDeleteController()),
     url(r'^backend/mysql/source$', mysql_instance.MysqlSourceController()),
+    url(r'^backend/mysql/security_group/source$', mysql_instance.MysqlSGSourceController()),
 
     url(r'^mysql_database$', mysql_database.MysqlDatabaseController()),
     url(r'^mysql_database/(?P<rid>[\w-]+)$', mysql_database.MysqlDatabaseIdController()),
@@ -62,6 +63,8 @@ urlpatterns = [
     url(r'^kvstore/(?P<rid>[\w-]+)$', kvstore_controller.KvStoreIdController()),
     url(r'^backend/kvstore/apply$', kvstore_controller.KvStoreAddController()),
     url(r'^backend/kvstore/destroy$', kvstore_controller.KvStoreDeleteController()),
+    url(r'^backend/kvstore/source$', kvstore_controller.KvStoreSourceController()),
+    url(r'^backend/kvstore/security_group/source$', kvstore_controller.KvStoreSGSourceController()),
 
     url(r'^kvstore_backup$', kvstore_backup_controller.KvBackupController()),
     url(r'^kvstore_backup/(?P<rid>[\w-]+)$', kvstore_backup_controller.KvBackupIdController()),

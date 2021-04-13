@@ -198,3 +198,15 @@ class MongoDBSourceController(BaseSourceController):
     allow_methods = ("POST",)
     resource = MongodbBackendApi()
 
+
+class MongoDBSGSourceController(BaseSourceController):
+    name = "MongoDB"
+    resource_describe = "MongoDB"
+    allow_methods = ("POST",)
+    resource = MongodbBackendApi()
+
+    def fetch_source(self, rid, provider, region, zone, secret, resource_id):
+        return self.resource.sg_nosql_relationship(rid=rid, provider=provider,
+                                                   region=region, zone=zone,
+                                                   secret=secret,
+                                                   resource_id=resource_id)

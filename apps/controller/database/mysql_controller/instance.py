@@ -37,7 +37,7 @@ class ResBase(object):
         validation.validate_collector(data=data,
                                       strings=["id", "name", "region", "zone",
                                                "provider", "secret", "subnet_id",
-                                               "user", "password",  "disk_type",
+                                               "user", "password", "disk_type",
                                                "version", "instance_type",
                                                "vpc_id", "second_slave_zone",
                                                "first_slave_zone"],
@@ -212,3 +212,15 @@ class MysqlSourceController(BaseSourceController):
     allow_methods = ("POST",)
     resource = MysqlBackendApi()
 
+
+class MysqlSGSourceController(BaseSourceController):
+    name = "Mysql"
+    resource_describe = "Mysql"
+    allow_methods = ("POST",)
+    resource = MysqlBackendApi()
+
+    def fetch_source(self, rid, provider, region, zone, secret, resource_id):
+        return self.resource.sg_mysql_relationship(rid=rid, provider=provider,
+                                                   region=region, zone=zone,
+                                                   secret=secret,
+                                                   resource_id=resource_id)
