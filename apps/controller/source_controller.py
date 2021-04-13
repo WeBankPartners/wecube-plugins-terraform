@@ -32,15 +32,7 @@ class BaseSourceController(BaseController):
     def response_templete(self, data):
         return {}
 
-    def main_response(self, request, data, **kwargs):
-        rid = data.pop("id", None)
-        secret = data.pop("secret", None)
-        region = data.pop("region", None)
-        zone = data.pop("zone", None)
-        provider = data.pop("provider", None)
-        resource_id = data.get("resource_id")
-        ignore_ids = data.get("ignore_ids", [])
-
+    def one_query(self, rid, provider, region, zone, secret, resource_id, ignore_ids):
         result = self.resource.get_remote_source(rid=rid, provider=provider,
                                                  region=region, zone=zone,
                                                  secret=secret, resource_id=resource_id)
@@ -63,4 +55,32 @@ class BaseSourceController(BaseController):
 
             result_data.append(res)
 
+        return result_data
+
+    def main_response(self, request, data, **kwargs):
+        rid = data.pop("id", None)
+        secret = data.pop("secret", None)
+        region = data.pop("region", None)
+        zone = data.pop("zone", None)
+        provider = data.pop("provider", None)
+        resource_id = data.get("resource_id")
+        ignore_ids = data.get("ignore_ids", [])
+
+        if resource_id:
+            if resource_id.startswith("[") and resource_id.endswith("]"):
+                resource_id = eval(resource_id)
+
+        if resource_id:
+            result = []
+            if isinstance(resource_id, basestring):
+                result = self.one_query(rid, provider, region, zone, secret, resource_id, ignore_ids)
+            elif isinstance(resource_id, list):
+                for r_resource_id in resource_id:
+                    result += self.one_query(rid, provider, region, zone, secret, r_resource_id, ignore_ids)
+            else:
+                raise ValueError("resource id error, please check")
+
+            return {"datas": result}
+
+        result_data = self.one_query(rid, provider, region, zone, secret, resource_id, ignore_ids)
         return {"datas": result_data}
