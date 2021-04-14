@@ -73,8 +73,12 @@ class BaseSourceController(BaseController):
         ignore_ids = data.get("ignore_ids", [])
 
         if resource_id:
+            resource_id = resource_id.strip()
             if resource_id.startswith("[") and resource_id.endswith("]"):
                 resource_id = eval(resource_id)
+
+            if resource_id == "*":
+                resource_id = None
 
         if resource_id:
             result = []

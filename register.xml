@@ -72,7 +72,7 @@
             <interface action="fetch_source" path="/terraform/v1/network/backend/vpc/source" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 				</inputParameters>
@@ -120,7 +120,7 @@
             <interface action="fetch_source" path="/terraform/v1/network/backend/subnet/source" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 				</inputParameters>
@@ -169,7 +169,7 @@
             <interface action="fetch_source" path="/terraform/v1/network/backend/route_table/source" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 				</inputParameters>
@@ -254,7 +254,7 @@
             <interface action="fetch_source" path="/terraform/v1/network/backend/peer_connection/source" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 				</inputParameters>
@@ -303,7 +303,7 @@
             <interface action="fetch_source" path="/terraform/v1/network/backend/security_group/source" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 				</inputParameters>
@@ -392,7 +392,7 @@
             <interface action="fetch_source" path="/terraform/v1/network/backend/nat/source" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 				</inputParameters>
@@ -441,7 +441,7 @@
             <interface action="fetch_source" path="/terraform/v1/network/backend/eip/source" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 				</inputParameters>
@@ -519,7 +519,7 @@
             <interface action="fetch_source" path="/terraform/v1/network/backend/ccn/source" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 				</inputParameters>
@@ -632,7 +632,7 @@
             <interface action="fetch_source" path="/terraform/v1/storage/backend/disk/source" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 				</inputParameters>
@@ -683,7 +683,7 @@
             <interface action="fetch_source" path="/terraform/v1/storage/backend/object_storage/source" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 				</inputParameters>
@@ -744,7 +744,7 @@
             <interface action="fetch_source" path="/terraform/v1/vm/backend/instance/source" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 				</inputParameters>
@@ -807,7 +807,7 @@
             <interface action="fetch_source" path="/terraform/v1/vm/backend/network_interface/source" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 				</inputParameters>
@@ -889,7 +889,7 @@
             <interface action="fetch_source" path="/terraform/v1/loadbalance/backend/lb/source" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 				</inputParameters>
@@ -1033,7 +1033,7 @@
             <interface action="fetch_source" path="/terraform/v1/database/backend/mysql/source" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
-                    <parameter datatype="string" mappingType="entity" required="Y">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 				</inputParameters>
