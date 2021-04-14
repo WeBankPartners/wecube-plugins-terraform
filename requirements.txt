@@ -16,3 +16,4 @@ SQLalchemy==1.3.23
 PyMySQL==0.7.11
 pycrypto
 pyDes
+lxml

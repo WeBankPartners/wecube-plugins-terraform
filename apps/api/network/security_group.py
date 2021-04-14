@@ -43,6 +43,18 @@ class Common(object):
         r_id = create_data.get("vpc_id")
         return None, r_id
 
+    def sg_vpc_relationship(self, rid, provider, region, zone, secret,
+                            resource_id, **kwargs):
+
+        self.resource_info(provider)
+        resource_property = self.resource_keys_config["resource_property"]
+        _vpc_status = define_relations_key("vpc_id", "0000000", resource_property.get("vpc_id"))
+        if _vpc_status:
+            return []
+        else:
+            return self.get_remote_source(rid, provider, region, zone, secret,
+                                          resource_id, **kwargs)
+
 
 class SecGroupApi(Common, ApiBase):
     def __init__(self):

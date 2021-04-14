@@ -166,3 +166,15 @@ class ENISourceController(BaseSourceController):
     allow_methods = ("POST",)
     resource = EniBackendApi()
 
+
+class ENISGSourceController(BaseSourceController):
+    name = "Eni"
+    resource_describe = "Eni"
+    allow_methods = ("POST",)
+    resource = EniBackendApi()
+
+    def fetch_source(self, rid, provider, region, zone, secret, resource_id):
+        return self.resource.sg_eni_relationship(rid=rid, provider=provider,
+                                                 region=region, zone=zone,
+                                                 secret=secret,
+                                                 resource_id=resource_id)

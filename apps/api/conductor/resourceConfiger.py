@@ -132,6 +132,32 @@ class ResourceConfiger(object):
         columns = origin_columns
         return columns, self.resource_keys_config
 
+
+    def conductor_reset_equivalence(self, provider, resource_name):
+        '''
+
+        :param provider:
+        :param resource_name:
+        :param resource_data:
+        :return:
+        '''
+
+        self.resource_info(provider, resource_name)
+
+        origin_columns = {}
+        resource_property = self.resource_keys_config["data_source_output"]
+
+        extend_info = resource_property.pop("extend_info", {}) or {}
+
+        propertys = ReverseProperty.reverse_equivalence(resource_property)
+        extend = ReverseProperty.reverse_extend_key_equivalence(extend_info)
+
+        origin_columns.update(propertys)
+        origin_columns.update(extend)
+
+        columns = origin_columns
+        return columns, self.resource_keys_config
+
     def conductor_upgrade_property(self, provider, resource_name, resource_data):
         '''
 

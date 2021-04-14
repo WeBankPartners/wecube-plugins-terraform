@@ -12,7 +12,7 @@ def validate_convert_key(defines):
         if (not isinstance(define, (basestring, dict))) or isinstance(define, list):
             raise ValueError("错误的定义 合法值为 string "
                              "或json:{'type': <type>, 'allow_null': <0/1>,"
-                             "'convert': <value>, 'default':<value>}")
+                             "'convert': <value>, 'default':<value>， 'equivalence': <value>}")
 
         if isinstance(define, dict):
             if define.get("type", "string") not in ["string", "json", "int", "float", "list", "bool"]:

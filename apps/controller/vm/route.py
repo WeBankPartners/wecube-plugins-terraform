@@ -15,6 +15,7 @@ urlpatterns = [
     # url(r'^backend/instance/update$', instance_controller.InstanceUpdateController()),
     # url(r'^backend/instance/action$', instance_controller.InstanceStartController()),
     url(r'^backend/instance/source$', instance_controller.InstanceSourceController()),
+    url(r'^backend/instance/security_group/source$', instance_controller.InstanceSGSourceController()),
 
     url(r'^instance_type$', instance_type_controller.InstanceTypeController()),
     url(r'^instance_type/(?P<rid>[\w-]+)$', instance_type_controller.InstanceTypeIdController()),
@@ -24,6 +25,7 @@ urlpatterns = [
     url(r'^backend/network_interface/apply$', eni_controller.EniAddController()),
     url(r'^backend/network_interface/destroy$', eni_controller.EniDeleteController()),
     url(r'^backend/network_interface/source$', eni_controller.ENISourceController()),
+    url(r'^backend/network_interface/security_group/source$', eni_controller.ENISGSourceController()),
 
     url(r'^network_interface_attach$', eni_attach_controller.EniAttachController()),
     url(r'^network_interface_attach/(?P<rid>[\w-]+)$', eni_attach_controller.EniAttachIdController()),

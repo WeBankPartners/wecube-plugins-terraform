@@ -210,3 +210,15 @@ class PostgreSQLSourceController(BaseSourceController):
     allow_methods = ("POST",)
     resource = PostgreSQLBackendApi()
 
+
+class PostgreSQLSGSourceController(BaseSourceController):
+    name = "PostgreSQL"
+    resource_describe = "PostgreSQL"
+    allow_methods = ("POST",)
+    resource = PostgreSQLBackendApi()
+
+    def fetch_source(self, rid, provider, region, zone, secret, resource_id):
+        return self.resource.sg_rds_relationship(rid=rid, provider=provider,
+                                                 region=region, zone=zone,
+                                                 secret=secret,
+                                                 resource_id=resource_id)
