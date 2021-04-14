@@ -86,7 +86,8 @@ class BaseSourceController(BaseController):
             else:
                 raise ValueError("resource id error, please check")
 
-            return {"datas": result}
+            # return {"datas": result}
+            return result
 
         result_data = self.one_query(rid, provider, region, zone, secret, resource_id, ignore_ids)
-        return {"datas": result_data}
+        return result_data
