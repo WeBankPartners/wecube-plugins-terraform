@@ -17,8 +17,8 @@ class BaseSourceController(BaseController):
     resource = None
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["id", "resource_id", "provider",
-                                      "secret", "region", "zone", "ignore_ids"])
+        # validation.allowed_key(data, ["id", "resource_id", "provider",
+        #                               "secret", "region", "zone", "ignore_ids"])
 
         validation.not_allowed_null(data=data,
                                     keys=["provider", "region"]
