@@ -16,6 +16,14 @@ class ProviderSecretManager(_BaseManager):
     obj = model.ProviderSecret
 
 
+class RegionManager(_BaseManager):
+    obj = model.Region
+
+
+class ZoneManager(_BaseManager):
+    obj = model.Zone
+
+
 class CommonKeyManager(_BaseManager):
     obj = model.CommonKeys
 

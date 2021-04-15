@@ -104,6 +104,62 @@ class ProviderSecret(Base):
         self.updated_time = data.get("updated_time")
 
 
+class Region(Base):
+    __tablename__ = "region"
+
+    id = Column(String(36), primary_key=True)
+    name = Column(String(64), nullable=False)
+    provider = Column(String(128), nullable=False)
+    asset_id = Column(String(128), nullable=False)
+    extend_info = Column(String(1024))
+    created_time = Column(DateTime)
+    updated_time = Column(DateTime)
+    deleted_time = Column(DateTime)
+    enabled = Column(TINYINT(1), server_default=text("'1'"))
+    is_deleted = Column(TINYINT(1), server_default=text("'0'"))
+
+    def __init__(self, data):
+        self.created_time = datetime.datetime.now()
+        self.deleted_time = data.get("deleted_time")
+        self.enabled = data.get("enabled")
+        self.extend_info = data.get("extend_info") or '{}'
+        self.id = data.get("id")
+        self.is_deleted = data.get("is_deleted")
+        self.name = data.get("name")
+        self.provider = data.get("provider") or '{}'
+        self.asset_id = data.get("asset_id")
+        self.updated_time = data.get("updated_time")
+
+
+class Zone(Base):
+    __tablename__ = "availability_zone"
+
+    id = Column(String(36), primary_key=True)
+    name = Column(String(64), nullable=False)
+    provider = Column(String(128), nullable=False)
+    asset_id = Column(String(128), nullable=False)
+    region = Column(String(128))
+    extend_info = Column(String(1024))
+    created_time = Column(DateTime)
+    updated_time = Column(DateTime)
+    deleted_time = Column(DateTime)
+    enabled = Column(TINYINT(1), server_default=text("'1'"))
+    is_deleted = Column(TINYINT(1), server_default=text("'0'"))
+
+    def __init__(self, data):
+        self.created_time = datetime.datetime.now()
+        self.deleted_time = data.get("deleted_time")
+        self.enabled = data.get("enabled")
+        self.extend_info = data.get("extend_info") or '{}'
+        self.id = data.get("id")
+        self.is_deleted = data.get("is_deleted")
+        self.name = data.get("name")
+        self.region = data.get("region")
+        self.provider = data.get("provider") or '{}'
+        self.asset_id = data.get("asset_id")
+        self.updated_time = data.get("updated_time")
+
+
 class Resource(Base):
     __tablename__ = "resource"
 
