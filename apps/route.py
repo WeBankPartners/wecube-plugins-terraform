@@ -7,6 +7,7 @@ urlpatterns = [
     url(r'^configer/', include('apps.controller.configer.route', namespace='configer')),
     url(r'^network/', include('apps.controller.network.route', namespace='network')),
     url(r'^vm/', include('apps.controller.vm.route', namespace='vm')),
+    url(r'^az/', include('apps.controller.region.route', namespace='az')),
     url(r'^storage/', include('apps.controller.storage.route', namespace='storage')),
     url(r'^loadbalance/', include('apps.controller.loadbalance.route', namespace='lb')),
     url(r'^database/', include('apps.controller.database.route', namespace='database')),
