@@ -46,7 +46,7 @@ class BaseSourceController(BaseController):
         for x_result in result:
             x_res = source_columns_outputs(self.resource.resource_name)
             x_res.update(x_result)
-            res = {}
+            res = {"region": region, "secret": secret, "provider": provider}
             for x, value in x_res.items():
                 if isinstance(value, dict):
                     res[x] = format_string(value)
