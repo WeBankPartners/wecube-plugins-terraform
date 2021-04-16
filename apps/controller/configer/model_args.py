@@ -453,6 +453,148 @@ output_property_models = {
     ],
 }
 
+data_source_models = {
+    "vpc": [
+        "resource_id"
+    ],
+    "subnet": [
+        "resource_id"
+    ],
+    "route_table": [
+        "resource_id"
+    ],
+    "route_entry": [
+        "resource_id"
+    ],
+    "security_group": [
+        "resource_id"
+    ],
+    "security_group_rule": [
+        "resource_id"
+    ],
+    "nat": [
+        "resource_id",
+        "ipaddress"
+    ],
+    "eip": [
+        "resource_id",
+        "ipaddress"
+    ],
+    "eip_association": [
+        "resource_id"
+    ],
+    "lb": [
+        "resource_id",
+        "ipaddress"
+    ],
+    "lb_listener": [
+        "resource_id"
+    ],
+    "lb_attach": [
+        "resource_id"
+    ],
+    "disk": [
+        "resource_id"
+    ],
+    "disk_attach": [
+        "resource_id"
+    ],
+    "network_interface": [
+        "resource_id",
+        "ipaddress"
+    ],
+    "network_interface_attach": [
+        "resource_id"
+    ],
+    "object_storage": [
+        "resource_id",
+        "url"
+    ],
+    "bucket_object": [
+        "resource_id"
+    ],
+    "ccn": [
+        "resource_id"
+    ],
+    "ccn_attach": [
+        "resource_id"
+    ],
+    "ccn_bandwidth": [
+        "resource_id"
+    ],
+    "instance": [
+        "resource_id",
+        "ipaddress",
+        "public_ip"
+    ],
+    "mysql": [
+        "resource_id",
+        "ipaddress",
+        "port"
+    ],
+    "mysql_database": [
+        "resource_id",
+    ],
+    "mysql_account": [
+        "resource_id",
+    ],
+    "mysql_privilege": [
+        "resource_id",
+    ],
+    "mysql_backup": [
+        "resource_id",
+    ],
+    "mariadb": [
+        "resource_id",
+        "ipaddress",
+        "port"
+    ],
+    "postgreSQL": [
+        "resource_id",
+        "ipaddress",
+        "port"
+    ],
+    "rds": [
+        "resource_id",
+        "ipaddress",
+        "port"
+    ],
+    "nosql": [
+        "resource_id",
+        "ipaddress",
+        "port"
+    ],
+    "mongodb": [
+        "resource_id",
+        "ipaddress",
+        "port"
+    ],
+    "kvstore": [
+        "resource_id",
+        "ipaddress",
+        "port"
+    ],
+    "redis": [
+        "resource_id",
+        "ipaddress",
+        "port"
+    ],
+    "memcached": [
+        "resource_id",
+        "ipaddress",
+        "port"
+    ],
+    "memcached_backup": [
+        "resource_id"
+    ],
+    "redis_backup": [
+        "resource_id"
+    ],
+    "kvstore_backup": [
+        "resource_id"
+    ],
+}
+
 
 def property_necessary(resource_name, resource_property):
     if resource_name not in resouce_property_models.keys():
@@ -479,14 +621,13 @@ def output_necessary(resource_name, resource_output):
 
 
 def source_necessary(resource_name, data_source):
-    if resource_name not in output_property_models.keys():
+    if resource_name not in data_source_models.keys():
         return
 
-    if not data_source:
-        return
-
-    if "resource_id" not in data_source.items():
-        raise ValueError("source 缺少必要的定义resource_id")
+    columns_property = data_source_models.get(resource_name)
+    for column in columns_property:
+        if column not in data_source.keys():
+            raise ValueError("缺少必要的data source 字段: %s" % column)
 
 
 def source_columns_outputs(resource_name):
