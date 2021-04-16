@@ -126,6 +126,16 @@ class ZoneAddController(BaseController):
         return {}
 
     def main_response(self, request, data, **kwargs):
+        rid = data.get("id", None)
+        if rid:
+            if self.resource.show(rid):
+                if data.get("extend_info") is not None:
+                    extend_info = validation.validate_dict("extend_info", data.get("extend_info"))
+                    data["extend_info"] = json.dumps(extend_info)
+
+                self.resource.update(rid, data)
+                return {"result": rid}
+
         count, res = ResBase.create(resource=self.resource, data=data)
         return res
 
