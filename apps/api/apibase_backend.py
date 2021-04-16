@@ -622,6 +622,8 @@ class ApiBackendBase(TerraformResource):
         if resource_id:
             query_data = {"resource_id": resource_id}
 
+        query_data.update(kwargs)
+
         provider_object, provider_info = ProviderConductor().conductor_provider_info(provider, region, secret)
 
         result = self.run_query(rid=rid, region=region, zone=zone,
