@@ -34,7 +34,7 @@ class ResBase(object):
     def not_null(cls, data):
         validation.not_allowed_null(data=data,
                                     keys=["region", "provider", "name",
-                                          "hostname", "subnet_id", "image",
+                                           "subnet_id", "image",
                                           "instance_type"]
                                     )
 
