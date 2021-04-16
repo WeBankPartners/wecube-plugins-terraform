@@ -32,16 +32,50 @@ class BaseSourceController(BaseController):
     def response_templete(self, data):
         return {}
 
-    def fetch_source(self, rid, provider, region, zone, secret, resource_id):
+    def fetch_source(self, rid, provider, region, zone, secret, resource_id, **kwargs):
+        '''
+
+        :param rid:
+        :param provider:
+        :param region:
+        :param zone:
+        :param secret:
+        :param resource_id:
+        :param kwargs:
+        :return:
+        '''
+        query_args = {}
+        for key, value in kwargs.items():
+            if value:
+                if not isinstance(value, (basestring, int, bool, float)):
+                    raise ValueError("查询条件需为字符串/数字/布尔值")
+
+                query_args[key] = value
+
         return self.resource.get_remote_source(rid=rid, provider=provider,
                                                region=region, zone=zone,
                                                secret=secret,
-                                               resource_id=resource_id)
+                                               resource_id=resource_id,
+                                               **query_args)
 
-    def one_query(self, rid, provider, region, zone, secret, resource_id, ignore_ids):
-        result = self.fetch_source(rid=rid, provider=provider,
-                                   region=region, zone=zone,
-                                   secret=secret, resource_id=resource_id)
+    def one_query(self, rid, provider, region, zone, secret,
+                  resource_id, ignore_ids, **kwargs):
+        '''
+
+        :param rid:
+        :param provider:
+        :param region:
+        :param zone:
+        :param secret:
+        :param resource_id:
+        :param ignore_ids:
+        :param kwargs:
+        :return:
+        '''
+
+        result = self.fetch_source(rid=rid, provider=provider, region=region, zone=zone,
+                                   secret=secret, resource_id=resource_id,
+                                   **kwargs)
         result_data = []
         for x_result in result:
             x_res = source_columns_outputs(self.resource.resource_name)
@@ -69,8 +103,8 @@ class BaseSourceController(BaseController):
         region = data.pop("region", None)
         zone = data.pop("zone", None)
         provider = data.pop("provider", None)
-        resource_id = data.get("resource_id")
-        ignore_ids = data.get("ignore_ids", [])
+        resource_id = data.pop("resource_id", None)
+        ignore_ids = data.pop("ignore_ids", [])
 
         if resource_id:
             resource_id = resource_id.strip()
@@ -83,15 +117,24 @@ class BaseSourceController(BaseController):
         if resource_id:
             result = []
             if isinstance(resource_id, basestring):
-                result = self.one_query(rid, provider, region, zone, secret, resource_id, ignore_ids)
+                result = self.one_query(rid=rid, provider=provider,
+                                        region=region, zone=zone,
+                                        secret=secret, resource_id=resource_id,
+                                        ignore_ids=ignore_ids, **data)
             elif isinstance(resource_id, list):
                 for r_resource_id in resource_id:
-                    result += self.one_query(rid, provider, region, zone, secret, r_resource_id, ignore_ids)
+                    result += self.one_query(rid=rid, provider=provider,
+                                             region=region, zone=zone,
+                                             secret=secret, resource_id=r_resource_id,
+                                             ignore_ids=ignore_ids, **data)
             else:
                 raise ValueError("resource id error, please check")
 
             # return {"datas": result}
             return result
 
-        result_data = self.one_query(rid, provider, region, zone, secret, resource_id, ignore_ids)
+        result_data = self.one_query(rid=rid, provider=provider,
+                                     region=region, zone=zone,
+                                     secret=secret, resource_id=resource_id,
+                                     ignore_ids=ignore_ids, **data)
         return result_data
