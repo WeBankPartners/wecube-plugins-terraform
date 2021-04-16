@@ -29,7 +29,10 @@ def format_string(data):
             else:
                 result[key] = format_json_dumps(value)
         else:
-            result[key] = str(value)
+            if value is not None and value != 'None':
+                result[key] = str(value)
+            else:
+                result[key] = ''
 
     return result
 

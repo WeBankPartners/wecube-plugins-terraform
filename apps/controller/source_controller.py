@@ -48,11 +48,11 @@ class BaseSourceController(BaseController):
             x_res.update(x_result)
             res = {}
             for x, value in x_res.items():
-                if isinstance(x, dict):
+                if isinstance(value, dict):
                     res[x] = format_string(value)
                 else:
-                    if x is None:
-                        res[x] = value
+                    if value is None:
+                        res[x] = ''
                     else:
                         res[x] = str(value)
 
