@@ -40,7 +40,7 @@
 	<!-- 7.插件列表 - 描述插件包中单个插件的输入和输出 -->
 	<plugins>
 		<plugin name="vpc">
-			<interface action="create" path="/terraform/v1/network/backend/vpc/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/network/backend/vpc/apply" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -59,7 +59,7 @@
 					<parameter datatype="string">resource_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="delete" path="/terraform/v1/network/backend/vpc/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/network/backend/vpc/destroy" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -86,7 +86,7 @@
 			</interface>
 		</plugin>
 		<plugin name="subnet">
-			<interface action="create" path="/terraform/v1/network/backend/subnet/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/network/backend/subnet/apply" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -107,7 +107,7 @@
 					<parameter datatype="string">resource_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="delete" path="/terraform/v1/network/backend/subnet/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/network/backend/subnet/destroy" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -136,7 +136,7 @@
 			</interface>
 		</plugin>
 		<plugin name="route_table">
-			<interface action="create" path="/terraform/v1/network/backend/route_table/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/network/backend/route_table/apply" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -156,7 +156,7 @@
 					<parameter datatype="string">resource_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="delete" path="/terraform/v1/network/backend/route_table/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/network/backend/route_table/destroy" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -183,7 +183,7 @@
 			</interface>
 		</plugin>
 		<plugin name="route_entry">
-			<interface action="create" path="/terraform/v1/network/backend/route_entry/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/network/backend/route_entry/apply" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -207,7 +207,7 @@
 					<parameter datatype="string">resource_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="delete" path="/terraform/v1/network/backend/route_entry/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/network/backend/route_entry/destroy" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -219,7 +219,7 @@
 			</interface>
 		</plugin>
 		<plugin name="peer_connection">
-			<interface action="create" path="/terraform/v1/network/backend/peer_connection/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/network/backend/peer_connection/apply" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -241,7 +241,7 @@
 					<parameter datatype="string">resource_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="delete" path="/terraform/v1/network/backend/peer_connection/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/network/backend/peer_connection/destroy" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -270,7 +270,7 @@
 			</interface>
 		</plugin>
 		<plugin name="security_group">
-			<interface action="create" path="/terraform/v1/network/backend/security_group/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/network/backend/security_group/apply" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -290,7 +290,7 @@
 					<parameter datatype="string">resource_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="delete" path="/terraform/v1/network/backend/security_group/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/network/backend/security_group/destroy" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -317,7 +317,7 @@
 			</interface>
 		</plugin>
 		<plugin name="security_group_rule">
-			<interface action="create" path="/terraform/v1/network/backend/security_group_rule/apply"
+			<interface action="apply" path="/terraform/v1/network/backend/security_group_rule/apply"
 				httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
@@ -344,7 +344,7 @@
 					<parameter datatype="string">resource_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="delete" path="/terraform/v1/network/backend/security_group/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/network/backend/security_group/destroy" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -356,7 +356,7 @@
 			</interface>
 		</plugin>
 		<plugin name="nat">
-			<interface action="create" path="/terraform/v1/network/backend/nat/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/network/backend/nat/apply" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -379,7 +379,7 @@
 					<parameter datatype="string">resource_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="delete" path="/terraform/v1/network/backend/nat/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/network/backend/nat/destroy" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -408,7 +408,7 @@
 			</interface>
 		</plugin>
 		<plugin name="eip">
-			<interface action="create" path="/terraform/v1/network/backend/eip/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/network/backend/eip/apply" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -428,7 +428,7 @@
 					<parameter datatype="string">resource_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="delete" path="/terraform/v1/network/backend/eip/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/network/backend/eip/destroy" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -487,7 +487,7 @@
 			</interface>
 		</plugin>
 		<plugin name="connect_network">
-			<interface action="create" path="/terraform/v1/network/backend/ccn/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/network/backend/ccn/apply" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -506,7 +506,7 @@
 					<parameter datatype="string">resource_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="delete" path="/terraform/v1/network/backend/ccn/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/network/backend/ccn/destroy" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -598,7 +598,7 @@
 			</interface>
 		</plugin>
         <plugin name="disk">
-			<interface action="create" path="/terraform/v1/storage/backend/disk/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/storage/backend/disk/apply" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -619,7 +619,7 @@
 					<parameter datatype="string">resource_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="delete" path="/terraform/v1/storage/backend/disk/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/storage/backend/disk/destroy" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -648,7 +648,7 @@
 			</interface>
 		</plugin>
 		<plugin name="object_storage">
-			<interface action="create" path="/terraform/v1/storage/backend/object_storage/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/storage/backend/object_storage/apply" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -670,7 +670,7 @@
 					<parameter datatype="string">resource_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="delete" path="/terraform/v1/storage/backend/object_storage/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/storage/backend/object_storage/destroy" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -698,7 +698,7 @@
 			</interface>
 		</plugin>
 		<plugin name="vm">
-			<interface action="create" path="/terraform/v1/vm/backend/instance/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/vm/backend/instance/apply" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -731,7 +731,7 @@
 					<parameter datatype="string">resource_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="delete" path="/terraform/v1/vm/backend/instance/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/vm/backend/instance/destroy" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -770,7 +770,7 @@
 			</interface>
 		</plugin>
 		<plugin name="network_interface">
-			<interface action="create" path="/terraform/v1/vm/backend/network_interface/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/vm/backend/network_interface/apply" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -794,7 +794,7 @@
 					<parameter datatype="string">resource_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="delete" path="/terraform/v1/vm/backend/network_interface/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/vm/backend/network_interface/destroy" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -841,7 +841,7 @@
 					<parameter datatype="string">resource_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="create" path="backend/network_interface/detach" httpMethod='POST'>
+			<interface action="apply" path="backend/network_interface/detach" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -853,7 +853,7 @@
 			</interface>
 		</plugin>
 		<plugin name="loadbalance">
-			<interface action="create" path="/terraform/v1/loadbalance/backend/lb/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/loadbalance/backend/lb/apply" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -876,7 +876,7 @@
 					<parameter datatype="string">resource_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="delete" path="/terraform/v1/loadbalance/backend/lb/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/loadbalance/backend/lb/destroy" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -985,7 +985,7 @@
 			</interface>
 		</plugin>
 		<plugin name="mysql">
-			<interface action="create" path="/terraform/v1/database/backend/mysql/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/database/backend/mysql/apply" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -1020,7 +1020,7 @@
 					<parameter datatype="string">id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="delete" path="/terraform/v1/database/backend/mysql/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/database/backend/mysql/destroy" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
