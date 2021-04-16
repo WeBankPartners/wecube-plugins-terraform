@@ -755,6 +755,7 @@
 					<parameter datatype="string">name</parameter>
 					<parameter datatype="string">subnet_id</parameter>
 					<parameter datatype="string">hostname</parameter>
+                    <parameter datatype="string">ipaddress</parameter>
 					<parameter datatype="string">image</parameter>
 					<parameter datatype="string">instance_type</parameter>
 					<parameter datatype="string">disk_type</parameter>
