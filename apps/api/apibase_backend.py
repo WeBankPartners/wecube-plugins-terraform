@@ -17,6 +17,7 @@ from apps.background.resource.configr.history import HistoryObject
 from apps.background.resource.configr.resource import ResourceObject
 from apps.background.resource.configr.value_config import ValueConfigObject
 from apps.background.resource.resource_base import CrsObject
+from apps.api.conductor.region import RegionConductor
 from apps.api.conductor.provider import ProviderConductor
 from apps.api.conductor.resource import ResourceConductor
 from apps.api.conductor.valueReverse import ValueResetConductor
@@ -400,6 +401,14 @@ class ApiBackendBase(TerraformResource):
     def generate_owner_data(self, create_data, **kwargs):
         return None, None
 
+    def region_object(self, provider, region):
+        if region:
+            return RegionConductor().region_info(provider=provider, region=region)
+
+    def zone_object(self, provider, zone):
+        if zone:
+            return RegionConductor().zone_info(provider=provider, zone=zone)
+
     def apply(self, rid, provider, region, zone, secret,
               create_data, extend_info,
               asset_id=None, resource_id=None,
@@ -419,6 +428,9 @@ class ApiBackendBase(TerraformResource):
         # _exists_data = self.create_resource_exists(rid)
         # if _exists_data:
         #     return 1, _exists_data
+
+        region = self.region_object(provider, region)
+        zone = self.zone_object(provider, zone)
 
         extend_info = extend_info or {}
         provider_object, provider_info = ProviderConductor().conductor_provider_info(provider, region, secret)
@@ -617,6 +629,8 @@ class ApiBackendBase(TerraformResource):
                           resource_id, **kwargs):
 
         rid = rid or resource_id or "rand_%s" % (get_uuid())
+
+        region = self.region_object(provider, region)
 
         query_data = {}
         if resource_id:
