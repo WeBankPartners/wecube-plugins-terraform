@@ -145,3 +145,10 @@ class EniBackendApi(Common, ApiBackendBase):
                         result.append(instance)
 
             return result
+
+    def before_source_asset(self, provider, query_data):
+        for key in ["vpc_id", "subnet_id"]:
+            if query_data.get(key):
+                query_data[key] = CrsObject().object_asset_id(query_data.get(key))
+
+        return query_data
