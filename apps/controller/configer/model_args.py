@@ -48,6 +48,12 @@ resouce_property_models = {
         "subnet_id",
         "eip"
     ],
+    "peer_connection": [
+        "name",
+        "vpc_id",
+        "peer_vpc_id",
+        "peer_region"
+    ],
     "eip": [
         "name"
     ],
@@ -334,6 +340,9 @@ output_property_models = {
         "resource_id",
         "ipaddress"
     ],
+    "peer_connection": [
+        "resource_id"
+    ],
     "eip": [
         "resource_id",
         "ipaddress"
@@ -455,66 +464,116 @@ output_property_models = {
 
 data_source_models = {
     "vpc": [
-        "resource_id"
+        "resource_id",
+        "name",
+        "tag",
+        "cidr"
     ],
     "subnet": [
-        "resource_id"
+        "resource_id",
+        "zone",
+        "cidr",
+        "tag",
+        "vpc_id"
     ],
     "route_table": [
-        "resource_id"
+        "resource_id",
+        "name",
+        "tag",
+        "vpc_id"
     ],
     "route_entry": [
-        "resource_id"
+        "resource_id",
+        "route_table_id",
+        "cidr",
+        "type"
     ],
     "security_group": [
-        "resource_id"
+        "resource_id",
+        "name",
+        "vpc_id",
+        "tag"
     ],
     "security_group_rule": [
-        "resource_id"
+        "resource_id",
+        "security_group_id"
     ],
     "nat": [
         "resource_id",
-        "ipaddress"
+        "name",
+        "type",
+        "tag",
+        "vpc_id"
+    ],
+    "peer_connection": [
+        "resource_id",
+        "name",
+        "vpc_id",
+        "peer_vpc_id",
+        "peer_region"
     ],
     "eip": [
         "resource_id",
-        "ipaddress"
+        "name",
+        "ipaddress",
+        "tag"
     ],
     "eip_association": [
-        "resource_id"
+        "resource_id",
+        "instance_id"
     ],
     "lb": [
         "resource_id",
+        "name",
+        "vpc_id",
+        "subnet_id",
+        "tag",
         "ipaddress"
     ],
     "lb_listener": [
-        "resource_id"
+        "resource_id",
+        "port",
+        "protocol",
+        "lb_id",
+        "tag"
     ],
     "lb_attach": [
         "resource_id"
     ],
     "disk": [
-        "resource_id"
+        "resource_id",
+        "name",
+        "instance_id",
+        "type",
+        "tag"
     ],
     "disk_attach": [
-        "resource_id"
+        "resource_id",
+        "instance_id"
     ],
     "network_interface": [
         "resource_id",
-        "ipaddress"
+        "name",
+        "vpc_id",
+        "subnet_id",
+        "tag",
+        "ipaddress",
+        "public_ip"
     ],
     "network_interface_attach": [
         "resource_id"
     ],
     "object_storage": [
         "resource_id",
-        "url"
+        "name",
+        "tag"
     ],
     "bucket_object": [
         "resource_id"
     ],
     "ccn": [
-        "resource_id"
+        "resource_id",
+        "name"
     ],
     "ccn_attach": [
         "resource_id"
@@ -525,18 +584,31 @@ data_source_models = {
     "instance": [
         "resource_id",
         "ipaddress",
-        "public_ip"
+        "public_ip",
+        "zone",
+        "image_id",
+        "tag",
+        "vpc_id",
+        "subnet_id"
     ],
     "mysql": [
         "resource_id",
         "ipaddress",
-        "port"
+        "port",
+        "engine",
+        "version",
+        "name",
+        "vpc_id",
+        "subnet_id",
+        "tag"
     ],
     "mysql_database": [
         "resource_id",
     ],
     "mysql_account": [
         "resource_id",
+        "instance_id",
+        "name"
     ],
     "mysql_privilege": [
         "resource_id",
@@ -547,42 +619,90 @@ data_source_models = {
     "mariadb": [
         "resource_id",
         "ipaddress",
-        "port"
+        "port",
+        "engine",
+        "version",
+        "name",
+        "vpc_id",
+        "subnet_id",
+        "tag"
     ],
     "postgreSQL": [
         "resource_id",
         "ipaddress",
-        "port"
+        "port",
+        "engine",
+        "version",
+        "name",
+        "vpc_id",
+        "subnet_id",
+        "tag"
     ],
     "rds": [
         "resource_id",
         "ipaddress",
-        "port"
+        "port",
+        "engine",
+        "version",
+        "name",
+        "vpc_id",
+        "subnet_id",
+        "tag"
     ],
     "nosql": [
         "resource_id",
         "ipaddress",
-        "port"
+        "port",
+        "engine",
+        "version",
+        "name",
+        "vpc_id",
+        "subnet_id",
+        "tag"
     ],
     "mongodb": [
         "resource_id",
         "ipaddress",
-        "port"
+        "port",
+        "engine",
+        "version",
+        "name",
+        "vpc_id",
+        "subnet_id",
+        "tag"
     ],
     "kvstore": [
         "resource_id",
         "ipaddress",
-        "port"
+        "port",
+        "engine",
+        "version",
+        "name",
+        "vpc_id",
+        "subnet_id",
+        "tag"
     ],
     "redis": [
         "resource_id",
         "ipaddress",
-        "port"
+        "port",
+        "engine",
+        "version",
+        "name",
+        "vpc_id",
+        "subnet_id",
+        "tag"
     ],
     "memcached": [
         "resource_id",
         "ipaddress",
-        "port"
+        "port",
+        "engine",
+        "version",
+        "name",
+        "vpc_id",
+        "subnet_id",
+        "tag"
     ],
     "memcached_backup": [
         "resource_id"
