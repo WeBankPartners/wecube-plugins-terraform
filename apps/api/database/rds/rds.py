@@ -216,8 +216,10 @@ class RdsDBBackendApi(ApiBackendBase):
     def _generate_slave_zone(self, provider, first_slave_zone, second_slave_zone):
         create_data = {}
         if first_slave_zone:
+            first_slave_zone = self.zone_object(provider, first_slave_zone)
             create_data["first_slave_zone"] = self.zone_info(provider, first_slave_zone)
         if second_slave_zone:
+            second_slave_zone = self.zone_object(provider, second_slave_zone)
             create_data["second_slave_zone"] = self.zone_info(provider, second_slave_zone)
 
         logger.info("_generate_slave_zone format json: %s" % (format_json_dumps(create_data)))
@@ -261,6 +263,9 @@ class RdsDBBackendApi(ApiBackendBase):
         :param kwargs:
         :return:
         '''
+
+        region = self.region_object(provider, region)
+        zone = self.zone_object(provider, zone)
 
         # _exists_data = self.create_resource_exists(rid)
         # if _exists_data:

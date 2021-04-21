@@ -65,8 +65,8 @@ class MysqlApi(RdsDBApi):
         logger.info("before_keys_checks add info: %s" % (format_json_dumps(ext_info)))
         return ext_info
 
-    def zone_info(self, provider, zone):
-        return ProviderApi().zone_info(provider, zone)
+    # def zone_info(self, provider, zone):
+    #     return ProviderApi().zone_info(provider, zone)
 
     def _generate_slave_zone(self, provider, first_slave_zone, second_slave_zone):
         create_data = {}
@@ -214,8 +214,10 @@ class MysqlBackendApi(RdsDBBackendApi):
     def _generate_slave_zone(self, provider, first_slave_zone, second_slave_zone):
         create_data = {}
         if first_slave_zone:
+            first_slave_zone = self.zone_object(provider, first_slave_zone)
             create_data["first_slave_zone"] = self.zone_info(provider, first_slave_zone)
         if second_slave_zone:
+            second_slave_zone = self.zone_object(provider, second_slave_zone)
             create_data["second_slave_zone"] = self.zone_info(provider, second_slave_zone)
 
         logger.info("_generate_slave_zone format json: %s" % (format_json_dumps(create_data)))
@@ -260,6 +262,9 @@ class MysqlBackendApi(RdsDBBackendApi):
         :param kwargs:
         :return:
         '''
+
+        region = self.region_object(provider, region)
+        zone = self.zone_object(provider, zone)
 
         extend_info = extend_info or {}
         provider_object, provider_info = ProviderConductor().conductor_provider_info(provider, region, secret)
