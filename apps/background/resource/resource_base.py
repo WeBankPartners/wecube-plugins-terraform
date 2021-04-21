@@ -6,6 +6,7 @@ import datetime
 from lib.encrypt_helper import encrypt_str
 from lib.encrypt_helper import decrypt_str
 from lib.uuid_util import get_uuid
+from lib.logs import logger
 from lib.json_helper import format_json_dumps
 from core import local_exceptions
 from apps.background.models.dbserver import CrsManager
@@ -182,6 +183,15 @@ class CrsObject(object):
         if not data:
             raise local_exceptions.ValueValidateError(self.resource_name, "资源 %s 不存在" % rid)
         return data["resource_id"]
+
+    def object_asset_id(self, rid):
+        data = self.show(rid)
+        if data:
+            return data["resource_id"]
+        else:
+            logger.info("search id: %s, asset id: null, may it's asset id, return" % rid)
+
+        return rid
 
     def ora_show(self, rid, where_data=None):
         where_data = where_data or {}
