@@ -10,6 +10,7 @@ from core import local_exceptions
 from apps.api.apibase import ApiBase
 from apps.api.conductor.provider import ProviderConductor
 from apps.api.apibase_backend import ApiBackendBase
+from apps.background.resource.resource_base import CrsObject
 
 
 class Common(object):
@@ -73,3 +74,10 @@ class DiskBackendApi(Common, ApiBackendBase):
         self.resource_workspace = "disk"
         self._flush_resobj()
         self.resource_keys_config = None
+
+    def before_source_asset(self, provider, query_data):
+        for key in ["instance_id"]:
+            if query_data.get(key):
+                query_data[key] = CrsObject().object_asset_id(query_data.get(key))
+
+        return query_data
