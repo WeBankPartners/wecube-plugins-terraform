@@ -22,7 +22,6 @@ CREATE TABLE `cloud_providers` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 
-
 DROP TABLE IF EXISTS `cloud_secret`;
 
 CREATE TABLE `cloud_secret` (
@@ -47,7 +46,7 @@ DROP TABLE IF EXISTS `region`;
 
 CREATE TABLE `region` (
   `id` VARCHAR(36) NOT NULL,
-  `name` VARCHAR(128) NOT NULL,
+  `name` VARCHAR(128) DEFAULT NULL,
   `provider` VARCHAR(128) NOT NULL,
   `asset_id` VARCHAR(128) NOT NULL,
   `extend_info` TEXT DEFAULT NULL,
@@ -57,7 +56,7 @@ CREATE TABLE `region` (
   `enabled` BOOL DEFAULT TRUE,
   `is_deleted` BOOL DEFAULT FALSE,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `idx_name` (`name`, `provider`)
+  UNIQUE INDEX `idx_asset` (`asset_id`, `provider`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 
@@ -65,7 +64,7 @@ DROP TABLE IF EXISTS `availability_zone`;
 
 CREATE TABLE `availability_zone` (
   `id` VARCHAR(36) NOT NULL,
-  `name` VARCHAR(128) NOT NULL,
+  `name` VARCHAR(128) DEFAULT NULL,
   `provider` VARCHAR(128) NOT NULL,
   `asset_id` VARCHAR(128) NOT NULL,
   `region` VARCHAR(128) DEFAULT NULL,
@@ -76,7 +75,7 @@ CREATE TABLE `availability_zone` (
   `enabled` BOOL DEFAULT TRUE,
   `is_deleted` BOOL DEFAULT FALSE,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `idx_name` (`name`, `provider`)
+  UNIQUE INDEX `idx_asset` (`asset_id`, `provider`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 
