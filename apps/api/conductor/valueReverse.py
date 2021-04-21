@@ -11,6 +11,7 @@ from apps.common.reverse import Reverse
 from apps.common.reverse_convert_keys import ReverseProperty
 from apps.background.resource.configr.value_config import ValueConfigObject
 from .provider import ProviderConductor
+from .region import RegionConductor
 
 
 class ValueResetConductor(object):
@@ -49,16 +50,19 @@ class ValueResetConductor(object):
 
         if "zone" in data.keys():
             zone = ProviderConductor().zone_reverse_info(provider, zone=data["zone"])
+            zone = RegionConductor().zone_reverse_info(provider, zone=zone)
             logger.info("find zone %s" % zone)
             resource_columns["zone"] = zone
 
         if "peer_region" in data.keys():
             peer_region = ProviderConductor().region_reverse_info(provider, region=data["peer_region"])
+            peer_region = RegionConductor().region_reverse_info(provider, region=peer_region)
             logger.info("find region %s" % peer_region)
             resource_columns["peer_region"] = peer_region
 
         if "region" in data.keys():
             peer_region = ProviderConductor().region_reverse_info(provider, region=data["region"])
+            peer_region = RegionConductor().region_reverse_info(provider, region=peer_region)
             logger.info("find region %s" % peer_region)
             resource_columns["region"] = peer_region
 

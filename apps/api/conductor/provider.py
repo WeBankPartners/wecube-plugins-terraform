@@ -15,6 +15,7 @@ from apps.api.configer.provider import ProviderApi
 from apps.common.validation import validate_column_line
 from apps.common.convert_keys import convert_keys
 from apps.common.convert_keys import convert_value
+from .region import RegionConductor
 
 if not os.path.exists(TERRAFORM_BASE_PATH):
     os.makedirs(TERRAFORM_BASE_PATH)
@@ -191,3 +192,16 @@ class ProviderConductor(object):
         }
 
         return provider_data, info
+
+    def conductor_backend_provider_info(self, provider, region, secret):
+        '''
+
+        :param provider:  name
+        :param region:  name
+        :param secret:  name or string dict
+        :return:
+        '''
+
+        region = RegionConductor().region_info(provider, region)
+        return self.conductor_provider_info(provider, region, secret)
+
