@@ -168,6 +168,9 @@ class CCNBandwidthBackendApi(ApiBackendBase):
         :return:
         '''
 
+        region = self.region_object(provider, region)
+        zone = self.zone_object(provider, zone)
+
         extend_info = extend_info or {}
         provider_object, provider_info = ProviderConductor().conductor_provider_info(provider, region, secret)
 
@@ -178,8 +181,10 @@ class CCNBandwidthBackendApi(ApiBackendBase):
         from_region = create_data.get("from_region")
         dest_region = create_data.get("dest_region")
         if from_region:
+            self.region_object(provider_object["name"], from_region)
             x_create_data["from_region"] = self.region_name(provider_object["name"], from_region)
         if dest_region:
+            self.region_object(provider_object["name"], dest_region)
             x_create_data["dest_region"] = self.region_name(provider_object["name"], dest_region)
 
         x_create_data.update(_relations_id_dict)

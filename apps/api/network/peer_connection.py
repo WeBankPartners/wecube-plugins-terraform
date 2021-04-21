@@ -166,6 +166,9 @@ class PeerConnBackendApi(ApiBackendBase):
         :return:
         '''
 
+        region = self.region_object(provider, region)
+        zone = self.zone_object(provider, zone)
+
         extend_info = extend_info or {}
         provider_object, provider_info = ProviderConductor().conductor_provider_info(provider, region, secret)
 
@@ -173,7 +176,8 @@ class PeerConnBackendApi(ApiBackendBase):
                                                                  provider=provider_object["name"])
         peer_region = create_data.get("region")
         if peer_region:
-            peer_region = ProviderConductor().region_info(provider=provider_object["name"], region=peer_region)
+            # peer_region = ProviderConductor().region_info(provider=provider_object["name"], region=peer_region)
+            peer_region = self.region_object(provider=provider_object["name"], region=peer_region)
             x_create_data["peer_region"] = peer_region
 
         _relations_id_dict = self.before_keys_checks(provider_object["name"], r_create_data)

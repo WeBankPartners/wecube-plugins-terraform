@@ -172,6 +172,9 @@ class CCNAttachBackendApi(ApiBackendBase):
         :return:
         '''
 
+        region = self.region_object(provider, region)
+        zone = self.zone_object(provider, zone)
+        
         extend_info = extend_info or {}
         provider_object, provider_info = ProviderConductor().conductor_provider_info(provider, region, secret)
 
@@ -181,6 +184,7 @@ class CCNAttachBackendApi(ApiBackendBase):
 
         instance_region = create_data.get("instance_region")
         if instance_region:
+            instance_region = self.region_object(provider_object["name"], instance_region)
             create_data["instance_region"] = self.region_name(provider_object["name"], instance_region)
 
         x_create_data.update(_relations_id_dict)
