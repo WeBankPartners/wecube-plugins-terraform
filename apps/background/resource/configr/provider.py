@@ -98,6 +98,9 @@ class ProviderObject(object):
         return data
 
     def provider_name_object(self, provider):
+        if not provider:
+            raise local_exceptions.ResourceValidateError("provider", "provider 不允许为空")
+
         data = self.query_one(where_data={"name": provider})
         if not data:
             raise local_exceptions.ResourceValidateError("provider", "provider %s 未注册" % provider)

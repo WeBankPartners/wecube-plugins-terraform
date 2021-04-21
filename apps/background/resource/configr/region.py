@@ -87,6 +87,15 @@ class RegionObject(_AreaObject):
             raise local_exceptions.ResourceValidateError("region", "region %s 未注册" % region)
         return data
 
+    def region_asset_object(self, asset_id, provider=None):
+        where_data = {"asset_id": asset_id}
+        if provider:
+            where_data["provider"] = provider
+        data = self.query_one(where_data=where_data)
+        if not data:
+            raise local_exceptions.ResourceValidateError("region", "region asset %s 未注册" % asset_id)
+        return data
+
 
 class ZoneObject(_AreaObject):
     def __init__(self):
@@ -104,3 +113,26 @@ class ZoneObject(_AreaObject):
         if not data:
             raise local_exceptions.ResourceValidateError("zone", "zone %s 未注册" % zone)
         return data
+
+    def zone_asset_object(self, asset_id, provider):
+        where_data = {"asset_id": asset_id}
+        if provider:
+            where_data["provider"] = provider
+        data = self.query_one(where_data=where_data)
+        if not data:
+            raise local_exceptions.ResourceValidateError("zone", "zone asset %s 未注册" % asset_id)
+        return data
+
+    def zone_asset(self, asset_id, provider=None):
+        where_data = {"asset_id": asset_id}
+        if provider:
+            where_data["provider"] = provider
+
+        return self.query_one(where_data=where_data)
+
+    def zone_region_asset(self, asset_id, provider=None):
+        where_data = {"asset_id": asset_id}
+        if provider:
+            where_data["provider"] = provider
+
+        return self.query_one(where_data=where_data)

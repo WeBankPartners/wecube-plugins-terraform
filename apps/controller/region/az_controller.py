@@ -8,7 +8,9 @@ from core import validation
 from core.controller import BackendController
 from core.controller import BackendIdController
 from core.controller import BaseController
+from apps.api.configer.region import RegionObject
 from apps.api.configer.region import ZoneObject
+from apps.api.configer.provider import ProviderObject
 
 
 class ResBase(object):
@@ -20,7 +22,7 @@ class ResBase(object):
     @classmethod
     def not_null(cls, data):
         validation.not_allowed_null(data=data,
-                                    keys=["asset_id", "provider", "name"]
+                                    keys=["asset_id", "provider", "region"]
                                     )
 
     @classmethod
@@ -36,6 +38,9 @@ class ResBase(object):
         asset_id = data.pop("asset_id", None)
         provider = data.pop("provider", None)
         region = data.pop("region", None)
+
+        ProviderObject().provider_name_object(provider)
+        RegionObject().region_object(region)
 
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
         data.update(extend_info)
@@ -103,6 +108,12 @@ class ZoneIdController(BackendIdController):
     def update(self, request, data, **kwargs):
         rid = kwargs.pop("rid", None)
 
+        if "provider" in data.keys():
+            ProviderObject().provider_name_object(data.get("provider"))
+
+        if "region" in data.keys():
+            RegionObject().region_object(data.get("region"))
+
         if data.get("extend_info") is not None:
             extend_info = validation.validate_dict("extend_info", data.get("extend_info"))
             data["extend_info"] = json.dumps(extend_info)
@@ -133,11 +144,17 @@ class ZoneAddController(BaseController):
                     extend_info = validation.validate_dict("extend_info", data.get("extend_info"))
                     data["extend_info"] = json.dumps(extend_info)
 
+                if "provider" in data.keys():
+                    ProviderObject().provider_name_object(data.get("provider"))
+
+                if "region" in data.keys():
+                    RegionObject().region_object(data.get("region"))
+
                 self.resource.update(rid, data)
                 return {"result": rid}
 
         count, res = ResBase.create(resource=self.resource, data=data)
-        return res
+        return {"result": res}
 
 
 class ZoneDeleteController(BaseController):
@@ -180,7 +197,7 @@ class ZoneSourceController(BaseController):
         :return:
         '''
 
-        validation.allowed_key(data, ["id", "provider", "name", 'asset_id', "region"])
+        # validation.allowed_key(data, ["id", "provider", "name", 'asset_id', "region"])
         return self.resource.list(filters=data, page=page,
                                   pagesize=pagesize, orderby=orderby)
 
@@ -200,7 +217,7 @@ class ZoneSourceController(BaseController):
         page = data.get("page")
         pagesize = data.get("pagesize")
 
-        count, result = self.list(request, data,
+        count, result = self.list(request, data=query_data,
                                   orderby=orderby, page=page,
                                   pagesize=pagesize, **kwargs)
         return result

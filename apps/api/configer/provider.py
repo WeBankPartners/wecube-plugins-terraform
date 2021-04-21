@@ -33,11 +33,10 @@ class ProviderApi(object):
 
         data = ValueConfigObject().query_one(where_data={"provider": provider,
                                                          "resource": "region"})
-        if not data:
-            raise local_exceptions.RequestValidateError("config region 未进行定义")
+        # if not data:
+        #     raise local_exceptions.RequestValidateError("config region 未进行定义")
 
-        _config = data["value_config"]
-
+        _config = data.get("value_config") or {}
         return convert_value(region, _config.get(region))
 
     def zone_info(self, provider, zone):
@@ -49,11 +48,10 @@ class ProviderApi(object):
         '''
         data = ValueConfigObject().query_one(where_data={"provider": provider,
                                                          "resource": "zone"})
-        if not data:
-            raise local_exceptions.RequestValidateError("zone 未进行定义")
+        # if not data:
+        #     raise local_exceptions.RequestValidateError("zone 未进行定义")
 
-        _config = data["value_config"]
-
+        _config = data.get("value_config") or {}
         return convert_value(zone, _config.get(zone))
 
     def region_reverse_info(self, provider, region):

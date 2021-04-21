@@ -9,6 +9,7 @@ from core.controller import BackendController
 from core.controller import BackendIdController
 from core.controller import BaseController
 from apps.api.configer.region import RegionObject
+from apps.api.configer.provider import ProviderObject
 
 
 class ResBase(object):
@@ -19,7 +20,7 @@ class ResBase(object):
     @classmethod
     def not_null(cls, data):
         validation.not_allowed_null(data=data,
-                                    keys=["asset_id", "provider", "name"]
+                                    keys=["asset_id", "provider"]
                                     )
 
     @classmethod
@@ -34,6 +35,8 @@ class ResBase(object):
         name = data.pop("name", None)
         asset_id = data.pop("asset_id", None)
         provider = data.pop("provider", None)
+
+        ProviderObject().provider_name_object(provider)
 
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
         data.update(extend_info)
@@ -100,6 +103,9 @@ class RegionIdController(BackendIdController):
     def update(self, request, data, **kwargs):
         rid = kwargs.pop("rid", None)
 
+        if "provider" in data.keys():
+            ProviderObject().provider_name_object(data.get("provider"))
+
         if data.get("extend_info") is not None:
             extend_info = validation.validate_dict("extend_info", data.get("extend_info"))
             data["extend_info"] = json.dumps(extend_info)
@@ -129,6 +135,9 @@ class RegionAddController(BaseController):
                 if data.get("extend_info") is not None:
                     extend_info = validation.validate_dict("extend_info", data.get("extend_info"))
                     data["extend_info"] = json.dumps(extend_info)
+
+                if "provider" in data.keys():
+                    ProviderObject().provider_name_object(data.get("provider"))
 
                 self.resource.update(rid, data)
                 return {"result": rid}
@@ -181,7 +190,7 @@ class RegionSourceController(BaseController):
         page = data.get("page")
         pagesize = data.get("pagesize")
 
-        validation.allowed_key(data, ["id", "provider", "name", 'asset_id'])
-        count, result = self.resource.list(filters=data, page=page,
+        # validation.allowed_key(data, ["id", "provider", "name", 'asset_id'])
+        count, result = self.resource.list(filters=query_data, page=page,
                                            pagesize=pagesize, orderby=orderby)
         return result

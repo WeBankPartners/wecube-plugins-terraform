@@ -108,7 +108,7 @@ class Region(Base):
     __tablename__ = "region"
 
     id = Column(String(36), primary_key=True)
-    name = Column(String(64), nullable=False)
+    name = Column(String(64))
     provider = Column(String(128), nullable=False)
     asset_id = Column(String(128), nullable=False)
     extend_info = Column(String(1024))
@@ -135,7 +135,7 @@ class Zone(Base):
     __tablename__ = "availability_zone"
 
     id = Column(String(36), primary_key=True)
-    name = Column(String(64), nullable=False)
+    name = Column(String(64))
     provider = Column(String(128), nullable=False)
     asset_id = Column(String(128), nullable=False)
     region = Column(String(128))
