@@ -625,6 +625,9 @@ class ApiBackendBase(TerraformResource):
 
         return result_list
 
+    def before_source_asset(self, provider, query_data):
+        return query_data
+
     def get_remote_source(self, rid, provider, region, zone, secret,
                           resource_id, **kwargs):
 
@@ -636,7 +639,12 @@ class ApiBackendBase(TerraformResource):
         if resource_id:
             query_data = {"resource_id": resource_id}
 
+        if zone:
+            zone = RegionConductor().zone_reverse_info(provider, zone)
+            query_data["zone"] = zone
+
         query_data.update(kwargs)
+        query_data = self.before_source_asset(provider, query_data)
 
         provider_object, provider_info = ProviderConductor().conductor_provider_info(provider, region, secret)
 

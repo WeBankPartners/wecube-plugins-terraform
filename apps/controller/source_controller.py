@@ -46,11 +46,12 @@ class BaseSourceController(BaseController):
         '''
         query_args = {}
         for key, value in kwargs.items():
-            if value:
+            if value is not None:
                 if not isinstance(value, (basestring, int, bool, float)):
                     raise ValueError("查询条件需为字符串/数字/布尔值")
 
-                query_args[key] = value
+                if value != '':
+                    query_args[key] = value
 
         return self.resource.get_remote_source(rid=rid, provider=provider,
                                                region=region, zone=zone,
