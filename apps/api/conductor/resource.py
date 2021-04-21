@@ -214,6 +214,10 @@ class ResourceConductor(object):
         :return:
         '''
 
+        resource_data = ValueConductor().conductor_apply_values(provider=provider,
+                                                                resource_name=resource_name,
+                                                                data=resource_data)
+
         configer = ResourceConfiger()
         resource_columns, resource_keys_config = configer.conductor_source_property(provider=provider,
                                                                                     resource_name=resource_name,
