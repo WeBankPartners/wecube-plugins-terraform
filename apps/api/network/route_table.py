@@ -111,3 +111,9 @@ class RouteTableBackendApi(Common, ApiBackendBase):
         self.owner_resource = "vpc"
         self._flush_resobj()
         self.resource_keys_config = None
+
+    def before_source_asset(self, provider, query_data):
+        if query_data.get("vpc_id"):
+            query_data["vpc_id"] = CrsObject().object_asset_id(query_data.get("vpc_id"))
+
+        return query_data

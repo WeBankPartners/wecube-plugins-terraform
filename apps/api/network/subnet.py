@@ -70,3 +70,9 @@ class SubnetBackendApi(Common, ApiBackendBase):
     def create(self, *args, **kwargs):
         return self.apply(*args, **kwargs)
 
+    def before_source_asset(self, provider, query_data):
+        if query_data.get("vpc_id"):
+            query_data["vpc_id"] = CrsObject().object_asset_id(query_data.get("vpc_id"))
+
+        return query_data
+

@@ -174,10 +174,10 @@ class PeerConnBackendApi(ApiBackendBase):
 
         x_create_data, r_create_data = self.generate_create_data(zone, create_data,
                                                                  provider=provider_object["name"])
-        peer_region = create_data.get("region")
+        peer_region = create_data.get("peer_region")
         if peer_region:
-            # peer_region = ProviderConductor().region_info(provider=provider_object["name"], region=peer_region)
             peer_region = self.region_object(provider=provider_object["name"], region=peer_region)
+            peer_region = ProviderConductor().region_info(provider=provider_object["name"], region=peer_region)
             x_create_data["peer_region"] = peer_region
 
         _relations_id_dict = self.before_keys_checks(provider_object["name"], r_create_data)
@@ -194,3 +194,16 @@ class PeerConnBackendApi(ApiBackendBase):
                                      extend_info=extend_info, **kwargs)
 
         return count, res
+
+    def before_source_asset(self, provider, query_data):
+        for key in ["vpc_id", "peer_vpc_id"]:
+            if query_data.get(key):
+                query_data[key] = CrsObject().object_asset_id(query_data.get(key))
+
+        peer_region = query_data.get("peer_region")
+        if peer_region:
+            peer_region = self.region_object(provider=provider, region=peer_region)
+            peer_region = ProviderConductor().region_info(provider=provider, region=peer_region)
+            query_data["peer_region"] = peer_region
+
+        return query_data
