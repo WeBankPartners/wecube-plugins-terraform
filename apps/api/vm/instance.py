@@ -516,6 +516,9 @@ class InstanceBackendApi(ApiBackendBase):
         :return:
         '''
 
+        region = self.region_object(provider, region)
+        zone = self.zone_object(provider, zone)
+
         extend_info = extend_info or {}
         provider_object, provider_info = ProviderConductor().conductor_provider_info(provider, region, secret)
 
