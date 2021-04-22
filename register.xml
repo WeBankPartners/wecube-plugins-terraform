@@ -85,6 +85,9 @@
                     <parameter datatype="string">name</parameter>
                     <parameter datatype="string">cidr</parameter>
                     <parameter datatype="string">resource_id</parameter>
+                    <parameter datatype="string">region</parameter>
+                    <parameter datatype="string">secret</parameter>
+                    <parameter datatype="string">provider</parameter>
 				</outputParameters>
 			</interface>
 		</plugin>
@@ -132,6 +135,9 @@
                     <parameter datatype="string" mappingType="entity" required="N">vpc_id</parameter>
 				</inputParameters>
 				<outputParameters>
+                    <parameter datatype="string">region</parameter>
+                    <parameter datatype="string">secret</parameter>
+                    <parameter datatype="string">provider</parameter>
                     <parameter datatype="string">errorCode</parameter>
                     <parameter datatype="string">name</parameter>
                     <parameter datatype="string">zone</parameter>
@@ -184,6 +190,9 @@
                     <parameter datatype="string" mappingType="entity" required="N">vpc_id</parameter>
 				</inputParameters>
 				<outputParameters>
+                    <parameter datatype="string">region</parameter>
+                    <parameter datatype="string">secret</parameter>
+                    <parameter datatype="string">provider</parameter>
 					<parameter datatype="string">name</parameter>
 					<parameter datatype="string">resource_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
@@ -273,6 +282,9 @@
                     <parameter datatype="string" mappingType="entity" required="N">peer_region</parameter>
 				</inputParameters>
 				<outputParameters>
+                    <parameter datatype="string">region</parameter>
+                    <parameter datatype="string">secret</parameter>
+                    <parameter datatype="string">provider</parameter>
 					<parameter datatype="string">name</parameter>
 					<parameter datatype="string">resource_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
@@ -325,6 +337,9 @@
                     <parameter datatype="string" mappingType="entity" required="N">tag</parameter>
 				</inputParameters>
 				<outputParameters>
+                    <parameter datatype="string">region</parameter>
+                    <parameter datatype="string">secret</parameter>
+                    <parameter datatype="string">provider</parameter>
 					<parameter datatype="string">resource_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
@@ -418,6 +433,9 @@
                     <parameter datatype="string" mappingType="entity" required="N">vpc_id</parameter>
 				</inputParameters>
 				<outputParameters>
+                    <parameter datatype="string">region</parameter>
+                    <parameter datatype="string">secret</parameter>
+                    <parameter datatype="string">provider</parameter>
 					<parameter datatype="string">resource_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
@@ -470,6 +488,9 @@
                     <parameter datatype="string" mappingType="entity" required="N">tag</parameter>
 				</inputParameters>
 				<outputParameters>
+                    <parameter datatype="string">region</parameter>
+                    <parameter datatype="string">secret</parameter>
+                    <parameter datatype="string">provider</parameter>
 					<parameter datatype="string">resource_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
@@ -549,6 +570,9 @@
                     <parameter datatype="string" mappingType="entity" required="N">name</parameter>
 				</inputParameters>
 				<outputParameters>
+                    <parameter datatype="string">region</parameter>
+                    <parameter datatype="string">secret</parameter>
+                    <parameter datatype="string">provider</parameter>
 					<parameter datatype="string">resource_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
@@ -666,6 +690,9 @@
                     <parameter datatype="string" mappingType="entity" required="N">tag</parameter>
 				</inputParameters>
 				<outputParameters>
+                    <parameter datatype="string">region</parameter>
+                    <parameter datatype="string">secret</parameter>
+                    <parameter datatype="string">provider</parameter>
 					<parameter datatype="string">resource_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
@@ -719,6 +746,9 @@
                     <parameter datatype="string" mappingType="entity" required="N">tag</parameter>
 				</inputParameters>
 				<outputParameters>
+                    <parameter datatype="string">region</parameter>
+                    <parameter datatype="string">secret</parameter>
+                    <parameter datatype="string">provider</parameter>
 					<parameter datatype="string">resource_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
@@ -787,6 +817,9 @@
                     <parameter datatype="string" mappingType="entity" required="N">subnet_id</parameter>
 				</inputParameters>
 				<outputParameters>
+                    <parameter datatype="string">region</parameter>
+                    <parameter datatype="string">secret</parameter>
+                    <parameter datatype="string">provider</parameter>
 					<parameter datatype="string">resource_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
@@ -857,6 +890,9 @@
                     <parameter datatype="string" mappingType="entity" required="N">public_ip</parameter>
 				</inputParameters>
 				<outputParameters>
+                    <parameter datatype="string">region</parameter>
+                    <parameter datatype="string">secret</parameter>
+                    <parameter datatype="string">provider</parameter>
 					<parameter datatype="string">resource_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
@@ -944,6 +980,9 @@
                     <parameter datatype="string" mappingType="entity" required="N">ipaddress</parameter>
 				</inputParameters>
 				<outputParameters>
+                    <parameter datatype="string">region</parameter>
+                    <parameter datatype="string">secret</parameter>
+                    <parameter datatype="string">provider</parameter>
 					<parameter datatype="string">resource_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
@@ -1096,6 +1135,9 @@
                     <parameter datatype="string" mappingType="entity" required="N">tag</parameter>
 				</inputParameters>
 				<outputParameters>
+                    <parameter datatype="string">region</parameter>
+                    <parameter datatype="string">secret</parameter>
+                    <parameter datatype="string">provider</parameter>
 					<parameter datatype="string">resource_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
