@@ -81,3 +81,6 @@ class DiskBackendApi(Common, ApiBackendBase):
                 query_data[key] = CrsObject().object_asset_id(query_data.get(key))
 
         return query_data
+
+    def reverse_asset_ids(self):
+        return ["instance_id"]
