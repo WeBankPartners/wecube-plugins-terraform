@@ -584,6 +584,33 @@ class ApiBackendBase(TerraformResource):
         logger.info(format_json_dumps(res))
         return res
 
+    def reverse_asset_ids(self):
+        return []
+
+    def reverse_asset_object(self, provider, data):
+        '''
+        转换资产id
+        :param provider:
+        :param data:
+        :return:
+        '''
+
+        for key in self.reverse_asset_ids():
+            x_data = data.get(key)
+            if x_data:
+                if isinstance(x_data, basestring):
+                    data[key] = CrsObject().asset_object_id(data.get(key))
+                elif isinstance(x_data, list):
+                    tmp = []
+                    for x_asset in x_data:
+                        t = CrsObject().asset_object_id(data.get(x_asset))
+                        tmp.append(t)
+                    data[key] = tmp
+                else:
+                    logger.info("reverse asset object support string or list only, skip..")
+
+        return data
+
     def run_query(self, rid, region, zone,
                   provider_object, provider_info,
                   query_data, **kwargs):
@@ -621,6 +648,8 @@ class ApiBackendBase(TerraformResource):
             x_json = ValueResetConductor().reset_values(provider=provider_object["name"],
                                                         resource_name=self.resource_name,
                                                         data=out_data)
+
+            x_json = self.reverse_asset_object(provider=provider_object["name"], data=x_json)
             result_list.append(x_json)
 
         return result_list
