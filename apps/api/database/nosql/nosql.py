@@ -291,3 +291,6 @@ class NosqlBackendApi(ApiBackendBase):
 
         query_data["engine"] = self.resource_name
         return query_data
+
+    def reverse_asset_ids(self):
+        return ['vpc_id', "subnet_id", "security_group_id"]

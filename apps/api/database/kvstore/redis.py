@@ -155,3 +155,6 @@ class RedisAccountBackendApi(KvAccountBackendApi):
 
         logger.info("before_keys_checks add info: %s" % (format_json_dumps(ext_info)))
         return ext_info
+
+    def reverse_asset_ids(self):
+        return ['vpc_id', "subnet_id", "security_group_id", "redis_id"]
