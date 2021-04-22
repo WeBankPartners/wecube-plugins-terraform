@@ -105,3 +105,6 @@ class LBListenerBackendApi(Common, ApiBackendBase):
 
         return query_data
 
+    def reverse_asset_ids(self):
+        return ['lb_id']
+

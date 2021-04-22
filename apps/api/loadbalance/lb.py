@@ -76,3 +76,6 @@ class LBBackendApi(Common, ApiBackendBase):
 
         return query_data
 
+    def reverse_asset_ids(self):
+        return ['vpc_id', "subnet_id"]
+
