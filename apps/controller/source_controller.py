@@ -3,11 +3,13 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 from lib.uuid_util import get_uuid
+from lib.logs import logger
 from core import validation
 from core.controller import BaseController
 from core.response_hooks import format_string
 from core import local_exceptions as exception_common
 from apps.controller.configer.model_args import source_columns_outputs
+from apps.api.configer.region import ZoneApi
 
 
 class BaseSourceController(BaseController):
@@ -78,10 +80,22 @@ class BaseSourceController(BaseController):
                                    secret=secret, resource_id=resource_id,
                                    **kwargs)
         result_data = []
+
+        register_zones = ZoneApi().region_zones(region, provider)
+
         for x_result in result:
             x_res = source_columns_outputs(self.resource.resource_name)
             x_res.update(x_result)
             res = {"region": region, "secret": secret, "provider": provider}
+
+            if x_res.get("resource_id") in ignore_ids:
+                continue
+
+            if x_res.get("zone") not in register_zones:
+                logger.info("resource: %s ,zone: %s searched not in register zone, skip it" % (
+                    x_res.get("resource_id"), x_res.get("zone")))
+                continue
+
             for x, value in x_res.items():
                 if isinstance(value, dict):
                     res[x] = format_string(value)
@@ -90,9 +104,6 @@ class BaseSourceController(BaseController):
                         res[x] = ''
                     else:
                         res[x] = str(value)
-
-            if res.get("resource_id") in ignore_ids:
-                continue
 
             result_data.append(res)
 
