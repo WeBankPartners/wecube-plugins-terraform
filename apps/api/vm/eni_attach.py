@@ -112,3 +112,6 @@ class ENIAttachBackendApi(Common, ApiBackendBase):
         self.resource_workspace = "network_interface_attach"
         self._flush_resobj()
         self.resource_keys_config = None
+
+    def reverse_asset_ids(self):
+        return ['network_interface_id', "instance_id"]
