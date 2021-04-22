@@ -83,3 +83,6 @@ class RouteEntryBackendApi(Common, ApiBackendBase):
 
         return query_data
 
+    def reverse_asset_ids(self):
+        return ['vpc_id', "route_table_id"]
+

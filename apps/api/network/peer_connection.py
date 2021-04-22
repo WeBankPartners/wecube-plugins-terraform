@@ -207,3 +207,7 @@ class PeerConnBackendApi(ApiBackendBase):
             query_data["peer_region"] = peer_region
 
         return query_data
+
+    def reverse_asset_ids(self):
+        return ['vpc_id', "peer_vpc_id"]
+
