@@ -79,6 +79,10 @@ class MysqlAccountBackendApi(Common, ApiBackendBase):
 
         return query_data
 
+    def reverse_asset_ids(self):
+        return ['instance_id']
+
+
 
 class PCommon(object):
 
