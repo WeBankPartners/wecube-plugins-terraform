@@ -193,6 +193,13 @@ class CrsObject(object):
 
         return rid
 
+    def asset_object_id(self, asset_id):
+        crs_data = CrsObject().query_one(where_data={"resource_id": asset_id, "is_deleted": 0})
+        if crs_data:
+            return crs_data.get("id")
+
+        return asset_id
+
     def ora_show(self, rid, where_data=None):
         where_data = where_data or {}
         if self.resource_name:
