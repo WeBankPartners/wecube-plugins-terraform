@@ -49,7 +49,7 @@ class ZoneApi(object):
         :return:
         '''
 
-        data = ZoneObject().zone_asset_object(asset_id, provider)
+        data = ZoneObject().zone_asset(asset_id, provider)
         if data:
             return data["id"]
 
@@ -76,3 +76,23 @@ class ZoneApi(object):
 
         return mapping
 
+    def region_zones(self, region, provider=None):
+        '''
+
+        :param region:
+        :param provider:
+        :return:
+        '''
+
+        where_data = {"region": region}
+        # if provider:
+        #     where_data["provider"] = region
+
+        count, data = ZoneObject().list(filters=where_data)
+        mapping = []
+
+        for x_data in data:
+            mapping.append(x_data["id"])
+            mapping.append(x_data["asset_id"])
+
+        return mapping
