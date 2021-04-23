@@ -23,9 +23,9 @@
 
 	<!-- 5.权限设定 -->
     <authorities>
-        <authority systemRoleName="SUPER_ADMIN" >
+		<authority systemRoleName="SUPER_ADMIN" >
             <menu code="ADMIN_TERRAFORM_CONFIG" />
-        </authority >
+		</authority >
     </authorities>
 
 	<!-- 6.运行资源 - 描述部署运行本插件包需要的基础资源(如主机、虚拟机、容器、数据库等) -->
@@ -498,7 +498,9 @@
                     <parameter datatype="string">ipaddress</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="create_association" path="/terraform/v1/network/backend/eip_association/apply" httpMethod='POST'>
+		</plugin>
+		<plugin name="eip_association">
+			<interface action="apply" path="/terraform/v1/network/backend/eip_association/apply" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
@@ -520,7 +522,7 @@
 					<parameter datatype="string">resource_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="delete_association" path="/terraform/v1/network/backend/eip_association/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/network/backend/eip_association/destroy" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -531,7 +533,7 @@
 				</outputParameters>
 			</interface>
 		</plugin>
-		<plugin name="connect_network">
+		<plugin name="ccn">
 			<interface action="apply" path="/terraform/v1/network/backend/ccn/apply" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
@@ -579,7 +581,9 @@
 					<parameter datatype="string">name</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="attach" path="/terraform/v1/network/backend/ccn_attach/apply" httpMethod='POST'>
+		</plugin>
+		<plugin name="ccn_attach">
+			<interface action="apply" path="/terraform/v1/network/backend/ccn_attach/apply" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
@@ -602,7 +606,7 @@
 					<parameter datatype="string">resource_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="detach" path="/terraform/v1/network/backend/ccn_attach/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/network/backend/ccn_attach/destroy" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -612,7 +616,9 @@
 					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="create_bandwidth" path="/terraform/v1/network/backend/ccn_bandwidth/apply" httpMethod='POST'>
+		</plugin>
+		<plugin name="ccn_bandwidth">
+			<interface action="apply" path="/terraform/v1/network/backend/ccn_bandwidth/apply" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
@@ -635,7 +641,7 @@
 					<parameter datatype="string">resource_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="delete_bandwidth" path="/terraform/v1/network/backend/ccn_bandwidth/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/network/backend/ccn_bandwidth/destroy" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -758,7 +764,7 @@
 				</outputParameters>
 			</interface>
 		</plugin>
-		<plugin name="vm">
+		<plugin name="instance">
 			<interface action="apply" path="/terraform/v1/vm/backend/instance/apply" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
@@ -903,7 +909,9 @@
                     <parameter datatype="string">security_group_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="attach" path="/terraform/v1/vm/backend/network_interface/attach" httpMethod='POST'>
+		</plugin>
+		<plugin name="network_interface_attach">
+			<interface action="apply" path="/terraform/v1/vm/backend/network_interface/attach" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -922,7 +930,7 @@
 					<parameter datatype="string">resource_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="apply" path="backend/network_interface/detach" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/vm/backend/network_interface/detach" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -1073,6 +1081,78 @@
 				</outputParameters>
 			</interface>
 		</plugin>
+		<plugin name="lb_listener">
+			<interface action="apply" path="/terraform/v1/loadbalance/backend/lb_listener/apply" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">lb_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">port</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">protocol</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">backend_port</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">health_check</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">health_check_uri</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">id</parameter>
+					<parameter datatype="string">resource_id</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="destroy" path="/terraform/v1/loadbalance/backend/lb_listener/destroy" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+		</plugin>
+		<plugin name="lb_attach">
+			<interface action="apply" path="/terraform/v1/loadbalance/backend/lb_attach/apply" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">lb_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">listener_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">backend_servers</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">instance_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">weight</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">port</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">id</parameter>
+					<parameter datatype="string">resource_id</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="destroy" path="/terraform/v1/loadbalance/backend/lb_attach/destroy" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+		</plugin>
 		<plugin name="mysql">
 			<interface action="apply" path="/terraform/v1/database/backend/mysql/apply" httpMethod='POST'>
 				<inputParameters>
@@ -1158,7 +1238,9 @@
                     <parameter datatype="string">ipaddress</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="create_database" path="/terraform/v1/database/backend/mysql_database/apply" httpMethod='POST'>
+		</plugin>
+		<plugin name="mysql_database">
+			<interface action="apply" path="/terraform/v1/database/backend/mysql_database/apply" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -1178,7 +1260,7 @@
 					<parameter datatype="string">id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="delete_database" path="/terraform/v1/database/backend/mysql_database/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/database/backend/mysql_database/destroy" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -1188,7 +1270,9 @@
 					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="create_account" path="/terraform/v1/database/backend/mysql_account/apply" httpMethod='POST'>
+		</plugin>
+		<plugin name="mysql_account">
+			<interface action="apply" path="/terraform/v1/database/backend/mysql_account/apply" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -1209,7 +1293,7 @@
 					<parameter datatype="string">id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="delete_account" path="/terraform/v1/database/backend/mysql_account/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/database/backend/mysql_account/destroy" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -1219,7 +1303,9 @@
 					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="create_account_privilege" path="/terraform/v1/database/backend/mysql_privilege/apply" httpMethod='POST'>
+		</plugin>
+		<plugin name="mysql_privilege">
+			<interface action="apply" path="/terraform/v1/database/backend/mysql_privilege/apply" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
@@ -1241,7 +1327,7 @@
 					<parameter datatype="string">id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="delete_account_privilege" path="/terraform/v1/database/backend/mysql_privilege/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/database/backend/mysql_privilege/destroy" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -1251,6 +1337,8 @@
 					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
+		</plugin>
+		<plugin name="mysql_backup">
 			<interface action="create_mysql_backup" path="/terraform/v1/database/backend/mysql_backup/apply" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
