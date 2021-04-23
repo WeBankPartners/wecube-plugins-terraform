@@ -965,7 +965,7 @@ name         string  必填
 display_name  string  选填
 provider    string  云厂商  必填
 secret_info    json  认证信息 必填
-region        string  选填
+region        string  选填(备注：限制秘钥可以使用的region范围， region为空则不限制， 多个region之间使用逗号(,)分隔)
 extend_info    json
 
 
