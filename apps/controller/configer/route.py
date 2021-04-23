@@ -9,6 +9,7 @@ from config_controller import ConfigController
 from config_controller import ConfigIdController
 from provider_secret_controller import ProviderSecretController
 from provider_secret_controller import ProviderSecretIdController
+from generate_xml import ResourceXmlController
 
 
 urlpatterns = [
@@ -17,6 +18,7 @@ urlpatterns = [
 
     url(r'^resource$', ResourceController()),
     url(r'^resource/(?P<rid>[\w-]+)$', ResourceIdController()),
+    url(r'^xml/resource$', ResourceXmlController()),
 
     url(r'^keyconfig$', ConfigController()),
     url(r'^keyconfig/(?P<rid>[\w-]+)$', ConfigIdController()),
