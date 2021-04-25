@@ -16,7 +16,7 @@ class ResBase(object):
     @classmethod
     def allow_key(cls, data):
         validation.allowed_key(data, ["id", "provider", "secret", "region", "zone",
-                                      "name", "type", "size", "extend_info"])
+                                      "name", "type", "size", "extend_info", "charge_type"])
 
     @classmethod
     def not_null(cls, data):
@@ -28,7 +28,7 @@ class ResBase(object):
     def validate_keys(cls, data):
         validation.validate_collector(data=data,
                                       strings=["id", "name", "region", "zone",
-                                               "provider", "type", "secret"],
+                                               "provider", "type", "secret", "charge_type"],
                                       ints=["size"],
                                       dicts=["extend_info"])
 
@@ -42,6 +42,7 @@ class ResBase(object):
         name = data.pop("name", None)
         disktype = data.pop("type", None)
         size = int(data.pop("size", None))
+        charge_type = data.pop("charge_type", None)
 
         asset_id = data.pop("asset_id", None)
         resource_id = data.pop("resource_id", None)
@@ -49,7 +50,7 @@ class ResBase(object):
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
         data.update(extend_info)
 
-        create_data = {"name": name, "type": disktype, "size": size}
+        create_data = {"name": name, "type": disktype, "size": size, "charge_type": charge_type}
         _, result = resource.create(rid=rid, provider=provider,
                                     region=region, zone=zone,
                                     secret=secret,

@@ -195,7 +195,7 @@ xml_register = {
             "method": "POST",
             "notnull": ['name', 'provider', 'region'],
             "inputParameters": ['id', 'name', 'secret', 'provider', 'zone', 'region', 'asset_id', 'resource_id',
-                                'extend_info'],
+                                'extend_info', "charge_type"],
             "outputParameters": ['errorMessage', 'errorCode', 'ipaddress', 'id', 'resource_id']
         },
         "destroy": {
@@ -211,7 +211,7 @@ xml_register = {
             "notnull": ["region", "provider"],
             "inputParameters": ['region', 'secret', 'provider', 'resource_id', 'name', 'ipaddress', 'tag'],
             "outputParameters": ['region', 'secret', 'provider', 'resource_id', 'errorMessage', 'errorCode', 'name',
-                                 'ipaddress']
+                                 'ipaddress', "charge_type"]
         }
     },
     "eip_association": {
@@ -295,7 +295,7 @@ xml_register = {
             "method": "POST",
             "notnull": ['name', 'provider', 'type', 'size', 'zone', 'region'],
             "inputParameters": ['id', 'name', 'secret', 'provider', 'type', 'size', 'zone', 'region', 'asset_id',
-                                'resource_id', 'extend_info'],
+                                'resource_id', 'extend_info', "charge_type"],
             "outputParameters": ['errorMessage', 'errorCode', 'id', 'resource_id']
         },
         "destroy": {
@@ -311,7 +311,7 @@ xml_register = {
             "notnull": ["region", "provider"],
             "inputParameters": ['region', 'secret', 'provider', 'resource_id', 'name', 'instance_id', 'type', 'tag'],
             "outputParameters": ['region', 'secret', 'provider', 'resource_id', 'errorMessage', 'errorCode', 'name',
-                                 'type', 'size', 'zone']
+                                 'type', 'size', 'zone', "charge_type"]
         }
     },
     "object_storage": {
@@ -346,7 +346,7 @@ xml_register = {
             "notnull": ['name', 'provider', 'subnet_id', 'hostname', 'image', 'instance_type', 'zone', 'region'],
             "inputParameters": ['id', 'name', 'secret', 'provider', 'subnet_id', 'hostname', 'image', 'instance_type',
                                 'disk_type', 'disk_size', 'password', 'security_group_id', 'vpc_id', 'power_action',
-                                'asset_id', 'resource_id', 'data_disks', 'zone', 'region', 'extend_info'],
+                                'asset_id', 'resource_id', 'data_disks', 'zone', 'region', 'extend_info', "charge_type"],
             "outputParameters": ['errorMessage', 'errorCode', 'ipaddress', 'cpu', 'memory', 'id', 'resource_id']
         },
         "destroy": {
@@ -365,7 +365,7 @@ xml_register = {
             "outputParameters": ['region', 'secret', 'provider', 'resource_id', 'errorMessage', 'errorCode', 'name',
                                  'subnet_id', 'hostname', 'ipaddress', 'image', 'instance_type', 'disk_type',
                                  'disk_size', 'password', 'security_group_id', 'vpc_id', 'data_disks', 'zone',
-                                 'power_action', 'force_delete']
+                                 'power_action', 'force_delete', "charge_type"]
         }
     },
     "network_interface": {
@@ -417,7 +417,7 @@ xml_register = {
             "method": "POST",
             "notnull": ['name', 'provider', 'subnet_id', 'region'],
             "inputParameters": ['id', 'name', 'secret', 'provider', 'subnet_id', 'network_type', 'vpc_id', 'zone',
-                                'region', 'asset_id', 'ipaddress', 'resource_id', 'extend_info'],
+                                'region', 'asset_id', 'ipaddress', 'resource_id', 'extend_info', "charge_type"],
             "outputParameters": ['errorMessage', 'errorCode', 'id', 'resource_id']
         },
         "destroy": {
@@ -434,7 +434,7 @@ xml_register = {
             "inputParameters": ['region', 'secret', 'provider', 'resource_id', 'name', 'vpc_id', 'subnet_id', 'tag',
                                 'ipaddress'],
             "outputParameters": ['region', 'secret', 'provider', 'resource_id', 'errorMessage', 'errorCode', 'name',
-                                 'network_type', 'vpc_id', 'subnet_id', 'ipaddress']
+                                 'network_type', 'vpc_id', 'subnet_id', 'ipaddress', "charge_type"]
         }
     },
     "lb_listener": {
@@ -480,7 +480,7 @@ xml_register = {
             "inputParameters": ['id', 'name', 'secret', 'provider', 'subnet_id', 'user', 'password', 'port',
                                 'disk_type', 'disk_size', 'version', 'instance_type', 'vpc_id', 'security_group_id',
                                 'second_slave_zone', 'first_slave_zone', 'zone', 'region', 'asset_id', 'resource_id',
-                                'extend_info'],
+                                'extend_info', "charge_type"],
             "outputParameters": ['errorMessage', 'errorCode', 'resource_id', 'user', 'password', 'ipaddress', 'port',
                                  'id']
         },
@@ -500,7 +500,7 @@ xml_register = {
             "outputParameters": ['region', 'secret', 'provider', 'resource_id', 'errorMessage', 'errorCode', 'name',
                                  'subnet_id', 'user', 'password', 'port', 'disk_type', 'disk_size', 'version',
                                  'instance_type', 'vpc_id', 'security_group_id', 'second_slave_zone',
-                                 'first_slave_zone', 'zone', 'ipaddress']
+                                 'first_slave_zone', 'zone', 'ipaddress', "charge_type"]
         }
     },
     "mysql_database": {

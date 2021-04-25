@@ -20,7 +20,8 @@ class ResBase(object):
                                       "name", "extend_info", "subnet_id",
                                       "hostname", "image", "instance_type",
                                       "disk_type", "disk_size", "password", "power_action",
-                                      "security_group_id", "vpc_id", "data_disks"])
+                                      "security_group_id", "vpc_id", "data_disks",
+                                      "charge_type"])
 
     @classmethod
     def allow_upgrade_key(cls, data):
@@ -45,7 +46,8 @@ class ResBase(object):
                                                "provider", "secret", "subnet_id",
                                                "hostname", "image", "instance_type",
                                                "disk_type", "password", "power_action",
-                                               "security_group_id", "vpc_id"],
+                                               "security_group_id", "vpc_id",
+                                               "charge_type"],
                                       ints=["disk_size"],
                                       dicts=["extend_info", "data_disks"])
 
@@ -72,6 +74,7 @@ class ResBase(object):
         instance_type = data.pop("instance_type", None)
         password = data.pop("password", None)
         vpc_id = data.pop("vpc_id", None)
+        charge_type = data.pop("charge_type", None)
         security_group_id = data.pop("security_group_id", None)
         data_disks = validation.validate_dict("data_disks", data.pop("data_disks", None))
 
@@ -89,7 +92,8 @@ class ResBase(object):
                  data_disks=data_disks,
                  disk_type=disk_type,
                  disk_size=disk_size,
-                 subnet_id=subnet_id)
+                 subnet_id=subnet_id,
+                 charge_type=charge_type)
 
         create_data = {"name": name}
         create_data.update(d)

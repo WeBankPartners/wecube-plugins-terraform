@@ -21,7 +21,7 @@ class ResBase(object):
         validation.allowed_key(data, ["id", "provider", "secret", "region", "zone",
                                       "name", "extend_info", "subnet_id", "password",
                                       "disk_size", "version", "instance_type",
-                                      "vpc_id", "security_group_id"])
+                                      "vpc_id", "security_group_id", "charge_type"])
 
     @classmethod
     def not_null(cls, data):
@@ -37,7 +37,7 @@ class ResBase(object):
                                                "provider", "secret", "subnet_id",
                                                "password", "disk_type",
                                                "version", "instance_type",
-                                               "vpc_id"],
+                                               "vpc_id", "charge_type"],
                                       ints=["disk_size"],
                                       lists=["security_group_id"],
                                       dicts=["extend_info"])
@@ -66,6 +66,8 @@ class ResBase(object):
         disk_size = data.pop("disk_size", None)
         instance_type = data.pop("instance_type", None)
         vpc_id = data.pop("vpc_id", None)
+        charge_type = data.pop("charge_type", None)
+
         security_group_id = validation.validate_list("security_group_id", data.pop("security_group_id", None))
 
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
@@ -80,7 +82,8 @@ class ResBase(object):
                  vpc_id=vpc_id,
                  security_group_id=security_group_id,
                  disk_size=disk_size,
-                 subnet_id=subnet_id)
+                 subnet_id=subnet_id,
+                 charge_type=charge_type)
 
         create_data = {"name": name}
         create_data.update(d)
@@ -205,7 +208,7 @@ class MongoDBSGSourceController(BaseSourceController):
     allow_methods = ("POST",)
     resource = MongodbBackendApi()
 
-    def fetch_source(self, rid, provider, region, zone, secret, resource_id):
+    def fetch_source(self, rid, provider, region, zone, secret, resource_id, **kwargs):
         return self.resource.sg_nosql_relationship(rid=rid, provider=provider,
                                                    region=region, zone=zone,
                                                    secret=secret,

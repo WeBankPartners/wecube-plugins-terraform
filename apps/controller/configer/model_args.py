@@ -55,7 +55,8 @@ resouce_property_models = {
         "peer_region"
     ],
     "eip": [
-        "name"
+        "name",
+        "charge_type"
     ],
     "eip_association": [
         "name",
@@ -67,7 +68,8 @@ resouce_property_models = {
         "name",
         "network_type",
         "vpc_id",
-        "subnet_id"
+        "subnet_id",
+        "charge_type"
     ],
     "lb_listener": [
         "name",
@@ -89,7 +91,8 @@ resouce_property_models = {
         "name",
         "type",
         "size",
-        "zone"
+        "zone",
+        "charge_type"
     ],
     "disk_attach": [
         "disk_id",
@@ -145,10 +148,12 @@ resouce_property_models = {
         "zone",
         "image",
         "power_action",
-        "force_delete"
+        "force_delete",
+        "charge_type"
     ],
     "mysql": [
         "name",
+        "charge_type",
         "engine",
         "zone",
         "version",
@@ -187,6 +192,7 @@ resouce_property_models = {
         "backup_time"
     ],
     "mariadb": [
+        "charge_type",
         "name",
         "engine",
         "zone",
@@ -205,6 +211,7 @@ resouce_property_models = {
         "force_delete"
     ],
     "postgreSQL": [
+        "charge_type",
         "name",
         "engine",
         "zone",
@@ -236,6 +243,7 @@ resouce_property_models = {
         "port",
         "user",
         "password",
+        "charge_type",
         "force_delete"
     ],
     "nosql": [
@@ -247,6 +255,7 @@ resouce_property_models = {
         "instance_type",
         "port",
         "password",
+        "charge_type",
         "force_delete"
     ],
     "mongodb": [
@@ -259,6 +268,7 @@ resouce_property_models = {
         # "port",
         "disk_size",
         "password",
+        "charge_type",
         "force_delete"
     ],
     "kvstore": [
@@ -272,6 +282,7 @@ resouce_property_models = {
         "instance_type",
         "port",
         "password",
+        "charge_type",
         "force_delete"
     ],
     "redis": [
@@ -285,6 +296,7 @@ resouce_property_models = {
         "instance_type",
         "port",
         "password",
+        "charge_type",
         "force_delete"
     ],
     "memcached": [
@@ -298,7 +310,8 @@ resouce_property_models = {
         "instance_type",
         "port",
         "password",
-        "force_delete"
+        "force_delete",
+        "charge_type"
     ],
     "kvstore_backup": [
         "backup_time",
