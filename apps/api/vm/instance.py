@@ -18,6 +18,7 @@ from apps.background.resource.vm.instance_type import InstanceTypeObject
 from apps.background.resource.resource_base import CrsObject
 from apps.api.conductor.provider import ProviderConductor
 from apps.api.apibase_backend import ApiBackendBase
+from apps.api.conductor.valueReverse import ValueResetConductor
 
 
 class InstanceApi(ApiBase):
@@ -153,7 +154,7 @@ class InstanceApi(ApiBase):
         x_create_data, r_create_data = self.generate_create_data(zone, create_data,
                                                                  provider=provider_object["name"])
 
-        password = create_data.get("password") #or "Terraform.123"
+        password = create_data.get("password")  # or "Terraform.123"
         origin_type, instance_type_data = InstanceTypeObject().convert_resource_id(provider_object.get("id"),
                                                                                    create_data.get("instance_type"))
 
@@ -528,7 +529,7 @@ class InstanceBackendApi(ApiBackendBase):
         x_create_data, r_create_data = self.generate_create_data(zone, create_data,
                                                                  provider=provider_object["name"])
 
-        password = create_data.get("password") #or "Terraform.123"
+        password = create_data.get("password")  # or "Terraform.123"
         origin_type, instance_type_data = InstanceTypeObject().convert_resource_id(provider_object.get("id"),
                                                                                    create_data.get("instance_type"))
 
@@ -598,4 +599,51 @@ class InstanceBackendApi(ApiBackendBase):
     def reverse_asset_ids(self):
         return ['vpc_id', "subnet_id", "security_group_id"]
 
+    def run_query(self, rid, region, zone,
+                  provider_object, provider_info,
+                  query_data, **kwargs):
+        '''
 
+        :param rid:
+        :param region:
+        :param zone:
+        :param owner_id:
+        :param relation_id:
+        :param create_data:
+        :param extend_info:
+        :param kwargs:
+        :return:
+        '''
+
+        # extend_info = extend_info or {}
+        label_name = self.resource_name + "_q_" + rid
+
+        define_json, resource_keys_config = self.source_filter_controller(provider_name=provider_object["name"],
+                                                                          label_name=label_name,
+                                                                          query_data=query_data
+                                                                          )
+
+        result = self._run_create_and_read_result(rid, provider=provider_object["name"],
+                                                  region=region, provider_info=provider_info,
+                                                  define_json=define_json)
+
+        data_source_argument = resource_keys_config.get("data_source_argument")
+        output_json = self.read_query_result_controller(provider_object["name"], result,
+                                                        data_source_argument)
+
+        result_list = []
+        for out_data in output_json:
+            x_json = ValueResetConductor().reset_values(provider=provider_object["name"],
+                                                        resource_name=self.resource_name,
+                                                        data=out_data)
+
+            x_json = self.reverse_asset_object(provider=provider_object["name"], data=x_json)
+
+            instance_type, resource_info = InstanceTypeObject().convert_asset(provider=provider_object["name"],
+                                                                              asset_name=x_json.get("instance_type"))
+            x_json["instance_type"] = instance_type
+            resource_info.update(x_json)
+
+            result_list.append(resource_info)
+
+        return result_list
