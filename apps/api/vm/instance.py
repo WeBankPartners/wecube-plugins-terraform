@@ -119,6 +119,7 @@ class InstanceApi(ApiBase):
                          "disk_type": create_data.get("disk_type"),
                          "disk_size": create_data.get("disk_size"),
                          "data_disks": create_data.get("data_disks"),
+                         "charge_type": create_data.get("charge_type"),
                          "zone": zone, "image": create_data.get("image")}
 
         return x_create_data, r_create_data
@@ -152,7 +153,7 @@ class InstanceApi(ApiBase):
         x_create_data, r_create_data = self.generate_create_data(zone, create_data,
                                                                  provider=provider_object["name"])
 
-        password = create_data.get("password") or "Terraform.123"
+        password = create_data.get("password") #or "Terraform.123"
         origin_type, instance_type_data = InstanceTypeObject().convert_resource_id(provider_object.get("id"),
                                                                                    create_data.get("instance_type"))
 
@@ -486,6 +487,7 @@ class InstanceBackendApi(ApiBackendBase):
                          "disk_type": create_data.get("disk_type"),
                          "disk_size": create_data.get("disk_size"),
                          "data_disks": create_data.get("data_disks"),
+                         "charge_type": create_data.get("charge_type"),
                          "zone": zone, "image": create_data.get("image")}
 
         if "power_action" in create_data.keys():
@@ -526,7 +528,7 @@ class InstanceBackendApi(ApiBackendBase):
         x_create_data, r_create_data = self.generate_create_data(zone, create_data,
                                                                  provider=provider_object["name"])
 
-        password = create_data.get("password") or "Terraform.123"
+        password = create_data.get("password") #or "Terraform.123"
         origin_type, instance_type_data = InstanceTypeObject().convert_resource_id(provider_object.get("id"),
                                                                                    create_data.get("instance_type"))
 
