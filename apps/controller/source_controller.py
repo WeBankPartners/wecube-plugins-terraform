@@ -116,7 +116,7 @@ class BaseSourceController(BaseController):
         zone = data.pop("zone", None)
         provider = data.pop("provider", None)
         resource_id = data.pop("resource_id", None)
-        ignore_ids = data.pop("ignore_ids", [])
+        ignore_ids = data.pop("ignore_ids", None)
 
         if resource_id:
             resource_id = resource_id.strip()
@@ -125,6 +125,15 @@ class BaseSourceController(BaseController):
 
             if resource_id == "*":
                 resource_id = None
+
+        if ignore_ids:
+            ignore_ids = ignore_ids.strip()
+            if ignore_ids.startswith("[") and ignore_ids.endswith("]"):
+                ignore_ids = eval(ignore_ids)
+            else:
+                ignore_ids = [ignore_ids]
+        else:
+            ignore_ids = []
 
         if resource_id:
             result = []
