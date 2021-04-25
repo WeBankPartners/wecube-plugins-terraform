@@ -70,6 +70,14 @@ class InstanceTypeObject(ResourceBaseObject):
         else:
             return name, {"cpu": 0, "memory": 0}
 
+    def convert_asset(self, provider, asset_name):
+        data = self.resource.get(filters={"provider": provider,
+                                          "origin_name": asset_name})
+        if data:
+            return data["name"], {"cpu": data.get("cpu"), "memory": data.get("memory")}
+        else:
+            return asset_name, {"cpu": 0, "memory": 0}
+
     def convert_resource_name(self, provider, name):
         data = self.resource.get(filters={"provider": provider,
                                           "name": name})
