@@ -458,6 +458,7 @@
                     <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">charge_type</parameter>
 				</inputParameters>
 				<outputParameters>
 					<parameter datatype="string">errorMessage</parameter>
@@ -496,6 +497,7 @@
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">name</parameter>
                     <parameter datatype="string">ipaddress</parameter>
+                    <parameter datatype="string">charge_type</parameter>
 				</outputParameters>
 			</interface>
 		</plugin>
@@ -665,6 +667,7 @@
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">charge_type</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
@@ -706,6 +709,7 @@
                     <parameter datatype="string">type</parameter>
                     <parameter datatype="string">size</parameter>
                     <parameter datatype="string">zone</parameter>
+                    <parameter datatype="string">charge_type</parameter>
 				</outputParameters>
 			</interface>
 		</plugin>
@@ -786,6 +790,7 @@
 					<parameter datatype="string" mappingType="entity" required="N">data_disks</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">charge_type</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
@@ -837,6 +842,7 @@
 					<parameter datatype="string">instance_type</parameter>
 					<parameter datatype="string">disk_type</parameter>
 					<parameter datatype="string">disk_size</parameter>
+                    <parameter datatype="string">charge_type</parameter>
 					<parameter datatype="string" sensitiveData="Y">password</parameter>
 					<parameter datatype="string">security_group_id</parameter>
 					<parameter datatype="string">vpc_id</parameter>
@@ -955,6 +961,7 @@
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">charge_type</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
@@ -999,6 +1006,7 @@
                     <parameter datatype="string">vpc_id</parameter>
                     <parameter datatype="string">subnet_id</parameter>
                     <parameter datatype="string">ipaddress</parameter>
+                    <parameter datatype="string">charge_type</parameter>
 				</outputParameters>
 			</interface>
 			<interface action="create_listener" path="/terraform/v1/loadbalance/backend/lb_listener/apply" httpMethod='POST'>
@@ -1174,6 +1182,7 @@
 					<parameter datatype="string" mappingType="entity" required="N">first_slave_zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">charge_type</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
@@ -1213,6 +1222,7 @@
                     <parameter datatype="string" mappingType="entity" required="N">vpc_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">subnet_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">tag</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">charge_type</parameter>
 				</inputParameters>
 				<outputParameters>
                     <parameter datatype="string">region</parameter>
