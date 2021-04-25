@@ -22,7 +22,18 @@ class ResourceController(BackendController):
     def list(self, request, data, orderby=None, page=None, pagesize=None, **kwargs):
         validation.allowed_key(data, ["id", "provider", "resource_type", "resource_name",
                                       "data_source_argument", "data_source_name"])
+
+        filter_string = None
+        for key in ["resource_type", "provider", "resource_name", "data_source_name"]:
+            if data.get(key):
+                if filter_string:
+                    filter_string += 'and ' + key + " like '%" + data.get(key) + "%' "
+                else:
+                    filter_string = key + " like '%" + data.get(key) + "%' "
+                data.pop(key, None)
+
         return self.resource.list(filters=data, page=page,
+                                  filter_string=filter_string,
                                   pagesize=pagesize, orderby=orderby)
 
     def before_handler(self, request, data, **kwargs):

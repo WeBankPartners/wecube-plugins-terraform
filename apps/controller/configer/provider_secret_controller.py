@@ -20,7 +20,18 @@ class ProviderSecretController(BackendController):
 
     def list(self, request, data, orderby=None, page=None, pagesize=None, **kwargs):
         validation.allowed_key(data.keys(), ["id", "name", "display_name", "region", "provider", "enabled"])
+
+        filter_string = None
+        for key in ["name", "display_name", "provider", "region"]:
+            if data.get(key):
+                if filter_string:
+                    filter_string += 'and ' + key + " like '%" + data.get(key) + "%' "
+                else:
+                    filter_string = key + " like '%" + data.get(key) + "%' "
+                data.pop(key, None)
+
         return self.resource.list(filters=data, page=page,
+                                  filter_string=filter_string,
                                   pagesize=pagesize, orderby=orderby)
 
     def before_handler(self, request, data, **kwargs):
