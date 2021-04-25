@@ -289,11 +289,12 @@ class ApiBackendBase(TerraformResource):
                 logger.info("info found, recovery state ..")
                 self.workspace_controller(rid, provider, region, provider_info)
                 self.rewrite_state(workpath, state_file=exists_data["result_json"])
+                logger.info("rewrite state file, continue...")
                 # import_status = False
-                return workpath
+                return False
         else:
             logger.info("state file exists continue ...")
-            return workpath
+            return False
 
         if asset_id and resource_id:
             logger.info("asset id given, try import resource..")
@@ -320,7 +321,7 @@ class ApiBackendBase(TerraformResource):
                 dest_source = "%s.%s" % (_cloud_resource_name, label_name)
                 self.run_import(from_source=asset_id, dest_source=dest_source, path=workpath, state=None)
 
-                return workpath
+                return False
             except Exception, e:
                 # self.rollback_data(rid)
                 # if workpath:
@@ -329,6 +330,7 @@ class ApiBackendBase(TerraformResource):
                 logger.info("resource import failed. continue ... ")
 
         logger.info("state file not recovery, continue apply resource ... ")
+        return True
 
     def run_create(self, rid, region, zone,
                    provider_object, provider_info,
@@ -352,15 +354,16 @@ class ApiBackendBase(TerraformResource):
         extend_info = extend_info or {}
         label_name = self.resource_name + "_" + rid
 
+        # todo 校验 是否导入，若导入则不设置密码
+        flush_status = self.source_run_import(rid=rid, provider=provider_object["name"],
+                                              region=region, label_name=label_name,
+                                              provider_info=provider_info,
+                                              asset_id=asset_id, resource_id=resource_id)
+
         define_json = self.resource_filter_controller(provider_name=provider_object["name"],
                                                       label_name=label_name,
                                                       create_data=create_data,
                                                       extend_info=extend_info)
-
-        self.source_run_import(rid=rid, provider=provider_object["name"],
-                               region=region, label_name=label_name,
-                               provider_info=provider_info,
-                               asset_id=asset_id, resource_id=resource_id)
 
         result = self._run_create_and_read_result(rid, provider=provider_object["name"],
                                                   region=region, provider_info=provider_info,

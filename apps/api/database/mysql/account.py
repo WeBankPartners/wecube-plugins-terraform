@@ -42,7 +42,7 @@ class Common(object):
     def generate_create_data(self, zone, create_data, **kwargs):
         r_create_data = {"mysql_id": create_data.get("mysql_id")}
 
-        password = create_data.get("password") or "Terraform.123"
+        password = create_data.get("password") #or "Terraform.123"
         x_create_data = {"password": password,
                          "name": create_data.get("name")}
 

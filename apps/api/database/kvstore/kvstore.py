@@ -73,6 +73,7 @@ class Common(object):
                          "engine": self.resource_name, "zone": zone,
                          "version": create_data.get("version"),
                          "port": create_data.get("port"),
+                         "charge_type": create_data.get("charge_type"),
                          "instance_type": create_data.get("instance_type")
                          }
 

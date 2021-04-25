@@ -23,6 +23,7 @@ class Common(object):
 
         x_create_data = {"type": create_data.get("type"),
                          "size": create_data.get("size"),
+                         "charge_type": create_data.get("charge_type"),
                          "name": create_data.get("name"),
                          "zone": zone}
 

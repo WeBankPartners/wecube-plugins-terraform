@@ -26,7 +26,8 @@ class Common(object):
     def generate_create_data(self, zone, create_data, **kwargs):
         r_create_data = {}
         create_data = {
-            "name": create_data.get("name")
+            "name": create_data.get("name"),
+            "charge_type": create_data.get("charge_type")
         }
 
         return create_data, r_create_data

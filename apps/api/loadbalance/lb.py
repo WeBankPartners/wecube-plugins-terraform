@@ -43,7 +43,8 @@ class Common(object):
         r_create_data = {"vpc_id": create_data.get("vpc_id"),
                          "subnet_id": create_data.get("subnet_id")}
         create_data = {"network_type": create_data.get("network_type"),
-                       "name": create_data.get("name")}
+                       "name": create_data.get("name"),
+                       "charge_type": create_data.get("charge_type")}
 
         return create_data, r_create_data
 

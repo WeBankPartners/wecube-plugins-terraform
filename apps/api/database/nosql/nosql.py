@@ -75,6 +75,7 @@ class NosqlApi(ApiBase):
         x_create_data = {"name": create_data.get("name"),
                          "engine": self.resource_name, "zone": zone,
                          "version": create_data.get("version"),
+                         "charge_type": create_data.get("charge_type"),
                          "instance_type": create_data.get("instance_type"),
                          "disk_size": create_data.get("disk_size")
                          }

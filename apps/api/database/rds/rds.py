@@ -93,6 +93,7 @@ class RdsDBApi(ApiBase):
                          "version": create_data.get("version"),
                          "instance_type": create_data.get("instance_type"),
                          "password": password,
+                         "charge_type": create_data.get("charge_type"),
                          "user": create_data.get("user"),
                          "port": create_data.get("port"),
                          "disk_type": create_data.get("disk_type"),
