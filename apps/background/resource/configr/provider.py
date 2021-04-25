@@ -14,11 +14,12 @@ class ProviderObject(object):
     def __init__(self):
         self.resource = ProvidersManager()
 
-    def list(self, filters=None, page=None, pagesize=None, orderby=None):
+    def list(self, filters=None, page=None, pagesize=None, orderby=None, filter_string=None):
         filters = filters or {}
         filters["is_deleted"] = 0
 
         count, results = self.resource.list(filters=filters, pageAt=page,
+                                            filter_string=filter_string,
                                             pageSize=pagesize, orderby=orderby)
         data = []
         for res in results:

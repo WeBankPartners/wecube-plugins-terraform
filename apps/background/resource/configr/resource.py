@@ -11,8 +11,9 @@ class ResourceObject(object):
     def __init__(self):
         self.resource = ResourceManager()
 
-    def list(self, filters=None, page=None, pagesize=None, orderby=None):
+    def list(self, filters=None, page=None, pagesize=None, orderby=None, filter_string=None):
         count, results = self.resource.list(filters=filters, pageAt=page,
+                                            filter_string=filter_string,
                                             pageSize=pagesize, orderby=orderby)
         data = []
         for res in results:
