@@ -66,6 +66,7 @@ class Database(object):
         _query_sql = session.query(obj).filter_by(**filters)
 
         if filter_string:
+            params = params or {}
             _query_sql = _query_sql.filter(text(filter_string)).params(**params)
 
         count = _query_sql.count()
