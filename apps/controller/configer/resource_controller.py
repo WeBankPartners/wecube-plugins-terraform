@@ -186,7 +186,7 @@ class ResourceIdController(BackendIdController):
                                resource_property=data_source_output)
 
             for _, value in data_source_output.items():
-                if not isinstance(value, basestring):
+                if not isinstance(value, (basestring, dict)):
                     raise ValueError("data_source_output 为key-value定义")
 
             data["data_source_output"] = json.dumps(data_source_output)
