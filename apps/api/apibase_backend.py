@@ -354,7 +354,6 @@ class ApiBackendBase(TerraformResource):
         extend_info = extend_info or {}
         label_name = self.resource_name + "_" + rid
 
-        # todo 校验 是否导入，若导入则不设置密码
         flush_status = self.source_run_import(rid=rid, provider=provider_object["name"],
                                               region=region, label_name=label_name,
                                               provider_info=provider_info,

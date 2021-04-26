@@ -69,6 +69,28 @@ class ResourceConfiger(object):
 
         return {}, self.resource_keys_config
 
+    def pre_check_source_property(self, provider, resource_name, resource_data):
+        '''
+
+        :param provider:
+        :param resource_name:
+        :param resource_data:
+        :return:
+        '''
+
+        self.resource_info(provider, resource_name)
+
+        data_source = self.resource_keys_config["data_source"]
+        if not data_source:
+            raise ValueError("source资源未定义")
+
+        for key, value in resource_data.items():
+            if key == "zone":
+                continue
+            else:
+                if key not in data_source.keys():
+                    raise ValueError("provider: %s 不支持过滤参数： %s" % (provider, key))
+
     def conductor_source_property(self, provider, resource_name, resource_data):
         '''
 

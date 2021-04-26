@@ -219,6 +219,10 @@ class ResourceConductor(object):
                                                                 data=resource_data)
 
         configer = ResourceConfiger()
+        configer.pre_check_source_property(provider=provider,
+                                           resource_name=resource_name,
+                                           resource_data=resource_data)
+
         resource_columns, resource_keys_config = configer.conductor_source_property(provider=provider,
                                                                                     resource_name=resource_name,
                                                                                     resource_data=resource_data)
