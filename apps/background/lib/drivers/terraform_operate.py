@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import os
 import json
+import traceback
 from shutil import copyfile
 from lib.logs import logger
 from lib.command import command
@@ -118,6 +119,13 @@ class TerraformResource(object):
         if os.path.exists(_statefile):
             backupfile = _statefile + "_" + get_datetime_point_str()
             copyfile(_statefile, backupfile)
+
+        try:
+            self.terraformDriver.plan(path)
+        except:
+            logger.info(traceback.format_exc())
+            logger.info("terraform plan run failed, continue ... ")
+
         self.terraformDriver.apply(path, auto_approve="")
         return self.terraformDriver.resource_result(path)
 
@@ -193,5 +201,11 @@ class TerraformResource(object):
         :param path:
         :return:
         '''
+
+        try:
+            self.terraformDriver.plan(path)
+        except:
+            logger.info(traceback.format_exc())
+            logger.info("terraform plan run failed, continue ... ")
 
         return TerraformDriver().destroy(dir_path=path, auto_approve="")
