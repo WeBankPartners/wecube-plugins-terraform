@@ -78,7 +78,13 @@ class RegionObject(_AreaObject):
     def region_object(self, region_id):
         data = self.show(rid=region_id)
         if not data:
+            data = self.query_one(where_data={"name": region_id})
+            if not data:
+                data = self.query_one(where_data={"asset_id": region_id})
+
+        if not data:
             raise local_exceptions.ResourceValidateError("region", "region %s 未注册" % region_id)
+
         return data
 
     def region_name_object(self, region, provider):
