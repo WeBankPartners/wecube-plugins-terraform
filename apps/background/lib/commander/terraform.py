@@ -207,7 +207,7 @@ class TerraformDriver(object):
         exec_cmd = "plan %s %s" % (args, workdir)
 
         code, out, err = command(self._format_cmd(exec_cmd), workdir=workdir)
-        if code == 0:
+        if code in [0, 1, 2]:
             # failed
             pass
         else:
