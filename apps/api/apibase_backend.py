@@ -549,8 +549,9 @@ class ApiBackendBase(TerraformResource):
         return result
 
     def read_query_result_controller(self, provider, result, data_source_argument):
-        if not data_source_argument:
-            raise ValueError("data_source_argument not config")
+        # if not data_source_argument:
+            # raise ValueError("data_source_argument not config")
+        data_source_argument = data_source_argument or ''
 
         logger.info(format_json_dumps(result))
         try:
@@ -560,7 +561,8 @@ class ApiBackendBase(TerraformResource):
 
             outlines = data_source_argument.split(".")
             for outline in outlines:
-                _attributes = _attributes.get(outline)
+                if outline:
+                    _attributes = _attributes.get(outline)
 
             instance_list = _attributes
             instance_define = instance_list
