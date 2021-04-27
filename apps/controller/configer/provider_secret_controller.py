@@ -35,7 +35,7 @@ class ProviderSecretController(BackendController):
                                   pagesize=pagesize, orderby=orderby)
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["id", "name", "display_name", "provider",
+        validation.allowed_key(data, ["id", "name", "display_name", "provider", "server",
                                       "secret_info", "region", "extend_info"])
         validation.not_allowed_null(data=data,
                                     keys=["name", "provider", "secret_info"]
@@ -43,6 +43,7 @@ class ProviderSecretController(BackendController):
 
         validation.validate_string("id", data.get("id"))
         validation.validate_string("name", data["name"])
+        validation.validate_string("server", data["server"])
         validation.validate_string("display_name", data.get("display_name"))
         validation.validate_string("provider", data.get("provider"))
         validation.validate_string("secret_info", data.get("secret_info"))
@@ -75,6 +76,7 @@ class ProviderSecretController(BackendController):
 
         create_data = {"id": data.get("id") or get_uuid(),
                        "name": data["name"],
+                       "server": data.get("server"),
                        "provider": data.get("provider"),
                        "display_name": data.get("display_name"),
                        "region": data.get("region"),
