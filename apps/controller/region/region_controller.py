@@ -187,8 +187,8 @@ class RegionSourceController(BaseController):
                 query_data[key] = data.get(key)
 
         orderby = data.get("orderby")
-        page = data.get("page")
-        pagesize = data.get("pagesize")
+        page = data.get("page", 0)
+        pagesize = data.get("pagesize", 1000)
 
         # validation.allowed_key(data, ["id", "provider", "name", 'asset_id'])
         count, result = self.resource.list(filters=query_data, page=page,

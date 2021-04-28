@@ -203,7 +203,7 @@ class TerraformResource(object):
         '''
 
         try:
-            self.terraformDriver.plan(path)
+            self.terraformDriver.plan(path, destroy="")
         except:
             logger.info(traceback.format_exc())
             logger.info("terraform plan run failed, continue ... ")

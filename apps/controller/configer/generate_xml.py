@@ -155,10 +155,11 @@ class ResBase(object):
     def format_plugin_interface(self, name, defines):
         result = ''
         for key, define in defines.items():
-            if key == "apply":
-                define = self.upgrade_apply_info(name, define)
-            elif key == "query":
-                define = self.upgrade_query_info(name, define)
+            if key not in ["region", "az"]:
+                if key == "apply":
+                    define = self.upgrade_apply_info(name, define)
+                elif key == "query":
+                    define = self.upgrade_query_info(name, define)
             interface_str = self.interface(action=key, path=define.get("path"), method=define.get("method"))
             input_str = self.inputparameter(notnull=define.get("notnull"), keys=define.get("inputParameters"))
             out_str = self.outputparameter(keys=define.get("outputParameters"))

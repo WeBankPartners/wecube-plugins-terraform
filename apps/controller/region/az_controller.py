@@ -214,8 +214,8 @@ class ZoneSourceController(BaseController):
                 query_data[key] = data.get(key)
 
         orderby = data.get("orderby")
-        page = data.get("page")
-        pagesize = data.get("pagesize")
+        page = data.get("page", 0)
+        pagesize = data.get("pagesize", 1000)
 
         count, result = self.list(request, data=query_data,
                                   orderby=orderby, page=page,
