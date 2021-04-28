@@ -2,6 +2,54 @@
 
 
 xml_register = {
+    "region": {
+        "apply": {
+            "path": "/terraform/v1/az/backend/region/apply",
+            "method": "POST",
+            "notnull": ["asset_id", "provider"],
+            "inputParameters": ['id', 'name', 'provider', 'asset_id', 'extend_info'],
+            "outputParameters": ["errorMessage", "errorCode", "result"]
+        },
+        "destroy": {
+            "path": "/terraform/v1/az/backend/region/destroy",
+            "method": "POST",
+            "notnull": ["id"],
+            "inputParameters": ["id"],
+            "outputParameters": ["errorMessage", "errorCode", "result"]
+        },
+        "query": {
+            "path": "/terraform/v1/az/backend/region/source",
+            "method": "POST",
+            "notnull": [],
+            "inputParameters": ['id', 'provider', 'asset_id', 'name'],
+            "outputParameters": ['errorCode', 'errorMessage', 'name', 'id', 'asset_id', 'extend_info',
+                                 'provider']
+        },
+    },
+    "az": {
+        "apply": {
+            "path": "/terraform/v1/az/backend/az/apply",
+            "method": "POST",
+            "notnull": ["asset_id", "provider"],
+            "inputParameters": ['id', 'name', 'provider', 'asset_id', 'region', 'extend_info'],
+            "outputParameters": ["errorMessage", "errorCode", "result"]
+        },
+        "destroy": {
+            "path": "/terraform/v1/az/backend/az/destroy",
+            "method": "POST",
+            "notnull": ["id"],
+            "inputParameters": ["id"],
+            "outputParameters": ["errorMessage", "errorCode", "result"]
+        },
+        "query": {
+            "path": "/terraform/v1/az/backend/az/source",
+            "method": "POST",
+            "notnull": [],
+            "inputParameters": ['id', 'provider', 'asset_id', 'name', 'region'],
+            "outputParameters": ['errorCode', 'errorMessage', 'name', 'id', 'asset_id', 'extend_info', 'region',
+                                 'provider']
+        },
+    },
     "vpc": {
         "apply": {
             "path": "/terraform/v1/network/backend/vpc/apply",
