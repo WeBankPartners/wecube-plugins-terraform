@@ -39,6 +39,94 @@
 
 	<!-- 7.插件列表 - 描述插件包中单个插件的输入和输出 -->
 	<plugins>
+        <plugin name="region">
+			<interface action="apply" path="/terraform/v1/az/backend/region/apply" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
+                    <parameter datatype="string" mappingType="entity" required="Y">asset_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">result</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="destroy" path="/terraform/v1/az/backend/region/destroy" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+            <interface action="query" path="/terraform/v1/az/backend/region/source" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">provider</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">name</parameter>
+				</inputParameters>
+				<outputParameters>
+                    <parameter datatype="string">errorCode</parameter>
+                    <parameter datatype="string">errorMessage</parameter>
+                    <parameter datatype="string">name</parameter>
+                    <parameter datatype="string">id</parameter>
+                    <parameter datatype="string">asset_id</parameter>
+                    <parameter datatype="string">extend_info</parameter>
+                    <parameter datatype="string">provider</parameter>
+				</outputParameters>
+			</interface>
+		</plugin>
+        <plugin name="az">
+			<interface action="apply" path="/terraform/v1/az/backend/az/apply" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">region</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
+                    <parameter datatype="string" mappingType="entity" required="Y">asset_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">result</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="destroy" path="/terraform/v1/az/backend/az/destroy" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+            <interface action="query" path="/terraform/v1/az/backend/az/source" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">provider</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">name</parameter>
+				</inputParameters>
+				<outputParameters>
+                    <parameter datatype="string">errorCode</parameter>
+                    <parameter datatype="string">errorMessage</parameter>
+                    <parameter datatype="string">name</parameter>
+                    <parameter datatype="string">id</parameter>
+                    <parameter datatype="string">region</parameter>
+                    <parameter datatype="string">asset_id</parameter>
+                    <parameter datatype="string">extend_info</parameter>
+                    <parameter datatype="string">provider</parameter>
+				</outputParameters>
+			</interface>
+		</plugin>
 		<plugin name="vpc">
 			<interface action="apply" path="/terraform/v1/network/backend/vpc/apply" httpMethod='POST'>
 				<inputParameters>
