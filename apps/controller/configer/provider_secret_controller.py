@@ -43,7 +43,7 @@ class ProviderSecretController(BackendController):
 
         validation.validate_string("id", data.get("id"))
         validation.validate_string("name", data["name"])
-        validation.validate_string("server", data["server"])
+        validation.validate_string("server", data.get("server"))
         validation.validate_string("display_name", data.get("display_name"))
         validation.validate_string("provider", data.get("provider"))
         validation.validate_string("secret_info", data.get("secret_info"))
