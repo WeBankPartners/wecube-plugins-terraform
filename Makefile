@@ -20,6 +20,7 @@ package: image
 	cd package && mv ../terraform-ui/dist/ui.zip .
 	cp doc/init.sql package/init.sql
 	cat doc/init_data.sql >> package/init.sql
+	cat doc/update.sql >> package/init.sql
 	cd package && sed -i 's/{{PLUGIN_VERSION}}/$(version)/'  ../register.xml
 	cd package && sed -i 's/{{IMAGENAME}}/$(project_name):$(version)/g' ../register.xml
 	cd package && sed -i 's/{{CONTAINERNAME}}/$(project_name)-$(version)/g' ../register.xml

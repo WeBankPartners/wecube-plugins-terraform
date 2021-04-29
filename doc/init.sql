@@ -1,3 +1,5 @@
+#@v0.1.0-begin@;
+
 DROP TABLE IF EXISTS `cloud_providers`;
 
 CREATE TABLE `cloud_providers` (
@@ -39,43 +41,6 @@ CREATE TABLE `cloud_secret` (
   `is_deleted` BOOL DEFAULT FALSE,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `idx_name` (`name`, `provider`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8;
-
-
-DROP TABLE IF EXISTS `region`;
-
-CREATE TABLE `region` (
-  `id` VARCHAR(36) NOT NULL,
-  `name` VARCHAR(128) DEFAULT NULL,
-  `provider` VARCHAR(128) NOT NULL,
-  `asset_id` VARCHAR(128) NOT NULL,
-  `extend_info` TEXT DEFAULT NULL,
-  `created_time` DATETIME DEFAULT NULL,
-  `updated_time` DATETIME DEFAULT NULL,
-  `deleted_time` DATETIME DEFAULT NULL,
-  `enabled` BOOL DEFAULT TRUE,
-  `is_deleted` BOOL DEFAULT FALSE,
-  PRIMARY KEY (`id`),
-  UNIQUE INDEX `idx_asset` (`asset_id`, `provider`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8;
-
-
-DROP TABLE IF EXISTS `availability_zone`;
-
-CREATE TABLE `availability_zone` (
-  `id` VARCHAR(36) NOT NULL,
-  `name` VARCHAR(128) DEFAULT NULL,
-  `provider` VARCHAR(128) NOT NULL,
-  `asset_id` VARCHAR(128) NOT NULL,
-  `region` VARCHAR(128) DEFAULT NULL,
-  `extend_info` TEXT DEFAULT NULL,
-  `created_time` DATETIME DEFAULT NULL,
-  `updated_time` DATETIME DEFAULT NULL,
-  `deleted_time` DATETIME DEFAULT NULL,
-  `enabled` BOOL DEFAULT TRUE,
-  `is_deleted` BOOL DEFAULT FALSE,
-  PRIMARY KEY (`id`),
-  UNIQUE INDEX `idx_asset` (`asset_id`, `provider`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 
@@ -204,3 +169,4 @@ CREATE TABLE `resource_history` (
   INDEX `idx_id` (`id`, `created_time`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
+#@v0.1.0-end@;

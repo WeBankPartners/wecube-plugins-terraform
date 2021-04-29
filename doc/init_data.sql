@@ -1,3 +1,5 @@
+#@v0.1.0-begin@;
+
 USE `terraform`;
 
 /*Data for the table `cloud_providers` */
@@ -82,3 +84,4 @@ insert  into `resource`(`id`,`provider`,`resource_type`,`resource_name`,`extend_
 ('f69c2785bfd94d0aab5455dc42dbab0d','alicloud','lb','alicloud_slb','{\"specification\": {\"type\": \"string\", \"value\": \"slb.s1.small\"}, \"tags\": {\"type\": \"json\"}}','{\"subnet_id\": {\"convert\": \"vswitch_id\", \"allow_null\": 0, \"type\": \"string\"}, \"vpc_id\": \"-\", \"name\": {\"convert\": \"name\", \"allow_null\": 0, \"type\": \"string\"}, \"network_type\": {\"default\": \"intranet\", \"convert\": \"address_type\", \"allow_null\": 1, \"type\": \"string\"}}','{\"ipaddress\": \"address\", \"resource_id\": \"id\"}','alicloud_slb','slbs','{\"resource_id\": {\"convert\": \"ids\", \"type\": \"list\"}}','{\"subnet_id\": {\"convert\": \"vswitch_id\", \"allow_null\": 0, \"type\": \"string\"}, \"vpc_id\": \"-\", \"name\": {\"convert\": \"name\", \"allow_null\": 0, \"type\": \"string\"}, \"network_type\": {\"default\": \"intranet\", \"convert\": \"address_type\", \"allow_null\": 1, \"type\": \"string\"}, \"resource_id\": \"id\", \"ipaddress\": \"address\"}',0,'2021-01-25 17:21:10','2021-03-16 14:49:07',NULL,1,0);
 
 
+#@v0.1.0-end@;
