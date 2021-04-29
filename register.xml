@@ -324,6 +324,30 @@
 					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
+            <interface action="query" path="/terraform/v1/network/backend/route_entry/source" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">secret</parameter>
+                    <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">route_table_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">cidr</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">type</parameter>
+				</inputParameters>
+				<outputParameters>
+                    <parameter datatype="string">region</parameter>
+                    <parameter datatype="string">secret</parameter>
+                    <parameter datatype="string">provider</parameter>
+					<parameter datatype="string">next_hub</parameter>
+					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">name</parameter>
+                    <parameter datatype="string">destination</parameter>
+                    <parameter datatype="string">next_type</parameter>
+                    <parameter datatype="string">route_table_id</parameter>
+				</outputParameters>
+			</interface>
 		</plugin>
 		<plugin name="peer_connection">
 			<interface action="apply" path="/terraform/v1/network/backend/peer_connection/apply" httpMethod='POST'>
@@ -791,6 +815,7 @@
                     <parameter datatype="string">secret</parameter>
                     <parameter datatype="string">provider</parameter>
 					<parameter datatype="string">resource_id</parameter>
+                    <parameter datatype="string">instance_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">name</parameter>
@@ -798,6 +823,39 @@
                     <parameter datatype="string">size</parameter>
                     <parameter datatype="string">zone</parameter>
                     <parameter datatype="string">charge_type</parameter>
+				</outputParameters>
+			</interface>
+		</plugin>
+        <plugin name="disk_attach">
+			<interface action="apply" path="/terraform/v1/storage/backend/disk_attach/apply" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">disk_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">instance_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">zone</parameter>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">id</parameter>
+					<parameter datatype="string">resource_id</parameter>
+				</outputParameters>
+			</interface>
+			<interface action="destroy" path="/terraform/v1/storage/backend/disk_attach/destroy" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
+				</inputParameters>
+				<outputParameters>
+					<parameter datatype="string">result</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
 		</plugin>
@@ -1310,7 +1368,7 @@
                     <parameter datatype="string" mappingType="entity" required="N">vpc_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">subnet_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">tag</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">charge_type</parameter>
+{#                    <parameter datatype="string" mappingType="entity" required="N">charge_type</parameter>#}
 				</inputParameters>
 				<outputParameters>
                     <parameter datatype="string">region</parameter>
@@ -1327,6 +1385,7 @@
 					<parameter datatype="string">disk_type</parameter>
 					<parameter datatype="string">disk_size</parameter>
 					<parameter datatype="string">version</parameter>
+                    <parameter datatype="string">charge_type</parameter>
 					<parameter datatype="string">instance_type</parameter>
 					<parameter datatype="string">vpc_id</parameter>
 					<parameter datatype="string">security_group_id</parameter>

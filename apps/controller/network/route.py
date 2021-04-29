@@ -53,6 +53,7 @@ urlpatterns = [
     url(r'^route_entry/(?P<rid>[\w-]+)$', RouteEntryIdController()),
     url(r'^backend/route_entry/apply$', RouteEntryAddController()),
     url(r'^backend/route_entry/destroy$', RouteEntryDeleteController()),
+    url(r'^backend/route_entry/source$', route_entry_controller.RTRuleSourceController()),
 
     url(r'^security_group$', SecGroupController()),
     url(r'^security_group/(?P<rid>[\w-]+)$', SecGroupIdController()),

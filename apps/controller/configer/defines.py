@@ -141,6 +141,14 @@ xml_register = {
             "notnull": ["id"],
             "inputParameters": ["id"],
             "outputParameters": ["errorMessage", "errorCode", "result"]
+        },
+        "query": {
+            "path": "/terraform/v1/network/backend/route_entry/source",
+            "method": "POST",
+            "notnull": ["region", "provider"],
+            "inputParameters": ['region', 'secret', 'provider', 'resource_id', 'route_table_id', 'cidr', 'type'],
+            "outputParameters": ['region', 'secret', 'provider', 'next_hub', 'resource_id', 'errorMessage',
+                                 'errorCode', 'name', 'destination', 'next_type', 'route_table_id']
         }
     },
     "peer_connection": {
