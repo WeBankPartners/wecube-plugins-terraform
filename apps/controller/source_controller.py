@@ -91,7 +91,7 @@ class BaseSourceController(BaseController):
             if x_res.get("resource_id") in ignore_ids:
                 continue
 
-            if x_res.get("zone") not in register_zones:
+            if x_res.get("zone") and (x_res.get("zone") not in register_zones):
                 logger.info("resource: %s ,zone: %s searched not in register zone, skip it" % (
                     x_res.get("resource_id"), x_res.get("zone")))
                 continue

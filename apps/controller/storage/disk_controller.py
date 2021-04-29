@@ -2,6 +2,10 @@
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
+from lib.logs import logger
+from core import validation
+from core.controller import BaseController
+from core.response_hooks import format_string
 from core import validation
 from core.controller import BackendController
 from core.controller import BackendIdController
@@ -10,6 +14,8 @@ from lib.uuid_util import get_uuid
 from apps.api.storage.disk import DiskApi
 from apps.api.storage.disk import DiskBackendApi
 from apps.controller.source_controller import BaseSourceController
+from apps.controller.configer.model_args import source_columns_outputs
+from apps.api.configer.region import ZoneApi
 
 
 class ResBase(object):
@@ -159,3 +165,51 @@ class DiskSourceController(BaseSourceController):
     allow_methods = ("POST",)
     resource = DiskBackendApi()
 
+    def one_query(self, rid, provider, region, zone, secret,
+                  resource_id, ignore_ids, **kwargs):
+        '''
+
+        :param rid:
+        :param provider:
+        :param region:
+        :param zone:
+        :param secret:
+        :param resource_id:
+        :param ignore_ids:
+        :param kwargs:
+        :return:
+        '''
+
+        result = self.fetch_source(rid=rid, provider=provider, region=region, zone=zone,
+                                   secret=secret, resource_id=resource_id,
+                                   **kwargs)
+        result_data = []
+
+        register_zones = ZoneApi().region_zones(region, provider)
+
+        for x_result in result:
+            x_res = source_columns_outputs(self.resource.resource_name)
+            x_res.update(x_result)
+            res = {"region": region, "secret": secret, "provider": provider,
+                   "instance_id": kwargs.get("instance_id")}
+
+            if x_res.get("resource_id") in ignore_ids:
+                continue
+
+            if x_res.get("zone") not in register_zones:
+                logger.info("resource: %s ,zone: %s searched not in register zone, skip it" % (
+                    x_res.get("resource_id"), x_res.get("zone")))
+                continue
+
+            for x, value in x_res.items():
+                if isinstance(value, dict):
+                    res[x] = format_string(value)
+                else:
+                    if value is None:
+                        res[x] = ''
+                    else:
+                        res[x] = str(value)
+
+            result_data.append(res)
+
+        return result_data

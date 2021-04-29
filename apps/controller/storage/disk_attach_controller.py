@@ -59,7 +59,7 @@ class ResBase(object):
                                     create_data=create_data,
                                     extend_info=data)
 
-        res = {"id": rid, "resource_id": str(result.get("resource_id"))[:64]}
+        res = {"id": rid, "resource_id": str(result.get("resource_id"))}
         return res, result
 
 
