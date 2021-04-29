@@ -138,6 +138,7 @@ class ZoneAddController(BaseController):
 
     def main_response(self, request, data, **kwargs):
         rid = data.get("id", None)
+        data.pop("secret", None)
         if rid:
             if self.resource.show(rid):
                 if data.get("extend_info") is not None:

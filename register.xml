@@ -43,6 +43,7 @@
 			<interface action="apply" path="/terraform/v1/az/backend/region/apply" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">secret</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">asset_id</parameter>
@@ -86,6 +87,7 @@
 			<interface action="apply" path="/terraform/v1/az/backend/az/apply" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">secret</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">region</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
