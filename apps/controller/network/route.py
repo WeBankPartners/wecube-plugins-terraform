@@ -13,6 +13,7 @@ import subnet_controller
 import routetable_controller
 import route_entry_controller
 import security_group_controller
+import security_group_rule_controller
 import peer_connection_controller
 
 from route_entry_controller import RouteEntryController
@@ -65,6 +66,7 @@ urlpatterns = [
     url(r'^security_group_rule/(?P<rid>[\w-]+)$', SecGroupRuleIdController()),
     url(r'^backend/security_group_rule/apply$', SecGroupRuleAddController()),
     url(r'^backend/security_group_rule/destroy$', SecGroupRuleDeleteController()),
+    url(r'^backend/security_group_rule/source$', security_group_rule_controller.SGRuleSourceController()),
 
     url(r'^nat$', nat_controller.NatGatewayController()),
     url(r'^nat/(?P<rid>[\w-]+)$', nat_controller.NatGatewayIdController()),

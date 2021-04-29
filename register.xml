@@ -488,7 +488,7 @@
 					<parameter datatype="string">resource_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/network/backend/security_group/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/network/backend/security_group_rule/destroy" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -496,6 +496,31 @@
 					<parameter datatype="string">result</parameter>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
+				</outputParameters>
+			</interface>
+            <interface action="query" path="/terraform/v1/network/backend/security_group_rule/source" httpMethod='POST'>
+				<inputParameters>
+					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">secret</parameter>
+                    <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">security_group_id</parameter>
+				</inputParameters>
+				<outputParameters>
+                    <parameter datatype="string">region</parameter>
+                    <parameter datatype="string">secret</parameter>
+                    <parameter datatype="string">provider</parameter>
+					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">errorMessage</parameter>
+					<parameter datatype="string">errorCode</parameter>
+					<parameter datatype="string">name</parameter>
+                    <parameter datatype="string">security_group_id</parameter>
+					<parameter datatype="string">type</parameter>
+					<parameter datatype="string">cidr_ip</parameter>
+					<parameter datatype="string">ip_protocol</parameter>
+					<parameter datatype="string">ports</parameter>
+					<parameter datatype="string">policy</parameter>
+					<parameter datatype="string">description</parameter>
 				</outputParameters>
 			</interface>
 		</plugin>
@@ -1368,7 +1393,6 @@
                     <parameter datatype="string" mappingType="entity" required="N">vpc_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">subnet_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">tag</parameter>
-{#                    <parameter datatype="string" mappingType="entity" required="N">charge_type</parameter>#}
 				</inputParameters>
 				<outputParameters>
                     <parameter datatype="string">region</parameter>
