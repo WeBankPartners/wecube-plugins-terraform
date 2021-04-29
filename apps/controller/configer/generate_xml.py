@@ -201,5 +201,3 @@ class ResourceXmlController(BackendController):
         xml_str = ResBase().generate_resource_xml()
         return 1, {"result": xml_str}
 
-# if __name__ == '__main__':
-#     print(ResBase().generate_resource_xml())

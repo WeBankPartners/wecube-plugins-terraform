@@ -84,7 +84,7 @@
 			</interface>
 		</plugin>
         <plugin name="az">
-			<interface action="apply" path="/terraform/v1/az/backend/az/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/az/backend/zone/apply" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">secret</parameter>
@@ -100,7 +100,7 @@
 					<parameter datatype="string">result</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/az/backend/az/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/az/backend/zone/destroy" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -110,7 +110,7 @@
 					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
-            <interface action="query" path="/terraform/v1/az/backend/az/source" httpMethod='POST'>
+            <interface action="query" path="/terraform/v1/az/backend/zone/source" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">provider</parameter>
