@@ -182,6 +182,7 @@ data_source_output 需要转换统一输出的字段
 原厂商B为： linux centos 7.2 x64,
 则可以统一命名为centos 7.2 进行转换
 
+注： 若region/zone通用值配置后，在注册region/zone时， asset id(资产id需要与配置后的值一致)
 url: /terraform/v1/configer/keyconfig
 
 ```

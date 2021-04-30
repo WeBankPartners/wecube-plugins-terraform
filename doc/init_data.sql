@@ -8,31 +8,6 @@ insert  into `cloud_providers`(`id`,`display_name`,`name`,`secret_id`,`secret_ke
 ('21fd34b382d844c4a2fe8acdf8ad75f0','阿里云','alicloud','xxxx','xxxx',NULL,NULL,NULL,'{}','{\"region\": \"region\", \"secret_key\": \"secret_key\", \"secret_id\": \"access_key\"}',1,'2021-01-22 10:56:36','2021-01-22 10:56:36',NULL,1,0),
 ('73aa4d40248849c48cb0fcde88d1d1d1','腾讯云','tencentcloud','xxxx','xxxx',NULL,NULL,NULL,'{}','{\"region\": \"region\", \"secret_key\": \"secret_key\", \"secret_id\": \"secret_id\"}',1,'2021-01-13 11:15:56','2021-01-13 11:15:56',NULL,1,0);
 
-/*Data for the table `config` */
-
-insert  into `config`(`id`,`provider`,`resource`,`property`,`value_config`,`is_locked`,`created_time`,`updated_time`,`deleted_time`,`enabled`,`is_deleted`) values
-('09f9682305484958bf54fe53270a7f39','alicloud','security_group_rule','policy','{\"DROP\": \"drop\", \"ACCEPT\": \"accept\"}',0,'2021-01-29 15:11:25','2021-01-29 15:11:25',NULL,1,0),
-('0f490f44980448aeb61efca2b0120107','alicloud','mysql','engine','{\"mysql\": \"MySQL\"}',0,'2021-01-25 16:09:26','2021-01-25 16:09:26',NULL,1,0),
-('191ca26f942a42b598636cf01b8a20ce','alicloud','instance','power_action','{\"start\": \"Running\", \"stop\": \"Stopped\"}',0,'2021-01-25 15:24:48','2021-01-25 15:24:48',NULL,1,0),
-('1e5ee3d572204bc4aaa96e57256f0386','alicloud','security_group_rule','ports','{\"10000\": \"10000/10000\", \"80\": \"80/80\", \"8000-9000\": \"8000/9000\", \"8080\": \"8080/8080\"}',0,'2021-01-29 15:11:34','2021-01-29 15:11:34',NULL,1,0),
-('20d0c747c96040afbeab159a2f5e696c','tencentcloud','subnet','cidr','{\"subnet_22\": \"10.1.2.0/24\", \"subnet_21\": \"10.1.1.0/24\", \"subnet_20\": \"10.0.20.0/24\", \"subnet_1\": \"10.0.1.0/24\"}',0,'2021-01-12 19:43:17','2021-01-21 16:52:09',NULL,1,0),
-('29207d072f0f4edb81540cf947b6b1cf','tencentcloud','zone','zone','{\"guangzhou4\": \"ap-guangzhou-4\", \"guangzhou3\": \"ap-guangzhou-3\"}',0,'2021-01-12 19:45:23','2021-01-12 19:45:23',NULL,1,0),
-('2ef73d2139054fb99ebccd7bdbb2ff77','tencentcloud','instance','disk_type','{\"normal_disk\": \"CLOUD_PREMIUM\"}',0,'2021-01-22 16:50:42','2021-01-22 16:50:42',NULL,1,0),
-('35bb9c075a254e1eb54e8d9c42e817ef','alicloud','instance','image','{\"linux_centos_7.7\": \"centos_7_7_x64_20G_alibase_20200426.vhd\"}',0,'2021-01-25 16:58:27','2021-01-25 16:58:27',NULL,1,0),
-('650e96b3687d453e900151ab327a0451','alicloud','zone','zone','{\"guangzhou1\": \"cn-guangzhou-a\", \"guangzhou2\": \"cn-guangzhou-b\"}',0,'2021-01-22 14:44:33','2021-01-22 14:44:33',NULL,1,0),
-('6718f4fe5aa44e50b599ab6a7c1a8c41','alicloud','vpc','cidr','{\"vpc_1\": \"10.1.0.0/16\", \"vpc_0\": \"10.0.0.0/16\"}',0,'2021-01-21 19:40:13','2021-01-21 19:40:13',NULL,1,0),
-('9e70671e06f345d2872c339bc42a71c4','tencentcloud','region','region','{\"guangzhou\": \"ap-guangzhou\"}',0,'2021-01-13 10:19:34','2021-01-13 10:19:34',NULL,1,0),
-('a1d7ed23ee964ec1a9e57f7374534a4a','alicloud','object_storage','acl','{\"true\": \"public-read\", \"false\": \"private\"}',0,'2021-01-29 15:19:29','2021-01-29 15:19:29',NULL,1,0),
-('c2046e3418df492da3e6beff4d43c606','alicloud','region','region','{\"guangzhou\": \"cn-guangzhou\"}',0,'2021-01-22 14:46:06','2021-01-22 14:46:06',NULL,1,0),
-('c63f9333d4994091998e723a8ae15520','tencentcloud','object_storage','acl','{\"true\": \"public-read\", \"false\": \"private\"}',0,'2021-01-29 15:19:39','2021-01-29 15:19:39',NULL,1,0),
-('c92ef007d24943179cf552410171b109','tencentcloud','instance','power_action','{\"start\": \"true\", \"stop\": \"false\"}',0,'2021-01-22 17:43:34','2021-01-22 17:43:34',NULL,1,0),
-('db5af6d4408242bb835300b7fd968bb3','tencentcloud','lb','network_type','{\"INTERNAL\": \"intranet\", \"OPEN\": \"internet\"}',0,'2021-01-29 15:21:55','2021-01-29 15:21:55',NULL,1,0),
-('de1105c827a64ebe8f342517348bbd92','tencentcloud','instance','image','{\"linux_centos_7.6_x64\": \"img-9qabwvbn\", \"linux_centos_7.8_x64\": \"img-3la7wgnt\"}',0,'2021-01-22 16:51:05','2021-01-22 16:51:05',NULL,1,0),
-('ed329c71020f490491c2d5c5b9447077','alicloud','subnet','cidr','{\"subnet_22\": \"10.1.2.0/24\", \"subnet_21\": \"10.1.1.0/24\", \"subnet_20\": \"10.0.20.0/24\", \"subnet_1\": \"10.0.1.0/24\"}',0,'2021-01-21 19:40:01','2021-01-21 19:40:01',NULL,1,0),
-('ef77e14d64644357978d3036480e2684','alicloud','security_group_rule','ip_protocol','{\"UDP\": \"udp\", \"ICMP\": \"icmp\", \"TCP\": \"tcp\"}',0,'2021-01-29 15:11:43','2021-01-29 15:11:43',NULL,1,0),
-('f28a57cd7d1b46448109f347b39e6124','tencentcloud','instance','instance_type','{\"1C-2G-01\": \"S5.SMALL2\", \"1C-4G-01\": \"S5.SMALL4\"}',0,'2021-01-22 16:50:53','2021-01-22 16:50:53',NULL,1,0),
-('f5be05e69af540fb96440e0a403027db','tencentcloud','vpc','cidr','{\"vpc_1\": \"10.1.0.0/16\", \"vpc_0\": \"10.0.0.0/16\"}',0,'2021-01-13 10:05:52','2021-01-13 10:05:52',NULL,1,0);
-
 /*Data for the table `instance_type` */
 
 insert  into `instance_type`(`id`,`provider_id`,`provider`,`name`,`origin_name`,`cpu`,`memory`,`network`,`extend_info`,`define_json`,`status`,`result_json`,`created_time`,`updated_time`,`deleted_time`,`enabled`,`is_deleted`) values
