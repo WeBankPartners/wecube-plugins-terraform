@@ -28,7 +28,7 @@ class RegionConductor(object):
         :return:
         '''
 
-        asset_id, data = ZoneApi().zone_asset(zone)
+        asset_id, data = ZoneApi().zone_asset_data(zone)
         if provider != data["provider"]:
             raise ValueError("provider: %s zone：%s 注册信息，请先注册" % (provider, zone))
 

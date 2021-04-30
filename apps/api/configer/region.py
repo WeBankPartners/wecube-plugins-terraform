@@ -41,6 +41,16 @@ class ZoneApi(object):
         data = ZoneObject().zone_object(zone_id)
         return data["asset_id"]
 
+    def zone_asset_data(self, zone_id):
+        '''
+
+        :param region_id:
+        :return:
+        '''
+
+        data = ZoneObject().zone_object(zone_id)
+        return data["asset_id"], data
+
     def zone_objectid(self, asset_id, provider=None):
         '''
 
