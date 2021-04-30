@@ -172,6 +172,8 @@ class ProviderConductor(object):
         provider_data = self.find_provider_info(provider)
 
         provider = provider_data.get("name")
+        ProviderApi().create_provider_workspace(provider)
+
         secret_info = self.producer_secret_info(provider, region, secret, provider_data)
 
         region = ProviderApi().region_info(provider, region)
