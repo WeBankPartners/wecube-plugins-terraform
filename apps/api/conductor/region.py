@@ -54,6 +54,16 @@ class RegionConductor(object):
 
         return ZoneApi().zone_objectid(asset_id=zone, provider=provider)
 
+    def zone_asset(self, provider, zone_id):
+        '''
+
+        :param provider:
+        :param zone: zone asset id
+        :return:
+        '''
+
+        return ZoneApi().zone_asset(zone_id=zone_id)
+
     def zone_reverse_mapping(self, provider, region):
         '''
 

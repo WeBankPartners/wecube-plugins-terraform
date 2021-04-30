@@ -673,7 +673,7 @@ class ApiBackendBase(TerraformResource):
             query_data = {"resource_id": resource_id}
 
         if zone:
-            zone = RegionConductor().zone_reverse_info(provider, zone)
+            zone = RegionConductor().zone_asset(provider, zone)
             query_data["zone"] = zone
 
         query_data.update(kwargs)
