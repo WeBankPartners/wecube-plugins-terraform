@@ -53,6 +53,7 @@ class ValueResetConductor(object):
             zone = RegionConductor().zone_reverse_info(provider, zone=zone)
             logger.info("find zone %s" % zone)
             resource_columns["zone"] = zone
+            resource_columns["x_ora_zone"] = zone
 
         if "peer_region" in data.keys():
             peer_region = ProviderConductor().region_reverse_info(provider, region=data["peer_region"])

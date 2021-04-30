@@ -94,7 +94,10 @@ class BaseSourceController(BaseController):
             if x_res.get("zone") and (x_res.get("zone") not in register_zones):
                 logger.info("resource: %s ,zone: %s searched not in register zone, skip it" % (
                     x_res.get("resource_id"), x_res.get("zone")))
-                continue
+                if x_res.get("x_ora_zone") and (x_res.get("x_ora_zone") not in register_zones):
+                    continue
+
+            x_res.pop("x_ora_zone", None)
 
             for x, value in x_res.items():
                 if isinstance(value, dict):
