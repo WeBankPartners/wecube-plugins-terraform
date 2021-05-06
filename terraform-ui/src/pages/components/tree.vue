@@ -31,6 +31,7 @@ export default {
           children: []
         }
       ],
+      currentKey: '',
       childrenT: [],
       finalJson: {},
       jsonJ: {
@@ -67,36 +68,36 @@ export default {
         const res = target({ children: this.data5[0].children }, data.nodeKey)
         data.path = data.path.replace('undefined.', '')
         let attrs = data.path.split('#DME#')
-        let xx = attrs.slice(0, attrs.length - 1)
-        let ss
-        if (xx.length === 0) {
-          ss = this.jsonJ
+        let attr = attrs.slice(0, attrs.length - 1)
+        let copyData
+        if (attr.length === 0) {
+          copyData = this.jsonJ
         } else {
-          ss = this.renderValue(this.jsonJ, xx)
+          copyData = this.renderValue(this.jsonJ, attr)
         }
         if (tag === 'key') {
-          if (xx.length === 0) {
+          if (attr.length === 0) {
             this.jsonJ[v] = this.jsonJ[res.key]
             delete this.jsonJ[res.key]
           } else {
-            ss[v] = ss[res.key]
-            delete ss[res.key]
+            copyData[v] = copyData[res.key]
+            delete copyData[res.key]
           }
         } else {
-          if (xx.length === 0) {
+          if (attr.length === 0) {
             this.jsonJ[res.key] = v
           } else {
-            ss[res.key] = v
+            copyData[res.key] = v
           }
         }
 
         if (tag === 'key') {
-          if (xx.length === 0) {
-            xx.push(v)
-            data.path = xx.join('#DME#')
+          if (attr.length === 0) {
+            attr.push(v)
+            data.path = attr.join('#DME#')
           } else {
-            xx.push(v)
-            data.path = xx.join('#DME#')
+            attr.push(v)
+            data.path = attr.join('#DME#')
           }
           res[tag] = res['title'] = v
         } else {
@@ -115,7 +116,9 @@ export default {
           return target(tmp, nodeKey)
         }
       }
-
+      let formatData = tmp => {
+        return this.isJson(tmp.value) ? '' : tmp.value
+      }
       if (data.children.length !== 0) {
         return (
           <span style="display: 'inline-block';width: '100%'">
@@ -140,7 +143,8 @@ export default {
               Key:<Input value={data.title} style="width:100px" onInput={v => formateNodeData(v, 'key')}></Input>
             </span>
             <span style="padding: 0 4px">
-              Value:<Input value={data.value} style="width:100px" onInput={v => formateNodeData(v, 'value')}></Input>
+              Value:
+              <Input value={formatData(data)} style="width:100px" onInput={v => formateNodeData(v, 'value')}></Input>
             </span>
             <span style="display: inline-block;float: right;margin-right: 32px">
               <Button onClick={() => this.append(data)} type="default" size="small" icon="ios-add"></Button>
@@ -185,29 +189,29 @@ export default {
       this.$set(data, 'children', children)
       if (data.path) {
         let attrs = data.path.split('#DME#')
-        let xx
+        let attr
         if (attrs.length !== 1) {
-          xx = attrs.slice(0, attrs.length - 1)
-          let ss = this.renderValue(this.jsonJ, xx)
-          if (this.isJson(ss[data.key])) {
-            ss[data.key] = {
-              ...ss[data.key],
+          attr = attrs.slice(0, attrs.length - 1)
+          let copyData = this.renderValue(this.jsonJ, attr)
+          if (this.isJson(copyData[data.key])) {
+            copyData[data.key] = {
+              ...copyData[data.key],
               [tag]: ''
             }
           } else {
-            ss[data.key] = {
+            copyData[data.key] = {
               [tag]: ''
             }
           }
         } else {
-          let ss = this.renderValue(this.jsonJ, xx)
-          if (this.isJson(ss[data.key])) {
-            ss[data.key] = {
-              ...ss[data.key],
+          let copyData = this.renderValue(this.jsonJ, attr)
+          if (this.isJson(copyData[data.key])) {
+            copyData[data.key] = {
+              ...copyData[data.key],
               [tag]: ''
             }
           } else {
-            ss[data.key] = {
+            copyData[data.key] = {
               [tag]: ''
             }
           }
@@ -218,21 +222,22 @@ export default {
       }
     },
     remove (root, node, data) {
+      this.currentKey = data.key
       const parentKey = root.find(el => el === node).parent
       const parent = root.find(el => el.nodeKey === parentKey).node
       const index = parent.children.indexOf(data)
       parent.children.splice(index, 1)
       let attrs = data.path.split('#DME#')
 
-      let xx = attrs.slice(0, attrs.length - 1)
-      let ss = this.renderValue(this.jsonJ, xx)
-      if (Object.keys(ss).length === 1) {
-        let xx2 = attrs.slice(0, attrs.length - 2)
-        let ss2 = this.renderValue(this.jsonJ, xx2)
-        const key = xx.slice(-1)[0]
-        ss2[key] = ''
+      let attr = attrs.slice(0, attrs.length - 1)
+      let copyData = this.renderValue(this.jsonJ, attr)
+      if (Object.keys(copyData).length === 1) {
+        let attr2 = attrs.slice(0, attrs.length - 2)
+        let copyData2 = this.renderValue(this.jsonJ, attr2)
+        const key = attr.slice(-1)[0]
+        copyData2[key] = ''
       } else {
-        delete ss[data.key]
+        delete copyData[data.key]
       }
     },
     initJSON (val) {
@@ -248,7 +253,6 @@ export default {
       )
     },
     formatTreeData (tmp, parentNode) {
-      console.log(123)
       const keys = Object.keys(tmp)
       let childrenTmp = []
       keys.forEach(key => {
