@@ -1090,7 +1090,7 @@
 			</interface>
 		</plugin>
 		<plugin name="network_interface_attach">
-			<interface action="apply" path="/terraform/v1/vm/backend/network_interface/attach" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/vm/backend/network_interface/apply" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -1109,7 +1109,7 @@
 					<parameter datatype="string">resource_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/vm/backend/network_interface/detach" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/vm/backend/network_interface/destroy" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -1217,7 +1217,7 @@
 					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="attach_server" path="/terraform/v1/loadbalance/backend/lb/attach" httpMethod='POST'>
+			<interface action="attach_server" path="/terraform/v1/loadbalance/backend/lb/apply" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
@@ -1240,7 +1240,7 @@
 					<parameter datatype="string">resource_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="dettach_all" path="/terraform/v1/loadbalance/backend/lb/detach" httpMethod='POST'>
+			<interface action="dettach_all" path="/terraform/v1/loadbalance/backend/lb/destroy" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -1250,7 +1250,7 @@
 					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="dettach_instance" path="/terraform/v1/loadbalance/backend/lb/detach/instance" httpMethod='POST'>
+			<interface action="dettach_instance" path="/terraform/v1/loadbalance/backend/lb/destroy/instance" httpMethod='POST'>
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">instance_id</parameter>

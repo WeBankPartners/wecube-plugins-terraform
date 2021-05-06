@@ -16,6 +16,7 @@ from apps.api.configer.provider import ProviderApi
 from apps.background.resource.configr.history import HistoryObject
 from apps.background.resource.configr.resource import ResourceObject
 from apps.background.resource.configr.value_config import ValueConfigObject
+from apps.background.resource.vm.instance_type import InstanceTypeObject
 from apps.background.resource.resource_base import CrsObject
 from apps.api.conductor.region import RegionConductor
 from apps.api.conductor.provider import ProviderConductor
@@ -550,7 +551,7 @@ class ApiBackendBase(TerraformResource):
 
     def read_query_result_controller(self, provider, result, data_source_argument):
         # if not data_source_argument:
-            # raise ValueError("data_source_argument not config")
+        # raise ValueError("data_source_argument not config")
         data_source_argument = data_source_argument or ''
 
         logger.info(format_json_dumps(result))
@@ -654,7 +655,17 @@ class ApiBackendBase(TerraformResource):
                                                         data=out_data)
 
             x_json = self.reverse_asset_object(provider=provider_object["name"], data=x_json)
-            result_list.append(x_json)
+
+            if x_json.get("instance_type"):
+                instance_type, resource_info = InstanceTypeObject().convert_asset(provider=provider_object["name"],
+                                                                                  asset_name=x_json.get(
+                                                                                      "instance_type"))
+                x_json["instance_type"] = instance_type
+                resource_info.update(x_json)
+                result_list.append(resource_info)
+
+            else:
+                result_list.append(x_json)
 
         return result_list
 

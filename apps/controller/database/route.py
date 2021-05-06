@@ -14,7 +14,7 @@ from kv_controller import memcached_conrtoller
 urlpatterns = [
     url(r'^mysql$', mysql_instance.MysqlController()),
     url(r'^mysql/(?P<rid>[\w-]+)$', mysql_instance.MysqlIdController()),
-    url(r'^backend/mysql/create$', mysql_instance.MysqlAddController()),
+    url(r'^backend/mysql/apply$', mysql_instance.MysqlAddController()),
     url(r'^backend/mysql/destroy$', mysql_instance.MysqlDeleteController()),
     url(r'^backend/mysql/source$', mysql_instance.MysqlSourceController()),
     url(r'^backend/mysql/security_group/source$', mysql_instance.MysqlSGSourceController()),

@@ -42,7 +42,14 @@ class ValueResetConductor(object):
             if resource_values_config.get(key):
                 _values_configs = resource_values_config.get(key)
                 # value = convert_value(value, _values_configs.get(value))
-                value = ReverseProperty.format_value(value, _values_configs.get(value))
+                x_value = ReverseProperty.format_value(value, _values_configs.get(value))
+
+                if x_value != value:
+                    value = x_value
+                else:
+                    for m_key, m_value in _values_configs.items():
+                        if m_value == value:
+                            value = m_key
             else:
                 logger.debug("key: %s value config is null, skip..." % key)
 

@@ -14,8 +14,8 @@ urlpatterns = [
 
     url(r'^disk_attach$', disk_attach_controller.DiskAttachController()),
     url(r'^disk_attach/(?P<rid>[\w-]+)$', disk_attach_controller.DiskAttachIdController()),
-    url(r'^backend/disk/attach$', disk_attach_controller.DiskAttachAddController()),
-    url(r'^backend/disk/detach$', disk_attach_controller.DiskDetachController()),
+    url(r'^backend/disk/apply', disk_attach_controller.DiskAttachAddController()),
+    url(r'^backend/disk/destroy', disk_attach_controller.DiskDetachController()),
 
     url(r'^object_storage$', object_storage_controller.ObjectStorageController()),
     url(r'^object_storage/(?P<rid>[\w-]+)$', object_storage_controller.ObjectStorageIdController()),

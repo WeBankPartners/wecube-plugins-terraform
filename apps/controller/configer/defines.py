@@ -452,7 +452,7 @@ xml_register = {
     },
     "network_interface_attach": {
         "apply": {
-            "path": "/terraform/v1/vm/backend/network_interface/attach",
+            "path": "/terraform/v1/vm/backend/network_interface/apply",
             "method": "POST",
             "notnull": ['name', 'provider', 'network_interface_id', 'instance_id', 'zone', 'region'],
             "inputParameters": ['id', 'name', 'secret', 'provider', 'network_interface_id', 'instance_id', 'zone',
@@ -460,7 +460,7 @@ xml_register = {
             "outputParameters": ['errorMessage', 'errorCode', 'id', 'resource_id']
         },
         "destroy": {
-            "path": "/terraform/v1/vm/backend/network_interface/detach",
+            "path": "/terraform/v1/vm/backend/network_interface/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
