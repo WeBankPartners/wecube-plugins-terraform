@@ -66,7 +66,7 @@ export default {
       let formateNodeData = (v, tag) => {
         const res = target({ children: this.data5[0].children }, data.nodeKey)
         data.path = data.path.replace('undefined.', '')
-        let attrs = data.path.split('.')
+        let attrs = data.path.split('#DME#')
         let xx = attrs.slice(0, attrs.length - 1)
         let ss
         if (xx.length === 0) {
@@ -93,10 +93,10 @@ export default {
         if (tag === 'key') {
           if (xx.length === 0) {
             xx.push(v)
-            data.path = xx.join('.')
+            data.path = xx.join('#DME#')
           } else {
             xx.push(v)
-            data.path = xx.join('.')
+            data.path = xx.join('#DME#')
           }
           res[tag] = res['title'] = v
         } else {
@@ -177,14 +177,14 @@ export default {
         expand: true,
         children: [],
         value: '',
-        path: data.path ? data.path + '.' + tag : tag
+        path: data.path ? data.path + '#DME#' + tag : tag
       })
       data.value = {
         [tag]: ''
       }
       this.$set(data, 'children', children)
       if (data.path) {
-        let attrs = data.path.split('.')
+        let attrs = data.path.split('#DME#')
         let xx
         if (attrs.length !== 1) {
           xx = attrs.slice(0, attrs.length - 1)
@@ -222,7 +222,7 @@ export default {
       const parent = root.find(el => el.nodeKey === parentKey).node
       const index = parent.children.indexOf(data)
       parent.children.splice(index, 1)
-      let attrs = data.path.split('.')
+      let attrs = data.path.split('#DME#')
 
       let xx = attrs.slice(0, attrs.length - 1)
       let ss = this.renderValue(this.jsonJ, xx)
@@ -248,6 +248,7 @@ export default {
       )
     },
     formatTreeData (tmp, parentNode) {
+      console.log(123)
       const keys = Object.keys(tmp)
       let childrenTmp = []
       keys.forEach(key => {
@@ -256,7 +257,7 @@ export default {
           expand: true,
           key: key,
           value: tmp[key],
-          path: JSON.stringify(parentNode) === '{}' ? key : parentNode.path + '.' + key
+          path: JSON.stringify(parentNode) === '{}' ? key : parentNode.path + '#DME#' + key
         }
         if (this.isJson(tmp[key])) {
           params.children = this.formatTreeData(tmp[key], params)
