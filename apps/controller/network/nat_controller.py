@@ -43,6 +43,7 @@ class ResBase(object):
         vpc_id = data.pop("vpc_id", None)
         subnet_id = data.pop("subnet_id", None)
         eip = data.pop("eip", None)
+        # eip = validation.validate_list("eip", data.pop("eip", None))
 
         asset_id = data.pop("asset_id", None)
         resource_id = data.pop("resource_id", None)

@@ -135,6 +135,15 @@ def validate_collector(data, strings=None, dicts=None, lists=None, ints=None, po
 def validate_list(key, value, minlen=None, maxlen=None):
     if not value:
         return []
+    if isinstance(value, basestring):
+        value = value.strip()
+        if value.startswith("[") and value.endswith("]"):
+            try:
+                value = json.loads(value)
+            except:
+                value = eval(value)
+        elif "," in value and "[" not in value:
+            value = value.split(",")
     if not isinstance(value, list):
         raise ValueError("%s 不是合法类型list" % key)
     if minlen and len(value) < minlen:

@@ -328,7 +328,8 @@ class ApiBackendBase(TerraformResource):
                 # if workpath:
                 #     self.rollback_workspace(workpath)
                 logger.info(traceback.format_exc())
-                logger.info("resource import failed. continue ... ")
+                # logger.info("resource import failed. continue ... ")
+                raise e
 
         logger.info("state file not recovery, continue apply resource ... ")
         return True

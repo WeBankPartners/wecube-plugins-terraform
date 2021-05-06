@@ -62,7 +62,10 @@ def validate_type(value, type):
         try:
             if isinstance(value, basestring):
                 if value.startswith("["):
-                    value = json.loads(value)
+                    try:
+                        value = json.loads(value)
+                    except:
+                        value = eval(value)
                 elif "," in value:
                     value = value.split(",")
                 elif ";" in value:
