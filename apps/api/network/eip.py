@@ -46,7 +46,7 @@ class EipApi(Common, ApiBase):
         self.resource_keys_config = None
 
 
-class EipBackendApi(Common, ApiBase):
+class EipBackendApi(Common, ApiBackendBase):
     def __init__(self):
         super(EipBackendApi, self).__init__()
         self.resource_name = "eip"
