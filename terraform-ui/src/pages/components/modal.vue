@@ -437,7 +437,7 @@ export default {
 }
 .model-input {
   min-width: 70%;
-  font-size: 12px;
+  font-size: 14px;
   display: inline-block;
 }
 /*取消选中样式*/
