@@ -39,6 +39,7 @@ class ConfigController(BackendController):
                 data.pop(key, None)
 
         return self.resource.list(filters=data, page=page,
+                                  filter_string=filter_string,
                                   pagesize=pagesize, orderby=orderby)
 
     def before_handler(self, request, data, **kwargs):

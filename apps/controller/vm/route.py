@@ -29,7 +29,7 @@ urlpatterns = [
 
     url(r'^network_interface_attach$', eni_attach_controller.EniAttachController()),
     url(r'^network_interface_attach/(?P<rid>[\w-]+)$', eni_attach_controller.EniAttachIdController()),
-    url(r'^backend/network_interface/attach$', eni_attach_controller.EniAttachAddController()),
-    url(r'^backend/network_interface/detach$', eni_attach_controller.EniDetachController()),
+    url(r'^backend/network_interface/apply$', eni_attach_controller.EniAttachAddController()),
+    url(r'^backend/network_interface/destroy$', eni_attach_controller.EniDetachController()),
 
 ]
