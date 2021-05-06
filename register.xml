@@ -539,6 +539,7 @@
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">bandwidth</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
@@ -580,6 +581,7 @@
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">name</parameter>
                     <parameter datatype="string">vpc_id</parameter>
+                    <parameter datatype="string">bandwidth</parameter>
                     <parameter datatype="string">eip</parameter>
                     <parameter datatype="string">ipaddress</parameter>
 				</outputParameters>

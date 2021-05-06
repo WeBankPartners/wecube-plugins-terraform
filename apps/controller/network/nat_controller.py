@@ -47,11 +47,14 @@ class ResBase(object):
 
         asset_id = data.pop("asset_id", None)
         resource_id = data.pop("resource_id", None)
+        bandwidth = data.pop("bandwidth", None)
 
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
         data.update(extend_info)
 
-        create_data = {"name": name, "vpc_id": vpc_id, "subnet_id": subnet_id, "eip": eip}
+        create_data = {"name": name, "vpc_id": vpc_id,
+                       "subnet_id": subnet_id, "eip": eip,
+                       "bandwidth": bandwidth}
         _, result = resource.create(rid=rid, provider=provider,
                                     region=region, zone=zone,
                                     secret=secret,

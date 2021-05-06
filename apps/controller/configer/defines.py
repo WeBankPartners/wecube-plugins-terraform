@@ -226,7 +226,7 @@ xml_register = {
             "method": "POST",
             "notnull": ['name', 'provider', 'vpc_id', 'region'],
             "inputParameters": ['id', 'name', 'secret', 'provider', 'vpc_id', 'subnet_id', 'eip', 'zone', 'region',
-                                'asset_id', 'resource_id', 'extend_info'],
+                                'asset_id', 'resource_id', 'extend_info', 'bandwidth'],
             "outputParameters": ['errorMessage', 'errorCode', 'ipaddress', 'id', 'resource_id']
         },
         "destroy": {
@@ -242,7 +242,7 @@ xml_register = {
             "notnull": ["region", "provider"],
             "inputParameters": ['region', 'secret', 'provider', 'resource_id', 'name', 'type', 'tag', 'vpc_id'],
             "outputParameters": ['region', 'secret', 'provider', 'resource_id', 'errorMessage', 'errorCode', 'name',
-                                 'vpc_id', 'eip', 'ipaddress']
+                                 'vpc_id', 'eip', 'ipaddress', 'bandwidth']
         }
     },
     "eip": {
