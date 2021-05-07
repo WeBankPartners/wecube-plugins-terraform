@@ -52,7 +52,8 @@ class Common(object):
                          "subnet_id": create_data.get("subnet_id")}
 
         create_data = {"eip": create_data.get("eip"),
-                       "name": create_data.get("name")}
+                       "name": create_data.get("name"),
+                       "bandwidth": create_data.get("bandwidth")}
 
         return create_data, r_create_data
 
