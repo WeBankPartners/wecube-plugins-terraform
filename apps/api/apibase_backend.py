@@ -44,6 +44,30 @@ def fetech_property(instance_define, define_columns):
     return res
 
 
+def fetch_columns(datas, columns):
+    if len(columns) == 0:
+        c_data = []
+        for data in datas:
+            if isinstance(data, list):
+                c_data += data
+            else:
+                c_data.append(data)
+        return c_data
+    column = columns.pop(0)
+    if isinstance(datas, list):
+        x_data = []
+        for data in datas:
+            x_data.append(data.get(column))
+        datas = x_data
+        return fetch_columns(datas, columns)
+    elif isinstance(datas, dict):
+        datas = datas.get(column)
+        return fetch_columns(datas, columns)
+    else:
+        logger.info("data is not dict/list, no columns %s filter, skip.." % column)
+        return datas
+
+
 class ApiBackendBase(TerraformResource):
     def __init__(self):
         super(ApiBackendBase, self).__init__()
@@ -557,17 +581,19 @@ class ApiBackendBase(TerraformResource):
 
         logger.info(format_json_dumps(result))
         try:
+            instance_define = []
             _data = result.get("resources")[0]
             _instances = _data.get("instances")[0]
             _attributes = _instances.get("attributes")
 
             outlines = data_source_argument.split(".")
-            for outline in outlines:
-                if outline:
-                    _attributes = _attributes.get(outline)
-
-            instance_list = _attributes
-            instance_define = instance_list
+            # for outline in outlines:
+            #     if outline:
+            #         _attributes = _attributes.get(outline)
+            #
+            # instance_list = _attributes
+            # instance_define = instance_list
+            instance_define = fetch_columns(datas=_attributes, columns=outlines)
         except:
             logger.info(traceback.format_exc())
             raise ValueError("query remote source failed, result read faild")
