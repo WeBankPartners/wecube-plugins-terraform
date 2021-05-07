@@ -838,6 +838,7 @@
                     <parameter datatype="string" mappingType="entity" required="N">instance_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">type</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">tag</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 				</inputParameters>
 				<outputParameters>
                     <parameter datatype="string">region</parameter>

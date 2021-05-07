@@ -365,7 +365,8 @@ xml_register = {
             "path": "/terraform/v1/storage/backend/disk/source",
             "method": "POST",
             "notnull": ["region", "provider"],
-            "inputParameters": ['region', 'secret', 'provider', 'resource_id', 'name', 'instance_id', 'type', 'tag'],
+            "inputParameters": ['region', 'secret', 'provider', 'resource_id',
+                                'name', 'instance_id', 'type', 'tag', 'zone'],
             "outputParameters": ['region', 'secret', 'provider', 'resource_id', 'errorMessage', 'errorCode', 'name',
                                  'type', 'size', 'zone', "charge_type"]
         }

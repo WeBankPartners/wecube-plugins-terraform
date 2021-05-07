@@ -560,7 +560,8 @@ data_source_models = {
         "name",
         "instance_id",
         "type",
-        "tag"
+        "tag",
+        "zone"
     ],
     "disk_attach": [
         "resource_id",
