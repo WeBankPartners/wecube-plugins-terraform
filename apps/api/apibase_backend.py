@@ -682,6 +682,7 @@ class ApiBackendBase(TerraformResource):
                                                         data=out_data)
 
             x_json = self.reverse_asset_object(provider=provider_object["name"], data=x_json)
+            x_json.update(query_data)
 
             if x_json.get("instance_type"):
                 instance_type, resource_info = InstanceTypeObject().convert_asset(provider=provider_object["name"],
