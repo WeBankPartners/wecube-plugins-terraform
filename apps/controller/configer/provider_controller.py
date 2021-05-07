@@ -66,7 +66,7 @@ class ProviderController(BackendController):
         name = data.get("name")
         extend_info = validation.validate_dict("extend_info", data.get("extend_info")) or {}
         provider_property = validation.validate_dict("provider_property", data.get("provider_property")) or {}
-        validate_convert_key(provider_property)
+        provider_property = validate_convert_key(provider_property)
         validate_convert_value(extend_info)
         property_necessary(resource_name="provider",
                            resource_property=provider_property)
@@ -115,7 +115,7 @@ class ProviderIdController(BackendIdController):
 
         if data.get("provider_property") is not None:
             provider_property = validation.validate_dict("provider_property", data.get("provider_property")) or {}
-            validate_convert_key(provider_property)
+            provider_property = validate_convert_key(provider_property)
             property_necessary(resource_name="provider",
                                resource_property=provider_property)
             data["provider_property"] = json.dumps(provider_property)

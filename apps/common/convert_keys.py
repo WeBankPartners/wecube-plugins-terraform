@@ -8,6 +8,7 @@ from lib.json_helper import format_json_dumps
 
 
 def validate_convert_key(defines):
+    x_res = {}
     for key, define in defines.items():
         if (not isinstance(define, (basestring, dict))) or isinstance(define, list):
             raise ValueError("错误的定义 合法值为 string "
@@ -18,8 +19,14 @@ def validate_convert_key(defines):
         if isinstance(define, dict):
             if define.get("type", "string") not in ["string", "json", "int", "float", "list", "bool"]:
                 raise ValueError("未知的类型约束 %s" % define.get("type"))
-            if define.get("allow_null", 1) not in [0, 1]:
+            if define.get("allow_null", 1) not in [0, 1, '0', '1']:
                 raise ValueError("allow_null 合法值为 0/1")
+            else:
+                define["allow_null"] = int(define.get("allow_null", 1))
+
+        x_res[key] = define
+
+    return x_res
 
 
 def validate_convert_value(defines):
