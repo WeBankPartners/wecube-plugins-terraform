@@ -232,10 +232,15 @@ export default {
       let attr = attrs.slice(0, attrs.length - 1)
       let copyData = this.renderValue(this.jsonJ, attr)
       if (Object.keys(copyData).length === 1) {
-        let attr2 = attrs.slice(0, attrs.length - 2)
-        let copyData2 = this.renderValue(this.jsonJ, attr2)
-        const key = attr.slice(-1)[0]
-        copyData2[key] = ''
+        // 只剩一个母节点情况
+        if (attrs.length === 1) {
+          this.jsonJ = {}
+        } else {
+          let attr2 = attrs.slice(0, attrs.length - 2)
+          let copyData2 = this.renderValue(this.jsonJ, attr2)
+          const key = attr.slice(-1)[0]
+          copyData2[key] = ''
+        }
       } else {
         delete copyData[data.key]
       }
