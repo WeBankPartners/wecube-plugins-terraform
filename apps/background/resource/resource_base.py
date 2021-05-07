@@ -184,6 +184,12 @@ class CrsObject(object):
             raise local_exceptions.ValueValidateError(self.resource_name, "资源 %s 不存在" % rid)
         return data["resource_id"]
 
+    def object_resource_assetid(self, rid):
+        data = self.show(rid)
+        if not data:
+            return rid
+        return data["resource_id"]
+
     def object_asset_id(self, rid):
         data = self.show(rid)
         if data:
