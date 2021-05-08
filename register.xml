@@ -539,6 +539,7 @@
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">bandwidth</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
@@ -580,6 +581,7 @@
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">name</parameter>
                     <parameter datatype="string">vpc_id</parameter>
+                    <parameter datatype="string">bandwidth</parameter>
                     <parameter datatype="string">eip</parameter>
                     <parameter datatype="string">ipaddress</parameter>
 				</outputParameters>
@@ -836,6 +838,7 @@
                     <parameter datatype="string" mappingType="entity" required="N">instance_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">type</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">tag</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 				</inputParameters>
 				<outputParameters>
                     <parameter datatype="string">region</parameter>
@@ -1180,85 +1183,6 @@
                     <parameter datatype="string">subnet_id</parameter>
                     <parameter datatype="string">ipaddress</parameter>
                     <parameter datatype="string">charge_type</parameter>
-				</outputParameters>
-			</interface>
-			<interface action="create_listener" path="/terraform/v1/loadbalance/backend/lb_listener/apply" httpMethod='POST'>
-				<inputParameters>
-					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
-					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
-					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">lb_id</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">port</parameter>
-					<parameter datatype="string" mappingType="entity" required="N">protocol</parameter>
-					<parameter datatype="string" mappingType="entity" required="N">backend_port</parameter>
-					<parameter datatype="string" mappingType="entity" required="N">health_check</parameter>
-					<parameter datatype="string" mappingType="entity" required="N">health_check_uri</parameter>
-					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
-					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
-				</inputParameters>
-				<outputParameters>
-					<parameter datatype="string">errorMessage</parameter>
-					<parameter datatype="string">errorCode</parameter>
-					<parameter datatype="string">id</parameter>
-					<parameter datatype="string">resource_id</parameter>
-				</outputParameters>
-			</interface>
-			<interface action="delete_listener" path="/terraform/v1/loadbalance/backend/lb_listener/destroy" httpMethod='POST'>
-				<inputParameters>
-					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
-				</inputParameters>
-				<outputParameters>
-					<parameter datatype="string">result</parameter>
-					<parameter datatype="string">errorMessage</parameter>
-					<parameter datatype="string">errorCode</parameter>
-				</outputParameters>
-			</interface>
-			<interface action="attach_server" path="/terraform/v1/loadbalance/backend/lb/apply" httpMethod='POST'>
-				<inputParameters>
-					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
-					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
-					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">lb_id</parameter>
-					<parameter datatype="string" mappingType="entity" required="N">listener_id</parameter>
-					<parameter datatype="string" mappingType="entity" required="N">backend_servers</parameter>
-					<parameter datatype="string" mappingType="entity" required="N">instance_id</parameter>
-					<parameter datatype="string" mappingType="entity" required="N">weight</parameter>
-					<parameter datatype="string" mappingType="entity" required="N">port</parameter>
-					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
-					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
-				</inputParameters>
-				<outputParameters>
-					<parameter datatype="string">errorMessage</parameter>
-					<parameter datatype="string">errorCode</parameter>
-					<parameter datatype="string">id</parameter>
-					<parameter datatype="string">resource_id</parameter>
-				</outputParameters>
-			</interface>
-			<interface action="dettach_all" path="/terraform/v1/loadbalance/backend/lb/destroy" httpMethod='POST'>
-				<inputParameters>
-					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
-				</inputParameters>
-				<outputParameters>
-					<parameter datatype="string">result</parameter>
-					<parameter datatype="string">errorMessage</parameter>
-					<parameter datatype="string">errorCode</parameter>
-				</outputParameters>
-			</interface>
-			<interface action="dettach_instance" path="/terraform/v1/loadbalance/backend/lb/destroy/instance" httpMethod='POST'>
-				<inputParameters>
-					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">instance_id</parameter>
-				</inputParameters>
-				<outputParameters>
-					<parameter datatype="string">result</parameter>
-					<parameter datatype="string">errorMessage</parameter>
-					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
 		</plugin>

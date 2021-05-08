@@ -87,10 +87,10 @@ class ResourceController(BackendController):
         #     if not isinstance(value, basestring):
         #         raise ValueError("data_source_output 为key-value定义")
 
-        validate_convert_key(resource_property)
+        resource_property = validate_convert_key(resource_property)
         validate_convert_value(extend_info)
         validate_convert_value(resource_output)
-        validate_convert_key(data_source_output)
+        data_source_output = validate_convert_key(data_source_output)
         property_necessary(resource_name=data["resource_name"],
                            resource_property=resource_property)
 
@@ -158,7 +158,7 @@ class ResourceIdController(BackendIdController):
 
         if data.get("resource_property") is not None:
             resource_property = validation.validate_dict("resource_property", data.get("resource_property")) or {}
-            validate_convert_key(resource_property)
+            resource_property = validate_convert_key(resource_property)
             property_necessary(resource_name=data["resource_name"],
                                resource_property=resource_property)
 
@@ -181,6 +181,7 @@ class ResourceIdController(BackendIdController):
 
         if data.get("data_source_output") is not None:
             data_source_output = validation.validate_dict("data_source_output", data.get("data_source_output"))
+            data_source_output = validate_convert_key(data_source_output)
 
             property_necessary(resource_name=data["resource_name"],
                                resource_property=data_source_output)

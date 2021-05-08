@@ -46,7 +46,8 @@ resouce_property_models = {
         "name",
         "vpc_id",
         "subnet_id",
-        "eip"
+        "eip",
+        "bandwidth"
     ],
     "peer_connection": [
         "name",
@@ -516,7 +517,8 @@ data_source_models = {
         "name",
         "type",
         "tag",
-        "vpc_id"
+        "vpc_id",
+        "bandwidth"
     ],
     "peer_connection": [
         "resource_id",
@@ -558,7 +560,8 @@ data_source_models = {
         "name",
         "instance_id",
         "type",
-        "tag"
+        "tag",
+        "zone"
     ],
     "disk_attach": [
         "resource_id",
