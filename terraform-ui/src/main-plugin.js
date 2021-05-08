@@ -41,6 +41,10 @@ const implicitRoute = {
   'terraformIndex/secret': {
     parentBreadcrumb: { 'zh-CN': 'Terraform配置', 'en-US': 'Terraform Config' },
     childBreadcrumb: { 'zh-CN': '云认证', 'en-US': 'secret' }
+  },
+  'terraformIndex/instanceType': {
+    parentBreadcrumb: { 'zh-CN': 'Terraform配置', 'en-US': 'Terraform Config' },
+    childBreadcrumb: { 'zh-CN': '实例规格', 'en-US': 'Instance Type' }
   }
 }
 window.addImplicitRoute(implicitRoute)
