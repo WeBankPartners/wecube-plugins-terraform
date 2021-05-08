@@ -7,6 +7,10 @@ from core.controller import BackendController
 from core.controller import BackendIdController
 from core.controller import BaseController
 from lib.uuid_util import get_uuid
+from lib.logs import logger
+from core.response_hooks import format_string
+from apps.controller.configer.model_args import source_columns_outputs
+from apps.api.configer.region import ZoneApi
 from apps.api.network.route_entry import RouteEntryApi
 from apps.api.network.route_entry import RouteEntryBackendApi
 from apps.controller.source_controller import BaseSourceController
@@ -167,3 +171,58 @@ class RTRuleSourceController(BaseSourceController):
     allow_methods = ("POST",)
     resource = RouteEntryBackendApi()
 
+    def one_query(self, rid, provider, region, zone, secret,
+                  resource_id, ignore_ids, **kwargs):
+        '''
+
+        :param rid:
+        :param provider:
+        :param region:
+        :param zone:
+        :param secret:
+        :param resource_id:
+        :param ignore_ids:
+        :param kwargs:
+        :return:
+        '''
+
+        result = self.fetch_source(rid=rid, provider=provider, region=region, zone=zone,
+                                   secret=secret, resource_id=resource_id,
+                                   **kwargs)
+        result_data = []
+
+        register_zones = ZoneApi().region_zones(region, provider)
+
+        for x_result in result:
+            x_res = source_columns_outputs(self.resource.resource_name)
+            x_res.update(x_result)
+
+            route_table_id = kwargs.get("route_table_id")
+            if not x_res.get("route_table_id") and route_table_id:
+                x_res["route_table_id"] = route_table_id
+
+            res = {"region": region, "secret": secret, "provider": provider}
+
+            if x_res.get("resource_id") in ignore_ids:
+                continue
+
+            if x_res.get("zone") and (x_res.get("zone") not in register_zones):
+                logger.info("resource: %s ,zone: %s searched not in register zone, skip it" % (
+                    x_res.get("resource_id"), x_res.get("zone")))
+                if x_res.get("x_ora_zone") and (x_res.get("x_ora_zone") not in register_zones):
+                    continue
+
+            x_res.pop("x_ora_zone", None)
+
+            for x, value in x_res.items():
+                if isinstance(value, dict):
+                    res[x] = format_string(value)
+                else:
+                    if value is None:
+                        res[x] = ''
+                    else:
+                        res[x] = str(value)
+
+            result_data.append(res)
+
+        return result_data
