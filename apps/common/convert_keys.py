@@ -40,6 +40,20 @@ def validate_convert_value(defines):
                 raise ValueError("未知的类型约束 %s" % define.get("type"))
 
 
+def format_is_json(data):
+    if isinstance(data, dict):
+        return data
+    elif isinstance(data, basestring):
+        try:
+            data = json.loads(data)
+        except:
+            if data.startswith("{"):
+                data = eval(data)
+            else:
+                raise ValueError("data: %s is not json " % (data))
+        return data
+
+
 def validate_type(value, type):
     '''
 
@@ -103,7 +117,7 @@ def validate_type(value, type):
     return value
 
 
-def convert_key(key, value, define):
+def convert_key(key, value, define, extend=False):
     '''
 
     :param key:
@@ -123,7 +137,10 @@ def convert_key(key, value, define):
         key = define or key
     else:
         if (value is None) and (not define.get("allow_null", 1)):
-            raise ValueError("key %s 不允许为空" % key)
+            if extend:
+                value = None
+            else:
+                raise ValueError("key %s 不允许为空" % key)
         if value is None:
             value = define.get("default") or value
         else:
@@ -192,6 +209,52 @@ def convert_keys(datas, defines, is_update=False, is_extend=False):
         _t = convert_key(key, datas.get(key), define=define)
         if _t:
             result.update(_t)
+
+    return result
+
+
+def ext_convert_keys(datas, defines, is_update=False, is_extend=False):
+    '''
+
+    :param datas:
+    :param defines:
+    :return:
+    '''
+
+    result = {}
+
+    if is_extend:
+        if not defines:
+            return result
+
+        for key, define in defines.items():
+            if isinstance(define, dict) and define.get("define"):
+                if datas.get(key):
+                    value = format_is_json(datas.get(key))
+                else:
+                    value = convert_keys(datas=datas, defines=define.get("define"), is_extend=is_extend)
+                if value:
+                    result[key] = value
+            else:
+                _t = convert_key(key, datas.get(key), define=define, extend=is_extend)
+                if _t:
+                    result.update(_t)
+
+        return result
+
+    for key, define in defines.items():
+        # 依据定义字段转换，只转换defines中的字段，检查必要字段的传入，未定义字段移除
+        if isinstance(define, dict) and define.get("define"):
+            if datas.get(key):
+                value = format_is_json(datas.get(key))
+            else:
+                value = convert_keys(datas=datas, defines=define.get("define"), is_extend=is_extend)
+            if value:
+                result[key] = value
+        else:
+            _t = convert_key(key, datas.get(key), define=define)
+            if _t:
+                result.update(_t)
 
     return result
 

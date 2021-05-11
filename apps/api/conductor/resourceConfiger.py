@@ -9,6 +9,7 @@ from lib.logs import logger
 from lib.json_helper import format_json_dumps
 from apps.common.convert_keys import convert_extend_propertys
 from apps.common.convert_keys import convert_keys
+from apps.common.convert_keys import ext_convert_keys
 from apps.common.convert_keys import convert_value
 from apps.common.convert_keys import output_line
 from apps.common.convert_keys import ConvertMetadata
@@ -51,7 +52,8 @@ class ResourceConfiger(object):
         self.resource_info(provider, resource_name)
 
         resource_property = self.resource_keys_config["resource_property"]
-        resource_columns = convert_keys(resource_data, defines=resource_property)
+        # resource_columns = convert_keys(resource_data, defines=resource_property)
+        resource_columns = ext_convert_keys(resource_data, defines=resource_property)
 
         resource_columns = self.reduce_key(resource_columns)
         return resource_columns, self.resource_keys_config
@@ -106,7 +108,8 @@ class ResourceConfiger(object):
         if not data_source:
             raise ValueError("source资源未定义")
 
-        resource_columns = convert_keys(resource_data, defines=data_source)
+        # resource_columns = convert_keys(resource_data, defines=data_source)
+        resource_columns = ext_convert_keys(resource_data, defines=data_source)
 
         resource_columns = self.reduce_key(resource_columns)
         return resource_columns, self.resource_keys_config
@@ -153,7 +156,6 @@ class ResourceConfiger(object):
 
         columns = origin_columns
         return columns, self.resource_keys_config
-
 
     def conductor_reset_equivalence(self, provider, resource_name):
         '''
@@ -217,11 +219,13 @@ class ResourceConfiger(object):
 
         resource_property_extend = resource_property.pop("extend_info", {}) or {}
 
-        _extend_columns = convert_keys(datas=extend_info, defines=resource_property, is_extend=True)
+        # _extend_columns = convert_keys(datas=extend_info, defines=resource_property, is_extend=True)
+        _extend_columns = ext_convert_keys(datas=extend_info, defines=resource_property, is_extend=True)
         logger.info("property extend info: %s" % (format_json_dumps(_extend_columns)))
         resource_columns.update(_extend_columns)
 
-        _extend_columns = convert_keys(datas=extend_info, defines=resource_property_extend, is_extend=True)
+        # _extend_columns = convert_keys(datas=extend_info, defines=resource_property_extend, is_extend=True)
+        _extend_columns = ext_convert_keys(datas=extend_info, defines=resource_property_extend, is_extend=True)
         logger.info("resource_property extend info: %s" % (format_json_dumps(_extend_columns)))
         resource_columns.update(_extend_columns)
 
@@ -343,7 +347,6 @@ class ResourceConfiger(object):
         # result = self.reduce_key(origin_data)
         # return result, self.resource_keys_config
         return resource_columns, self.resource_keys_config
-
 
 # if __name__ == '__main__':
 #     x = ResourceConfiger().conductor_reset_property('tencentcloud', 'vpc')
