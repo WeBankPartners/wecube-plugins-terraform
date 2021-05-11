@@ -170,3 +170,16 @@ class SGRuleSourceController(BaseSourceController):
     allow_methods = ("POST",)
     resource = SecGroupRuleBackendApi()
 
+    def before_handler(self, request, data, **kwargs):
+        validation.not_allowed_null(data=data,
+                                    keys=["provider", "region", "security_group_id"]
+                                    )
+
+        validation.validate_collector(data=data,
+                                      strings=["id", "resource_id", "provider",
+                                               "secret", "region", "zone",
+                                               "security_group_id"],
+                                      lists=["ignore_ids"])
+
+    def return_relation_keys(self):
+        return ["security_group_id"]

@@ -61,6 +61,9 @@ class BaseSourceController(BaseController):
                                                resource_id=resource_id,
                                                **query_args)
 
+    def return_relation_keys(self):
+        return []
+
     def one_query(self, rid, provider, region, zone, secret,
                   resource_id, ignore_ids, **kwargs):
         '''
@@ -96,6 +99,12 @@ class BaseSourceController(BaseController):
                     x_res.get("resource_id"), x_res.get("zone")))
                 if x_res.get("x_ora_zone") and (x_res.get("x_ora_zone") not in register_zones):
                     continue
+
+            for s_key in self.return_relation_keys():
+                if x_res.get(s_key):
+                    continue
+                else:
+                    x_res[s_key] = kwargs.get(s_key) if kwargs.get(s_key) else ""
 
             x_res.pop("x_ora_zone", None)
 
