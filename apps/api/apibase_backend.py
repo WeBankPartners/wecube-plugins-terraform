@@ -5,6 +5,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import os
 import json
 import time
+# import copy
 import traceback
 from lib.logs import logger
 from lib.uuid_util import get_uuid
@@ -24,7 +25,61 @@ from apps.api.conductor.resource import ResourceConductor
 from apps.api.conductor.valueReverse import ValueResetConductor
 
 
-def fetech_property(instance_define, define_columns):
+def eval_variable(line, column, to_column):
+    def find_num(data):
+        count = 0
+        data = data[len("$line"):]
+        for i in data:
+            try:
+                count += 1
+                int(i)
+                count -= 1
+                break
+            except:
+                continue
+
+        if count == 0 or count == len(data):
+            return None, None
+        else:
+            try:
+                return data[:count], int(data[count:])
+            except:
+                raise ValueError("$line define error, use: [split + num], example: $line#2")
+
+    if column == "$line":
+        return {to_column: line}
+    elif column.startswith("$line"):
+        s_split, point = find_num(column)
+        if s_split:
+            tmp = line.split(s_split)
+            t_value = tmp[point]
+            return {to_column: t_value}
+        else:
+            return {to_column: line}
+    else:
+        logger.info("unknown define %s ,skip ..." % line)
+        return {to_column: ""}
+
+
+def fetch_property(instance_define, define_columns):
+    if isinstance(instance_define, basestring):
+        res = {}
+        for key, value in define_columns.items():
+            if key.startswith("$"):
+                res.update(eval_variable(instance_define, key, value))
+            else:
+                res[value] = ""
+        return res
+
+    x_Origin_line = instance_define.pop("x_Origin_line", None)
+    if x_Origin_line:
+        for key, value in define_columns.items():
+            if key.startswith("$"):
+                instance_define.update(eval_variable(x_Origin_line, key, value))
+            else:
+                instance_define[value] = ""
+        return instance_define
+
     res = {}
     for key, value in define_columns.items():
         if "." in key:
@@ -44,6 +99,30 @@ def fetech_property(instance_define, define_columns):
     return res
 
 
+def skip_null_data(datas):
+    result = []
+    for out_data in datas:
+        if isinstance(out_data, basestring):
+            result.append(out_data)
+            # continue
+        elif isinstance(out_data, list):
+            result.append(out_data)
+        elif isinstance(out_data, dict):
+            count = 0
+            for _, x_value in out_data.items():
+                if not x_value:
+                    count += 1
+            if count == len(out_data):
+                logger.info("out data columns is null, skip ...")
+                continue
+            else:
+                result.append(out_data)
+        else:
+            logger.info("result data type is not string, dict/list, skip....")
+
+    return result
+
+
 def fetch_columns(datas, columns):
     if len(columns) == 0:
         c_data = []
@@ -52,12 +131,15 @@ def fetch_columns(datas, columns):
                 c_data += data
             else:
                 c_data.append(data)
+
+        c_data = skip_null_data(c_data)
         return c_data
     column = columns.pop(0)
     if isinstance(datas, list):
         x_data = []
         for data in datas:
-            x_data.append(data.get(column))
+            if data.get(column):
+                x_data.append(data.get(column))
         datas = x_data
         return fetch_columns(datas, columns)
     elif isinstance(datas, dict):
@@ -66,6 +148,29 @@ def fetch_columns(datas, columns):
     else:
         logger.info("data is not dict/list, no columns %s filter, skip.." % column)
         return datas
+
+
+def format_argument(key, data):
+    if not data:
+        return ""
+    if isinstance(data, dict):
+        return data
+    elif isinstance(data, basestring):
+        data = data.strip()
+        if data.startswith("{"):
+            try:
+                data = json.loads(data)
+            except:
+                try:
+                    data = eval(data)
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.info("key: %s, data: %s may is json, but format error")
+                    raise ValueError("data: %s is not json " % (data))
+
+        return data
+    else:
+        raise ValueError("key: %s 应为json或string" % key)
 
 
 class ApiBackendBase(TerraformResource):
@@ -578,6 +683,7 @@ class ApiBackendBase(TerraformResource):
         # if not data_source_argument:
         # raise ValueError("data_source_argument not config")
         data_source_argument = data_source_argument or ''
+        data_source_argument = format_argument("data_source_argument", data_source_argument)
 
         logger.info(format_json_dumps(result))
         try:
@@ -586,14 +692,39 @@ class ApiBackendBase(TerraformResource):
             _instances = _data.get("instances")[0]
             _attributes = _instances.get("attributes")
 
-            outlines = data_source_argument.split(".")
-            # for outline in outlines:
-            #     if outline:
-            #         _attributes = _attributes.get(outline)
-            #
-            # instance_list = _attributes
-            # instance_define = instance_list
-            instance_define = fetch_columns(datas=_attributes, columns=outlines)
+            if data_source_argument:
+                if isinstance(data_source_argument, basestring):
+                    outlines = data_source_argument.split(".")
+                    instance_define = fetch_columns(datas=_attributes, columns=outlines)
+                elif isinstance(data_source_argument, dict):
+                    # 多个字段提取定义 {"engree": {"property": "type", "attributes": "engress"}}
+                    for s_key, s_value in data_source_argument.items():
+                        if isinstance(s_value, basestring):
+                            outlines = s_value.split(".")
+                            instance_define += fetch_columns(datas=_attributes, columns=outlines)
+                        elif isinstance(s_value, dict):
+                            col_value = s_value.get("attributes", "")
+                            outlines = col_value.split(".")
+                            col_defines = fetch_columns(datas=_attributes, columns=outlines)
+                            if s_value.get("property"):
+                                x_tmp = []
+                                for t_data in col_defines:
+                                    add_columns = {s_value.get("property"): s_key}
+                                    if isinstance(t_data, dict):
+                                        t_data.update(add_columns)
+                                    elif isinstance(t_data, basestring):
+                                        add_columns["x_Origin_line"] = t_data
+                                        t_data = add_columns
+                                    x_tmp.append(t_data)
+
+                                col_defines = x_tmp
+                            instance_define += col_defines
+                        else:
+                            raise ValueError("data source argument 配置异常应为 string或json：key-value "
+                                             "或 key - {'property': 'xxx', 'attributes': ''}")
+            else:
+                outlines = []
+                instance_define = fetch_columns(datas=_attributes, columns=outlines)
         except:
             logger.info(traceback.format_exc())
             raise ValueError("query remote source failed, result read faild")
@@ -603,7 +734,7 @@ class ApiBackendBase(TerraformResource):
 
         res = []
         for out_data in instance_define:
-            x_res = fetech_property(out_data, define_columns)
+            x_res = fetch_property(out_data, define_columns)
             equivalence_define = resourceconduct.conductor_reset_equivalence(provider, self.resource_name)
 
             e_res = self.outer_equivalence(datas=x_res, defines=equivalence_define)
