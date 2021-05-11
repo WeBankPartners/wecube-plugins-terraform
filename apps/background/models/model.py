@@ -173,7 +173,7 @@ class Resource(Base):
     resource_property = Column(String(2048), nullable=False)
     resource_output = Column(String(1024), nullable=False)
     data_source_name = Column(String(64))
-    data_source_argument = Column(String(64))
+    data_source_argument = Column(String(256))
     data_source_output = Column(String(512))
     data_source = Column(String(2048))
     is_locked = Column(TINYINT(1), server_default=text("'0'"))

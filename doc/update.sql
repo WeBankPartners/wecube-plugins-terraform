@@ -82,5 +82,8 @@ UPDATE terraform.resource SET  provider='alicloud', resource_type='lb', resource
 
 #@v0.2.0-end@;
 
+#@v0.3.0-begin@;
+ALTER TABLE terraform.resource MODIFY COLUMN data_source_argument varchar(256) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL;
+#@v0.3.0-end@;
 
 

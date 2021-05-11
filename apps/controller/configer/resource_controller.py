@@ -16,6 +16,27 @@ from .model_args import output_necessary
 from .model_args import source_necessary
 
 
+def format_argument(key, data):
+    if not data:
+        return ""
+    if isinstance(data, dict):
+        return data
+    elif isinstance(data, basestring):
+        data = data.strip()
+        if data.startswith("{"):
+            try:
+                json.loads(data)
+            except:
+                try:
+                    eval(data)
+                except:
+                    raise ValueError("data: %s is not json " % (data))
+
+        return data
+    else:
+        raise ValueError("key: %s 应为json或string" % key)
+
+
 class ResourceController(BackendController):
     resource = ResourceObject()
 
@@ -103,6 +124,8 @@ class ResourceController(BackendController):
         property_necessary(resource_name=data["resource_name"],
                            resource_property=data_source_output)
 
+        data_source_argument = format_argument("data_source_argument", data.get("data_source_argument"))
+
         ProviderObject().provider_name_object(data["provider"])
         create_data = {"id": data.get("id") or get_uuid(),
                        "provider": data["provider"],
@@ -112,7 +135,7 @@ class ResourceController(BackendController):
                        "resource_property": json.dumps(resource_property),
                        "resource_output": json.dumps(resource_output),
                        "data_source_name": data.get("data_source_name"),
-                       "data_source_argument": data.get("data_source_argument"),
+                       "data_source_argument": data_source_argument,
                        "data_source_output": json.dumps(data_source_output),
                        "data_source": json.dumps(data_source)
                        }
@@ -146,6 +169,8 @@ class ResourceIdController(BackendIdController):
         # for data source
         validation.validate_string("data_source_name", data.get("data_source_name"))
         validation.validate_string("data_source_argument", data.get("data_source_argument"))
+
+        format_argument("data_source_argument", data.get("data_source_argument"))
         validation.validate_dict("data_source", data.get("data_source"))
         validation.validate_dict("data_source_output", data.get("data_source_output"))
 

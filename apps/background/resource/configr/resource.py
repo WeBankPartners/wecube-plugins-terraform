@@ -3,6 +3,8 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import json
 import datetime
+import traceback
+from lib.logs import logger
 from lib.uuid_util import get_uuid
 from apps.background.models.dbserver import ResourceManager
 
