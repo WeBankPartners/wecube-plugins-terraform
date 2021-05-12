@@ -40,9 +40,11 @@ class Common(object):
         if eip and (not _eip_status):
             # eip 特殊处理
             _eip_ip = eip.split(",")
+            x_eip = []
             for _ip in _eip_ip:
-                CrsObject("eip").object_resource_id(_ip)
-            ext_info["eip"] = eip
+                x = CrsObject("eip").object_resource_id(_ip)
+                x_eip.append(x)
+            ext_info["eip"] = x_eip
 
         logger.info("before_keys_checks add info: %s" % (format_json_dumps(ext_info)))
         return ext_info
