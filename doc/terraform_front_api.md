@@ -306,6 +306,10 @@ data_source_name  查询data source资源名称 string 选填
 data_source_argument  data source输出资源字段 如: instance.configs   string 选填
 data_source   data source查询字段转换    string  选填
 data_source_output  data source资源输出转换字段  string 选填
+
+<data source需要先刷列表的情况>
+pre_action  列表资源  string 选填  例如vpc_list
+pre_action_output 列表输出参数   json 选填
 ```
 
 

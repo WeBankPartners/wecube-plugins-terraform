@@ -173,6 +173,18 @@ data_source 设置查询的字段转换信息
 data_source_output 需要转换统一输出的字段
 </p>
 
+3).针对回刷资源需要先刷列表的情况
+```
+{
+"pre_action": "aws_vpcs",
+"pre_action_output": "{'ids': 'id'}"
+}
+```
+<p>
+pre_action  列表获取的资源名称， 例如vpc_list
+pre_action_output 列表获取， 输入到资源的过滤参数， 仅支持最多一个
+</p>
+
 3. 配置通用值
 
 用于将云厂商之间不同的值进行统一
