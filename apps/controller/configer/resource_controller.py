@@ -61,6 +61,7 @@ class ResourceController(BackendController):
         validation.allowed_key(data, ["id", "provider", "resource_type", "extend_info",
                                       "resource_name", "resource_property", "resource_output",
                                       "data_source", "data_source_name",
+                                      "pre_action", "pre_action_output",
                                       "data_source_output", "data_source_argument"])
         validation.not_allowed_null(data=data,
                                     keys=["provider", "resource_type",
@@ -83,6 +84,10 @@ class ResourceController(BackendController):
         validation.validate_dict("data_source", data.get("data_source"))
         validation.validate_dict("data_source_output", data.get("data_source_output"))
 
+        # pre action
+        validation.validate_dict("pre_action_output", data.get("pre_action_output"))
+        validation.validate_string("pre_action", data.get("pre_action"))
+
     def create(self, request, data, **kwargs):
         '''
 
@@ -104,9 +109,12 @@ class ResourceController(BackendController):
         data_source = validation.validate_dict("data_source", data.get("data_source"))
         data_source_output = validation.validate_dict("data_source_output", data.get("data_source_output"))
 
-        # for _, value in data_source_output.items():
-        #     if not isinstance(value, basestring):
-        #         raise ValueError("data_source_output 为key-value定义")
+        pre_action_output = validation.validate_dict("pre_action_output", data.get("pre_action_output"))
+        for _, value in pre_action_output.items():
+            if not isinstance(value, basestring):
+                raise ValueError("pre_action_output 为key-value定义")
+        if len(pre_action_output) > 1:
+            raise ValueError("output 只支持最多一个参数过滤")
 
         resource_property = validate_convert_key(resource_property)
         validate_convert_value(extend_info)
@@ -137,7 +145,9 @@ class ResourceController(BackendController):
                        "data_source_name": data.get("data_source_name"),
                        "data_source_argument": data_source_argument,
                        "data_source_output": json.dumps(data_source_output),
-                       "data_source": json.dumps(data_source)
+                       "data_source": json.dumps(data_source),
+                       "pre_action": data.get("pre_action"),
+                       "pre_action_output": json.dumps("pre_action_output")
                        }
 
         return self.resource.create(create_data)
@@ -155,7 +165,9 @@ class ResourceIdController(BackendIdController):
                                       "resource_name", "resource_property",
                                       "enabled", "resource_output",
                                       "data_source", "data_source_name",
-                                      "data_source_output", "data_source_argument"])
+                                      "data_source_output", "pre_action",
+                                      "pre_action_output",
+                                      "data_source_argument"])
 
         validation.validate_string("provider", data["provider"])
         validation.validate_string("resource_type", data.get("resource_type"))
@@ -169,6 +181,10 @@ class ResourceIdController(BackendIdController):
         # for data source
         validation.validate_string("data_source_name", data.get("data_source_name"))
         validation.validate_string("data_source_argument", data.get("data_source_argument"))
+
+        # pre action
+        validation.validate_string("pre_action", data.get("pre_action"))
+        validation.validate_dict("pre_action_output", data.get("pre_action_output"))
 
         format_argument("data_source_argument", data.get("data_source_argument"))
         validation.validate_dict("data_source", data.get("data_source"))
@@ -216,6 +232,18 @@ class ResourceIdController(BackendIdController):
                     raise ValueError("data_source_output 为key-value定义")
 
             data["data_source_output"] = json.dumps(data_source_output)
+
+        if data.get("pre_action_output") is not None:
+            pre_action_output = validation.validate_dict("pre_action_output", data.get("pre_action_output"))
+
+            for _, value in pre_action_output.items():
+                if not isinstance(value, basestring):
+                    raise ValueError("data_source_output 为key-value定义")
+
+            if len(pre_action_output) > 1:
+                raise ValueError("output 只支持最多一个参数过滤")
+
+            data["pre_action_output"] = json.dumps(pre_action_output)
 
         if "provider" in data.keys():
             if not data.get("provider"):

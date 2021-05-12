@@ -176,6 +176,8 @@ class Resource(Base):
     data_source_argument = Column(String(256))
     data_source_output = Column(String(512))
     data_source = Column(String(2048))
+    pre_action = Column(String(256))
+    pre_action_output = Column(String(512))
     is_locked = Column(TINYINT(1), server_default=text("'0'"))
     created_time = Column(DateTime)
     updated_time = Column(DateTime)
@@ -197,6 +199,8 @@ class Resource(Base):
         self.resource_name = data.get("resource_name")
         self.data_source_name = data.get("data_source_name")
         self.data_source = data.get("data_source")
+        self.pre_action = data.get("pre_action")
+        self.pre_action_output = data.get("pre_action_output")
         self.extend_info = data.get("extend_info") or '{}'
         self.resource_property = data.get("resource_property") or '{}'
         self.resource_output = data.get("resource_output") or '{}'

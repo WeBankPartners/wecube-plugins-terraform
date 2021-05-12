@@ -25,6 +25,7 @@ class ResourceObject(object):
             res["data_source"] = json.loads(res["data_source"]) if res.get("data_source") else {}
             t = json.loads(res["data_source_output"]) if res.get("data_source_output") else {}
             res["data_source_output"] = t
+            res["pre_action_output"] = json.loads(res["pre_action_output"]) if res.get("pre_action_output") else {}
             data.append(res)
 
         return count, data
@@ -49,6 +50,7 @@ class ResourceObject(object):
             data["data_source"] = json.loads(data["data_source"]) if data.get("data_source") else {}
             t = json.loads(data["data_source_output"]) if data.get("data_source_output") else {}
             data["data_source_output"] = t
+            data["pre_action_output"] = json.loads(data["pre_action_output"]) if data.get("pre_action_output") else {}
         return data
 
     def update(self, rid, update_data, where_data=None):
@@ -63,6 +65,7 @@ class ResourceObject(object):
             data["data_source"] = json.loads(data["data_source"]) if data.get("data_source") else {}
             t = json.loads(data["data_source_output"]) if data.get("data_source_output") else {}
             data["data_source_output"] = t
+            data["pre_action_output"] = json.loads(data["pre_action_output"]) if data.get("pre_action_output") else {}
         return count, data
 
     def delete(self, rid, where_data=None):
