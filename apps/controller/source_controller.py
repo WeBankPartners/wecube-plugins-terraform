@@ -10,6 +10,23 @@ from core.response_hooks import format_string
 from core import local_exceptions as exception_common
 from apps.controller.configer.model_args import source_columns_outputs
 from apps.api.configer.region import ZoneApi
+from apps.api.apibase_backend import ApiBackendBase
+
+
+def filter_action_output(out_datas, filters):
+    res = []
+    for out_data in out_datas:
+        for key, value in filters.items():
+            s_value = out_data.get(key)
+            if isinstance(s_value, (basestring, int, float)):
+                res.append({value: s_value})
+            elif isinstance(s_value, list):
+                for s in s_value:
+                    res.append({value: s})
+            else:
+                logger.info("output value not string/int/list, skip ...")
+
+    return res
 
 
 class BaseSourceController(BaseController):
@@ -121,7 +138,7 @@ class BaseSourceController(BaseController):
 
         return result_data
 
-    def main_response(self, request, data, **kwargs):
+    def _main_query(self, request, data, **kwargs):
         rid = data.pop("id", None)
         secret = data.pop("secret", None)
         region = data.pop("region", None)
@@ -171,3 +188,41 @@ class BaseSourceController(BaseController):
                                      secret=secret, resource_id=resource_id,
                                      ignore_ids=ignore_ids, **data)
         return result_data
+
+    def main_response(self, request, data, **kwargs):
+        rid = data.pop("id", None)
+        secret = data.pop("secret", None)
+        region = data.pop("region", None)
+        zone = data.pop("zone", None)
+        provider = data.pop("provider", None)
+        resource_id = data.pop("resource_id", None)
+        ignore_ids = data.pop("ignore_ids", None)
+
+        if not data:
+            resource_config = self.resource.resource_info()
+            if resource_config.get("pre_action"):
+                pre_action = resource_config.get("pre_action")
+                pre_action = pre_action.strip()
+                action_define = pre_action.split(".")
+                actionclient = ApiBackendBase(resource_name=action_define[0], resource_workspace=action_define[0])
+                action_result = actionclient.get_remote_source(rid=None, provider=provider,
+                                                               region=region, zone=zone,
+                                                               secret=secret, resource_id=None)
+                output_filters = filter_action_output(action_result, filters=resource_config.get("pre_action_output"))
+                result = []
+                for output_filter in output_filters:
+                    source_args = {"id": rid, "secret": secret, "region": region,
+                                   "zone": zone, "provider": provider,
+                                   "resource_id": resource_id, "ignore_ids": ignore_ids}
+                    source_args.update(output_filter)
+                    data.update(source_args)
+                    x_result = self._main_query(request, data, **kwargs)
+                    result += x_result
+
+                return result
+
+        data.update({"id": rid, "secret": secret, "region": region,
+                     "zone": zone, "provider": provider,
+                     "resource_id": resource_id, "ignore_ids": ignore_ids})
+        return self._main_query(request, data, **kwargs)
+

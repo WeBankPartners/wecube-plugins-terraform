@@ -159,7 +159,10 @@ def validate_dict(key, value, minlen=None, maxlen=None):
         return {}
     try:
         if isinstance(value, basestring):
-            value = json.loads(value)
+            try:
+                value = json.loads(value)
+            except:
+                value = eval(value)
     except:
         raise ValueError("%s 不是json" % key)
 

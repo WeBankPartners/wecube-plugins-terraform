@@ -174,10 +174,10 @@ def format_argument(key, data):
 
 
 class ApiBackendBase(TerraformResource):
-    def __init__(self):
+    def __init__(self, resource_name=None, resource_workspace=None):
         super(ApiBackendBase, self).__init__()
-        self.resource_name = ""
-        self.resource_workspace = ""
+        self.resource_name = resource_name or ""
+        self.resource_workspace = resource_workspace or ""
         self.owner_resource = ""
         self.relation_resource = ""
         self.resource_object = None
