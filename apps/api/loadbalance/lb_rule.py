@@ -64,11 +64,13 @@ class Common(object):
                          "security_group_id": create_data.get("security_group_id")}
 
         x_create_data = {}
-        for key in ["frontend_port", "name", "domain", "url",
-                    "health_check_http_code", "health_check_interval",
-                    "health_check_uri", "health_check_connect_port",
-                    "health_check_timeout", "health_check_http_method",
-                    "scheduler", "certificate_id", "certificate_ca_id"]:
+        for key in ["frontend_port", "name",
+                    # "domain", "url",
+                    # "health_check_http_code", "health_check_interval",
+                    # "health_check_uri", "health_check_connect_port",
+                    # "health_check_timeout", "health_check_http_method",
+                    # "scheduler", "certificate_id", "certificate_ca_id"
+                    ]:
             x_create_data[key] = create_data.get(key)
         return x_create_data, r_create_data
 
