@@ -510,6 +510,67 @@ xml_register = {
             "notnull": ["id"],
             "inputParameters": ["id"],
             "outputParameters": ["errorMessage", "errorCode", "result"]
+        },
+        "query": {
+            "path": "/terraform/v1/loadbalance/backend/lb_listener/source",
+            "method": "POST",
+            "notnull": ["region", "provider"],
+            "inputParameters": ['region', 'secret', 'provider', 'resource_id', 'lb_id', 'tag'],
+            "outputParameters": ['region', 'secret', 'provider', 'resource_id', 'errorMessage', 'errorCode',
+                                 'name', 'lb_id', 'port', 'protocol', 'health_check', 'health_check_uri']
+        }
+    },
+    "lb_rule": {
+        "apply": {
+            "path": "/terraform/v1/loadbalance/backend/lb_rule/apply",
+            "method": "POST",
+            "notnull": ['provider', 'region', 'lb_id'],
+            "inputParameters": ['id', 'provider', 'secret', 'region', 'zone', 'listener_id', 'extend_info',
+                                'lb_id', 'security_group_id', 'frontend_port', 'name'],
+            "outputParameters": ['errorMessage', 'errorCode', 'id', 'resource_id']
+        },
+        "destroy": {
+            "path": "/terraform/v1/loadbalance/backend/lb_rule/destroy",
+            "method": "POST",
+            "notnull": ["id"],
+            "inputParameters": ["id"],
+            "outputParameters": ["errorMessage", "errorCode", "result"]
+        },
+        "query": {
+            "path": "/terraform/v1/loadbalance/backend/lb_rule/source",
+            "method": "POST",
+            "notnull": ["region", "provider"],
+            "inputParameters": ['region', 'secret', 'provider', 'resource_id', 'listener_id', 'lb_id', 'name'],
+            "outputParameters": ['region', 'secret', 'provider', 'resource_id', 'errorMessage', 'errorCode',
+                                 'name', 'lb_id', 'listener_id', 'region', 'zone',
+                                 'security_group_id', 'frontend_port']
+        }
+    },
+    "lb_server_group": {
+        "apply": {
+            "path": "/terraform/v1/loadbalance/backend/lb_server_group/apply",
+            "method": "POST",
+            "notnull": ['provider', 'region', 'name', 'lb_id'],
+            "inputParameters": ['id', 'provider', 'secret', 'region', 'zone',
+                                'name', 'lb_id', 'instance_id', 'port'],
+            "outputParameters": ['errorMessage', 'errorCode', 'id', 'resource_id']
+        },
+        "destroy": {
+            "path": "/terraform/v1/loadbalance/backend/lb_server_group/destroy",
+            "method": "POST",
+            "notnull": ["id"],
+            "inputParameters": ["id"],
+            "outputParameters": ["errorMessage", "errorCode", "result"]
+        },
+        "query": {
+            "path": "/terraform/v1/loadbalance/backend/lb_server_group/source",
+            "method": "POST",
+            "notnull": ["region", "provider"],
+            "inputParameters": ['region', 'secret', 'provider',
+                                'resource_id', 'instance_id', 'lb_id', 'name'],
+            "outputParameters": ['region', 'secret', 'provider', 'resource_id',
+                                 'errorMessage', 'errorCode', 'name',
+                                 'lb_id', 'instance_id', 'region', 'zone', 'port']
         }
     },
     "lb_attach": {

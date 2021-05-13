@@ -81,6 +81,17 @@ resouce_property_models = {
         "health_check_uri",
         "lb_id"
     ],
+    "lb_rule": [
+        "listener_id", "extend_info", "lb_id",
+        "security_group_id", "frontend_port",
+        "name"
+    ],
+    "lb_server_group": [
+        "name",
+        "lb_id",
+        "instance_id",
+        "port"
+    ],
     "lb_attach": [
         "backend_servers",
         "instance_id",
@@ -371,6 +382,12 @@ output_property_models = {
     "lb_listener": [
         "resource_id"
     ],
+    "lb_rule": [
+        "resource_id"
+    ],
+    "lb_server_group": [
+        "resource_id"
+    ],
     "lb_attach": [
         "resource_id"
     ],
@@ -552,8 +569,21 @@ data_source_models = {
         "lb_id",
         "tag"
     ],
+    "lb_rule": [
+        "resource_id",
+        "listener_id",
+        "lb_id",
+        "name"
+    ],
+    "lb_server_group": [
+        "resource_id",
+        "name",
+        "lb_id",
+        "instance_id"
+    ],
     "lb_attach": [
-        "resource_id"
+        "resource_id",
+        "instance_id"
     ],
     "disk": [
         "resource_id",
