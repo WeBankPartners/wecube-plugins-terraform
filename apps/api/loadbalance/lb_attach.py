@@ -204,3 +204,6 @@ class LBAttachBackendApi(Common, ApiBackendBase):
         self.resource_workspace = "lb_attach"
         self._flush_resobj()
         self.resource_keys_config = None
+
+    def reverse_asset_ids(self):
+        return ['lb_id', "listener_id", "instance_id"]
