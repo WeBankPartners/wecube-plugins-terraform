@@ -164,8 +164,8 @@ class LBListenerDeleteController(BaseController):
 
 
 class LBListenerSourceController(BaseSourceController):
-    name = "VPC"
-    resource_describe = "VPC"
+    name = "LBListener"
+    resource_describe = "LBListener"
     allow_methods = ("POST",)
     resource = LBListenerBackendApi()
 
