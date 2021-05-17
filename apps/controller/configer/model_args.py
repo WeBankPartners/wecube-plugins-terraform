@@ -82,7 +82,7 @@ resouce_property_models = {
         "lb_id"
     ],
     "lb_rule": [
-        "listener_id", "extend_info", "lb_id",
+        "listener_id", "lb_id",
         "security_group_id", "frontend_port",
         "name"
     ],
@@ -202,6 +202,10 @@ resouce_property_models = {
         "backup_model",
         "mysql_id",
         "backup_time"
+    ],
+    "db_subnet_group": [
+        "subnet_id",
+        "name"
     ],
     "mariadb": [
         "charge_type",
@@ -442,6 +446,9 @@ output_property_models = {
     "mysql_backup": [
         "resource_id",
     ],
+    "db_subnet_group": [
+        "resource_id"
+    ],
     "mariadb": [
         "resource_id",
         "ipaddress",
@@ -650,6 +657,10 @@ data_source_models = {
     ],
     "mysql_database": [
         "resource_id",
+    ],
+    "db_subnet_group": [
+        "resource_id",
+        "name"
     ],
     "mysql_account": [
         "resource_id",

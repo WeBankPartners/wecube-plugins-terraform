@@ -688,6 +688,32 @@ xml_register = {
             "inputParameters": ["id"],
             "outputParameters": ["errorMessage", "errorCode", "result"]
         }
-    }
+    },
+    "db_subnet_group": {
+        "apply": {
+            "path": "/terraform/v1/database/backend/db_subnet_group/apply",
+            "method": "POST",
+            "notnull": ['name', 'provider', 'subnet_id', 'zone', 'region'],
+            "inputParameters": ['id', 'name', 'secret', 'provider', 'subnet_id',
+                                'zone', 'region', 'asset_id', 'resource_id',
+                                'extend_info'],
+            "outputParameters": ['errorMessage', 'errorCode', 'resource_id', 'id']
+        },
+        "destroy": {
+            "path": "/terraform/v1/database/backend/db_subnet_group/destroy",
+            "method": "POST",
+            "notnull": ["id"],
+            "inputParameters": ["id"],
+            "outputParameters": ["errorMessage", "errorCode", "result"]
+        },
+        "query": {
+            "path": "/terraform/v1/database/backend/db_subnet_group/source",
+            "method": "POST",
+            "notnull": ["region", "provider"],
+            "inputParameters": ['region', 'secret', 'provider', 'resource_id', 'name'],
+            "outputParameters": ['region', 'secret', 'provider', 'resource_id', 'errorMessage', 'errorCode', 'name',
+                                 'subnet_id', 'zone', ]
+        }
+    },
 }
 
