@@ -6,6 +6,7 @@ from mysql_controller import database as mysql_database
 from mysql_controller import account as mysql_account
 from mysql_controller import privilege as mysql_privilege
 from mysql_controller import backup as mysql_backup
+from mysql_controller import subnet_group as rds_subnet_group
 from kv_controller import kvstore_controller
 from kv_controller import kvstore_backup_controller
 from kv_controller import redis_controller
@@ -38,6 +39,12 @@ urlpatterns = [
     url(r'^mysql_backup/(?P<rid>[\w-]+)$', mysql_backup.MysqlBackupIdController()),
     url(r'^backend/mysql_backup/apply$', mysql_backup.MysqlBackupAddController()),
     url(r'^backend/mysql_backup/destroy$', mysql_backup.MysqlBackupDeleteController()),
+
+    url(r'^rds_subnet_group$', rds_subnet_group.SubnetGroupController()),
+    url(r'^rds_subnet_group/(?P<rid>[\w-]+)$', rds_subnet_group.SubnetGroupIdController()),
+    url(r'^backend/rds_subnet_group/apply$', rds_subnet_group.SubnetGroupAddController()),
+    url(r'^backend/rds_subnet_group/destroy$', rds_subnet_group.SubnetGroupDeleteController()),
+    url(r'^backend/rds_subnet_group/source$', rds_subnet_group.SubnetGroupSourceController()),
 
     url(r'^redis$', redis_controller.RedisController()),
     url(r'^redis/(?P<rid>[\w-]+)$', redis_controller.RedisIdController()),
