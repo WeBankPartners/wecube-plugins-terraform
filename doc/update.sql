@@ -87,6 +87,10 @@ ALTER TABLE terraform.resource MODIFY COLUMN data_source_argument varchar(256) C
 
 ALTER TABLE terraform.resource ADD pre_action varchar(256) NULL  after  `data_source_output`;
 ALTER TABLE terraform.resource ADD pre_action_output varchar(512) NULL  after  `pre_action`;
+
+ALTER TABLE terraform.resource MODIFY COLUMN data_source_name varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL;
+
+
 #@v0.3.0-end@;
 
 
