@@ -126,7 +126,7 @@ let tableEle = [
   {
     title: 'tf_provider', // 不必
     value: 'provider', //
-    style: { width: '200px' },
+    style: { width: '150px' },
     display: true
   },
   {
@@ -159,7 +159,7 @@ let tableEle = [
   {
     title: 'tf_resource_property_conversion',
     value: 'resource_property',
-    // style: { width: '150px' },
+    style: { width: '150px' },
     render: item => {
       return JSON.stringify(item.resource_property)
     },
