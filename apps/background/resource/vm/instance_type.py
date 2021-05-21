@@ -13,9 +13,24 @@ class InstanceTypeObject(ResourceBaseObject):
     def __init__(self):
         self.resource = InstanceTypeManager()
 
-    def list(self, filters=None, page=None, pagesize=None, orderby=None, filter_string=None):
+    def list(self, filters=None, page=None, pagesize=None, orderby=None, filter_string=None, filter_in=None):
         filters = filters or {}
+        filter_in = filter_in or {}
+
         filters["is_deleted"] = 0
+
+        for key, value in filter_in.items():
+            if value:
+                f = ''
+                for x in value:
+                    f += "'" + x + "',"
+                f = f[:-1]
+
+                x = '(' + f + ')'
+                if filter_string:
+                    filter_string += 'and ' + key + " in " + x + " "
+                else:
+                    filter_string = key + " in " + x + " "
 
         count, results = self.resource.list(filters=filters, pageAt=page,
                                             filter_string=filter_string,
