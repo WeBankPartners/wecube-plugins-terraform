@@ -140,5 +140,7 @@
   "tf_data_source_output_parameter": "Data Source输出参数",
   "tf_data_source_parameter_conversion": "Data Source参数转换",
   "tf_data_source_output_conversion": "Data Source输出转换",
-  "tf_config": "配置"
+  "tf_config": "配置",
+  "tf_pre_action": "列表资源",
+  "tf_pre_action_output": "列表输出参数"
 }

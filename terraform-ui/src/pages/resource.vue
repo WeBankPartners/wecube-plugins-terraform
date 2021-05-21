@@ -3,6 +3,26 @@
     <TerraformPageTable :pageConfig="pageConfig"></TerraformPageTable>
     <TfModalComponent :modelConfig="modelConfig">
       <template #outer-config>
+        <div class="marginbottom params-each">
+          <label class="col-md-2 label-name">{{ $t('tf_pre_action') }}:</label>
+          <input v-model="modelConfig.addRow.pre_action" type="text" class="col-md-7 form-control model-input c-dark" />
+        </div>
+        <div class="marginbottom params-each">
+          <label class="col-md-2 label-name" style="vertical-align: top;">{{ $t('tf_pre_action_output') }}:</label>
+          <Input
+            v-model="modelConfig.addRow.pre_action_output"
+            class="json-edit"
+            type="textarea"
+            :rows="3"
+            style="width:70%"
+          />
+          <Icon
+            @click="editJson(modelConfig.addRow.pre_action_output, 'pre_action_output')"
+            type="ios-create-outline"
+            size="18"
+            class="json-edit"
+          />
+        </div>
         <Divider size="small" orientation="left" style="font-size:12px;color:#cccaca"
           >Resource {{ $t('tf_config') }}</Divider
         >
@@ -106,7 +126,7 @@ let tableEle = [
   {
     title: 'tf_provider', // 不必
     value: 'provider', //
-    style: { width: '200px' },
+    style: { width: '150px' },
     display: true
   },
   {
@@ -122,9 +142,24 @@ let tableEle = [
     display: true
   },
   {
+    title: 'tf_pre_action',
+    value: 'pre_action',
+    // style: { width: '150px' },
+    display: true
+  },
+  {
+    title: 'tf_pre_action_output',
+    value: 'pre_action_output',
+    // style: { width: '150px' },
+    render: item => {
+      return JSON.stringify(item.pre_action_output)
+    },
+    display: true
+  },
+  {
     title: 'tf_resource_property_conversion',
     value: 'resource_property',
-    // style: { width: '150px' },
+    style: { width: '150px' },
     render: item => {
       return JSON.stringify(item.resource_property)
     },
@@ -268,9 +303,11 @@ export default {
         addRow: {
           // [通用]-保存用户新增、编辑时数据
           resource_name: '',
+          pre_action: '',
           provider: '',
           resource_type: '',
           resource_property: '{}',
+          pre_action_output: '{}',
           resource_output: '{}',
           data_source_name: '',
           data_source_argument: '',
@@ -327,6 +364,7 @@ export default {
     },
     async add () {
       this.modelConfig.addRow.resource_property = '{}'
+      this.modelConfig.addRow.pre_action_output = '{}'
       this.modelConfig.addRow.resource_output = '{}'
       this.modelConfig.addRow.data_source = '{}'
       this.modelConfig.addRow.data_source_output = '{}'
@@ -368,6 +406,7 @@ export default {
       this.modelTip.value = rowData[this.modelTip.key]
       this.modelConfig.addRow = this.$tfCommonUtil.manageEditParams(this.modelConfig.addRow, rowData)
       this.modelConfig.addRow.resource_property = JSON.stringify(this.modelConfig.addRow.resource_property)
+      this.modelConfig.addRow.pre_action_output = JSON.stringify(this.modelConfig.addRow.pre_action_output)
       this.modelConfig.addRow.resource_output = JSON.stringify(this.modelConfig.addRow.resource_output)
       this.modelConfig.addRow.data_source = JSON.stringify(this.modelConfig.addRow.data_source)
       this.modelConfig.addRow.data_source_output = JSON.stringify(this.modelConfig.addRow.data_source_output)
