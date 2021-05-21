@@ -18,8 +18,8 @@ def format_dict_data(data):
     return json.loads(data, default=__default)
 
 
-def format_json_dumps(data, ensure_ascii=False):
-    return json.dumps(data, default=__default, ensure_ascii=ensure_ascii)
+def format_json_dumps(data, ensure_ascii=False, indent=None):
+    return json.dumps(data, default=__default, ensure_ascii=ensure_ascii, indent=indent)
 
 
 def format_to_json(data):

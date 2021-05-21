@@ -232,7 +232,7 @@ def ext_convert_keys(datas, defines, is_update=False, is_extend=False):
                 if datas.get(key):
                     value = format_is_json(datas.get(key))
                 else:
-                    value = convert_keys(datas=datas, defines=define.get("define"), is_extend=is_extend)
+                    value = ext_convert_keys(datas=datas, defines=define.get("define"), is_extend=is_extend)
                 if value:
                     result[key] = value
             else:
