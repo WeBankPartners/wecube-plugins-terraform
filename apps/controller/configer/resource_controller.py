@@ -147,7 +147,7 @@ class ResourceController(BackendController):
                        "data_source_output": json.dumps(data_source_output),
                        "data_source": json.dumps(data_source),
                        "pre_action": data.get("pre_action"),
-                       "pre_action_output": json.dumps("pre_action_output")
+                       "pre_action_output": json.dumps(pre_action_output)
                        }
 
         return self.resource.create(create_data)
