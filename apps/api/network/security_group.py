@@ -11,7 +11,15 @@ from apps.background.resource.resource_base import CrsObject
 from apps.api.apibase_backend import ApiBackendBase
 
 
-class Common(object):
+class SecGroupApi(ApiBase):
+    def __init__(self):
+        super(SecGroupApi, self).__init__()
+        self.resource_name = "security_group"
+        self.resource_workspace = "security_group"
+        self.relation_resource = "vpc"
+        self._flush_resobj()
+        self.resource_keys_config = None
+
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
 
@@ -56,17 +64,7 @@ class Common(object):
                                           resource_id, **kwargs)
 
 
-class SecGroupApi(Common, ApiBase):
-    def __init__(self):
-        super(SecGroupApi, self).__init__()
-        self.resource_name = "security_group"
-        self.resource_workspace = "security_group"
-        self.relation_resource = "vpc"
-        self._flush_resobj()
-        self.resource_keys_config = None
-
-
-class SecGroupBackendApi(Common, ApiBackendBase):
+class SecGroupBackendApi(ApiBackendBase):
     def __init__(self):
         super(SecGroupBackendApi, self).__init__()
         self.resource_name = "security_group"
@@ -74,13 +72,3 @@ class SecGroupBackendApi(Common, ApiBackendBase):
         self.relation_resource = "vpc"
         self._flush_resobj()
         self.resource_keys_config = None
-
-    def before_source_asset(self, provider, query_data):
-        for key in ["vpc_id"]:
-            if query_data.get(key):
-                query_data[key] = CrsObject().object_asset_id(query_data.get(key))
-
-        return query_data
-
-    def reverse_asset_ids(self):
-        return ['vpc_id']
