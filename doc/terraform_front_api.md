@@ -708,7 +708,7 @@ url: /terraform/v1/vm/instance_type
 参数：
 
 ```
-"id", "provider", "origin_name", "cpu", "memory", "provider_id", "name", "enabled"
+"id", "provider", "origin_name", "cpu", "memory", "provider_id", "name", "enabled", type
 ```
 
 输出：
@@ -765,7 +765,7 @@ url: /terraform/v1/vm/instance_type
 "memory",        内存大小       int  必填
 "network",       网络参数      string  选填
 "extend_info"    其他信息      list   选填
-
+type             规格类型如instance  string 必填 （对应名称必须为资源类型name、例如： mysql, instance等）
 
 例如： 
 {
