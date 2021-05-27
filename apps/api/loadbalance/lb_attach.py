@@ -12,17 +12,18 @@ from apps.common.convert_keys import convert_value
 from apps.common.convert_keys import convert_key_only
 from apps.common.convert_keys import define_relations_key
 from apps.api.apibase import ApiBase
-from apps.api.configer.provider import ProviderApi
-# from apps.background.resource.vm.instance import InstanceObject
-# from apps.background.resource.loadbalance.lb import LBObject
-# from apps.background.resource.loadbalance.listener import LBListenerObject
-# from apps.background.resource.loadbalance.lb_attach import LBAttachObject
-# from apps.background.resource.loadbalance.lb_attach import LBAttachInstanceObject
 from apps.background.resource.resource_base import CrsObject
 from apps.api.apibase_backend import ApiBackendBase
 
 
-class Common(object):
+class LBAttachApi(ApiBase):
+    def __init__(self):
+        super(LBAttachApi, self).__init__()
+        self.resource_name = "lb_attach"
+        self.resource_workspace = "lb_attach"
+        self._flush_resobj()
+        self.resource_keys_config = None
+
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
 
@@ -88,15 +89,6 @@ class Common(object):
     def generate_owner_data(self, create_data, **kwargs):
         owner_id = None
         return owner_id, None
-
-
-class LBAttachApi(Common, ApiBase):
-    def __init__(self):
-        super(LBAttachApi, self).__init__()
-        self.resource_name = "lb_attach"
-        self.resource_workspace = "lb_attach"
-        self._flush_resobj()
-        self.resource_keys_config = None
 
     def destroy(self, rid):
         '''
@@ -197,13 +189,10 @@ class LBAttachApi(Common, ApiBase):
         return count
 
 
-class LBAttachBackendApi(Common, ApiBackendBase):
+class LBAttachBackendApi(ApiBackendBase):
     def __init__(self):
         super(LBAttachBackendApi, self).__init__()
         self.resource_name = "lb_attach"
         self.resource_workspace = "lb_attach"
         self._flush_resobj()
         self.resource_keys_config = None
-
-    def reverse_asset_ids(self):
-        return ['lb_id', "listener_id", "instance_id"]

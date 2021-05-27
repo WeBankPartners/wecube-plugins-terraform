@@ -12,7 +12,13 @@ from apps.background.resource.resource_base import CrsObject
 from apps.api.apibase_backend import ApiBackendBase
 
 
-class Common(object):
+class LBApi(ApiBase):
+    def __init__(self):
+        super(LBApi, self).__init__()
+        self.resource_name = "lb"
+        self.resource_workspace = "lb"
+        self._flush_resobj()
+        self.resource_keys_config = None
 
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
@@ -53,30 +59,10 @@ class Common(object):
         return owner_id, None
 
 
-class LBApi(Common, ApiBase):
-    def __init__(self):
-        super(LBApi, self).__init__()
-        self.resource_name = "lb"
-        self.resource_workspace = "lb"
-        self._flush_resobj()
-        self.resource_keys_config = None
-
-
-class LBBackendApi(Common, ApiBackendBase):
+class LBBackendApi(ApiBackendBase):
     def __init__(self):
         super(LBBackendApi, self).__init__()
         self.resource_name = "lb"
         self.resource_workspace = "lb"
         self._flush_resobj()
         self.resource_keys_config = None
-
-    def before_source_asset(self, provider, query_data):
-        for key in ["vpc_id", "subnet_id"]:
-            if query_data.get(key):
-                query_data[key] = CrsObject().object_asset_id(query_data.get(key))
-
-        return query_data
-
-    def reverse_asset_ids(self):
-        return ['vpc_id', "subnet_id"]
-
