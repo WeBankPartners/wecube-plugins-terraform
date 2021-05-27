@@ -9,7 +9,9 @@ from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.storage.disk_attach import DiskAttachApi
 from apps.api.storage.disk_attach import DiskAttachBackendApi
-from apps.controller.source_controller import BaseSourceController
+from apps.controller.backend_controller import BackendAddController
+from apps.controller.backend_controller import BackendDeleteController
+from apps.controller.backend_controller import BackendSourceController
 
 
 class ResBase(object):
@@ -115,20 +117,9 @@ class DiskAttachIdController(BackendIdController):
         return self.resource.detach(rid)
 
 
-class DiskAttachAddController(BaseController):
+class DiskAttachAddController(BackendAddController):
     allow_methods = ("POST",)
     resource = DiskAttachBackendApi()
-
-    def before_handler(self, request, data, **kwargs):
-        ResBase.not_null(data)
-        ResBase.validate_keys(data)
-
-    def response_templete(self, data):
-        return {}
-
-    def main_response(self, request, data, **kwargs):
-        res, _ = ResBase.create(resource=self.resource, data=data)
-        return res
 
 
 class DiskDetachController(BaseController):
@@ -137,25 +128,9 @@ class DiskDetachController(BaseController):
     allow_methods = ("POST",)
     resource = DiskAttachBackendApi()
 
-    def before_handler(self, request, data, **kwargs):
-        validation.not_allowed_null(data=data,
-                                    keys=["id"]
-                                    )
 
-        validation.validate_string("id", data.get("id"))
-
-    def response_templete(self, data):
-        return {}
-
-    def main_response(self, request, data, **kwargs):
-        rid = data.pop("id", None)
-        result = self.resource.detach(rid)
-        return {"result": result}
-
-
-class RTRuleSourceController(BaseSourceController):
+class RTRuleSourceController(BackendSourceController):
     name = "DiskDetach"
     resource_describe = "DiskDetach"
     allow_methods = ("POST",)
     resource = DiskAttachBackendApi()
-
