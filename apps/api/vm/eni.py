@@ -8,15 +8,19 @@ from lib.logs import logger
 from lib.json_helper import format_json_dumps
 from core import local_exceptions
 from apps.common.convert_keys import validate_type
-from apps.common.convert_keys import convert_extend_propertys
 from apps.common.convert_keys import define_relations_key
-from apps.api.configer.provider import ProviderApi
 from apps.api.apibase import ApiBase
 from apps.background.resource.resource_base import CrsObject
 from apps.api.apibase_backend import ApiBackendBase
 
 
-class Common(object):
+class EniApi(ApiBase):
+    def __init__(self):
+        super(EniApi, self).__init__()
+        self.resource_name = "network_interface"
+        self.resource_workspace = "network_interface"
+        self._flush_resobj()
+        self.resource_keys_config = None
 
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
@@ -72,15 +76,6 @@ class Common(object):
         owner_id = create_data.get("vpc_id")
         return owner_id, None
 
-
-class EniApi(Common, ApiBase):
-    def __init__(self):
-        super(EniApi, self).__init__()
-        self.resource_name = "network_interface"
-        self.resource_workspace = "network_interface"
-        self._flush_resobj()
-        self.resource_keys_config = None
-
     def destroy(self, rid):
         '''
 
@@ -88,7 +83,6 @@ class EniApi(Common, ApiBase):
         :return:
         '''
 
-        # todo 校验interface 没有attach到主机/没有被使用
         resource_info = self.resource_object.show(rid)
         if not resource_info:
             return 0
@@ -108,51 +102,10 @@ class EniApi(Common, ApiBase):
         return self.resource_object.delete(rid)
 
 
-class EniBackendApi(Common, ApiBackendBase):
+class EniBackendApi(ApiBackendBase):
     def __init__(self):
         super(EniBackendApi, self).__init__()
         self.resource_name = "network_interface"
         self.resource_workspace = "network_interface"
         self._flush_resobj()
         self.resource_keys_config = None
-
-    def sg_eni_relationship(self, rid, provider, region, zone, secret,
-                            resource_id, **kwargs):
-
-        self.resource_info(provider)
-        resource_property = self.resource_keys_config["resource_property"]
-        _sg_status = define_relations_key("security_group_id", "0000000",
-                                          resource_property.get("security_group_id"))
-        if _sg_status:
-            return []
-        else:
-            result = []
-            instance_datas = self.get_remote_source(rid, provider, region, zone, secret,
-                                                    resource_id=None, **kwargs)
-
-            for instance in instance_datas:
-                sg = instance.get("security_group_id")
-                if isinstance(resource_id, basestring):
-                    if resource_id in sg:
-                        result.append(instance)
-                elif isinstance(resource_id, list):
-                    state = 0
-                    for x_resource in resource_id:
-                        if x_resource in sg:
-                            state = 1
-
-                    if state == 1:
-                        result.append(instance)
-
-            return result
-
-    def before_source_asset(self, provider, query_data):
-        for key in ["vpc_id", "subnet_id"]:
-            if query_data.get(key):
-                query_data[key] = CrsObject().object_asset_id(query_data.get(key))
-
-        return query_data
-
-    def reverse_asset_ids(self):
-        return ['vpc_id', "subnet_id"]
-
