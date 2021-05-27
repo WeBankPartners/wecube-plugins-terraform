@@ -1,18 +1,18 @@
 # coding: utf-8
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-import json
-import traceback
-from lib.logs import logger
-from lib.json_helper import format_json_dumps
-from apps.common.convert_keys import define_relations_key
 from apps.api.apibase import ApiBase
-from apps.api.configer.provider import ProviderApi
-from apps.background.resource.resource_base import CrsObject
 from apps.api.apibase_backend import ApiBackendBase
 
 
-class Common(object):
+class EipApi(ApiBase):
+    def __init__(self):
+        super(EipApi, self).__init__()
+        self.resource_name = "eip"
+        self.resource_workspace = "eip"
+        self._flush_resobj()
+        self.resource_keys_config = None
+
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
 
@@ -37,16 +37,7 @@ class Common(object):
         return owner_id, None
 
 
-class EipApi(Common, ApiBase):
-    def __init__(self):
-        super(EipApi, self).__init__()
-        self.resource_name = "eip"
-        self.resource_workspace = "eip"
-        self._flush_resobj()
-        self.resource_keys_config = None
-
-
-class EipBackendApi(Common, ApiBackendBase):
+class EipBackendApi(ApiBackendBase):
     def __init__(self):
         super(EipBackendApi, self).__init__()
         self.resource_name = "eip"
