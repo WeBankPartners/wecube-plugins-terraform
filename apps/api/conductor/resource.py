@@ -79,6 +79,48 @@ class ResourceConductor(object):
         define_json.update(output_json)
         return define_json, resource_keys_config
 
+    def conductor_apply_data(self, label_name, create_data, ora_resource_name):
+        '''
+
+        :param provider: name
+        :param region:
+        :param secret:
+        :param create_data:
+        :param extend_info:
+        :return:
+        '''
+
+        _info = {
+            "resource": {
+                ora_resource_name: {
+                    label_name: create_data
+                }
+            }
+        }
+        logger.info(format_json_dumps(_info))
+        return _info
+
+    def conductor_apply_output(self, provider, resource_name, label_name):
+        '''
+
+        :param provider: name
+        :param region:
+        :param secret:
+        :param create_data:
+        :param extend_info:
+        :return:
+        '''
+
+        output_json, _ = ResourceConfiger().conductor_apply_output(provider=provider,
+                                                                   resource_name=resource_name,
+                                                                   label_name=label_name
+                                                                   )
+
+        return output_json
+
+    def apply_output(self, label_name, resource_object):
+        return ResourceConfiger().apply_output(label_name=label_name, resource_object=resource_object)
+
     def _generate_import_resource(self, provider, resource_name, label_name):
         '''
         # import resource define: {
@@ -238,6 +280,28 @@ class ResourceConductor(object):
         }
         logger.info(format_json_dumps(_info))
         return _info, resource_keys_config
+
+    def generate_data_source(self, label_name, query_data, resource_object):
+        '''
+
+        :param provider:
+        :param resource_name:
+        :param label_name:
+        :param resource_data:
+        :return:
+        '''
+
+        property = resource_object.get("data_source_name") or resource_object["resource_name"]
+
+        _info = {
+            "data": {
+                property: {
+                    label_name: query_data
+                }
+            }
+        }
+        logger.info(format_json_dumps(_info))
+        return _info
 
     def conductor_reset_resource(self, provider, resource_name, label_name, resource_data):
         '''
