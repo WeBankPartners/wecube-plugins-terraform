@@ -9,13 +9,19 @@ from core import local_exceptions
 from apps.common.convert_keys import define_relations_key
 from apps.api.apibase import ApiBase
 from apps.api.configer.provider import ProviderApi
-# from apps.background.resource.network.vpc import VpcObject
-# from apps.background.resource.network.route_table import RouteTableObject
 from apps.background.resource.resource_base import CrsObject
 from apps.api.apibase_backend import ApiBackendBase
 
 
-class Common(object):
+class RouteTableApi(ApiBase):
+    def __init__(self):
+        super(RouteTableApi, self).__init__()
+        self.resource_name = "route_table"
+        self.resource_workspace = "route_table"
+        self.owner_resource = "vpc"
+        self._flush_resobj()
+        self.resource_keys_config = None
+
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
 
@@ -48,16 +54,6 @@ class Common(object):
     def generate_owner_data(self, create_data, **kwargs):
         owner_id = create_data.get("vpc_id")
         return owner_id, None
-
-
-class RouteTableApi(Common, ApiBase):
-    def __init__(self):
-        super(RouteTableApi, self).__init__()
-        self.resource_name = "route_table"
-        self.resource_workspace = "route_table"
-        self.owner_resource = "vpc"
-        self._flush_resobj()
-        self.resource_keys_config = None
 
     def update(self, rid, name, extend_info, **kwargs):
         '''
@@ -103,7 +99,7 @@ class RouteTableApi(Common, ApiBase):
                                            "define_json": json.dumps(define_json)})
 
 
-class RouteTableBackendApi(Common, ApiBackendBase):
+class RouteTableBackendApi(ApiBackendBase):
     def __init__(self):
         super(RouteTableBackendApi, self).__init__()
         self.resource_name = "route_table"
@@ -111,12 +107,3 @@ class RouteTableBackendApi(Common, ApiBackendBase):
         self.owner_resource = "vpc"
         self._flush_resobj()
         self.resource_keys_config = None
-
-    def before_source_asset(self, provider, query_data):
-        if query_data.get("vpc_id"):
-            query_data["vpc_id"] = CrsObject().object_asset_id(query_data.get("vpc_id"))
-
-        return query_data
-
-    def reverse_asset_ids(self):
-        return ['vpc_id']
