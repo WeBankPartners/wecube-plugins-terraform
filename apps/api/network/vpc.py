@@ -2,7 +2,7 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 from apps.api.apibase import ApiBase
-from apps.api.apibase_backend_v2 import ApiBackendBase
+from apps.api.apibase_backend import ApiBackendBase
 
 
 class VpcApi(ApiBase):

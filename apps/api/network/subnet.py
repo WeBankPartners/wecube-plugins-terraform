@@ -10,7 +10,7 @@ from core import local_exceptions
 from apps.common.convert_keys import define_relations_key
 from apps.api.apibase import ApiBase
 from apps.background.resource.resource_base import CrsObject
-from apps.api.apibase_backend_v2 import ApiBackendBase
+from apps.api.apibase_backend import ApiBackendBase
 
 
 class SubnetApi(ApiBase):
