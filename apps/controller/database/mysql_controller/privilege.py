@@ -6,10 +6,12 @@ from core import validation
 from core import local_exceptions
 from core.controller import BackendController
 from core.controller import BackendIdController
-from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.database.mysql.account import MysqlPrivilegeApi
 from apps.api.database.mysql.account import MysqlPrivilegeBackendApi
+from apps.controller.backend_controller import BackendAddController
+from apps.controller.backend_controller import BackendDeleteController
+from apps.controller.backend_controller import BackendSourceController
 
 
 class ResBase(object):
@@ -122,39 +124,13 @@ class MysqlPrivilegeIdController(BackendIdController):
         return self.resource.destroy(rid)
 
 
-class MysqlPrivilegeAddController(BaseController):
+class MysqlPrivilegeAddController(BackendAddController):
     allow_methods = ("POST",)
     resource = MysqlPrivilegeBackendApi()
 
-    def before_handler(self, request, data, **kwargs):
-        ResBase.not_null(data)
-        ResBase.validate_keys(data)
 
-    def response_templete(self, data):
-        return {}
-
-    def main_response(self, request, data, **kwargs):
-        res, _ = ResBase.create(resource=self.resource, data=data)
-        return res
-
-
-class MysqlPrivilegeDeleteController(BaseController):
+class MysqlPrivilegeDeleteController(BackendDeleteController):
     name = "MysqlPrivilege"
     resource_describe = "MysqlPrivilege"
     allow_methods = ("POST",)
     resource = MysqlPrivilegeBackendApi()
-
-    def before_handler(self, request, data, **kwargs):
-        validation.not_allowed_null(data=data,
-                                    keys=["id"]
-                                    )
-
-        validation.validate_string("id", data.get("id"))
-
-    def response_templete(self, data):
-        return {}
-
-    def main_response(self, request, data, **kwargs):
-        rid = data.pop("id", None)
-        result = self.resource.destroy(rid)
-        return {"result": result}

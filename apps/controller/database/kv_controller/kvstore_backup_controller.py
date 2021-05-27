@@ -11,8 +11,9 @@ from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.database.kvstore.kvstore_backup import KvBackupApi
 from apps.api.database.kvstore.kvstore_backup import KvBackupBackendApi
-from apps.controller.source_controller import BaseSourceController
-
+from apps.controller.backend_controller import BackendAddController
+from apps.controller.backend_controller import BackendDeleteController
+from apps.controller.backend_controller import BackendSourceController
 
 
 class ResBase(object):
@@ -132,53 +133,20 @@ class KvBackupIdController(BackendIdController):
         return self.resource.destroy(rid)
 
 
-class KvBackupAddController(BaseController):
+class KvBackupAddController(BackendAddController):
     allow_methods = ("POST",)
     resource = KvBackupBackendApi()
 
-    def keyname(self):
-        return "kvstore_id"
 
-    def before_handler(self, request, data, **kwargs):
-        keyname = self.keyname()
-        ResBase.not_null(data, keyname)
-        ResBase.validate_keys(data, keyname)
-
-    def response_templete(self, data):
-        return {}
-
-    def main_response(self, request, data, **kwargs):
-        keyname = self.keyname()
-        res, _ = ResBase.create(resource=self.resource, data=data, keyname=keyname)
-        return res
-
-
-class KvBackupDeleteController(BaseController):
+class KvBackupDeleteController(BackendDeleteController):
     name = "KvBackup"
     resource_describe = "KvBackup"
     allow_methods = ("POST",)
     resource = KvBackupBackendApi()
 
-    def before_handler(self, request, data, **kwargs):
-        validation.not_allowed_null(data=data,
-                                    keys=["id"]
-                                    )
 
-        validation.validate_string("id", data.get("id"))
-
-    def response_templete(self, data):
-        return {}
-
-    def main_response(self, request, data, **kwargs):
-        rid = data.pop("id", None)
-        force_delete = data.get("force_delete", False)
-        result = self.resource.destroy(rid)
-        return {"result": result}
-
-
-class KvBackupSourceController(BaseSourceController):
+class KvBackupSourceController(BackendSourceController):
     name = "KvBackup"
     resource_describe = "KvBackup"
     allow_methods = ("POST",)
     resource = KvBackupBackendApi()
-

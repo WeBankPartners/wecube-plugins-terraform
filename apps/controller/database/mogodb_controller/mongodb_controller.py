@@ -12,7 +12,9 @@ from lib.uuid_util import get_uuid
 from lib.encrypt_helper import decrypt_str
 from apps.api.database.nosql.mogodb import MongodbApi
 from apps.api.database.nosql.mogodb import MongodbBackendApi
-from apps.controller.source_controller import BaseSourceController
+from apps.controller.backend_controller import BackendAddController
+from apps.controller.backend_controller import BackendDeleteController
+from apps.controller.backend_controller import BackendSourceController
 
 
 class ResBase(object):
@@ -157,52 +159,26 @@ class MongoDBIdController(BackendIdController):
         return self.resource.destroy(rid)
 
 
-class MongoDBAddController(BaseController):
+class MongoDBAddController(BackendAddController):
     allow_methods = ("POST",)
     resource = MongodbBackendApi()
 
-    def before_handler(self, request, data, **kwargs):
-        ResBase.not_null(data)
-        ResBase.validate_keys(data)
 
-    def response_templete(self, data):
-        return {}
-
-    def main_response(self, request, data, **kwargs):
-        res, _ = ResBase.create(resource=self.resource, data=data)
-        return res
-
-
-class MongoDBDeleteController(BaseController):
-    name = "MongoDB"
-    resource_describe = "MongoDB"
-    allow_methods = ("POST",)
-    resource = MongodbBackendApi()
-
-    def before_handler(self, request, data, **kwargs):
-        validation.not_allowed_null(data=data,
-                                    keys=["id"]
-                                    )
-
-        validation.validate_string("id", data.get("id"))
-
-    def response_templete(self, data):
-        return {}
-
-    def main_response(self, request, data, **kwargs):
-        rid = data.pop("id", None)
-        result = self.resource.destroy(rid)
-        return {"result": result}
-
-
-class MongoDBSourceController(BaseSourceController):
+class MongoDBDeleteController(BackendDeleteController):
     name = "MongoDB"
     resource_describe = "MongoDB"
     allow_methods = ("POST",)
     resource = MongodbBackendApi()
 
 
-class MongoDBSGSourceController(BaseSourceController):
+class MongoDBSourceController(BackendSourceController):
+    name = "MongoDB"
+    resource_describe = "MongoDB"
+    allow_methods = ("POST",)
+    resource = MongodbBackendApi()
+
+
+class MongoDBSGSourceController(BackendSourceController):
     name = "MongoDB"
     resource_describe = "MongoDB"
     allow_methods = ("POST",)
