@@ -10,10 +10,18 @@ from core import local_exceptions
 from apps.common.convert_keys import define_relations_key
 from apps.api.apibase import ApiBase
 from apps.background.resource.resource_base import CrsObject
-from apps.api.apibase_backend import ApiBackendBase
+from apps.api.apibase_backend_v2 import ApiBackendBase
 
 
-class Common(object):
+class SubnetApi(ApiBase):
+    def __init__(self):
+        super(SubnetApi, self).__init__()
+        self.resource_name = "subnet"
+        self.resource_workspace = "subnet"
+        self.owner_resource = "vpc"
+        self._flush_resobj()
+        self.resource_keys_config = None
+
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
 
@@ -48,33 +56,10 @@ class Common(object):
         return owner_id, None
 
 
-class SubnetApi(Common, ApiBase):
-    def __init__(self):
-        super(SubnetApi, self).__init__()
-        self.resource_name = "subnet"
-        self.resource_workspace = "subnet"
-        self.owner_resource = "vpc"
-        self._flush_resobj()
-        self.resource_keys_config = None
-
-
-class SubnetBackendApi(Common, ApiBackendBase):
+class SubnetBackendApi(ApiBackendBase):
     def __init__(self):
         super(SubnetBackendApi, self).__init__()
         self.resource_name = "subnet"
         self.resource_workspace = "subnet"
-        self.owner_resource = "vpc"
         self._flush_resobj()
         self.resource_keys_config = None
-
-    def create(self, *args, **kwargs):
-        return self.apply(*args, **kwargs)
-
-    def before_source_asset(self, provider, query_data):
-        if query_data.get("vpc_id"):
-            query_data["vpc_id"] = CrsObject().object_asset_id(query_data.get("vpc_id"))
-
-        return query_data
-
-    def reverse_asset_ids(self):
-        return ['vpc_id']
