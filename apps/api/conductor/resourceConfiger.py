@@ -271,6 +271,27 @@ class ResourceConfiger(object):
         result = {"output": ext_output_config} if ext_output_config else {}
         return result, self.resource_keys_config
 
+    def apply_output(self, label_name, resource_object):
+        '''
+        转换output 输出参数，生成配置
+        :param label_name:
+        :return:
+        '''
+
+        output_configs = resource_object["resource_output"]
+        resource_name = resource_object["resource_name"]
+
+        _ext_output = {}
+        for key, define in output_configs.items():
+            _ext_output.update(output_line(key, define))
+
+        ext_output_config = {}
+        for column, ora_column in _ext_output.items():
+            ext_output_config[column] = {"value": "${%s.%s.%s}" % (resource_name, label_name, ora_column)}
+
+        result = {"output": ext_output_config} if ext_output_config else {}
+        return result
+
     def _generate_source_output(self, provider, resource_name, label_name):
         '''
         转换output 输出参数，生成配置

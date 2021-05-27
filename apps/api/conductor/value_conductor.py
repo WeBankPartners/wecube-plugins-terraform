@@ -22,6 +22,8 @@ class ValueConfigerConductor(object):
     def outer_value(value, resource_value_config):
         if value is None or value == "":
             value = ""
+        if not resource_value_config:
+            return value
 
         if value or value == 0 or value is False:
             for x_value, y_value in resource_value_config.items():
