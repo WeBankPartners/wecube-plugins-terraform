@@ -11,7 +11,6 @@ from .kvstore import KvStoreBackendApi
 from .kvstore_backup import KvBackupApi
 from .kvstore_backup import KvBackupBackendApi
 from apps.background.resource.resource_base import CrsObject
-from apps.api.apibase_backend import ApiBackendBase
 
 
 class MemcachedApi(KvStoreApi):
@@ -69,27 +68,3 @@ class MemcachedBackupBackendApi(KvBackupBackendApi):
         self.resource_workspace = "memcached_backup"
         self._flush_resobj()
         self.resource_keys_config = None
-
-    def before_keys_checks(self, provider, create_data, is_update=None):
-        '''
-
-        :param provider:
-        :param vpc_id:
-        :return:
-        '''
-
-        kvstore_id = create_data.get("memcached_id")
-
-        self.resource_info(provider)
-        resource_property = self.resource_keys_config["resource_property"]
-        _kv_status = define_relations_key("memcached_id", kvstore_id, resource_property.get("memcached_id"))
-
-        ext_info = {}
-        if kvstore_id and (not _kv_status):
-            ext_info["memcached_id"] = CrsObject("memcached").object_resource_id(kvstore_id)
-
-        logger.info("before_keys_checks add info: %s" % (format_json_dumps(ext_info)))
-        return ext_info
-
-    def reverse_asset_ids(self):
-        return ['vpc_id', "subnet_id", "security_group_id", "memcached_id"]

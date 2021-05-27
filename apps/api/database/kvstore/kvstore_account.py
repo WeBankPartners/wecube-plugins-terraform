@@ -14,7 +14,14 @@ from apps.background.resource.resource_base import CrsObject
 from apps.api.apibase_backend import ApiBackendBase
 
 
-class Common(object):
+class KvAccountApi(ApiBase):
+    def __init__(self):
+        super(KvAccountApi, self).__init__()
+        self.resource_name = "kvstore_account"
+        self.resource_workspace = "kvstore_account"
+        self.relation_resource = "kvstore"
+        self._flush_resobj()
+        self.resource_keys_config = None
 
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
@@ -50,17 +57,7 @@ class Common(object):
         return owner_id, None
 
 
-class KvAccountApi(Common, ApiBase):
-    def __init__(self):
-        super(KvAccountApi, self).__init__()
-        self.resource_name = "kvstore_account"
-        self.resource_workspace = "kvstore_account"
-        self.relation_resource = "kvstore"
-        self._flush_resobj()
-        self.resource_keys_config = None
-
-
-class KvAccountBackendApi(Common, ApiBackendBase):
+class KvAccountBackendApi(ApiBackendBase):
     def __init__(self):
         super(KvAccountBackendApi, self).__init__()
         self.resource_name = "kvstore_account"
