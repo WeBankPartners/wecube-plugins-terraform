@@ -125,7 +125,7 @@ class ModelFormat(object):
 
     @classmethod
     def convert_apply_value(cls, value, define):
-        if not value:
+        if not value or not define:
             return value
         if isinstance(value, (basestring, int, bool, float)):
             value = cls.convert_value(value, define.get(value))
@@ -447,7 +447,7 @@ class ModelFormat(object):
         else:
             return value, add_infos
 
-        logger.info("outer revert value ...")
+        logger.debug("outer revert value ...")
         if define.startswith("$resource"):
             value = cls._hint_resource_id_outer_(value, define)
         elif define == "$zone":

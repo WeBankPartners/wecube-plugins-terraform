@@ -41,7 +41,8 @@ class TypeFormat(object):
         :param value:
         :return:
         '''
-
+        if not value:
+            return []
         def str_list(value):
             try:
                 return json.loads(value)
@@ -59,6 +60,8 @@ class TypeFormat(object):
                 else:
                     _v = " ".join(value.split())
                     value = _v.split()
+            elif isinstance(value, list):
+                return value
             else:
                 raise ValueError()
         except:
