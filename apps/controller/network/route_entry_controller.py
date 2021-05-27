@@ -13,7 +13,9 @@ from apps.controller.configer.model_args import source_columns_outputs
 from apps.api.configer.region import ZoneApi
 from apps.api.network.route_entry import RouteEntryApi
 from apps.api.network.route_entry import RouteEntryBackendApi
-from apps.controller.source_controller import BaseSourceController
+from apps.controller.backend_controller import BackendAddController
+from apps.controller.backend_controller import BackendDeleteController
+from apps.controller.backend_controller import BackendSourceController
 
 
 class ResBase(object):
@@ -106,6 +108,7 @@ class RouteEntryController(BackendController):
         res, _ = ResBase.create(resource=self.resource, data=data)
         return 1, res
 
+
 class RouteEntryIdController(BackendIdController):
     allow_methods = ('GET', 'DELETE', 'PATCH')
     resource = RouteEntryApi()
@@ -127,102 +130,20 @@ class RouteEntryIdController(BackendIdController):
         return self.resource.destroy(rid)
 
 
-class RouteEntryAddController(BaseController):
+class RouteEntryAddController(BackendAddController):
     allow_methods = ("POST",)
     resource = RouteEntryBackendApi()
 
-    def before_handler(self, request, data, **kwargs):
-        ResBase.not_null(data)
-        ResBase.validate_keys(data)
 
-    def response_templete(self, data):
-        return {}
-
-    def main_response(self, request, data, **kwargs):
-        res, _ = ResBase.create(resource=self.resource, data=data)
-        return res
-
-
-class RouteEntryDeleteController(BaseController):
+class RouteEntryDeleteController(BackendDeleteController):
     name = "RouteEntry"
     resource_describe = "RouteEntry"
     allow_methods = ("POST",)
     resource = RouteEntryBackendApi()
 
-    def before_handler(self, request, data, **kwargs):
-        validation.not_allowed_null(data=data,
-                                    keys=["id"]
-                                    )
 
-        validation.validate_string("id", data.get("id"))
-
-    def response_templete(self, data):
-        return {}
-
-    def main_response(self, request, data, **kwargs):
-        rid = data.pop("id", None)
-        result = self.resource.destroy(rid)
-        return {"result": result}
-
-
-class RTRuleSourceController(BaseSourceController):
+class RTRuleSourceController(BackendSourceController):
     name = "RouteEntry"
     resource_describe = "RouteEntry"
     allow_methods = ("POST",)
     resource = RouteEntryBackendApi()
-
-    def one_query(self, rid, provider, region, zone, secret,
-                  resource_id, ignore_ids, **kwargs):
-        '''
-
-        :param rid:
-        :param provider:
-        :param region:
-        :param zone:
-        :param secret:
-        :param resource_id:
-        :param ignore_ids:
-        :param kwargs:
-        :return:
-        '''
-
-        result = self.fetch_source(rid=rid, provider=provider, region=region, zone=zone,
-                                   secret=secret, resource_id=resource_id,
-                                   **kwargs)
-        result_data = []
-
-        register_zones = ZoneApi().region_zones(region, provider)
-
-        for x_result in result:
-            x_res = source_columns_outputs(self.resource.resource_name)
-            x_res.update(x_result)
-
-            route_table_id = kwargs.get("route_table_id")
-            if not x_res.get("route_table_id") and route_table_id:
-                x_res["route_table_id"] = route_table_id
-
-            res = {"region": region, "secret": secret, "provider": provider}
-
-            if x_res.get("resource_id") in ignore_ids:
-                continue
-
-            if x_res.get("zone") and (x_res.get("zone") not in register_zones):
-                logger.info("resource: %s ,zone: %s searched not in register zone, skip it" % (
-                    x_res.get("resource_id"), x_res.get("zone")))
-                if x_res.get("x_ora_zone") and (x_res.get("x_ora_zone") not in register_zones):
-                    continue
-
-            x_res.pop("x_ora_zone", None)
-
-            for x, value in x_res.items():
-                if isinstance(value, dict):
-                    res[x] = format_string(value)
-                else:
-                    if value is None:
-                        res[x] = ''
-                    else:
-                        res[x] = str(value)
-
-            result_data.append(res)
-
-        return result_data

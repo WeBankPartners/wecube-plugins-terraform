@@ -9,7 +9,9 @@ from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.network.security_group_rule import SecGroupRuleApi
 from apps.api.network.security_group_rule import SecGroupRuleBackendApi
-from apps.controller.source_controller import BaseSourceController
+from apps.controller.backend_controller import BackendAddController
+from apps.controller.backend_controller import BackendDeleteController
+from apps.controller.backend_controller import BackendSourceController
 
 
 class ResBase(object):
@@ -126,60 +128,20 @@ class SecGroupRuleIdController(BackendIdController):
         return self.resource.destroy(rid)
 
 
-class SecGroupRuleAddController(BaseController):
+class SecGroupRuleAddController(BackendAddController):
     allow_methods = ("POST",)
     resource = SecGroupRuleBackendApi()
 
-    def before_handler(self, request, data, **kwargs):
-        ResBase.not_null(data)
-        ResBase.validate_keys(data)
 
-    def response_templete(self, data):
-        return {}
-
-    def main_response(self, request, data, **kwargs):
-        res, _ = ResBase.create(resource=self.resource, data=data)
-        return res
-
-
-class SecGroupRuleDeleteController(BaseController):
+class SecGroupRuleDeleteController(BackendDeleteController):
     name = "SecGroupRule"
     resource_describe = "SecGroupRule"
     allow_methods = ("POST",)
     resource = SecGroupRuleBackendApi()
 
-    def before_handler(self, request, data, **kwargs):
-        validation.not_allowed_null(data=data,
-                                    keys=["id"]
-                                    )
 
-        validation.validate_string("id", data.get("id"))
-
-    def response_templete(self, data):
-        return {}
-
-    def main_response(self, request, data, **kwargs):
-        rid = data.pop("id", None)
-        result = self.resource.destroy(rid)
-        return {"result": result}
-
-
-class SGRuleSourceController(BaseSourceController):
+class SGRuleSourceController(BackendSourceController):
     name = "SecGroupRule"
     resource_describe = "SecGroupRule"
     allow_methods = ("POST",)
     resource = SecGroupRuleBackendApi()
-
-    def before_handler(self, request, data, **kwargs):
-        validation.not_allowed_null(data=data,
-                                    keys=["provider", "region", "security_group_id"]
-                                    )
-
-        validation.validate_collector(data=data,
-                                      strings=["id", "resource_id", "provider",
-                                               "secret", "region", "zone",
-                                               "security_group_id"],
-                                      lists=["ignore_ids"])
-
-    def return_relation_keys(self):
-        return ["security_group_id"]

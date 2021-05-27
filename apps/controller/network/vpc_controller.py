@@ -10,7 +10,9 @@ from core.controller import BaseController
 from core import local_exceptions as exception_common
 from apps.api.network.vpc import VpcApi
 from apps.api.network.vpc import VpcBackendApi
-from apps.controller.source_controller import BaseSourceController
+from apps.controller.backend_controller import BackendAddController
+from apps.controller.backend_controller import BackendDeleteController
+from apps.controller.backend_controller import BackendSourceController
 
 
 class ResBase(object):
@@ -114,45 +116,19 @@ class VPCIdController(BackendIdController):
         return self.resource.destroy(rid)
 
 
-class VPCAddController(BaseController):
+class VPCAddController(BackendAddController):
     allow_methods = ("POST",)
     resource = VpcBackendApi()
 
-    def before_handler(self, request, data, **kwargs):
-        ResBase.not_null(data)
-        ResBase.validate_keys(data)
 
-    def response_templete(self, data):
-        return {}
-
-    def main_response(self, request, data, **kwargs):
-        res, _ = ResBase.create(resource=self.resource, data=data)
-        return res
-
-
-class VPCDeleteController(BaseController):
+class VPCDeleteController(BackendDeleteController):
     name = "VPC"
     resource_describe = "VPC"
     allow_methods = ("POST",)
     resource = VpcBackendApi()
 
-    def before_handler(self, request, data, **kwargs):
-        validation.not_allowed_null(data=data,
-                                    keys=["id"]
-                                    )
 
-        validation.validate_string("id", data.get("id"))
-
-    def response_templete(self, data):
-        return {}
-
-    def main_response(self, request, data, **kwargs):
-        rid = data.pop("id", None)
-        result = self.resource.destroy(rid)
-        return {"result": result}
-
-
-class VPCSourceController(BaseSourceController):
+class VPCSourceController(BackendSourceController):
     name = "VPC"
     resource_describe = "VPC"
     allow_methods = ("POST",)
