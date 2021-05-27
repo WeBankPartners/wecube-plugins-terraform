@@ -9,59 +9,16 @@ from lib.json_helper import format_json_dumps
 from core import local_exceptions
 from lib.json_helper import format_json_dumps
 from core import local_exceptions
-from apps.common.convert_keys import define_relations_key
-from apps.api.configer.provider import ProviderApi
 from apps.common.convert_keys import convert_keys
 from apps.common.convert_keys import convert_value
 from apps.common.convert_keys import define_relations_key
 from apps.common.convert_keys import convert_extend_propertys
-from apps.api.configer.provider import ProviderApi
 from apps.api.apibase import ApiBase
 from apps.background.resource.resource_base import CrsObject
 from apps.api.apibase_backend import ApiBackendBase
 
 
-class Common(object):
-    def before_keys_checks(self, provider, create_data, is_update=None):
-        '''
-
-        :param provider:
-        :param vpc_id:
-        :return:
-        '''
-
-        bucket_id = create_data.get("bucket_id")
-
-        self.resource_info(provider)
-        resource_property = self.resource_keys_config["resource_property"]
-        _bucket_status = define_relations_key("bucket_id", bucket_id, resource_property.get("bucket_id"))
-
-        ext_info = {}
-        if bucket_id and (not _bucket_status):
-            ext_info["bucket_id"] = CrsObject("object_storage").object_resource_id(bucket_id)
-
-        logger.info("before_keys_checks add info: %s" % (format_json_dumps(ext_info)))
-        return ext_info
-
-    def generate_create_data(self, zone, create_data, **kwargs):
-        r_create_data = {"bucket_id": create_data.get("bucket_id")}
-
-        content = create_data.get("content")
-        source = create_data.get("source")
-        x_create_data = {"key": create_data.get("key")}
-        if content:
-            x_create_data["context"] = content
-        if source:
-            x_create_data["source"] = source
-
-        return x_create_data, r_create_data
-
-    def generate_owner_data(self, create_data, **kwargs):
-        owner_id = None
-        return owner_id, None
-
-
-class BucketObjectApi(Common, ApiBase):
+class BucketObjectApi(ApiBase):
     def __init__(self):
         super(BucketObjectApi, self).__init__()
         self.resource_name = "bucket_object"
@@ -176,7 +133,7 @@ class BucketObjectApi(Common, ApiBase):
         return self.resource_object.delete(rid)
 
 
-class BucketObjectBackendApi(Common, ApiBackendBase):
+class BucketObjectBackendApi(ApiBackendBase):
     def __init__(self):
         super(BucketObjectBackendApi, self).__init__()
         self.resource_name = "bucket_object"
