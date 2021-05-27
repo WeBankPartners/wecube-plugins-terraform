@@ -10,4 +10,5 @@ static/.DS_Store
 /.idea/*
 test.py
 test/
+*_beta/
 terraform-ui/node_modules
