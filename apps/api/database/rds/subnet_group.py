@@ -15,7 +15,14 @@ from apps.background.resource.resource_base import CrsObject
 from apps.api.apibase_backend import ApiBackendBase
 
 
-class Common(object):
+class SubnetGroupApi(ApiBase):
+    def __init__(self):
+        super(SubnetGroupApi, self).__init__()
+        self.resource_name = "db_subnet_group"
+        self.resource_workspace = "db_subnet_group"
+        self.owner_resource = "rds"
+        self._flush_resobj()
+        self.resource_keys_config = None
 
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
@@ -63,17 +70,7 @@ class Common(object):
         return None, None
 
 
-class SubnetGroupApi(Common, ApiBase):
-    def __init__(self):
-        super(SubnetGroupApi, self).__init__()
-        self.resource_name = "db_subnet_group"
-        self.resource_workspace = "db_subnet_group"
-        self.owner_resource = "rds"
-        self._flush_resobj()
-        self.resource_keys_config = None
-
-
-class SubnetGroupBackendApi(Common, ApiBackendBase):
+class SubnetGroupBackendApi(ApiBackendBase):
     def __init__(self):
         super(SubnetGroupBackendApi, self).__init__()
         self.resource_name = "db_subnet_group"
