@@ -185,12 +185,11 @@ def convert_keys(datas, defines, is_update=False, is_extend=False):
     result = {}
     if is_update:
         for key, value in datas.items():
-            # 依据data数据进行字段， 如果字段未定义则异常
+            # 依据data数据进行字段筛选
             if defines.get(key) is not None:
                 result.update(convert_key(key, value, define=defines[key]))
             else:
                 logger.info("not define key %s, skip it. can use define ('key': '-')  remove it" % key)
-                # raise ValueError("未定义的关键词 %s, 若需移除关键词，则定义为 'key': '-'" % key)
 
         return result
 
