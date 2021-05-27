@@ -5,21 +5,17 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import copy
 from lib.logs import logger
 from core import validation
-from core.controller import BackendController
-from core.controller import BackendIdController
 from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from core import local_exceptions
 from apps.api.configer.resource import ResourceObject
-
-from apps.api.conductor.valueConfiger import ValueConductor
 from apps.controller.source_controller import BaseSourceController
 from apps.api.conductor.provider import ProviderConductor
 from apps.api.conductor.region import RegionConductor
 from apps.api.conductor.type_format import TypeFormat
-from apps.api.conductor.apply_data_conductor import apply_data_builder
-from apps.api.conductor.source_data_conductor import query_data_builder
-from apps.api.apibase_backend_v2 import ApiBackendBaseV2
+# from apps.api.conductor.apply_data_conductor import apply_data_builder
+# from apps.api.conductor.source_data_conductor import query_data_builder
+from apps.api.apibase_backend import ApiBackendBase
 from apps.api.configer.region import ZoneApi
 from apps.controller.configer.model_args import source_columns_outputs
 
@@ -45,7 +41,7 @@ def filter_action_output(out_datas, filters):
     return res
 
 
-class ResBase(object):
+class BackendClient(object):
     @classmethod
     def get_id(cls, data):
         return data.get("id") or get_uuid()
@@ -163,7 +159,7 @@ class ResBase(object):
         pre_action = resource_object.get("pre_action")
         pre_action_output = resource_object.get("pre_action_output")
         if pre_action and pre_action_output:
-            client = ApiBackendBaseV2(resource_name=pre_action, resource_workspace=pre_action)
+            client = ApiBackendBase(resource_name=pre_action, resource_workspace=pre_action)
             results = client.get_remote_source(rid, base_info, base_bodys, query_data=data)
             return filter_action_output(results, filters=pre_action_output)
 
@@ -248,7 +244,7 @@ class ResBase(object):
         if ignore_resources:
             for result in pre_results:
                 if result.get("resource_id") and result.get("resource_id") in ignore_resources:
-                    logger.info("skip resource id : %s" %(result.get("resource_id")))
+                    logger.info("skip resource id : %s" % (result.get("resource_id")))
                 else:
                     t_data = copy.deepcopy(data)
                     t_data.update(result)
@@ -315,14 +311,14 @@ class BackendAddController(BaseController):
     resource = None
 
     def before_handler(self, request, data, **kwargs):
-        ResBase.not_null(data)
-        ResBase.validate_keys(data)
+        BackendClient.not_null(data)
+        BackendClient.validate_keys(data)
 
     def response_templete(self, data):
         return {}
 
     def main_response(self, request, data, **kwargs):
-        return ResBase.create(resource=self.resource, data=data)
+        return BackendClient.create(resource=self.resource, data=data)
 
 
 class BackendDeleteController(BaseController):
@@ -347,18 +343,18 @@ class BackendDeleteController(BaseController):
         return {"result": result}
 
 
-class BackendSourceController(BaseSourceController):
+class BackendSourceController(BaseController):
     name = "Backend"
     resource_describe = "Backend"
     allow_methods = ("POST",)
     resource = None
 
     def before_handler(self, request, data, **kwargs):
-        ResBase.not_null(data)
-        ResBase.validate_keys(data)
+        BackendClient.not_null(data)
+        BackendClient.validate_keys(data)
 
     def response_templete(self, data):
         return []
 
     def main_response(self, request, data, **kwargs):
-        return ResBase.query(resource=self.resource, data=data)
+        return BackendClient.query(resource=self.resource, data=data)
