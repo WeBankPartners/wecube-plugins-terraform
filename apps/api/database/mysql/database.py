@@ -7,14 +7,20 @@ import json
 from core import local_exceptions
 from lib.logs import logger
 from lib.json_helper import format_json_dumps
-from apps.api.configer.provider import ProviderApi
 from apps.common.convert_keys import define_relations_key
 from apps.api.apibase import ApiBase
 from apps.background.resource.resource_base import CrsObject
 from apps.api.apibase_backend import ApiBackendBase
 
 
-class Common(object):
+class MysqlDatabaseApi(ApiBase):
+    def __init__(self):
+        super(MysqlDatabaseApi, self).__init__()
+        self.resource_name = "mysql_database"
+        self.resource_workspace = "mysql_database"
+        self.owner_resource = "mysql"
+        self._flush_resobj()
+        self.resource_keys_config = None
 
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
@@ -48,17 +54,7 @@ class Common(object):
         return owner_id, None
 
 
-class MysqlDatabaseApi(Common, ApiBase):
-    def __init__(self):
-        super(MysqlDatabaseApi, self).__init__()
-        self.resource_name = "mysql_database"
-        self.resource_workspace = "mysql_database"
-        self.owner_resource = "mysql"
-        self._flush_resobj()
-        self.resource_keys_config = None
-
-
-class MysqlDatabaseBackendApi(Common, ApiBackendBase):
+class MysqlDatabaseBackendApi(ApiBackendBase):
     def __init__(self):
         super(MysqlDatabaseBackendApi, self).__init__()
         self.resource_name = "mysql_database"
