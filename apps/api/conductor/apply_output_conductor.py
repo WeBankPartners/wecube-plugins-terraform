@@ -42,6 +42,23 @@ class OutputReader(object):
         add_infos[key] = value
         return add_infos
 
+    @classmethod
+    def fetch_id(cls, result):
+        '''
+
+        :param result:
+        :return:
+        '''
+
+        try:
+            _data = result.get("resources")[0]
+            _instances = _data.get("instances")[0]
+            _attributes = _instances.get("attributes")
+            return _attributes.get("id") or "0000000"
+        except:
+            logger.info(traceback.format_exc())
+            raise ValueError("result can not fetch id")
+
 
 def read_output_result(provider, result, models, resource_values_config):
     '''
@@ -65,6 +82,8 @@ def read_output_result(provider, result, models, resource_values_config):
             if len(ext_result["resource_id"]) > 512:
                 ext_result["resource_id"] = ext_result["resource_id"][:512]
                 logger.info("resource id length more than 512, will truncated for resource_id")
+        else:
+            ext_result["resource_id"] = OutputReader.fetch_id(result)
 
         logger.info(format_json_dumps(ext_result))
         return ext_result
