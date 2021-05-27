@@ -1,6 +1,7 @@
 # coding: utf-8
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
+import copy
 import json
 import traceback
 from lib.logs import logger
@@ -101,7 +102,7 @@ def query_data_builder(provider, datas, defines, resource_values_config):
 
 def query_return_builder(data, defines, results):
     add_columns = {}
-    for key, define in defines:
+    for key, define in defines.items():
         if isinstance(define, dict):
             if define.get("return") in [True, 1, '1', 'true', 'True']:
                 add_columns[key] = data.get(key)
@@ -110,11 +111,14 @@ def query_return_builder(data, defines, results):
         res = []
         for result in results:
             if isinstance(result, dict):
-                result.update(add_columns)
-            res.append(result)
+                x_adder_col = copy.deepcopy(add_columns)
+                x_adder_col.update(result)
+                res.append(x_adder_col)
+            else:
+                res.append(result)
         return res
     elif isinstance(results, dict):
-        results.update(add_columns)
-        return results
+        add_columns.update(results)
+        return add_columns
     else:
         return results

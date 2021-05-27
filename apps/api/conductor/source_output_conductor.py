@@ -45,8 +45,8 @@ class SourceOuterReader(object):
             if out_data:
                 if isinstance(out_data, dict) and (not SourceOuterReader.is_null_dict(out_data)):
                     result.append(out_data)
-
-                result.append(out_data)
+                elif isinstance(out_data, (basestring, bool, int, float)):
+                    result.append(out_data)
 
         return result
 
@@ -110,6 +110,8 @@ class SourceOuterReader(object):
                 x_value = SourceOuterReader.eval_line(line=data, column=column)
                 if x_value:
                     x_value = resource_value_config.get(x_value) or x_value
+            elif column == "-" or not column:
+                return {}
 
             return {key: x_value}
 
@@ -199,3 +201,88 @@ def source_object_outer(datas, columns):
         logger.info("data is not dict/list, no columns %s filter, skip.." % column)
         return datas
 
+
+def _data_attr_(result):
+    _data = result.get("resources")[0]
+    _instances = _data.get("instances")[0]
+    return _instances.get("attributes")
+
+
+def _adder_property(result, key, define):
+    x_tmp = []
+    for t_data in result:
+        if isinstance(t_data, dict):
+            t_data[define.get("property")] = key
+        elif isinstance(t_data, basestring):
+            # 对于获取的数据是字符串类型时， 需要添加property字段， 
+            # 则先将数据放入x_Origin_line， 由后续的字段提取进行特殊处理
+            t_data = {define.get("property"): key, "x_Origin_line": t_data}
+        else:
+            logger.info("_adder_property %s is not string or dict, skip add property" % key)
+
+        x_tmp.append(t_data)
+
+    return x_tmp
+
+
+def read_source_output(result, data_source_argument):
+    try:
+        result_columns = []
+        _attributes = _data_attr_(result)
+
+        if not data_source_argument:
+            return source_object_outer(datas=_attributes, columns=[])
+
+        if isinstance(data_source_argument, basestring):
+            result_columns = source_object_outer(datas=_attributes, columns=data_source_argument.split("."))
+        elif isinstance(data_source_argument, dict):
+            # 多个字段提取定义 {"engree": {"property": "type", "attributes": "engress"}}
+            for key, define in data_source_argument.items():
+                if isinstance(define, basestring):
+                    result_columns = source_object_outer(datas=_attributes, columns=define.split("."))
+                elif isinstance(define, dict):
+                    col_defines = source_object_outer(datas=_attributes,
+                                                      columns=define.get("attributes", "").split("."))
+
+                    if define.get("property"):
+                        col_defines = _adder_property(result=col_defines, key=key, define=define)
+                    result_columns += col_defines
+                else:
+                    raise ValueError("data source argument 配置异常应为 string或json：key-value "
+                                     "或 key - {'property': 'xxx', 'attributes': ''}")
+
+        return result_columns
+    except:
+        logger.info(traceback.format_exc())
+        raise ValueError("query remote source failed, result read faild")
+
+
+def read_outer_property(provider, result, defines, resource_values_config):
+    logger.debug("data source output outer .... ")
+
+    # 处理x_Origin_line
+    x_Origin_line = result.pop("x_Origin_line", None) if isinstance(result, dict) else None
+    if x_Origin_line:
+        for key, define in defines.items():
+            _t = SourceOuterReader.fetch_property(provider, key, result, define, resource_values_config.get(key))
+            result.update(_t)
+
+        return result
+
+    res = {}
+    for key, define in defines.items():
+        if isinstance(define, dict) and define.get("define"):
+            if result.get(key):
+                value = TypeFormat.f_dict(result.get(key))
+            else:
+                value = read_outer_property(provider=provider, result=result,
+                                            defines=define.get("define"), resource_values_config=resource_values_config)
+            if value:
+                res[key] = value
+
+        else:
+            _t = SourceOuterReader.fetch_property(provider, key, result, define, resource_values_config.get(key))
+            if _t:
+                res.update(_t)
+
+    return res
