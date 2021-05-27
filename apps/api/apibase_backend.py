@@ -22,7 +22,7 @@ from apps.api.conductor.apply_output_conductor import read_output_result
 from apps.api.conductor.apply_data_conductor import apply_data_builder
 from apps.api.conductor.source_data_conductor import query_data_builder
 from apps.api.conductor.source_data_conductor import query_return_builder
-from apps.api.conductor.source_output_conductor import source_object_outer
+# from apps.api.conductor.source_output_conductor import source_object_outer
 from apps.api.conductor.source_output_conductor import read_source_output
 from apps.api.conductor.source_output_conductor import SourceOuterReader
 from apps.api.conductor.source_output_conductor import read_outer_property
@@ -70,7 +70,8 @@ class ApiBackendBase(TerraformResource):
         # 生成apply resource信息
         create_data = apply_data_builder(provider=provider, datas=data,
                                          defines=defines["resource_property"],
-                                         resource_values_config=resource_values_config)
+                                         resource_values_config=resource_values_config,
+                                         resource_name=self.resource_name)
 
         logger.info(format_json_dumps(create_data))
         return ResourceConductor().conductor_apply_data(label_name, create_data,
@@ -199,7 +200,8 @@ class ApiBackendBase(TerraformResource):
     def read_output_controller(self, provider, result, resource_object, resource_values_config):
         logger.info(format_json_dumps(result))
         return read_output_result(provider, result, models=resource_object.get("resource_property"),
-                                  resource_values_config=resource_values_config)
+                                  resource_values_config=resource_values_config,
+                                  resource_name=self.resource_name)
 
     def run_create(self, rid, region, zone, provider_object, provider_info,
                    asset_id, resource_id, create_data, extend_info,
@@ -368,7 +370,8 @@ class ApiBackendBase(TerraformResource):
         label_name = self.resource_name + "_q_" + rid
         build_query_data = query_data_builder(provider=provider_object["name"], datas=query_data,
                                               defines=resource_object.get("data_source"),
-                                              resource_values_config=resource_values_config)
+                                              resource_values_config=resource_values_config,
+                                              resource_name=self.resource_name)
 
         define_json = self.source_filter_controller(label_name=label_name,
                                                     query_data=build_query_data,
@@ -398,7 +401,8 @@ class ApiBackendBase(TerraformResource):
 
         res = []
         for out_data in output_results:
-            x_res = read_outer_property(provider, out_data, defines.get("data_source_output"), resource_values_config)
+            x_res = read_outer_property(provider, out_data, defines.get("data_source_output"),
+                                        resource_values_config, resouce_name=self.resource_name)
             res.append(x_res)
 
         logger.info(format_json_dumps(res))

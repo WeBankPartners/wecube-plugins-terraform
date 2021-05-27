@@ -86,18 +86,23 @@ class InstanceTypeObject(ResourceBaseObject):
         else:
             return name, {"cpu": 0, "memory": 0}
 
-    def convert_asset(self, provider, asset_name):
+    def convert_asset(self, provider, asset_name, usage_type=None):
         asset_name = str(asset_name)
-        data = self.resource.get(filters={"provider": provider,
-                                          "origin_name": asset_name})
+        filters = {"provider": provider, "origin_name": asset_name}
+        if usage_type:
+            filters["type"] = usage_type
+        data = self.resource.get(filters=filters)
         if data:
             return data["name"], {"cpu": data.get("cpu"), "memory": data.get("memory")}
         else:
             return asset_name, {"cpu": 0, "memory": 0}
 
-    def convert_resource_name(self, provider, name):
-        data = self.resource.get(filters={"provider": provider,
-                                          "name": name})
+    def convert_resource_name(self, provider, name, usage_type=None):
+        filters = {"provider": provider, "name": name}
+        if usage_type:
+            filters["type"] = usage_type
+
+        data = self.resource.get(filters=filters)
         if data:
             return data["origin_name"], data
         else:
@@ -105,4 +110,3 @@ class InstanceTypeObject(ResourceBaseObject):
 
     def ora_delete(self, rid):
         return self.resource.delete(filters={"id": rid})
-

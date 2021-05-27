@@ -260,7 +260,6 @@ class ModelFormat(object):
 
         return value
 
-
     @classmethod
     def _hint_zone_id_outer_(cls, value):
         '''
@@ -347,9 +346,8 @@ class ModelFormat(object):
 
         return value
 
-
     @classmethod
-    def _hint_instance_type_(cls, provider, value):
+    def _hint_instance_type_(cls, provider, value, usage_type=None):
         '''
 
         :param value:
@@ -359,10 +357,13 @@ class ModelFormat(object):
 
         # for define instance type
         if isinstance(value, basestring):
-            t_data, _ = InstanceTypeObject().convert_resource_name(provider, value)
+            t_data, _ = InstanceTypeObject().convert_resource_name(provider, value, usage_type)
             value = t_data or value
         elif isinstance(value, list):
-            c, t_data = InstanceTypeObject().list(filters={"provider": provider}, filter_in={"name": value})
+            filters = {"provider": provider}
+            if usage_type:
+                filters["type"] = usage_type
+            c, t_data = InstanceTypeObject().list(filters=filters, filter_in={"name": value})
 
             convertd = []
             for x in t_data:
@@ -377,7 +378,7 @@ class ModelFormat(object):
         return value
 
     @classmethod
-    def _hint_instance_type_outer_(cls, provider, value):
+    def _hint_instance_type_outer_(cls, provider, value, usage_type=None):
         '''
          #todo instance type 转换信息新增 cpu 内存等信息
         :param value:
@@ -388,10 +389,13 @@ class ModelFormat(object):
         # for define instance type
         add_infos = {}
         if isinstance(value, (basestring, int)):
-            value, add_infos = InstanceTypeObject().convert_asset(provider, value)
+            value, add_infos = InstanceTypeObject().convert_asset(provider, value, usage_type)
         elif isinstance(value, list):
-            #for list add info is {}, e: list may not used
-            c, t_data = InstanceTypeObject().list(filters={"provider": provider}, filter_in={"origin_name": value})
+            # for list add info is {}, e: list may not used
+            filters = {"provider": provider}
+            if usage_type:
+                filters["type"] = usage_type
+            c, t_data = InstanceTypeObject().list(filters=filters, filter_in={"origin_name": value})
 
             convertd = []
             for x in t_data:
@@ -406,7 +410,7 @@ class ModelFormat(object):
         return value, add_infos
 
     @classmethod
-    def hint_apply_infos(cls, provider, value, define):
+    def hint_apply_infos(cls, provider, value, define, resource_name):
         '''
         hint info， 用于转换cmdb信息定义
         :param value:
@@ -426,13 +430,13 @@ class ModelFormat(object):
         elif define == "$region":
             value = cls._hint_region_id_(value)
         elif define == "$instance.type":
-            value = cls._hint_instance_type_(provider, value)
+            value = cls._hint_instance_type_(provider, value, usage_type=resource_name)
         else:
             logger.info("define %s not define now, skip it ..." % (define))
         return value
 
     @classmethod
-    def hint_outer_infos(cls, provider, value, define):
+    def hint_outer_infos(cls, provider, value, define, resource_name):
         '''
         hint info， 用于转换cmdb信息定义
 
@@ -455,7 +459,7 @@ class ModelFormat(object):
         elif define == "$region":
             value = cls._hint_region_id_outer_(value)
         elif define == "$instance.type":
-            value, add_infos = cls._hint_instance_type_outer_(provider, value)
+            value, add_infos = cls._hint_instance_type_outer_(provider, value, usage_type=resource_name)
         else:
             logger.info("define %s not define now, skip it ..." % (define))
         return value, add_infos

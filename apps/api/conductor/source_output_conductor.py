@@ -81,7 +81,7 @@ class SourceOuterReader(object):
             return ""
 
     @staticmethod
-    def fetch_property(provider, key, data, define_column, resource_value_config):
+    def fetch_property(provider, key, data, define_column, resource_value_config, resource_name):
         '''
 
         提取 output 数据字段值
@@ -131,7 +131,7 @@ class SourceOuterReader(object):
 
             return x_data
 
-        def _f_dict_property_(provider, data, key, define, resource_value_config):
+        def _f_dict_property_(provider, data, key, define, resource_value_config, resource_name):
             '''
             for dict
             :param data:
@@ -160,7 +160,7 @@ class SourceOuterReader(object):
                 value = ValueConfigerConductor.outer_value(value, resource_value_config)
 
                 # for hint 转换为资产id等信息
-                value, add_info = ModelFormat.hint_outer_infos(provider, value, define)
+                value, add_info = ModelFormat.hint_outer_infos(provider, value, define, resource_name)
                 add_info[key] = value
                 return add_info
 
@@ -171,7 +171,8 @@ class SourceOuterReader(object):
 
         return _f_dict_property_(provider=provider, data=data,
                                  key=key, define=define_column,
-                                 resource_value_config=resource_value_config)
+                                 resource_value_config=resource_value_config,
+                                 resource_name=resource_name)
 
 
 def source_object_outer(datas, columns):
@@ -257,14 +258,16 @@ def read_source_output(result, data_source_argument):
         raise ValueError("query remote source failed, result read faild")
 
 
-def read_outer_property(provider, result, defines, resource_values_config):
+def read_outer_property(provider, result, defines, resource_values_config, resouce_name):
     logger.debug("data source output outer .... ")
 
     # 处理x_Origin_line
     x_Origin_line = result.pop("x_Origin_line", None) if isinstance(result, dict) else None
     if x_Origin_line:
         for key, define in defines.items():
-            _t = SourceOuterReader.fetch_property(provider, key, result, define, resource_values_config.get(key))
+            _t = SourceOuterReader.fetch_property(provider, key, result, define,
+                                                  resource_values_config.get(key),
+                                                  resouce_name)
             result.update(_t)
 
         return result
@@ -276,12 +279,16 @@ def read_outer_property(provider, result, defines, resource_values_config):
                 value = TypeFormat.f_dict(result.get(key))
             else:
                 value = read_outer_property(provider=provider, result=result,
-                                            defines=define.get("define"), resource_values_config=resource_values_config)
+                                            defines=define.get("define"),
+                                            resource_values_config=resource_values_config,
+                                            resouce_name=resouce_name)
             if value:
                 res[key] = value
 
         else:
-            _t = SourceOuterReader.fetch_property(provider, key, result, define, resource_values_config.get(key))
+            _t = SourceOuterReader.fetch_property(provider, key, result, define,
+                                                  resource_values_config.get(key),
+                                                  resouce_name)
             if _t:
                 res.update(_t)
 

@@ -10,7 +10,7 @@ from apps.api.conductor.model_format import ModelFormat
 client = ModelFormat
 
 
-def _validate_apply_data(provider, key, value, define, resource_value_config):
+def _validate_apply_data(provider, key, value, define, resource_value_config, resource_name):
     '''
     转换传入的数据的key 以及 value映射值
 
@@ -44,7 +44,7 @@ def _validate_apply_data(provider, key, value, define, resource_value_config):
             if isinstance(value, list):
                 # for list after format, may need revert value
                 value = client.convert_apply_value(value, resource_value_config)
-            value = client.hint_apply_infos(provider, value, define)
+            value = client.hint_apply_infos(provider, value, define, resource_name)
 
         if define.get("convert"):
             key = define.get("convert") or key
@@ -57,7 +57,7 @@ def _validate_apply_data(provider, key, value, define, resource_value_config):
         return {}
 
 
-def apply_data_builder(provider, datas, defines, resource_values_config):
+def apply_data_builder(provider, datas, defines, resource_values_config, resource_name):
     '''
     依据resource定义， 转换字段， 转换value值， 生成apply resource 数据
     {
@@ -85,13 +85,15 @@ def apply_data_builder(provider, datas, defines, resource_values_config):
             else:
                 value = apply_data_builder(provider=provider,
                                            datas=datas, defines=define.get("define"),
-                                           resource_values_config=resource_values_config)
+                                           resource_values_config=resource_values_config,
+                                           resource_name=resource_name)
             if value:
                 result[key] = value
         else:
             _t = _validate_apply_data(provider=provider, key=key,
                                       value=datas.get(key), define=define,
-                                      resource_value_config=resource_values_config.get(key, {}))
+                                      resource_value_config=resource_values_config.get(key, {}),
+                                      resource_name=resource_name)
             if _t:
                 result.update(_t)
 

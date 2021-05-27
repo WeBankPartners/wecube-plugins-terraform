@@ -90,6 +90,7 @@ ALTER TABLE terraform.resource ADD pre_action_output varchar(512) NULL  after  `
 
 ALTER TABLE terraform.resource MODIFY COLUMN data_source_name varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL;
 
+ALTER TABLE terraform.instance_type ADD `type` varchar(64) NULL  after  `name`;
 
 #@v0.3.0-end@;
 

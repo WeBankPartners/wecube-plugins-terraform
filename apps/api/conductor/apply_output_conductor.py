@@ -11,7 +11,7 @@ from apps.api.conductor.value_conductor import ValueConfigerConductor
 
 class OutputReader(object):
     @staticmethod
-    def read_output(provider, key, define, result, resource_value_config):
+    def read_output(provider, key, define, result, resource_value_config, resource_name):
         '''
 
         :param key:
@@ -32,7 +32,7 @@ class OutputReader(object):
         elif isinstance(define, dict):
             client = ModelFormat
             value = client.format_type(result, type=define.get("type", "string"))
-            value, add_infos = client.hint_outer_infos(provider, value, define)
+            value, add_infos = client.hint_outer_infos(provider, value, define, resource_name)
         else:
             raise ValueError("转换配置错误， 类型错误")
 
@@ -60,7 +60,7 @@ class OutputReader(object):
             raise ValueError("result can not fetch id")
 
 
-def read_output_result(provider, result, models, resource_values_config):
+def read_output_result(provider, result, models, resource_values_config, resource_name):
     '''
     对于设置了output的属性， 则提取output输出值
     :param result:
@@ -75,7 +75,8 @@ def read_output_result(provider, result, models, resource_values_config):
             _out_dict = OutputReader.read_output(provider=provider,
                                                  key=column, define=models.get(column),
                                                  result=res.get("value"),
-                                                 resource_value_config=resource_values_config.get(column))
+                                                 resource_value_config=resource_values_config.get(column),
+                                                 resource_name=resource_name)
             ext_result.update(_out_dict)
 
         if "resource_id" in ext_result.keys():
