@@ -9,7 +9,9 @@ from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.vm.eni import EniApi
 from apps.api.vm.eni import EniBackendApi
-from apps.controller.source_controller import BaseSourceController
+from apps.controller.backend_controller import BackendAddController
+from apps.controller.backend_controller import BackendDeleteController
+from apps.controller.backend_controller import BackendSourceController
 
 
 class ResBase(object):
@@ -122,52 +124,26 @@ class EniIdController(BackendIdController):
         return self.resource.destroy(rid)
 
 
-class EniAddController(BaseController):
+class EniAddController(BackendAddController):
     allow_methods = ("POST",)
     resource = EniBackendApi()
 
-    def before_handler(self, request, data, **kwargs):
-        ResBase.not_null(data)
-        ResBase.validate_keys(data)
 
-    def response_templete(self, data):
-        return {}
-
-    def main_response(self, request, data, **kwargs):
-        res, _ = ResBase.create(resource=self.resource, data=data)
-        return res
-
-
-class EniDeleteController(BaseController):
-    name = "Eni"
-    resource_describe = "Eni"
-    allow_methods = ("POST",)
-    resource = EniBackendApi()
-
-    def before_handler(self, request, data, **kwargs):
-        validation.not_allowed_null(data=data,
-                                    keys=["id"]
-                                    )
-
-        validation.validate_string("id", data.get("id"))
-
-    def response_templete(self, data):
-        return {}
-
-    def main_response(self, request, data, **kwargs):
-        rid = data.pop("id", None)
-        result = self.resource.destroy(rid)
-        return {"result": result}
-
-
-class ENISourceController(BaseSourceController):
+class EniDeleteController(BackendDeleteController):
     name = "Eni"
     resource_describe = "Eni"
     allow_methods = ("POST",)
     resource = EniBackendApi()
 
 
-class ENISGSourceController(BaseSourceController):
+class ENISourceController(BackendSourceController):
+    name = "Eni"
+    resource_describe = "Eni"
+    allow_methods = ("POST",)
+    resource = EniBackendApi()
+
+
+class ENISGSourceController(BackendSourceController):
     name = "Eni"
     resource_describe = "Eni"
     allow_methods = ("POST",)
