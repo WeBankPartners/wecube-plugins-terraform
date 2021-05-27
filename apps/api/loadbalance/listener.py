@@ -8,12 +8,19 @@ from lib.json_helper import format_json_dumps
 from core import local_exceptions
 from apps.common.convert_keys import define_relations_key
 from apps.api.apibase import ApiBase
-from apps.api.configer.provider import ProviderApi
 from apps.background.resource.resource_base import CrsObject
 from apps.api.apibase_backend import ApiBackendBase
 
 
-class Common(object):
+class LBListenerApi(ApiBase):
+    def __init__(self):
+        super(LBListenerApi, self).__init__()
+        self.resource_name = "lb_listener"
+        self.resource_workspace = "lb_listener"
+        self.owner_resource = "lb"
+        self._flush_resobj()
+        self.resource_keys_config = None
+
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
 
@@ -54,16 +61,6 @@ class Common(object):
         owner_id = create_data.get("lb_id")
         return owner_id, None
 
-
-class LBListenerApi(Common, ApiBase):
-    def __init__(self):
-        super(LBListenerApi, self).__init__()
-        self.resource_name = "lb_listener"
-        self.resource_workspace = "lb_listener"
-        self.owner_resource = "lb"
-        self._flush_resobj()
-        self.resource_keys_config = None
-
     def destroy(self, rid):
         '''
 
@@ -89,7 +86,7 @@ class LBListenerApi(Common, ApiBase):
         return self.resource_object.delete(rid)
 
 
-class LBListenerBackendApi(Common, ApiBackendBase):
+class LBListenerBackendApi(ApiBackendBase):
     def __init__(self):
         super(LBListenerBackendApi, self).__init__()
         self.resource_name = "lb_listener"
@@ -97,14 +94,3 @@ class LBListenerBackendApi(Common, ApiBackendBase):
         self.owner_resource = "lb"
         self._flush_resobj()
         self.resource_keys_config = None
-
-    def before_source_asset(self, provider, query_data):
-        for key in ["lb_id"]:
-            if query_data.get(key):
-                query_data[key] = CrsObject().object_asset_id(query_data.get(key))
-
-        return query_data
-
-    def reverse_asset_ids(self):
-        return ['lb_id']
-
