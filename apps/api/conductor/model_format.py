@@ -169,16 +169,31 @@ class ModelFormat(object):
         :return:
         '''
 
+        def get_value(value, column, data):
+            if column == "resource_id" or (not column):
+                value = data.get("resource_id") or value
+            else:
+                x_res = data.get("output_json") or {}
+                value = x_res.get(instance_columns) or value
+
+            return value
+
         # for define $resource, filter any resource
         if "." in define:
             resource_name = define.split(".")[1]
         else:
             resource_name = ""
 
+        instance_columns = ""
+        try:
+            instance_columns = define.split(".")[2]
+        except:
+            pass
+
         logger.info("_hint_resource_, filter resource %s" % resource_name)
         if isinstance(value, basestring):
             t_data = CrsObject(resource_name).show(rid=value)
-            value = t_data.get("resource_id") or value
+            value = get_value(value=value, column=instance_columns, data=t_data)
         elif isinstance(value, list):
             c, t_data = CrsObject(resource_name).list(filter_in={"id": value})
             if resource_name and len(value) < c:
@@ -187,7 +202,8 @@ class ModelFormat(object):
             convertd = []
             for x in t_data:
                 convertd.append(x.get("id"))
-                value.append(x.get("resource_id"))
+                x_value = get_value(value=x.get("resource_id"), column=instance_columns, data=x)
+                value.append(x_value)
 
             logger.info("_hint_resource_, convert resource id: %s" % (bytes(convertd)))
             value = list(set(value) - set(convertd))
@@ -418,7 +434,7 @@ class ModelFormat(object):
         :return:
         '''
 
-        if define.get("hint"):
+        if value and define.get("hint"):
             define = define.get("hint")
         else:
             return value
@@ -446,7 +462,7 @@ class ModelFormat(object):
         '''
 
         add_infos = {}
-        if define.get("hint"):
+        if value and define.get("hint"):
             define = define.get("hint")
         else:
             return value, add_infos
