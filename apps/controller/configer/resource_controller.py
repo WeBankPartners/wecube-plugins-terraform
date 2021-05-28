@@ -64,8 +64,7 @@ class ResourceController(BackendController):
                                       "pre_action", "pre_action_output",
                                       "data_source_output", "data_source_argument"])
         validation.not_allowed_null(data=data,
-                                    keys=["provider", "resource_type",
-                                          "resource_name", "resource_property"]
+                                    keys=["provider", "resource_type"]
                                     )
 
         validation.validate_string("id", data.get("id"))
@@ -133,11 +132,12 @@ class ResourceController(BackendController):
 
         data_source_argument = format_argument("data_source_argument", data.get("data_source_argument"))
 
+        resource_name = data.get("resource_name", "") or ""
         ProviderObject().provider_name_object(data["provider"])
         create_data = {"id": data.get("id") or get_uuid(),
                        "provider": data["provider"],
                        "resource_type": data.get("resource_type"),
-                       "resource_name": data.get("resource_name"),
+                       "resource_name": resource_name,
                        "extend_info": json.dumps(extend_info),
                        "resource_property": json.dumps(resource_property),
                        "resource_output": json.dumps(resource_output),
