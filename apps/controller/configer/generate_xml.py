@@ -48,6 +48,25 @@ template = '''
 '''
 
 
+def fetch_columns(defines):
+    result = []
+    if not defines:
+        return result
+
+    for key, define in defines.items:
+        if isinstance(define, basestring):
+            result.append(key)
+        else:
+            if define.get("define"):
+                if define.get("convert"):
+                    result.append(key)
+                result += fetch_columns(defines=define.get("define"))
+            else:
+                result.append(key)
+
+    return result
+
+
 class ResBase(object):
     def resource_objets(self, name):
         _, datas = ResourceObject().list(filters={"resource_type": name})
@@ -57,9 +76,12 @@ class ResBase(object):
         x_columns = []
         x_output = []
         for data in datas:
-            x_columns += data.get("resource_property").keys()
-            x_columns += data.get("extend_info").keys()
-            x_output += data.get("resource_output").keys()
+            # x_columns += data.get("resource_property").keys()
+            # x_columns += data.get("extend_info").keys()
+            # x_output += data.get("resource_output").keys()
+            x_columns += fetch_columns(defines=data.get("resource_property"))
+            x_columns += fetch_columns(data.get("extend_info"))
+            x_output += fetch_columns(data.get("resource_output"))
 
         columns = list(set(x_columns))
         output = list(set(x_output))
@@ -87,13 +109,15 @@ class ResBase(object):
         x_columns = []
         x_output = []
         for data in datas:
-            x_columns += data.get("data_source").keys()
-            x_output += data.get("data_source_output").keys()
-            data_source_output = data.get("data_source_output")
-            for key, value in data_source_output.items():
-                if isinstance(value, dict):
-                    if value.get("equivalence"):
-                        x_columns.append(value.get("equivalence"))
+            # x_columns += data.get("data_source").keys()
+            x_columns += fetch_columns(data.get("data_source"))
+            # x_output += data.get("data_source_output").keys()
+            x_output += fetch_columns(data.get("data_source_output"))
+            # data_source_output = data.get("data_source_output")
+            # for key, value in data_source_output.items():
+            #     if isinstance(value, dict):
+            #         if value.get("equivalence"):
+            #             x_columns.append(value.get("equivalence"))
 
         columns = list(set(x_columns))
         output = list(set(x_output))
@@ -200,4 +224,3 @@ class ResourceXmlController(BackendController):
     def list(self, request, data, orderby=None, page=None, pagesize=None, **kwargs):
         xml_str = ResBase().generate_resource_xml()
         return 1, {"result": xml_str}
-
