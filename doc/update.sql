@@ -184,6 +184,31 @@ INSERT INTO terraform.resource (id,provider,resource_type,resource_name,extend_i
 	 ('eeaf649f6be54ccfaf2b6b20acf2b18b','aws','network_interface','aws_network_interface','{}','{"subnet_id": {"convert": "subnet_id", "allow_null": 0, "type": "string", "hint": "$resource.subnet"}, "vpc_id": "-", "ipaddress": {"convert": "private_ips", "allow_null": 1, "type": "list"}, "name": {"convert": "name", "allow_null": 0, "type": "string"}, "security_group_id": {"convert": "security_groups", "allow_null": 1, "type": "list", "hint": "$resource.security_group"}}','{"mac": "mac_address", "ipaddress": "private_ips", "resource_id": "id"}','aws_network_interface','','{"resource_id": {"convert": "id", "hint": "$resource.network_interface"}}','{"name": {"convert": "name", "allow_null": 0, "type": "string"}, "resource_id": {"convert": "id", "allow_null": 1, "hint": "$resource.network_interface"}, "subnet_id": {"convert": "subnet_id", "allow_null": 0, "type": "string", "hint": "$resource.subnet"}, "security_group_id": {"convert": "security_groups", "allow_null": 1, "type": "list", "hint": "$resource.security_group"}, "vpc_id": "-", "ipaddress": {"convert": "private_ips", "allow_null": 1, "type": "list"}}','network_interface_list','{"ids": "resource_id"}',0,'2021-05-17 11:44:40','2021-05-28 16:55:25',NULL,1,0);
 
 
+INSERT INTO terraform.config (id,provider,resource,property,value_config,is_locked,created_time,updated_time,deleted_time,enabled,is_deleted) VALUES
+	 ('09f9682305484958bf54fe53270a7f39','alicloud','security_group_rule','policy','{"DROP": "drop", "ACCEPT": "accept"}',0,'2021-01-29 15:11:25','2021-01-29 15:11:25',NULL,1,0),
+	 ('0f490f44980448aeb61efca2b0120107','alicloud','mysql','engine','{"mysql": "MySQL"}',0,'2021-01-25 16:09:26','2021-01-25 16:09:26',NULL,1,0),
+	 ('191ca26f942a42b598636cf01b8a20ce','alicloud','instance','power_action','{"start": "Running", "stop": "Stopped"}',0,'2021-01-25 15:24:48','2021-01-25 15:24:48',NULL,1,0),
+	 ('1e5ee3d572204bc4aaa96e57256f0386','alicloud','security_group_rule','ports','{"10000": "10000/10000", "80": "80/80", "8000-9000": "8000/9000", "8080": "8080/8080"}',0,'2021-01-29 15:11:34','2021-01-29 15:11:34',NULL,1,0);
+
+INSERT INTO terraform.config (id,provider,resource,property,value_config,is_locked,created_time,updated_time,deleted_time,enabled,is_deleted) VALUES
+	 ('35bb9c075a254e1eb54e8d9c42e817ef','alicloud','instance','image','{"linux_centos_7.7": "centos_7_7_x64_20G_alibase_20200426.vhd"}',0,'2021-01-25 16:58:27','2021-01-25 16:58:27',NULL,1,0);
+
+
+INSERT INTO terraform.config (id,provider,resource,property,value_config,is_locked,created_time,updated_time,deleted_time,enabled,is_deleted) VALUES
+
+	 ('c92ef007d24943179cf552410171b109','tencentcloud','instance','power_action','{"start": "true", "stop": "false"}',0,'2021-01-22 17:43:34','2021-01-22 17:43:34',NULL,1,0),
+	 ('db5af6d4408242bb835300b7fd968bb3','tencentcloud','lb','network_type','{"INTERNAL": "intranet", "OPEN": "internet"}',0,'2021-01-29 15:21:55','2021-01-29 15:21:55',NULL,1,0),
+	 ('de1105c827a64ebe8f342517348bbd92','tencentcloud','instance','image','{"linux_centos_7.6_x64": "img-9qabwvbn", "linux_centos_7.8_x64": "img-3la7wgnt"}',0,'2021-01-22 16:51:05','2021-01-22 16:51:05',NULL,1,0);
+
+INSERT INTO terraform.config (id,provider,resource,property,value_config,is_locked,created_time,updated_time,deleted_time,enabled,is_deleted) VALUES
+	 ('ef77e14d64644357978d3036480e2684','alicloud','security_group_rule','ip_protocol','{"UDP": "udp", "ICMP": "icmp", "TCP": "tcp"}',0,'2021-01-29 15:11:43','2021-01-29 15:11:43',NULL,1,0);
+
+
+INSERT INTO terraform.instance_type (id,provider_id,provider,name,`type`,origin_name,cpu,memory,network,extend_info,define_json,status,result_json,created_time,updated_time,deleted_time,enabled,is_deleted) VALUES
+	 ('a814c4b2400e43f89d30cd167a9cf9c3','375895738dc04141a76276adf7fbbb21','tencentcloud','1C-2G','instance','S5.SMALL2',1,2,'1.5Gbps  --  25万PPS','{}',NULL,NULL,NULL,'2021-01-21 11:31:34','2021-01-21 11:38:42',NULL,1,0),
+	 ('d60d2926e98147bbaca7529a90bb8547','21fd34b382d844c4a2fe8acdf8ad75f0','alicloud','mysql-1C-1024M','instance','mysql.n1.micro.1',1,1024,NULL,'{}',NULL,NULL,NULL,'2021-01-25 17:58:10','2021-01-25 17:58:10',NULL,1,0),
+	 ('f318296a6dc24b0591442932c6f5ded3','375895738dc04141a76276adf7fbbb21','tencentcloud','1C-2000M','instance','2000',1,256,NULL,'{}',NULL,NULL,NULL,'2021-01-24 16:53:01','2021-01-24 16:53:01',NULL,1,0);
+
 #@v0.3.0-end@;
 
 
