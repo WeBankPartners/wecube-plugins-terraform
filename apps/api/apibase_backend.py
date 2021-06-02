@@ -148,7 +148,7 @@ class ApiBackendBase(TerraformResource):
     def _import_resource_(self, rid, provider, region, provider_info, asset_id, resource_id, label_name):
         workpath = self.get_workpath(rid, provider, region)
         try:
-            query_data = {"resource_id": resource_id} if resource_id else {}
+            query_data = {"asset_id": resource_id} if resource_id else {}
 
             self.workspace_controller(rid, provider, region, provider_info)
             define_json, resource_keys_config = self.import_filter_controller(provider_name=provider,
@@ -248,7 +248,7 @@ class ApiBackendBase(TerraformResource):
                                            region=region, zone=zone,
                                            extend_info=extend_info,
                                            define_json=define_json,
-                                           resource_id=output_res.get("resource_id"),
+                                           resource_id=output_res.get("asset_id"),
                                            status="ok", output_json=output_res,
                                            create_data=create_data,
                                            result_json=result, **kwargs)

@@ -146,7 +146,7 @@ class BackendClient(object):
         data.update(extend_info)
 
         asset_id = data.pop("asset_id", None)
-        resource_id = data.pop("resource_id", None)
+        resource_id = data.pop("resource_id", None) or asset_id
 
         _, result = resource.create(rid=rid, base_info=base_info, base_bodys=base_bodys,
                                     create_data=data, extend_info=extend_info,

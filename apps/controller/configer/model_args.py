@@ -348,196 +348,196 @@ resouce_property_models = {
 
 output_property_models = {
     "vpc": [
-        "resource_id"
+        "asset_id"
     ],
     "subnet": [
-        "resource_id"
+        "asset_id"
     ],
     "route_table": [
-        "resource_id"
+        "asset_id"
     ],
     "route_entry": [
-        "resource_id"
+        "asset_id"
     ],
     "security_group": [
-        "resource_id"
+        "asset_id"
     ],
     "security_group_rule": [
-        "resource_id"
+        "asset_id"
     ],
     "nat": [
-        "resource_id",
+        "asset_id",
         "ipaddress"
     ],
     "peer_connection": [
-        "resource_id"
+        "asset_id"
     ],
     "eip": [
-        "resource_id",
+        "asset_id",
         "ipaddress"
     ],
     "eip_association": [
-        "resource_id"
+        "asset_id"
     ],
     "lb": [
-        "resource_id",
+        "asset_id",
         "ipaddress"
     ],
     "lb_listener": [
-        "resource_id"
+        "asset_id"
     ],
     "lb_rule": [
-        "resource_id"
+        "asset_id"
     ],
     "lb_server_group": [
-        "resource_id"
+        "asset_id"
     ],
     "lb_attach": [
-        "resource_id"
+        "asset_id"
     ],
     "disk": [
-        "resource_id"
+        "asset_id"
     ],
     "disk_attach": [
-        "resource_id"
+        "asset_id"
     ],
     "network_interface": [
-        "resource_id",
+        "asset_id",
         "ipaddress"
     ],
     "network_interface_attach": [
-        "resource_id"
+        "asset_id"
     ],
     "object_storage": [
-        "resource_id",
+        "asset_id",
         "url"
     ],
     "bucket_object": [
-        "resource_id"
+        "asset_id"
     ],
     "ccn": [
-        "resource_id"
+        "asset_id"
     ],
     "ccn_attach": [
-        "resource_id"
+        "asset_id"
     ],
     "ccn_bandwidth": [
-        "resource_id"
+        "asset_id"
     ],
     "instance": [
-        "resource_id",
+        "asset_id",
         "ipaddress",
         "public_ip"
     ],
     "mysql": [
-        "resource_id",
+        "asset_id",
         "ipaddress",
         "port"
     ],
     "mysql_database": [
-        "resource_id",
+        "asset_id",
     ],
     "mysql_account": [
-        "resource_id",
+        "asset_id",
     ],
     "mysql_privilege": [
-        "resource_id",
+        "asset_id",
     ],
     "mysql_backup": [
-        "resource_id",
+        "asset_id",
     ],
     "db_subnet_group": [
-        "resource_id"
+        "asset_id"
     ],
     "mariadb": [
-        "resource_id",
+        "asset_id",
         "ipaddress",
         "port"
     ],
     "postgreSQL": [
-        "resource_id",
+        "asset_id",
         "ipaddress",
         "port"
     ],
     "rds": [
-        "resource_id",
+        "asset_id",
         "ipaddress",
         "port"
     ],
     "nosql": [
-        "resource_id",
+        "asset_id",
         "ipaddress",
         "port"
     ],
     "mongodb": [
-        "resource_id",
+        "asset_id",
         "ipaddress",
         "port"
     ],
     "kvstore": [
-        "resource_id",
+        "asset_id",
         "ipaddress",
         "port"
     ],
     "redis": [
-        "resource_id",
+        "asset_id",
         "ipaddress",
         "port"
     ],
     "memcached": [
-        "resource_id",
+        "asset_id",
         "ipaddress",
         "port"
     ],
     "memcached_backup": [
-        "resource_id"
+        "asset_id"
     ],
     "redis_backup": [
-        "resource_id"
+        "asset_id"
     ],
     "kvstore_backup": [
-        "resource_id"
+        "asset_id"
     ],
 }
 
 data_source_models = {
     "vpc": [
-        "resource_id",
+        "asset_id",
         "name",
         "tag",
         "cidr"
     ],
     "subnet": [
-        "resource_id",
+        "asset_id",
         "zone",
         "cidr",
         "tag",
         "vpc_id"
     ],
     "route_table": [
-        "resource_id",
+        "asset_id",
         "name",
         "tag",
         "vpc_id"
     ],
     "route_entry": [
-        "resource_id",
+        "asset_id",
         "route_table_id",
         "cidr",
         "type"
     ],
     "security_group": [
-        "resource_id",
+        "asset_id",
         "name",
         "vpc_id",
         "tag"
     ],
     "security_group_rule": [
-        "resource_id",
+        "asset_id",
         "security_group_id"
     ],
     "nat": [
-        "resource_id",
+        "asset_id",
         "name",
         "type",
         "tag",
@@ -545,24 +545,24 @@ data_source_models = {
         "bandwidth"
     ],
     "peer_connection": [
-        "resource_id",
+        "asset_id",
         "name",
         "vpc_id",
         "peer_vpc_id",
         "peer_region"
     ],
     "eip": [
-        "resource_id",
+        "asset_id",
         "name",
         "ipaddress",
         "tag"
     ],
     "eip_association": [
-        "resource_id",
+        "asset_id",
         "instance_id"
     ],
     "lb": [
-        "resource_id",
+        "asset_id",
         "name",
         "vpc_id",
         "subnet_id",
@@ -570,30 +570,30 @@ data_source_models = {
         "ipaddress"
     ],
     "lb_listener": [
-        "resource_id",
+        "asset_id",
         "port",
         "protocol",
         "lb_id",
         "tag"
     ],
     "lb_rule": [
-        "resource_id",
+        "asset_id",
         "listener_id",
         "lb_id",
         "name"
     ],
     "lb_server_group": [
-        "resource_id",
+        "asset_id",
         "name",
         "lb_id",
         "instance_id"
     ],
     "lb_attach": [
-        "resource_id",
+        "asset_id",
         "instance_id"
     ],
     "disk": [
-        "resource_id",
+        "asset_id",
         "name",
         "instance_id",
         "type",
@@ -601,11 +601,11 @@ data_source_models = {
         "zone"
     ],
     "disk_attach": [
-        "resource_id",
+        "asset_id",
         "instance_id"
     ],
     "network_interface": [
-        "resource_id",
+        "asset_id",
         "name",
         "vpc_id",
         "subnet_id",
@@ -614,28 +614,28 @@ data_source_models = {
         "public_ip"
     ],
     "network_interface_attach": [
-        "resource_id"
+        "asset_id"
     ],
     "object_storage": [
-        "resource_id",
+        "asset_id",
         "name",
         "tag"
     ],
     "bucket_object": [
-        "resource_id"
+        "asset_id"
     ],
     "ccn": [
-        "resource_id",
+        "asset_id",
         "name"
     ],
     "ccn_attach": [
-        "resource_id"
+        "asset_id"
     ],
     "ccn_bandwidth": [
-        "resource_id"
+        "asset_id"
     ],
     "instance": [
-        "resource_id",
+        "asset_id",
         "ipaddress",
         "public_ip",
         "zone",
@@ -645,7 +645,7 @@ data_source_models = {
         "subnet_id"
     ],
     "mysql": [
-        "resource_id",
+        "asset_id",
         "ipaddress",
         "port",
         "engine",
@@ -656,25 +656,25 @@ data_source_models = {
         "tag"
     ],
     "mysql_database": [
-        "resource_id",
+        "asset_id",
     ],
     "db_subnet_group": [
-        "resource_id",
+        "asset_id",
         "name"
     ],
     "mysql_account": [
-        "resource_id",
+        "asset_id",
         "instance_id",
         "name"
     ],
     "mysql_privilege": [
-        "resource_id",
+        "asset_id",
     ],
     "mysql_backup": [
-        "resource_id",
+        "asset_id",
     ],
     "mariadb": [
-        "resource_id",
+        "asset_id",
         "ipaddress",
         "port",
         "engine",
@@ -685,7 +685,7 @@ data_source_models = {
         "tag"
     ],
     "postgreSQL": [
-        "resource_id",
+        "asset_id",
         "ipaddress",
         "port",
         "engine",
@@ -696,7 +696,7 @@ data_source_models = {
         "tag"
     ],
     "rds": [
-        "resource_id",
+        "asset_id",
         "ipaddress",
         "port",
         "engine",
@@ -707,7 +707,7 @@ data_source_models = {
         "tag"
     ],
     "nosql": [
-        "resource_id",
+        "asset_id",
         "ipaddress",
         "port",
         "engine",
@@ -718,7 +718,7 @@ data_source_models = {
         "tag"
     ],
     "mongodb": [
-        "resource_id",
+        "asset_id",
         "ipaddress",
         "port",
         "engine",
@@ -729,7 +729,7 @@ data_source_models = {
         "tag"
     ],
     "kvstore": [
-        "resource_id",
+        "asset_id",
         "ipaddress",
         "port",
         "engine",
@@ -740,7 +740,7 @@ data_source_models = {
         "tag"
     ],
     "redis": [
-        "resource_id",
+        "asset_id",
         "ipaddress",
         "port",
         "engine",
@@ -751,7 +751,7 @@ data_source_models = {
         "tag"
     ],
     "memcached": [
-        "resource_id",
+        "asset_id",
         "ipaddress",
         "port",
         "engine",
@@ -762,13 +762,13 @@ data_source_models = {
         "tag"
     ],
     "memcached_backup": [
-        "resource_id"
+        "asset_id"
     ],
     "redis_backup": [
-        "resource_id"
+        "asset_id"
     ],
     "kvstore_backup": [
-        "resource_id"
+        "asset_id"
     ],
 }
 
@@ -795,6 +795,21 @@ def output_necessary(resource_name, resource_output):
     # for key in resource_output.keys():
     #     if key not in columns_property:
     #         raise ValueError("不合法的output property: %s， 允许值：%s" % (key, ",".join(columns_property)))
+
+
+def data_source_output_necessary(resource_name, resource_property):
+    if resource_name not in resouce_property_models.keys():
+        return
+
+    columns_property = resouce_property_models.get(resource_name)
+    for column in columns_property:
+        if column not in resource_property.keys():
+            raise ValueError("data_source_output缺少必要的property: %s" % column)
+
+    columns_property = output_property_models.get(resource_name)
+    for column in columns_property:
+        if column not in resource_property.keys():
+            raise ValueError("data_source_output缺少必要的property: %s" % column)
 
 
 def source_necessary(resource_name, data_source):

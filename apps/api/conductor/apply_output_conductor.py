@@ -79,12 +79,12 @@ def read_output_result(provider, result, models, resource_values_config, resourc
                                                  resource_name=resource_name)
             ext_result.update(_out_dict)
 
-        if "resource_id" in ext_result.keys():
-            if len(ext_result["resource_id"]) > 512:
-                ext_result["resource_id"] = ext_result["resource_id"][:512]
-                logger.info("resource id length more than 512, will truncated for resource_id")
+        if "asset_id" in ext_result.keys():
+            if len(ext_result["asset_id"]) > 512:
+                ext_result["asset_id"] = ext_result["asset_id"][:512]
+                logger.info("resource id length more than 512, will truncated for asset_id")
         else:
-            ext_result["resource_id"] = OutputReader.fetch_id(result)
+            ext_result["asset_id"] = OutputReader.fetch_id(result)
 
         logger.info(format_json_dumps(ext_result))
         return ext_result
