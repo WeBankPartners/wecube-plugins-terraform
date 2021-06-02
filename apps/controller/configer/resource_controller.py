@@ -14,6 +14,7 @@ from apps.api.configer.provider import ProviderObject
 from .model_args import property_necessary
 from .model_args import output_necessary
 from .model_args import source_necessary
+from .model_args import data_source_output_necessary
 
 
 def format_argument(key, data):
@@ -118,17 +119,17 @@ class ResourceController(BackendController):
         validate_convert_value(extend_info)
         validate_convert_value(resource_output)
         data_source_output = validate_convert_key(data_source_output)
-        property_necessary(resource_name=data["resource_name"],
+        property_necessary(resource_name=data["resource_type"],
                            resource_property=resource_property)
 
-        output_necessary(resource_name=data["resource_name"],
+        output_necessary(resource_name=data["resource_type"],
                          resource_output=resource_output)
 
-        source_necessary(resource_name=data["resource_name"],
+        source_necessary(resource_name=data["resource_type"],
                          data_source=data_source)
 
-        property_necessary(resource_name=data["resource_name"],
-                           resource_property=data_source_output)
+        data_source_output_necessary(resource_name=data["resource_type"],
+                                     resource_property=data_source_output)
 
         data_source_argument = format_argument("data_source_argument", data.get("data_source_argument"))
 
@@ -199,7 +200,7 @@ class ResourceIdController(BackendIdController):
         if data.get("resource_property") is not None:
             resource_property = validation.validate_dict("resource_property", data.get("resource_property")) or {}
             resource_property = validate_convert_key(resource_property)
-            property_necessary(resource_name=data["resource_name"],
+            property_necessary(resource_name=data["resource_type"],
                                resource_property=resource_property)
 
             data["resource_property"] = json.dumps(resource_property)
@@ -207,14 +208,14 @@ class ResourceIdController(BackendIdController):
         if data.get("resource_output") is not None:
             resource_output = validation.validate_dict("resource_output", data.get("resource_output")) or {}
             validate_convert_value(resource_output)
-            output_necessary(resource_name=data["resource_name"],
+            output_necessary(resource_name=data["resource_type"],
                              resource_output=resource_output)
 
             data["resource_output"] = json.dumps(resource_output)
 
         if data.get("data_source") is not None:
             data_source = validation.validate_dict("data_source", data.get("data_source"))
-            source_necessary(resource_name=data["data_source"],
+            source_necessary(resource_name=data["resource_type"],
                              data_source=data_source)
 
             data["data_source"] = json.dumps(data_source)
@@ -223,8 +224,8 @@ class ResourceIdController(BackendIdController):
             data_source_output = validation.validate_dict("data_source_output", data.get("data_source_output"))
             data_source_output = validate_convert_key(data_source_output)
 
-            property_necessary(resource_name=data["resource_name"],
-                               resource_property=data_source_output)
+            data_source_output_necessary(resource_name=data["resource_type"],
+                                         resource_property=data_source_output)
 
             for _, value in data_source_output.items():
                 if not isinstance(value, (basestring, dict)):
