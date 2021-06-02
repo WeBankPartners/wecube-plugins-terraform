@@ -180,6 +180,7 @@ resouce_property_models = {
         "first_slave_zone",
         "second_slave_zone",
         "password",
+        "parameters",
         "force_delete"
     ],
     "mysql_database": [

@@ -1530,6 +1530,7 @@
                     <parameter datatype="string" mappingType="entity" required="N">max_disk_size</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">charge_type</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">parameters</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
@@ -1594,6 +1595,7 @@
 					<parameter datatype="string">first_slave_zone</parameter>
 					<parameter datatype="string">zone</parameter>
                     <parameter datatype="string">ipaddress</parameter>
+                    <parameter datatype="string">parameters</parameter>
 				</outputParameters>
 			</interface>
 		</plugin>
