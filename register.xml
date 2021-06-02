@@ -40,7 +40,7 @@
 	<!-- 7.插件列表 - 描述插件包中单个插件的输入和输出 -->
 	<plugins>
         <plugin name="region">
-			<interface action="apply" path="/terraform/v1/az/backend/region/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/az/backend/region/apply" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">secret</parameter>
@@ -55,7 +55,7 @@
 					<parameter datatype="string">result</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/az/backend/region/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/az/backend/region/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -65,7 +65,7 @@
 					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
-            <interface action="query" path="/terraform/v1/az/backend/region/source" httpMethod='POST'>
+            <interface action="query" path="/terraform/v1/az/backend/region/source" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">provider</parameter>
@@ -84,7 +84,7 @@
 			</interface>
 		</plugin>
         <plugin name="az">
-			<interface action="apply" path="/terraform/v1/az/backend/zone/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/az/backend/zone/apply" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">secret</parameter>
@@ -100,7 +100,7 @@
 					<parameter datatype="string">result</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/az/backend/zone/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/az/backend/zone/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -110,7 +110,7 @@
 					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
-            <interface action="query" path="/terraform/v1/az/backend/zone/source" httpMethod='POST'>
+            <interface action="query" path="/terraform/v1/az/backend/zone/source" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">provider</parameter>
@@ -130,27 +130,26 @@
 			</interface>
 		</plugin>
 		<plugin name="vpc">
-			<interface action="apply" path="/terraform/v1/network/backend/vpc/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/network/backend/vpc/apply" httpMethod="POST" description="tencentclod,alicloud,aws">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">tag</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N" description="[tencentcloud, N],[alicloud, N],[aws, N]">tag</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">cidr</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">id</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/network/backend/vpc/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/network/backend/vpc/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -160,22 +159,23 @@
 					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
-            <interface action="query" path="/terraform/v1/network/backend/vpc/source" httpMethod='POST'>
+            <interface action="query" path="/terraform/v1/network/backend/vpc/source" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">name</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">tag</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">cidr</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">id</parameter>
 				</inputParameters>
 				<outputParameters>
                     <parameter datatype="string">errorCode</parameter>
                     <parameter datatype="string">errorMessage</parameter>
                     <parameter datatype="string">name</parameter>
                     <parameter datatype="string">cidr</parameter>
-                    <parameter datatype="string">resource_id</parameter>
+                    <parameter datatype="string">asset_id</parameter>
                     <parameter datatype="string">region</parameter>
                     <parameter datatype="string">secret</parameter>
                     <parameter datatype="string">provider</parameter>
@@ -183,7 +183,7 @@
 			</interface>
 		</plugin>
 		<plugin name="subnet">
-			<interface action="apply" path="/terraform/v1/network/backend/subnet/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/network/backend/subnet/apply" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -194,17 +194,16 @@
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">cidr</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">id</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/network/backend/subnet/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/network/backend/subnet/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -214,17 +213,18 @@
 					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
-            <interface action="query" path="/terraform/v1/network/backend/subnet/source" httpMethod='POST'>
+            <interface action="query" path="/terraform/v1/network/backend/subnet/source" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">zone</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">name</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">cidr</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">tag</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">vpc_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">id</parameter>
 				</inputParameters>
 				<outputParameters>
                     <parameter datatype="string">region</parameter>
@@ -233,7 +233,7 @@
                     <parameter datatype="string">errorCode</parameter>
                     <parameter datatype="string">name</parameter>
                     <parameter datatype="string">zone</parameter>
-                    <parameter datatype="string">resource_id</parameter>
+                    <parameter datatype="string">asset_id</parameter>
                     <parameter datatype="string">vpc_id</parameter>
                     <parameter datatype="string">cidr</parameter>
                     <parameter datatype="string">errorMessage</parameter>
@@ -241,7 +241,7 @@
 			</interface>
 		</plugin>
 		<plugin name="route_table">
-			<interface action="apply" path="/terraform/v1/network/backend/route_table/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/network/backend/route_table/apply" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -251,17 +251,16 @@
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">id</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/network/backend/route_table/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/network/backend/route_table/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -271,24 +270,24 @@
 					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
-            <interface action="query" path="/terraform/v1/network/backend/route_table/source" httpMethod='POST'>
+            <interface action="query" path="/terraform/v1/network/backend/route_table/source" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">name</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">tag</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">vpc_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">subnet_id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">route_table_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">id</parameter>
 				</inputParameters>
 				<outputParameters>
                     <parameter datatype="string">region</parameter>
                     <parameter datatype="string">secret</parameter>
                     <parameter datatype="string">provider</parameter>
 					<parameter datatype="string">name</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
                     <parameter datatype="string">route_table_id</parameter>
@@ -297,7 +296,7 @@
 			</interface>
 		</plugin>
 		<plugin name="route_entry">
-			<interface action="apply" path="/terraform/v1/network/backend/route_entry/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/network/backend/route_entry/apply" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -324,10 +323,10 @@
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">id</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/network/backend/route_entry/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/network/backend/route_entry/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -337,12 +336,12 @@
 					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
-            <interface action="query" path="/terraform/v1/network/backend/route_entry/source" httpMethod='POST'>
+            <interface action="query" path="/terraform/v1/network/backend/route_entry/source" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">route_table_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">cidr</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">type</parameter>
@@ -350,15 +349,16 @@
                     <parameter datatype="string" mappingType="entity" required="N">instance_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">nat_gateway_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">local_gateway_id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">vpc_peering_connection_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">peer_connection_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">network_interface_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">id</parameter>
 				</inputParameters>
 				<outputParameters>
                     <parameter datatype="string">region</parameter>
                     <parameter datatype="string">secret</parameter>
                     <parameter datatype="string">provider</parameter>
 					<parameter datatype="string">next_hub</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">name</parameter>
@@ -366,7 +366,7 @@
                     <parameter datatype="string">next_type</parameter>
                     <parameter datatype="string">route_table_id</parameter>
                     <parameter datatype="string">gateway_id</parameter>
-                    <parameter datatype="string">vpc_peering_connection_id</parameter>
+                    <parameter datatype="string">peer_connection_id</parameter>
                     <parameter datatype="string">local_gateway_id</parameter>
                     <parameter datatype="string">instance_id</parameter>
                     <parameter datatype="string">network_interface_id</parameter>
@@ -374,7 +374,7 @@
 			</interface>
 		</plugin>
 		<plugin name="peer_connection">
-			<interface action="apply" path="/terraform/v1/network/backend/peer_connection/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/network/backend/peer_connection/apply" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -386,20 +386,19 @@
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">peer_vpc_id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">accepter.allow_classic_link_to_remote_vpc</parameter>
-					<parameter datatype="string" mappingType="entity" required="N">requester.allow_classic_link_to_remote_vpc</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">accepter.allow_vpc</parameter>
+					<parameter datatype="string" mappingType="entity" required="N">requester.allow_vpc</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">id</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/network/backend/peer_connection/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/network/backend/peer_connection/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -409,24 +408,25 @@
 					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
-            <interface action="query" path="/terraform/v1/network/backend/peer_connection/source" httpMethod='POST'>
+            <interface action="query" path="/terraform/v1/network/backend/peer_connection/source" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">name</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">vpc_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">cidr</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">peer_vpc_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">peer_region</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">id</parameter>
 				</inputParameters>
 				<outputParameters>
                     <parameter datatype="string">region</parameter>
                     <parameter datatype="string">secret</parameter>
                     <parameter datatype="string">provider</parameter>
 					<parameter datatype="string">name</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">vpc_id</parameter>
@@ -436,7 +436,7 @@
 			</interface>
 		</plugin>
 		<plugin name="security_group">
-			<interface action="apply" path="/terraform/v1/network/backend/security_group/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/network/backend/security_group/apply" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -448,17 +448,16 @@
                     <parameter datatype="string" mappingType="entity" required="N">description</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">id</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/network/backend/security_group/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/network/backend/security_group/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -468,21 +467,22 @@
 					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
-            <interface action="query" path="/terraform/v1/network/backend/security_group/source" httpMethod='POST'>
+            <interface action="query" path="/terraform/v1/network/backend/security_group/source" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">name</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">vpc_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">tag</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">id</parameter>
 				</inputParameters>
 				<outputParameters>
                     <parameter datatype="string">region</parameter>
                     <parameter datatype="string">secret</parameter>
                     <parameter datatype="string">provider</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">name</parameter>
@@ -494,7 +494,7 @@
 		</plugin>
 		<plugin name="security_group_rule">
 			<interface action="apply" path="/terraform/v1/network/backend/security_group_rule/apply"
-				httpMethod='POST'>
+				httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
@@ -511,8 +511,8 @@
                     <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">description</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">from_port</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">to_port</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">begin_port</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">end_port</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">priority</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">nic_type</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
@@ -521,10 +521,10 @@
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">id</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/network/backend/security_group_rule/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/network/backend/security_group_rule/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -534,12 +534,12 @@
 					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
-            <interface action="query" path="/terraform/v1/network/backend/security_group_rule/source" httpMethod='POST'>
+            <interface action="query" path="/terraform/v1/network/backend/security_group_rule/source" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">vpc_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">name</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">security_group_id</parameter>
@@ -548,7 +548,7 @@
                     <parameter datatype="string">region</parameter>
                     <parameter datatype="string">secret</parameter>
                     <parameter datatype="string">provider</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">name</parameter>
@@ -567,7 +567,7 @@
 			</interface>
 		</plugin>
 		<plugin name="nat">
-			<interface action="apply" path="/terraform/v1/network/backend/nat/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/network/backend/nat/apply" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -580,7 +580,6 @@
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">bandwidth</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
@@ -588,10 +587,10 @@
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">ipaddress</parameter>
 					<parameter datatype="string">id</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/network/backend/nat/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/network/backend/nat/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -601,23 +600,24 @@
 					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
-            <interface action="query" path="/terraform/v1/network/backend/nat/source" httpMethod='POST'>
+            <interface action="query" path="/terraform/v1/network/backend/nat/source" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">name</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">type</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">tag</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">vpc_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">subnet_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">id</parameter>
 				</inputParameters>
 				<outputParameters>
                     <parameter datatype="string">region</parameter>
                     <parameter datatype="string">secret</parameter>
                     <parameter datatype="string">provider</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">name</parameter>
@@ -631,7 +631,7 @@
 			</interface>
 		</plugin>
 		<plugin name="eip">
-			<interface action="apply" path="/terraform/v1/network/backend/eip/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/network/backend/eip/apply" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -640,7 +640,6 @@
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">charge_type</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">public_ipv4_pool</parameter>
@@ -655,10 +654,10 @@
 					<parameter datatype="string">ipaddress</parameter>
 					<parameter datatype="string">id</parameter>
                     <parameter datatype="string">private_ip</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/network/backend/eip/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/network/backend/eip/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -668,21 +667,22 @@
 					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
-            <interface action="query" path="/terraform/v1/network/backend/eip/source" httpMethod='POST'>
+            <interface action="query" path="/terraform/v1/network/backend/eip/source" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">name</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">ipaddress</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">tag</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">id</parameter>
 				</inputParameters>
 				<outputParameters>
                     <parameter datatype="string">region</parameter>
                     <parameter datatype="string">secret</parameter>
                     <parameter datatype="string">provider</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">name</parameter>
@@ -693,7 +693,7 @@
 			</interface>
 		</plugin>
 		<plugin name="eip_association">
-			<interface action="apply" path="/terraform/v1/network/backend/eip_association/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/network/backend/eip_association/apply" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
@@ -713,10 +713,10 @@
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">id</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/network/backend/eip_association/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/network/backend/eip_association/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -728,7 +728,7 @@
 			</interface>
 		</plugin>
 		<plugin name="ccn">
-			<interface action="apply" path="/terraform/v1/network/backend/ccn/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/network/backend/ccn/apply" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -737,17 +737,16 @@
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">id</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/network/backend/ccn/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/network/backend/ccn/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -757,19 +756,20 @@
 					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
-            <interface action="query" path="/terraform/v1/network/backend/ccn/source" httpMethod='POST'>
+            <interface action="query" path="/terraform/v1/network/backend/ccn/source" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">name</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">id</parameter>
 				</inputParameters>
 				<outputParameters>
                     <parameter datatype="string">region</parameter>
                     <parameter datatype="string">secret</parameter>
                     <parameter datatype="string">provider</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">name</parameter>
@@ -777,14 +777,13 @@
 			</interface>
 		</plugin>
 		<plugin name="ccn_attach">
-			<interface action="apply" path="/terraform/v1/network/backend/ccn_attach/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/network/backend/ccn_attach/apply" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">ccn_id</parameter>
-					<parameter datatype="string" mappingType="entity" required="Y">instance_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">instance_type</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">instance_region</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
@@ -797,10 +796,10 @@
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">id</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/network/backend/ccn_attach/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/network/backend/ccn_attach/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -812,7 +811,7 @@
 			</interface>
 		</plugin>
 		<plugin name="ccn_bandwidth">
-			<interface action="apply" path="/terraform/v1/network/backend/ccn_bandwidth/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/network/backend/ccn_bandwidth/apply" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
@@ -825,17 +824,16 @@
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">id</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/network/backend/ccn_bandwidth/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/network/backend/ccn_bandwidth/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -847,7 +845,7 @@
 			</interface>
 		</plugin>
         <plugin name="disk">
-			<interface action="apply" path="/terraform/v1/storage/backend/disk/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/storage/backend/disk/apply" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -858,7 +856,6 @@
 					<parameter datatype="string" mappingType="entity" required="Y">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">charge_type</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
@@ -866,10 +863,10 @@
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">id</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/storage/backend/disk/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/storage/backend/disk/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -879,24 +876,25 @@
 					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
-            <interface action="query" path="/terraform/v1/storage/backend/disk/source" httpMethod='POST'>
+            <interface action="query" path="/terraform/v1/storage/backend/disk/source" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">name</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">instance_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">volume_ids</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">type</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">tag</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">zone</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">id</parameter>
 				</inputParameters>
 				<outputParameters>
                     <parameter datatype="string">region</parameter>
                     <parameter datatype="string">secret</parameter>
                     <parameter datatype="string">provider</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
                     <parameter datatype="string">instance_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
@@ -909,7 +907,7 @@
 			</interface>
 		</plugin>
         <plugin name="disk_attach">
-			<interface action="apply" path="/terraform/v1/storage/backend/disk_attach/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/storage/backend/disk_attach/apply" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -927,10 +925,10 @@
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">id</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/storage/backend/disk_attach/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/storage/backend/disk_attach/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -942,7 +940,7 @@
 			</interface>
 		</plugin>
 		<plugin name="object_storage">
-			<interface action="apply" path="/terraform/v1/storage/backend/object_storage/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/storage/backend/object_storage/apply" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -954,7 +952,6 @@
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">acl</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
@@ -962,10 +959,10 @@
 					<parameter datatype="string">errorCode</parameter>
                     <parameter datatype="string">url</parameter>
 					<parameter datatype="string">id</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/storage/backend/object_storage/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/storage/backend/object_storage/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -975,12 +972,12 @@
 					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
-            <interface action="query" path="/terraform/v1/storage/backend/object_storage/source" httpMethod='POST'>
+            <interface action="query" path="/terraform/v1/storage/backend/object_storage/source" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">name</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">tag</parameter>
 				</inputParameters>
@@ -988,7 +985,7 @@
                     <parameter datatype="string">region</parameter>
                     <parameter datatype="string">secret</parameter>
                     <parameter datatype="string">provider</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">name</parameter>
@@ -998,7 +995,7 @@
 			</interface>
 		</plugin>
 		<plugin name="instance">
-			<interface action="apply" path="/terraform/v1/vm/backend/instance/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/vm/backend/instance/apply" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -1015,7 +1012,6 @@
 					<parameter datatype="string" mappingType="entity" required="N">vpc_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">power_action</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">data_disks</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
@@ -1031,10 +1027,10 @@
 					<parameter datatype="string">id</parameter>
                     <parameter datatype="string">name</parameter>
                     <parameter datatype="string">password</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/vm/backend/instance/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/vm/backend/instance/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -1044,12 +1040,12 @@
 					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
-            <interface action="query" path="/terraform/v1/vm/backend/instance/source" httpMethod='POST'>
+            <interface action="query" path="/terraform/v1/vm/backend/instance/source" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">ipaddress</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">public_ip</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">zone</parameter>
@@ -1057,12 +1053,13 @@
                     <parameter datatype="string" mappingType="entity" required="N">tag</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">vpc_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">subnet_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">id</parameter>
 				</inputParameters>
 				<outputParameters>
                     <parameter datatype="string">region</parameter>
                     <parameter datatype="string">secret</parameter>
                     <parameter datatype="string">provider</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">name</parameter>
@@ -1085,7 +1082,7 @@
 			</interface>
 		</plugin>
 		<plugin name="network_interface">
-			<interface action="apply" path="/terraform/v1/vm/backend/network_interface/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/vm/backend/network_interface/apply" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -1098,7 +1095,6 @@
 					<parameter datatype="string" mappingType="entity" required="Y">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
@@ -1106,10 +1102,10 @@
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">ipaddress</parameter>
 					<parameter datatype="string">id</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/vm/backend/network_interface/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/vm/backend/network_interface/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -1119,24 +1115,25 @@
 					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
-            <interface action="query" path="/terraform/v1/vm/backend/network_interface/source" httpMethod='POST'>
+            <interface action="query" path="/terraform/v1/vm/backend/network_interface/source" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">name</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">vpc_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">subnet_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">tag</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">ipaddress</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">public_ip</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">id</parameter>
 				</inputParameters>
 				<outputParameters>
                     <parameter datatype="string">region</parameter>
                     <parameter datatype="string">secret</parameter>
                     <parameter datatype="string">provider</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">name</parameter>
@@ -1148,7 +1145,7 @@
 			</interface>
 		</plugin>
 		<plugin name="network_interface_attach">
-			<interface action="apply" path="/terraform/v1/vm/backend/network_interface_attach/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/vm/backend/network_interface_attach/apply" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -1156,6 +1153,8 @@
 					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">network_interface_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">instance_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
@@ -1164,10 +1163,10 @@
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">id</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/vm/backend/network_interface_attach/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/vm/backend/network_interface_attach/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -1179,7 +1178,7 @@
 			</interface>
 		</plugin>
 		<plugin name="loadbalance">
-			<interface action="apply" path="/terraform/v1/loadbalance/backend/lb/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/loadbalance/backend/lb/apply" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -1194,7 +1193,6 @@
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">charge_type</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
@@ -1203,10 +1201,10 @@
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">ipaddress</parameter>
 					<parameter datatype="string">id</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/loadbalance/backend/lb/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/loadbalance/backend/lb/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -1216,23 +1214,24 @@
 					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
-            <interface action="query" path="/terraform/v1/loadbalance/backend/lb/source" httpMethod='POST'>
+            <interface action="query" path="/terraform/v1/loadbalance/backend/lb/source" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">name</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">vpc_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">subnet_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">tag</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">ipaddress</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">id</parameter>
 				</inputParameters>
 				<outputParameters>
                     <parameter datatype="string">region</parameter>
                     <parameter datatype="string">secret</parameter>
                     <parameter datatype="string">provider</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">name</parameter>
@@ -1247,7 +1246,7 @@
 			</interface>
 		</plugin>
 		<plugin name="lb_listener">
-			<interface action="apply" path="/terraform/v1/loadbalance/backend/lb_listener/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/loadbalance/backend/lb_listener/apply" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
@@ -1264,17 +1263,16 @@
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">id</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/loadbalance/backend/lb_listener/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/loadbalance/backend/lb_listener/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -1284,21 +1282,22 @@
 					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
-            <interface action="query" path="/terraform/v1/loadbalance/backend/lb_listener/source" httpMethod='POST'>
+            <interface action="query" path="/terraform/v1/loadbalance/backend/lb_listener/source" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">lb_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">port</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">tag</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">id</parameter>
 				</inputParameters>
 				<outputParameters>
                     <parameter datatype="string">region</parameter>
                     <parameter datatype="string">secret</parameter>
                     <parameter datatype="string">provider</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">name</parameter>
@@ -1313,7 +1312,7 @@
 			</interface>
 		</plugin>
 		<plugin name="lb_rule">
-			<interface action="apply" path="/terraform/v1/loadbalance/backend/lb_rule/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/loadbalance/backend/lb_rule/apply" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
@@ -1325,22 +1324,23 @@
 					<parameter datatype="string" mappingType="entity" required="Y">lb_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">action</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">server_group_id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">server_group_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">security_group_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">frontend_port</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">condition</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">host_header</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">source_ip</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 				</inputParameters>
 				<outputParameters>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">id</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/loadbalance/backend/lb_rule/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/loadbalance/backend/lb_rule/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -1350,21 +1350,22 @@
 					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
-            <interface action="query" path="/terraform/v1/loadbalance/backend/lb_rule/source" httpMethod='POST'>
+            <interface action="query" path="/terraform/v1/loadbalance/backend/lb_rule/source" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">listener_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">lb_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">name</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">id</parameter>
 				</inputParameters>
 				<outputParameters>
                     <parameter datatype="string">region</parameter>
                     <parameter datatype="string">secret</parameter>
                     <parameter datatype="string">provider</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">name</parameter>
@@ -1378,7 +1379,7 @@
 			</interface>
 		</plugin>
 		<plugin name="lb_server_group">
-			<interface action="apply" path="/terraform/v1/loadbalance/backend/lb_server_group/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/loadbalance/backend/lb_server_group/apply" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
@@ -1392,15 +1393,16 @@
                     <parameter datatype="string" mappingType="entity" required="N">protocol</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">vpc_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">type</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
 				</inputParameters>
 				<outputParameters>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">id</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/loadbalance/backend/lb_server_group/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/loadbalance/backend/lb_server_group/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -1410,21 +1412,22 @@
 					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
-            <interface action="query" path="/terraform/v1/loadbalance/backend/lb_server_group/source" httpMethod='POST'>
+            <interface action="query" path="/terraform/v1/loadbalance/backend/lb_server_group/source" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">instance_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">lb_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">name</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">id</parameter>
 				</inputParameters>
 				<outputParameters>
                     <parameter datatype="string">region</parameter>
                     <parameter datatype="string">secret</parameter>
                     <parameter datatype="string">provider</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
                     <parameter datatype="string">protocol</parameter>
@@ -1440,7 +1443,7 @@
 			</interface>
 		</plugin>
 		<plugin name="lb_attach">
-			<interface action="apply" path="/terraform/v1/loadbalance/backend/lb_attach/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/loadbalance/backend/lb_attach/apply" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
@@ -1453,18 +1456,20 @@
 					<parameter datatype="string" mappingType="entity" required="N">weight</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">port</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">zone</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">backend_servers</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">group_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 				</inputParameters>
 				<outputParameters>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">id</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/loadbalance/backend/lb_attach/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/loadbalance/backend/lb_attach/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -1474,12 +1479,12 @@
 					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
-            <interface action="query" path="/terraform/v1/loadbalance/backend/lb_attach/source" httpMethod='POST'>
+            <interface action="query" path="/terraform/v1/loadbalance/backend/lb_attach/source" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">lb_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">instance_id</parameter>
 				</inputParameters>
@@ -1487,7 +1492,7 @@
                     <parameter datatype="string">region</parameter>
                     <parameter datatype="string">secret</parameter>
                     <parameter datatype="string">provider</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">name</parameter>
@@ -1501,7 +1506,7 @@
 			</interface>
 		</plugin>
 		<plugin name="mysql">
-			<interface action="apply" path="/terraform/v1/database/backend/mysql/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/database/backend/mysql/apply" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -1525,13 +1530,12 @@
                     <parameter datatype="string" mappingType="entity" required="N">max_disk_size</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">charge_type</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
 				</inputParameters>
 				<outputParameters>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 					<parameter datatype="string">user</parameter>
 					<parameter datatype="string" sensitiveData="Y">password</parameter>
 					<parameter datatype="string">ipaddress</parameter>
@@ -1539,7 +1543,7 @@
 					<parameter datatype="string">id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/database/backend/mysql/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/database/backend/mysql/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -1549,12 +1553,12 @@
 					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
-            <interface action="query" path="/terraform/v1/database/backend/mysql/source" httpMethod='POST'>
+            <interface action="query" path="/terraform/v1/database/backend/mysql/source" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">ipaddress</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">port</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">engine</parameter>
@@ -1563,12 +1567,13 @@
                     <parameter datatype="string" mappingType="entity" required="N">vpc_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">subnet_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">tag</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">id</parameter>
 				</inputParameters>
 				<outputParameters>
                     <parameter datatype="string">region</parameter>
                     <parameter datatype="string">secret</parameter>
                     <parameter datatype="string">provider</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">name</parameter>
@@ -1593,7 +1598,7 @@
 			</interface>
 		</plugin>
 		<plugin name="mysql_database">
-			<interface action="apply" path="/terraform/v1/database/backend/mysql_database/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/database/backend/mysql_database/apply" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -1609,11 +1614,11 @@
 				<outputParameters>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 					<parameter datatype="string">id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/database/backend/mysql_database/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/database/backend/mysql_database/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -1625,7 +1630,7 @@
 			</interface>
 		</plugin>
 		<plugin name="mysql_account">
-			<interface action="apply" path="/terraform/v1/database/backend/mysql_account/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/database/backend/mysql_account/apply" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -1642,11 +1647,11 @@
 				<outputParameters>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 					<parameter datatype="string">id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/database/backend/mysql_account/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/database/backend/mysql_account/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -1658,7 +1663,7 @@
 			</interface>
 		</plugin>
 		<plugin name="mysql_privilege">
-			<interface action="apply" path="/terraform/v1/database/backend/mysql_privilege/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/database/backend/mysql_privilege/apply" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">secret</parameter>
@@ -1676,11 +1681,11 @@
 				<outputParameters>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 					<parameter datatype="string">id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/database/backend/mysql_privilege/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/database/backend/mysql_privilege/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -1692,7 +1697,7 @@
 			</interface>
 		</plugin>
 		<plugin name="mysql_backup">
-			<interface action="create_mysql_backup" path="/terraform/v1/database/backend/mysql_backup/apply" httpMethod='POST'>
+			<interface action="create_mysql_backup" path="/terraform/v1/database/backend/mysql_backup/apply" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">name</parameter>
@@ -1710,11 +1715,11 @@
 				<outputParameters>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 					<parameter datatype="string">id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="delete_mysql_backup" path="/terraform/v1/database/backend/mysql_backup/destroy" httpMethod='POST'>
+			<interface action="delete_mysql_backup" path="/terraform/v1/database/backend/mysql_backup/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -1726,7 +1731,7 @@
 			</interface>
 		</plugin>
 		<plugin name="rds_subnet_group">
-			<interface action="apply" path="/terraform/v1/database/backend/rds_subnet_group/apply" httpMethod='POST'>
+			<interface action="apply" path="/terraform/v1/database/backend/rds_subnet_group/apply" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="N">id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">name</parameter>
@@ -1735,15 +1740,16 @@
 					<parameter datatype="string" mappingType="entity" required="Y">subnet_id</parameter>
 					<parameter datatype="string" mappingType="entity" required="Y">zone</parameter>
 					<parameter datatype="string" mappingType="entity" required="N">extend_info</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
 				</inputParameters>
 				<outputParameters>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 					<parameter datatype="string">id</parameter>
 				</outputParameters>
 			</interface>
-			<interface action="destroy" path="/terraform/v1/database/backend/rds_subnet_group/destroy" httpMethod='POST'>
+			<interface action="destroy" path="/terraform/v1/database/backend/rds_subnet_group/destroy" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">id</parameter>
 				</inputParameters>
@@ -1753,20 +1759,21 @@
 					<parameter datatype="string">errorCode</parameter>
 				</outputParameters>
 			</interface>
-            <interface action="query" path="/terraform/v1/database/backend/rds_subnet_group/source" httpMethod='POST'>
+            <interface action="query" path="/terraform/v1/database/backend/rds_subnet_group/source" httpMethod="POST">
 				<inputParameters>
 					<parameter datatype="string" mappingType="entity" required="Y">region</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">secret</parameter>
                     <parameter datatype="string" mappingType="entity" required="Y">provider</parameter>
-                    <parameter datatype="string" mappingType="entity" required="N">resource_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">asset_id</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">name</parameter>
                     <parameter datatype="string" mappingType="entity" required="N">subnet_id</parameter>
+                    <parameter datatype="string" mappingType="entity" required="N">id</parameter>
 				</inputParameters>
 				<outputParameters>
                     <parameter datatype="string">region</parameter>
                     <parameter datatype="string">secret</parameter>
                     <parameter datatype="string">provider</parameter>
-					<parameter datatype="string">resource_id</parameter>
+					<parameter datatype="string">asset_id</parameter>
 					<parameter datatype="string">errorMessage</parameter>
 					<parameter datatype="string">errorCode</parameter>
 					<parameter datatype="string">name</parameter>
