@@ -48,21 +48,30 @@ template = '''
 '''
 
 
-def fetch_columns(defines):
+def fetch_columns(provider, defines):
     result = []
     if not defines:
         return result
 
-    for key, define in defines.items:
+    for key, define in defines.items():
         if isinstance(define, basestring):
-            result.append(key)
+            _t = {key: "[%s N]" % provider}
+            result.append(_t)
         else:
-            if define.get("define"):
-                if define.get("convert"):
-                    result.append(key)
-                result += fetch_columns(defines=define.get("define"))
-            else:
-                result.append(key)
+            try:
+                if define.get("define"):
+                    if define.get("convert"):
+                        x = "N" if int(define.get("allow_null", "1")) else "Y"
+                        _t = {key: "[%s %s]" % (provider, x)}
+                        result.append(_t)
+                    result += fetch_columns(provider=provider, defines=define.get("define"))
+                else:
+                    x = "N" if int(define.get("allow_null", "1")) else "Y"
+                    _t = {key: "[%s %s]" % (provider, x)}
+                    result.append(_t)
+            except Exception, e:
+                raise e
+
 
     return result
 
@@ -72,6 +81,28 @@ class ResBase(object):
         _, datas = ResourceObject().list(filters={"resource_type": name})
         return datas
 
+    def zip_columns(self, defines):
+        result = {}
+        for define in defines:
+            key = define.keys()[0]
+            if key in result.keys():
+                result[key] = result[key] + "," + define[key]
+            else:
+                result[key] = define[key]
+
+        return result
+
+    def revert_common_columns(self, sys_define, defines):
+        res = {}
+        for s_define in sys_define:
+            x_desc = defines.get(s_define) or ""
+            if x_desc:
+                x_desc = "," + str(x_desc)
+            res[s_define] = "common" + x_desc
+
+        defines.update(res)
+        return defines
+
     def register_resource_infos(self, datas):
         x_columns = []
         x_output = []
@@ -79,29 +110,43 @@ class ResBase(object):
             # x_columns += data.get("resource_property").keys()
             # x_columns += data.get("extend_info").keys()
             # x_output += data.get("resource_output").keys()
-            x_columns += fetch_columns(defines=data.get("resource_property"))
-            x_columns += fetch_columns(data.get("extend_info"))
-            x_output += fetch_columns(data.get("resource_output"))
+            try:
+                x_columns += fetch_columns(provider=data.get("provider"), defines=data.get("resource_property"))
+                # x_columns += fetch_columns(provider=data.get("provider"), defines=data.get("extend_info"))
+                x_output += fetch_columns(provider=data.get("provider"), defines=data.get("resource_output"))
+            except Exception, e:
+                raise e
 
-        columns = list(set(x_columns))
-        output = list(set(x_output))
+        columns = self.zip_columns(x_columns)  #list(set(x_columns))
+        output = self.zip_columns(x_output)    #list(set(x_output))
 
         return columns, output
 
-    def _upgrade_apply_info(self, name, inputkeys, outputkey):
-        datas = self.resource_objets(name)
+    def _upgrade_apply_info(self, datas, inputkeys, outputkey):
+        inputkeys = inputkeys + ["id", "asset_id"]
+        inputkeys = list(set(inputkeys))
+        outputkey = outputkey + ["id", "asset_id"]
+        outputkey = list(set(outputkey))
+
         x_input, x_output = self.register_resource_infos(datas)
-        inputkeys = list(set(inputkeys + x_input))
-        outputkey = list(set(outputkey + x_output))
+        inputkeys = self.revert_common_columns(inputkeys, x_input)  #list(set(inputkeys + x_input))
+        outputkey = self.revert_common_columns(outputkey, x_output)  #list(set(outputkey + x_output))
         return inputkeys, outputkey
 
     def upgrade_apply_info(self, name, define):
-        inputkeys, outputkey = self._upgrade_apply_info(name,
+        datas = self.resource_objets(name)
+        inputkeys, outputkey = self._upgrade_apply_info(datas,
                                                         inputkeys=define.get("inputParameters"),
                                                         outputkey=define.get("outputParameters"))
 
+
+        p = []
+        for data in datas:
+            p.append(data["provider"])
+
         define["inputParameters"] = inputkeys
         define["outputParameters"] = outputkey
+        define["provider"] = ",".join(p)
 
         return define
 
@@ -109,67 +154,81 @@ class ResBase(object):
         x_columns = []
         x_output = []
         for data in datas:
-            # x_columns += data.get("data_source").keys()
-            x_columns += fetch_columns(data.get("data_source"))
-            # x_output += data.get("data_source_output").keys()
-            x_output += fetch_columns(data.get("data_source_output"))
-            # data_source_output = data.get("data_source_output")
-            # for key, value in data_source_output.items():
-            #     if isinstance(value, dict):
-            #         if value.get("equivalence"):
-            #             x_columns.append(value.get("equivalence"))
+            x_columns += fetch_columns(provider=data.get("provider"), defines=data.get("data_source"))
 
-        columns = list(set(x_columns))
-        output = list(set(x_output))
+            x_output += fetch_columns(provider=data.get("provider"), defines=data.get("data_source_output"))
 
+        columns = self.zip_columns(x_columns)
+        output = self.zip_columns(x_output)
         return columns, output
 
-    def _upgrade_query_info(self, name, inputkeys, outputkey):
-        datas = self.resource_objets(name)
+    def _upgrade_query_info(self, datas, inputkeys, outputkey):
+        inputkeys = inputkeys + ["id", "asset_id"]
+        inputkeys = list(set(inputkeys))
+        outputkey = outputkey + ["id", "asset_id"]
+        outputkey = list(set(outputkey))
+
         x_input, x_output = self.register_source_infos(datas)
-        inputkeys = list(set(inputkeys + x_input))
-        outputkey = list(set(outputkey + x_output))
+        inputkeys = self.revert_common_columns(inputkeys, x_input)  #list(set(inputkeys + x_input))
+        outputkey = self.revert_common_columns(outputkey, x_output)  #list(set(outputkey + x_output))
         return inputkeys, outputkey
 
     def upgrade_query_info(self, name, define):
-        inputkeys, outputkey = self._upgrade_query_info(name,
+        datas = self.resource_objets(name)
+        inputkeys, outputkey = self._upgrade_query_info(datas,
                                                         inputkeys=define.get("inputParameters"),
                                                         outputkey=define.get("outputParameters"))
 
         define["inputParameters"] = inputkeys
         define["outputParameters"] = outputkey
 
+        p = []
+        for data in datas:
+            p.append(data["provider"])
+        define["provider"] = ",".join(p)
+
         return define
 
     def plugin_tag(self, name):
         return '<plugin name="%s">' % name
 
-    def interface(self, action, path, method):
-        return '<interface action="%s" path="%s" httpMethod="%s">' % (action, path, method)
+    def interface(self, action, path, method, description):
+        description = description or "common"
+        return '<interface action="%s" path="%s" httpMethod="%s" description="%s">' % (
+            action, path, method, description)
 
-    def inputparameter(self, notnull, keys):
+    def inputparameter(self, notnull, columns):
         result = ''
-        for key in keys:
+        x_columns = columns if isinstance(columns, list) else columns.keys()
+
+        for key in x_columns:
+            description = "common" if isinstance(columns, list) else columns.get(key)
+
             if key == "password":
-                x = '<parameter datatype="string" mappingType="entity" required="N" sensitiveData="Y">password</parameter>'
+                x = '<parameter datatype="string" mappingType="entity" required="N" sensitiveData="Y" description="%s">password</parameter>' % description
             else:
                 if key in notnull:
-                    x = '<parameter datatype="string" mappingType="entity" required="Y">%s</parameter>' % key
+                    x = '<parameter datatype="string" mappingType="entity" required="Y" description="%s">%s</parameter>' % (
+                        description, key)
                 else:
-                    x = '<parameter datatype="string" mappingType="entity" required="N">%s</parameter>' % key
+                    x = '<parameter datatype="string" mappingType="entity" required="N" description="%s">%s</parameter>' % (
+                        description, key)
 
             result += x
 
         x_result = "<inputParameters>%s</inputParameters>" % result
         return x_result
 
-    def outputparameter(self, keys):
+    def outputparameter(self, columns):
         result = ''
-        for key in keys:
+        x_columns = columns if isinstance(columns, list) else columns.keys()
+
+        for key in x_columns:
+            description = "common" if isinstance(columns, list) else columns.get(key)
             if key == "password":
-                x = '<parameter datatype="string" sensitiveData="Y">password</parameter>'
+                x = '<parameter datatype="string" sensitiveData="Y" description="%s">password</parameter>' % description
             else:
-                x = '<parameter datatype="string">%s</parameter>' % key
+                x = '<parameter datatype="string" description="%s">%s</parameter>' % (description, key)
 
             result += x
 
@@ -184,9 +243,10 @@ class ResBase(object):
                     define = self.upgrade_apply_info(name, define)
                 elif key == "query":
                     define = self.upgrade_query_info(name, define)
-            interface_str = self.interface(action=key, path=define.get("path"), method=define.get("method"))
-            input_str = self.inputparameter(notnull=define.get("notnull"), keys=define.get("inputParameters"))
-            out_str = self.outputparameter(keys=define.get("outputParameters"))
+            interface_str = self.interface(action=key, path=define.get("path"),
+                                           method=define.get("method"), description=define.get("provider", "common"))
+            input_str = self.inputparameter(notnull=define.get("notnull"), columns=define.get("inputParameters"))
+            out_str = self.outputparameter(columns=define.get("outputParameters"))
             x_result = interface_str + input_str + out_str + "</interface>"
 
             result += x_result
@@ -212,6 +272,7 @@ class ResBase(object):
         title = '''<?xml version="1.0" encoding="UTF-8"?>'''
 
         xml_result = title + xml_result
+        print(xml_result)
         xml_result = xml_result.replace('\n', '').replace('\r', '').replace('\t', '')
         xml_result = minidom.parseString(xml_result.encode('utf-8'))
         return xml_result.toprettyxml(indent='	', encoding='UTF-8')
