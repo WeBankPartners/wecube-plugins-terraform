@@ -129,7 +129,7 @@ CREATE TABLE `cloud_resource` (
   INDEX `idx_id` (`resource_id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
-ALTER TABLE `terraform`.`cloud_resource`
+ALTER TABLE `cloud_resource`
   CHANGE `resource_id` `resource_id` VARCHAR(255) CHARSET utf8 COLLATE utf8_general_ci NULL;
 
 
