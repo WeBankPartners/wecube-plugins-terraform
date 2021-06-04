@@ -70,8 +70,8 @@ class BackendClient(object):
         :return:
         '''
 
-        region = data.get("region")
-        not_null("region", region)
+        region = data.get("region_id") or data.get("region")
+        not_null("region_id", region)
         _, region_info = RegionConductor().provider_region_info(provider=provider, region=region)
         return region_info.get("name"), region_info
 
@@ -85,11 +85,11 @@ class BackendClient(object):
         :return:
         '''
 
-        zone = data.get("zone")
+        zone = data.get("zone_id") or data.get("zone")
         if not zone:
             return "", {}
 
-        not_null("zone", zone)
+        # not_null("zone", zone)
         _, zone_info = RegionConductor().provider_zone_info(provider=provider, region=region, zone=zone)
         return zone_info.get("name"), zone_info
 
@@ -102,13 +102,13 @@ class BackendClient(object):
     @classmethod
     def not_null(cls, data):
         validation.not_allowed_null(data=data,
-                                    keys=["region", "provider"]
+                                    keys=["region_id", "provider"]
                                     )
 
     @classmethod
     def validate_keys(cls, data):
         validation.validate_collector(data=data,
-                                      strings=["id", "region", "zone", "provider", "secret"],
+                                      strings=["id", "region_id", "zone_id", "provider", "secret"],
                                       dicts=["extend_info"])
 
     @classmethod
@@ -148,6 +148,8 @@ class BackendClient(object):
         asset_id = data.pop("asset_id", None)
         resource_id = data.pop("resource_id", None) or asset_id
 
+        data["region"] = data.get("region_id") or data.get("region")
+        data["zone"] = data.get("zone_id") or data.get("zone")
         _, result = resource.create(rid=rid, base_info=base_info, base_bodys=base_bodys,
                                     create_data=data, extend_info=extend_info,
                                     asset_id=asset_id, resource_id=resource_id)
@@ -222,6 +224,8 @@ class BackendClient(object):
                 elif result.get("resource_id") and result.get("resource_id") in ignore_resources:
                     logger.info("ignore_resources skip id: %s" % (result.get("resource_id")))
                 else:
+                    if result.get("asset_id") == result.get("id"):
+                        result["id"] = ""
                     res.append(result)
 
         return res
@@ -301,6 +305,8 @@ class BackendClient(object):
         # 兼容extend info字段
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
         data.update(extend_info)
+        data["region"] = data.get("region_id") or data.get("region")
+        data["zone"] = data.get("zone_id") or data.get("zone")
         return cls.main_query(resource, rid, data, base_info, base_bodys)
 
 

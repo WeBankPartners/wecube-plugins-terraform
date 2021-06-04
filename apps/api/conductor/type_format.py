@@ -67,7 +67,12 @@ class TypeFormat(object):
         except:
             raise ValueError("%s 不是list类型" % value)
 
-        return value
+        # 移除空值
+        result = []
+        for x_value in value:
+            if x_value:
+                result.append(x_value)
+        return result
 
     @staticmethod
     def f_bool(value):

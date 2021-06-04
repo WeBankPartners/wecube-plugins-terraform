@@ -16,19 +16,19 @@ from apps.api.configer.provider import ProviderObject
 class ResBase(object):
     @classmethod
     def allow_key(cls, data):
-        validation.allowed_key(data, ["id", "provider", "name",
+        validation.allowed_key(data, ["id", "provider", "name", "region_id",
                                       "region", "asset_id", "extend_info"])
 
     @classmethod
     def not_null(cls, data):
         validation.not_allowed_null(data=data,
-                                    keys=["asset_id", "provider", "region"]
+                                    keys=["asset_id", "provider", "region_id"]
                                     )
 
     @classmethod
     def validate_keys(cls, data):
         validation.validate_collector(data=data,
-                                      strings=["id", "name", "provider", "asset_id", "region"],
+                                      strings=["id", "name", "provider", "asset_id", "region_id"],
                                       dicts=["extend_info"])
 
     @classmethod
@@ -37,7 +37,7 @@ class ResBase(object):
         name = data.pop("name", None)
         asset_id = data.pop("asset_id", None)
         provider = data.pop("provider", None)
-        region = data.pop("region", None)
+        region = data.pop("region_id", None) or data.pop("region", None)
 
         ProviderObject().provider_name_object(provider)
         RegionObject().region_object(region)
@@ -73,8 +73,14 @@ class ZoneController(BackendController):
         '''
 
         validation.allowed_key(data, ["id", "provider", "name", 'asset_id', "region"])
-        return self.resource.list(filters=data, page=page,
-                                  pagesize=pagesize, orderby=orderby)
+        count, res = self.resource.list(filters=data, page=page,
+                                   pagesize=pagesize, orderby=orderby)
+        result = []
+        for x_res in res:
+            x_res["region_id"] = x_res["region"]
+            result.append(x_res)
+
+        return count, res
 
     def before_handler(self, request, data, **kwargs):
         ResBase.allow_key(data)
@@ -102,7 +108,7 @@ class ZoneIdController(BackendIdController):
         return self.resource.show(rid)
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["provider", "name", "asset_id", "extend_info", "region"])
+        validation.allowed_key(data, ["provider", "name", "asset_id", "extend_info", "region", "region_id"])
         ResBase.validate_keys(data)
 
     def update(self, request, data, **kwargs):
@@ -210,9 +216,12 @@ class ZoneSourceController(BaseController):
 
     def main_response(self, request, data, **kwargs):
         query_data = {}
-        for key in ["id", "provider", "name", 'asset_id', "region"]:
+        for key in ["id", "provider", "name", 'asset_id', "region_id"]:
             if data.get(key):
-                query_data[key] = data.get(key)
+                if key == "region_id":
+                    query_data["region"] = data.get(key)
+                else:
+                    query_data[key] = data.get(key)
 
         orderby = data.get("orderby")
         page = data.get("page", 0)
@@ -221,4 +230,9 @@ class ZoneSourceController(BaseController):
         count, result = self.list(request, data=query_data,
                                   orderby=orderby, page=page,
                                   pagesize=pagesize, **kwargs)
-        return result
+        res = []
+        for x in result:
+            x["region_id"] = x["region"]
+            res.append(x)
+
+        return res
