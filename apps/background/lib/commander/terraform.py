@@ -68,7 +68,7 @@ class TerraformDriver(object):
         if plugin_dir:
             args += " -plugin-dir %s" % plugin_dir
 
-        exec_cmd = "init %s %s" % (args, workdir)
+        exec_cmd = "-chdir=%s init %s" % (workdir, args)
 
         code, out, err = command(self._format_cmd(exec_cmd), workdir=workdir)
         if code == 0:
@@ -145,7 +145,7 @@ class TerraformDriver(object):
         input_options["auto_approve"] = auto_approve
         args = self._generate_args(input_options)
         args += self._generate_var_args(var)
-        exec_cmd = "apply %s %s" % (args, workdir)
+        exec_cmd = " -chdir=%s apply %s" % (workdir, args)
 
         code, out, err = command(self._format_cmd(exec_cmd), workdir=workdir)
         if code == 0:
@@ -204,7 +204,7 @@ class TerraformDriver(object):
         input_options["var_file"] = var_file
         args = self._generate_args(input_options)
         args += self._generate_var_args(var)
-        exec_cmd = "plan %s %s" % (args, workdir)
+        exec_cmd = " -chdir=%s plan %s " % (workdir, args)
 
         code, out, err = command(self._format_cmd(exec_cmd), workdir=workdir)
         if code in [0, 1, 2]:
@@ -270,7 +270,7 @@ class TerraformDriver(object):
         input_options["force"] = force
         args = self._generate_args(input_options)
         args += self._generate_var_args(var)
-        exec_cmd = "destroy %s %s" % (args, workdir)
+        exec_cmd = " -chdir=%s destroy %s " % (workdir, args)
 
         code, out, err = command(self._format_cmd(exec_cmd), workdir=workdir)
         if code == 0:

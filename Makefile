@@ -7,7 +7,7 @@ clean:
 
 
 image: clean
-	cd bin && unzip -o terraform_0.14.5_linux_amd64.zip
+	cd bin && unzip -o terraform_0.15.5_linux_amd64.zip
 	docker build -t $(project_name):$(version) .
 
 package: image
