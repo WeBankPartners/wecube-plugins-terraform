@@ -199,7 +199,7 @@ class ApiBackendBase(TerraformResource):
 
     def read_output_controller(self, provider, result, resource_object, resource_values_config):
         logger.info(format_json_dumps(result))
-        return read_output_result(provider, result, models=resource_object.get("resource_property"),
+        return read_output_result(provider, result, models=resource_object.get("resource_output"),
                                   resource_values_config=resource_values_config,
                                   resource_name=self.resource_name)
 

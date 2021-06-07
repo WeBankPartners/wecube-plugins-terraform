@@ -45,6 +45,12 @@ class TypeFormat(object):
             return []
         def str_list(value):
             try:
+                value = value.replace("[", "").replace("]", "")
+                return value.split(",")
+            except:
+                pass
+
+            try:
                 return json.loads(value)
             except:
                 return eval(value)
