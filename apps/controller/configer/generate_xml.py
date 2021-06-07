@@ -2,6 +2,7 @@
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
+import copy
 from xml.dom import minidom
 from lib.logs import logger
 from core.controller import BackendController
@@ -107,18 +108,14 @@ class ResBase(object):
         x_columns = []
         x_output = []
         for data in datas:
-            # x_columns += data.get("resource_property").keys()
-            # x_columns += data.get("extend_info").keys()
-            # x_output += data.get("resource_output").keys()
             try:
                 x_columns += fetch_columns(provider=data.get("provider"), defines=data.get("resource_property"))
-                # x_columns += fetch_columns(provider=data.get("provider"), defines=data.get("extend_info"))
                 x_output += fetch_columns(provider=data.get("provider"), defines=data.get("resource_output"))
             except Exception, e:
                 raise e
 
-        columns = self.zip_columns(x_columns)  #list(set(x_columns))
-        output = self.zip_columns(x_output)    #list(set(x_output))
+        columns = self.zip_columns(x_columns)
+        output = self.zip_columns(x_output)
 
         return columns, output
 
@@ -129,8 +126,8 @@ class ResBase(object):
         outputkey = list(set(outputkey))
 
         x_input, x_output = self.register_resource_infos(datas)
-        inputkeys = self.revert_common_columns(inputkeys, x_input)  #list(set(inputkeys + x_input))
-        outputkey = self.revert_common_columns(outputkey, x_output)  #list(set(outputkey + x_output))
+        inputkeys = self.revert_common_columns(inputkeys, x_input)
+        outputkey = self.revert_common_columns(outputkey, x_output)
         return inputkeys, outputkey
 
     def upgrade_apply_info(self, name, define):
@@ -260,7 +257,8 @@ class ResBase(object):
         '''
 
         result = ''
-        for key, defines in xml_register.items():
+        resource_register = copy.deepcopy(xml_register)
+        for key, defines in resource_register.items():
             plugin_str = self.plugin_tag(key)
             body_str = self.format_plugin_interface(key, defines)
             x_result = plugin_str + body_str + "</plugin>"
@@ -272,7 +270,7 @@ class ResBase(object):
         title = '''<?xml version="1.0" encoding="UTF-8"?>'''
 
         xml_result = title + xml_result
-        print(xml_result)
+        # print(xml_result)
         xml_result = xml_result.replace('\n', '').replace('\r', '').replace('\t', '')
         xml_result = minidom.parseString(xml_result.encode('utf-8'))
         return xml_result.toprettyxml(indent='	', encoding='UTF-8')
