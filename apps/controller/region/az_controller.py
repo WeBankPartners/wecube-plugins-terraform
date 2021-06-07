@@ -145,23 +145,25 @@ class ZoneAddController(BaseController):
     def main_response(self, request, data, **kwargs):
         rid = data.get("id", None)
         data.pop("secret", None)
+        asset_id = data.get("asset_id")
         if rid:
             if self.resource.show(rid):
-                if data.get("extend_info") is not None:
+                if "extend_info" in data.keys():
                     extend_info = validation.validate_dict("extend_info", data.get("extend_info"))
                     data["extend_info"] = json.dumps(extend_info)
 
                 if "provider" in data.keys():
                     ProviderObject().provider_name_object(data.get("provider"))
 
-                if "region" in data.keys():
-                    RegionObject().region_object(data.get("region"))
+                if "region_id" in data.keys():
+                    RegionObject().region_object(data.get("region_id"))
+                    data["region"] = data.pop("region_id", None)
 
                 self.resource.update(rid, data)
-                return {"result": rid}
+                return {"id": rid, "asset_id": asset_id}
 
         count, res = ResBase.create(resource=self.resource, data=data)
-        return {"result": res}
+        return {"id": res, "asset_id": asset_id}
 
 
 class ZoneDeleteController(BaseController):
@@ -183,7 +185,7 @@ class ZoneDeleteController(BaseController):
     def main_response(self, request, data, **kwargs):
         rid = data.pop("id", None)
         result = self.resource.delete(rid)
-        return {"result": result}
+        return {"id": result}
 
 
 class ZoneSourceController(BaseController):

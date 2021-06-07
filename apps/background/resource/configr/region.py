@@ -48,7 +48,7 @@ class _AreaObject(object):
                                             pageSize=pagesize, orderby=orderby)
         data = []
         for res in results:
-            res["extend_info"] = json.loads(res["extend_info"])
+            res["extend_info"] = json.loads(res["extend_info"]) if res["extend_info"] else {}
             data.append(res)
 
         return count, data
@@ -65,7 +65,7 @@ class _AreaObject(object):
 
         data = self.resource.get(filters=where_data)
         if data:
-            data["extend_info"] = json.loads(data["extend_info"])
+            data["extend_info"] = json.loads(data["extend_info"]) if data["extend_info"] else {}
 
         return data
 
@@ -74,7 +74,7 @@ class _AreaObject(object):
         where_data.update({"is_deleted": 0})
         data = self.resource.get(filters=where_data)
         if data:
-            data["extend_info"] = json.loads(data["extend_info"])
+            data["extend_info"] = json.loads(data["extend_info"]) if data["extend_info"] else {}
 
         return data
 
@@ -84,7 +84,7 @@ class _AreaObject(object):
         update_data["updated_time"] = datetime.datetime.now()
         count, data = self.resource.update(filters=where_data, data=update_data)
         if data:
-            data["extend_info"] = json.loads(data["extend_info"])
+            data["extend_info"] = json.loads(data["extend_info"]) if data["extend_info"] else {}
 
         return count, data
 

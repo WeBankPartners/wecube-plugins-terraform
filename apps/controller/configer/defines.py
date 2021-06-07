@@ -8,14 +8,14 @@ xml_register = {
             "method": "POST",
             "notnull": ["asset_id", "provider"],
             "inputParameters": ['id', 'name', 'provider', 'asset_id', 'extend_info'],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id", "asset_id"]
         },
         "destroy": {
             "path": "/terraform/v1/az/backend/region/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/az/backend/region/source",
@@ -32,14 +32,14 @@ xml_register = {
             "method": "POST",
             "notnull": ["asset_id", "provider"],
             "inputParameters": ['id', 'name', 'provider', 'asset_id', "region_id", 'extend_info'],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id", "asset_id"]
         },
         "destroy": {
             "path": "/terraform/v1/az/backend/zone/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/az/backend/zone/source",
@@ -64,7 +64,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/network/backend/vpc/source",
@@ -89,7 +89,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/network/backend/subnet/source",
@@ -114,7 +114,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/network/backend/route_table/source",
@@ -140,7 +140,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/network/backend/route_entry/source",
@@ -165,7 +165,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/network/backend/peer_connection/source",
@@ -191,7 +191,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/network/backend/security_group/source",
@@ -217,7 +217,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/network/backend/security_group_rule/source",
@@ -244,7 +244,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/network/backend/nat/source",
@@ -270,7 +270,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/network/backend/eip/source",
@@ -295,7 +295,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         }
     },
     "ccn": {
@@ -312,7 +312,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/network/backend/ccn/source",
@@ -336,7 +336,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         }
     },
     "ccn_bandwidth": {
@@ -353,7 +353,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         }
     },
     "disk": {
@@ -370,7 +370,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/storage/backend/disk/source",
@@ -396,7 +396,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         }
     },
     "object_storage": {
@@ -413,7 +413,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/storage/backend/object_storage/source",
@@ -439,7 +439,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/vm/backend/instance/source",
@@ -467,7 +467,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/storage/backend/network_interface/source",
@@ -493,7 +493,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         }
     },
     "lb": {
@@ -510,7 +510,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/loadbalance/backend/lb/source",
@@ -537,7 +537,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/loadbalance/backend/lb_listener/source",
@@ -564,7 +564,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/loadbalance/backend/lb_rule/source",
@@ -590,7 +590,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/loadbalance/backend/lb_server_group/source",
@@ -618,7 +618,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/loadbalance/backend/lb_attach/source",
@@ -647,7 +647,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/database/backend/mysql/source",
@@ -675,7 +675,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         }
     },
     "mysql_account": {
@@ -692,7 +692,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         }
     },
     "mysql_privilege": {
@@ -709,7 +709,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         }
     },
     "mysql_backup": {
@@ -726,7 +726,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         }
     },
     "db_subnet_group": {
@@ -744,7 +744,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/database/backend/db_subnet_group/source",

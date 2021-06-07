@@ -131,9 +131,10 @@ class RegionAddController(BaseController):
     def main_response(self, request, data, **kwargs):
         rid = data.get("id", None)
         data.pop("secret", None)
+        asset_id = data.get("asset_id")
         if rid:
             if self.resource.show(rid):
-                if data.get("extend_info") is not None:
+                if "extend_info" in data.keys():
                     extend_info = validation.validate_dict("extend_info", data.get("extend_info"))
                     data["extend_info"] = json.dumps(extend_info)
 
@@ -141,10 +142,10 @@ class RegionAddController(BaseController):
                     ProviderObject().provider_name_object(data.get("provider"))
 
                 self.resource.update(rid, data)
-                return {"result": rid}
+                return {"id": rid, "asset_id": asset_id}
 
         count, res = ResBase.create(resource=self.resource, data=data)
-        return {"result": res}
+        return {"id": res, "asset_id": asset_id}
 
 
 class RegionDeleteController(BaseController):
@@ -166,7 +167,7 @@ class RegionDeleteController(BaseController):
     def main_response(self, request, data, **kwargs):
         rid = data.pop("id", None)
         result = self.resource.delete(rid)
-        return {"result": result}
+        return {"id": result}
 
 
 class RegionSourceController(BaseController):
@@ -191,7 +192,6 @@ class RegionSourceController(BaseController):
         page = data.get("page", 0)
         pagesize = data.get("pagesize", 1000)
 
-        # validation.allowed_key(data, ["id", "provider", "name", 'asset_id'])
         count, result = self.resource.list(filters=query_data, page=page,
                                            pagesize=pagesize, orderby=orderby)
         return result

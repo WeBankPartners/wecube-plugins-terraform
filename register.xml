@@ -69,7 +69,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -144,7 +144,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -207,7 +207,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -265,7 +265,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -300,7 +300,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -381,7 +381,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -451,7 +451,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -508,7 +508,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -563,7 +563,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -663,7 +663,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -681,7 +681,7 @@
           <parameter datatype="string" description="common">errorCode</parameter>
           <parameter datatype="string" description="common">asset_id</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">asset_id</parameter>
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
@@ -711,7 +711,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -776,7 +776,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -838,7 +838,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -898,7 +898,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -962,7 +962,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -1034,7 +1034,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -1068,7 +1068,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -1085,7 +1085,7 @@
           <parameter datatype="string" description="common">errorCode</parameter>
           <parameter datatype="string" description="common">asset_id</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">asset_id</parameter>
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
@@ -1113,7 +1113,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -1171,7 +1171,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -1207,7 +1207,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -1272,7 +1272,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -1350,7 +1350,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -1450,7 +1450,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -1484,7 +1484,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -1535,7 +1535,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -1571,7 +1571,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -1637,7 +1637,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -1670,7 +1670,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -1729,7 +1729,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -1761,7 +1761,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -1795,7 +1795,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -1860,7 +1860,7 @@
         <outputParameters>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common">result</parameter>
+          <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
     </plugin>
