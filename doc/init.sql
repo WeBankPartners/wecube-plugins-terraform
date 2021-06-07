@@ -3,7 +3,7 @@
 DROP TABLE IF EXISTS `cloud_providers`;
 
 CREATE TABLE `cloud_providers` (
-  `id` VARCHAR(36) NOT NULL,
+  `id` VARCHAR(64) NOT NULL,
   `display_name` VARCHAR(64) DEFAULT NULL,
   `name` VARCHAR(64) NOT NULL,
   `secret_id` VARCHAR(256),
@@ -27,7 +27,7 @@ CREATE TABLE `cloud_providers` (
 DROP TABLE IF EXISTS `cloud_secret`;
 
 CREATE TABLE `cloud_secret` (
-  `id` VARCHAR(36) NOT NULL,
+  `id` VARCHAR(64) NOT NULL,
   `name` VARCHAR(64) NOT NULL,
   `display_name` VARCHAR(64) DEFAULT NULL,
   `provider` VARCHAR(64) NOT NULL,
@@ -47,8 +47,8 @@ CREATE TABLE `cloud_secret` (
 DROP TABLE IF EXISTS `resource`;
 
 CREATE TABLE `resource` (
-  `id` varchar(36) NOT NULL,
-  `provider` varchar(32) NOT NULL,
+  `id` varchar(64) NOT NULL,
+  `provider` varchar(64) NOT NULL,
   `resource_type` varchar(64) NOT NULL,
   `resource_name` varchar(64) NOT NULL,
   `extend_info` text NOT NULL,
@@ -71,7 +71,7 @@ CREATE TABLE `resource` (
 DROP TABLE IF EXISTS `common_keys`;
 
 CREATE TABLE `common_keys` (
-  `id` VARCHAR(36) NOT NULL,
+  `id` VARCHAR(64) NOT NULL,
   `resource` VARCHAR(64) NOT NULL,
   `key` VARCHAR(64) NOT NULL,
   `property` VARCHAR(64) NOT NULL,
@@ -87,8 +87,8 @@ CREATE TABLE `common_keys` (
 DROP TABLE IF EXISTS `config`;
 
 CREATE TABLE `config` (
-  `id` VARCHAR(36) NOT NULL,
-  `provider` VARCHAR(32) NOT NULL,
+  `id` VARCHAR(64) NOT NULL,
+  `provider` VARCHAR(64) NOT NULL,
   `resource` VARCHAR(64) NOT NULL,
   `property` VARCHAR(64) DEFAULT NULL,
   `value_config` text NOT NULL,
@@ -106,9 +106,9 @@ CREATE TABLE `config` (
 DROP TABLE IF EXISTS `cloud_resource`;
 
 CREATE TABLE `cloud_resource` (
-  `id` VARCHAR(36) NOT NULL,
-  `provider_id` VARCHAR(36) DEFAULT NULL,
-  `provider` VARCHAR(32) DEFAULT NULL,
+  `id` VARCHAR(64) NOT NULL,
+  `provider_id` VARCHAR(64) DEFAULT NULL,
+  `provider` VARCHAR(64) DEFAULT NULL,
   `region` VARCHAR(64) DEFAULT NULL,
   `zone` VARCHAR(64) DEFAULT NULL,
   `resource_name` VARCHAR(64) NOT NULL,
@@ -120,7 +120,7 @@ CREATE TABLE `cloud_resource` (
   `define_json` text DEFAULT NULL,
   `result_json` TEXT DEFAULT NULL,
   `output_json` TEXT DEFAULT NULL,
-  `status` varchar(36) DEFAULT NULL,
+  `status` varchar(64) DEFAULT NULL,
   `created_time` DATETIME DEFAULT NULL,
   `updated_time` DATETIME DEFAULT NULL,
   `deleted_time` DATETIME DEFAULT NULL,
@@ -136,9 +136,9 @@ ALTER TABLE `cloud_resource`
 DROP TABLE IF EXISTS `instance_type`;
 
 CREATE TABLE `instance_type` (
-  `id` VARCHAR(36) NOT NULL,
-  `provider_id` VARCHAR(36) DEFAULT NULL,
-  `provider` VARCHAR(32) DEFAULT NULL,
+  `id` VARCHAR(64) NOT NULL,
+  `provider_id` VARCHAR(64) DEFAULT NULL,
+  `provider` VARCHAR(64) DEFAULT NULL,
   `name` VARCHAR(64) DEFAULT NULL,
   `origin_name` VARCHAR(64) DEFAULT NULL,
   `cpu` int(11) DEFAULT NULL,
@@ -146,7 +146,7 @@ CREATE TABLE `instance_type` (
   `network` VARCHAR(64) DEFAULT NULL,
   `extend_info` text DEFAULT NULL,
   `define_json` text DEFAULT NULL,
-  `status` varchar(36) DEFAULT NULL,
+  `status` varchar(64) DEFAULT NULL,
   `result_json` TEXT DEFAULT NULL,
   `created_time` DATETIME DEFAULT NULL,
   `updated_time` DATETIME DEFAULT NULL,
@@ -160,9 +160,9 @@ CREATE TABLE `instance_type` (
 DROP TABLE IF EXISTS `resource_history`;
 
 CREATE TABLE `resource_history` (
-  `xid` VARCHAR(36) NOT NULL,
-  `id` VARCHAR(36) DEFAULT NULL,
-  `resource` VARCHAR(36) DEFAULT NULL,
+  `xid` VARCHAR(64) NOT NULL,
+  `id` VARCHAR(64) DEFAULT NULL,
+  `resource` VARCHAR(64) DEFAULT NULL,
   `ora_data` text DEFAULT NULL,
   `created_time` DATETIME DEFAULT NULL,
     PRIMARY KEY (`xid`),

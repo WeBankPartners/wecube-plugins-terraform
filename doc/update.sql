@@ -6,7 +6,7 @@ ALTER TABLE cloud_secret ADD server varchar(256) NULL  after  `region`;
 DROP TABLE IF EXISTS `region`;
 
 CREATE TABLE `region` (
-  `id` VARCHAR(36) NOT NULL,
+  `id` VARCHAR(64) NOT NULL,
   `name` VARCHAR(128) DEFAULT NULL,
   `provider` VARCHAR(128) NOT NULL,
   `asset_id` VARCHAR(128) NOT NULL,
@@ -24,7 +24,7 @@ CREATE TABLE `region` (
 DROP TABLE IF EXISTS `availability_zone`;
 
 CREATE TABLE `availability_zone` (
-  `id` VARCHAR(36) NOT NULL,
+  `id` VARCHAR(64) NOT NULL,
   `name` VARCHAR(128) DEFAULT NULL,
   `provider` VARCHAR(128) NOT NULL,
   `asset_id` VARCHAR(128) NOT NULL,
