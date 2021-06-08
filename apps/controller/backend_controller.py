@@ -232,13 +232,13 @@ class BackendClient(object):
 
     @classmethod
     def filter_data(cls, data, pre_results):
-        resource_ids = TypeFormat.f_list(data.get("resource_id"))
+        resource_ids = TypeFormat.f_list(data.get("id"))
         ignore_resources = TypeFormat.f_list(data.get("ignore_ids"))
 
         res = []
         if resource_ids:
             for result in pre_results:
-                if result.get("resource_id") in resource_ids:
+                if result.get("id") in resource_ids:
                     t_data = copy.deepcopy(data)
                     t_data.update(result)
                     res.append(t_data)
@@ -247,8 +247,8 @@ class BackendClient(object):
 
         if ignore_resources:
             for result in pre_results:
-                if result.get("resource_id") and result.get("resource_id") in ignore_resources:
-                    logger.info("skip resource id : %s" % (result.get("resource_id")))
+                if result.get("id") and result.get("id") in ignore_resources:
+                    logger.info("skip resource id : %s" % (result.get("id")))
                 else:
                     t_data = copy.deepcopy(data)
                     t_data.update(result)
