@@ -92,7 +92,7 @@ class InstanceTypeIdController(BackendIdController):
         validation.validate_string("origin_name", data.get("origin_name"))
         validation.validate_int("cpu", data.get("cpu"))
         validation.validate_int("memory", data.get("memory"))
-        validation.validate_int("type", data.get("type"))
+        validation.validate_string("type", data.get("type"))
         validation.validate_string("network", data.get("network"))
         validation.validate_string("provider_id", data.get("provider_id"))
         validation.validate_dict("extend_info", data.get("extend_info"))
