@@ -157,10 +157,19 @@ class BackendClient(object):
         return result
 
     @classmethod
-    def source_pre_action(cls, rid, base_info, base_bodys, resource_object, data):
+    def is_pre_action(cls, resource_object):
         pre_action = resource_object.get("pre_action")
         pre_action_output = resource_object.get("pre_action_output")
         if pre_action and pre_action_output:
+            return True
+        else:
+            return False
+
+    @classmethod
+    def source_pre_action(cls, rid, base_info, base_bodys, resource_object, data):
+        if cls.is_pre_action(resource_object):
+            pre_action = resource_object.get("pre_action")
+            pre_action_output = resource_object.get("pre_action_output")
             client = ApiBackendBase(resource_name=pre_action, resource_workspace=pre_action)
             results = client.get_remote_source(rid, base_info, base_bodys, query_data=data)
             return filter_action_output(results, filters=pre_action_output)
@@ -220,9 +229,9 @@ class BackendClient(object):
             else:
                 if result.get("zone") and (result.get("zone") not in register_zones):
                     logger.info("resource: %s ,zone: %s searched not in register zone, skip it" % (
-                        result.get("resource_id"), result.get("zone")))
-                elif result.get("resource_id") and result.get("resource_id") in ignore_resources:
-                    logger.info("ignore_resources skip id: %s" % (result.get("resource_id")))
+                        result.get("id"), result.get("zone")))
+                elif result.get("id") and result.get("id") in ignore_resources:
+                    logger.info("ignore_resources skip id: %s" % (result.get("id")))
                 else:
                     if result.get("asset_id") == result.get("id"):
                         result["id"] = ""
@@ -274,20 +283,76 @@ class BackendClient(object):
         return results
 
     @classmethod
-    def main_query(cls, resource, rid, data, base_info, base_bodys):
-        provider_object = base_bodys["provider_data"]
-        resource_object = cls.get_resource_object(provider=provider_object["name"],
-                                                  resource_name=resource.resource_name)
+    def is_need_flush_list(cls, data):
+        if "ignore_ids" in data.keys() and data.get("ignore_ids"):
+            return True
 
-        pre_results = cls.source_pre_action(rid, base_info, base_bodys, resource_object, data)
-        query_datas = cls.filter_data(data, pre_results)
+        for key in data.keys():
+            if key not in ["region", "region_id", "zone", "zone_id", "secret", "provider"] and data.get(key):
+                return False
 
+        return True
+
+    @classmethod
+    def format_filter_data(cls, data):
+        res = []
+        if "id" in data.keys():
+            ids = TypeFormat.f_list(data.pop("id", None))
+            for xid in ids:
+                tmp = copy.deepcopy(data)
+                tmp["id"] = xid
+                res.append(tmp)
+
+            return res
+        else:
+            return [data]
+
+    @classmethod
+    def skip_ingore_ids(cls, result, data):
+        ignore_ids = TypeFormat.f_list(data.get("ignore_ids"))
+        if ignore_ids:
+            res = []
+            for xres in result:
+                if isinstance(xres, dict):
+                    if xres.get("id") in ignore_ids:
+                        logger.info("skip ignore_id : %s" % (result.get("id")))
+                    else:
+                        res.append(xres)
+                else:
+                    res.append(xres)
+        else:
+            return result
+
+    @classmethod
+    def source_query_datas(cls, resource, rid, data, base_info, base_bodys):
+        query_datas = cls.format_filter_data(data)
         result = []
         for query_data in query_datas:
             x_res = cls.one_query(resource, rid, query_data, base_info, base_bodys)
             result += x_res
 
+        result = cls.skip_ingore_ids(result, data)
         return result
+
+    @classmethod
+    def main_query(cls, resource, rid, data, base_info, base_bodys):
+        provider_object = base_bodys["provider_data"]
+        resource_object = cls.get_resource_object(provider=provider_object["name"],
+                                                  resource_name=resource.resource_name)
+
+        if cls.is_need_flush_list(data) and cls.is_pre_action(resource_object):
+            pre_results = cls.source_pre_action(rid, base_info, base_bodys, resource_object, data)
+            query_datas = cls.filter_data(data, pre_results)
+
+            result = []
+            for query_data in query_datas:
+                x_res = cls.one_query(resource, rid, query_data, base_info, base_bodys)
+                result += x_res
+
+            return result
+        else:
+            return cls.source_query_datas(resource=resource, rid=rid, data=data,
+                                          base_info=base_info, base_bodys=base_bodys)
 
     @classmethod
     def query(cls, resource, data, **kwargs):
