@@ -165,9 +165,12 @@ class SourceOuterReader(object):
                 return add_info
 
         if isinstance(data, basestring):
-            return _f_string_property_(data=data, key=key,
-                                       column=define_column,
-                                       resource_value_config=resource_value_config)
+            try:
+                return _f_string_property_(data=data, key=key,
+                                           column=define_column,
+                                           resource_value_config=resource_value_config)
+            except Exception, e:
+                raise e
 
         return _f_dict_property_(provider=provider, data=data,
                                  key=key, define=define_column,
@@ -178,11 +181,17 @@ class SourceOuterReader(object):
 def source_object_outer(datas, columns):
     if len(columns) == 0:
         c_data = []
-        for data in datas:
-            if isinstance(data, list):
-                c_data += data
-            else:
-                c_data.append(data)
+        if isinstance(datas, list):
+            for data in datas:
+                if isinstance(data, list):
+                    c_data += data
+                else:
+                    c_data.append(data)
+        elif isinstance(datas, dict):
+            c_data.append(datas)
+        else:
+            logger.info("data is not list/json may error....")
+            c_data.append(datas)
 
         return SourceOuterReader.skip_empty_dict(c_data)
 
