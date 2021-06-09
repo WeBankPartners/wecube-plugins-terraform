@@ -426,6 +426,42 @@ class ModelFormat(object):
         return value, add_infos
 
     @classmethod
+    def _hint_instance_type_columns_outer_(cls, provider, value, columns, usage_type=None):
+        '''
+        #todo instance type 转换信息新增 cpu 内存等信息
+        :param provider:
+        :param value:
+        :param columns:
+        :param usage_type:
+        :return:
+        '''
+
+        # for define instance type
+        add_infos = {}
+        if isinstance(value, (basestring, int)):
+            value, add_infos = InstanceTypeObject().convert_asset(provider, value, usage_type)
+            value = add_infos.get(columns) or value
+            return value, add_infos
+        elif isinstance(value, list):
+            # for list add info is {}, e: list may not used
+            filters = {"provider": provider}
+            if usage_type:
+                filters["type"] = usage_type
+            c, t_data = InstanceTypeObject().list(filters=filters, filter_in={"origin_name": value})
+
+            convertd = []
+            for x in t_data:
+                convertd.append(x.get(columns)) if x.get(columns) else None
+                value.append(x.get("name"))
+
+            logger.info("_hint_instance_type_outer_, convert resource: %s" % (bytes(convertd)))
+            value = list(set(value) - set(convertd))
+        else:
+            raise ValueError("不正确的 instance type： %s" % value)
+
+        return value, add_infos
+
+    @classmethod
     def hint_apply_infos(cls, provider, value, define, resource_name):
         '''
         hint info， 用于转换cmdb信息定义
@@ -476,10 +512,15 @@ class ModelFormat(object):
             value = cls._hint_zone_id_outer_(value)
         elif define == "$region":
             value = cls._hint_region_id_outer_(value)
-        elif define == "$instance.type":
+        elif define.startswith("$instance.type"):
             # instance type 转换统一使用value进行转换
-            logger.info("instance type used value revert now, skip value ...")
-            _, add_infos = cls._hint_instance_type_outer_(provider, value, usage_type=resource_name)
+            if define == "$instance.type":
+                logger.info("instance type used value revert now, skip value ...")
+                _, add_infos = cls._hint_instance_type_outer_(provider, value, usage_type=resource_name)
+            else:
+                column = define[len("$instance.type."):]
+                value, _ = cls._hint_instance_type_columns_outer_(provider, value,
+                                                                  columns=column, usage_type=resource_name)
         else:
             logger.info("define %s not define now, skip it ..." % (define))
         return value, add_infos
