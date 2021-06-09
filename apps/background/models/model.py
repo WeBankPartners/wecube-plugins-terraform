@@ -18,7 +18,7 @@ Base.to_dict = to_dict
 
 
 class ResourceHistory(Base):
-    __tablename__ = "resource_history"
+    __tablename__ = "cloud_resource_history"
 
     xid = Column(String(64), primary_key=True)
     id = Column(String(64))
@@ -107,7 +107,7 @@ class ProviderSecret(Base):
 
 
 class Region(Base):
-    __tablename__ = "region"
+    __tablename__ = "cloud_region"
 
     id = Column(String(64), primary_key=True)
     name = Column(String(64))
@@ -134,7 +134,7 @@ class Region(Base):
 
 
 class Zone(Base):
-    __tablename__ = "availability_zone"
+    __tablename__ = "cloud_zone"
 
     id = Column(String(64), primary_key=True)
     name = Column(String(64))

@@ -3,9 +3,9 @@
 ALTER TABLE cloud_secret ADD server varchar(256) NULL  after  `region`;
 
 
-DROP TABLE IF EXISTS `region`;
+DROP TABLE IF EXISTS `cloud_region`;
 
-CREATE TABLE `region` (
+CREATE TABLE `cloud_region` (
   `id` VARCHAR(64) NOT NULL,
   `name` VARCHAR(128) DEFAULT NULL,
   `provider` VARCHAR(128) NOT NULL,
@@ -21,9 +21,9 @@ CREATE TABLE `region` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 
-DROP TABLE IF EXISTS `availability_zone`;
+DROP TABLE IF EXISTS `cloud_zone`;
 
-CREATE TABLE `availability_zone` (
+CREATE TABLE `cloud_zone` (
   `id` VARCHAR(64) NOT NULL,
   `name` VARCHAR(128) DEFAULT NULL,
   `provider` VARCHAR(128) NOT NULL,

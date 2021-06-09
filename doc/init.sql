@@ -68,21 +68,6 @@ CREATE TABLE `resource` (
   UNIQUE KEY `idx_property` (`provider`,`resource_type`,`is_deleted`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `common_keys`;
-
-CREATE TABLE `common_keys` (
-  `id` VARCHAR(64) NOT NULL,
-  `resource` VARCHAR(64) NOT NULL,
-  `key` VARCHAR(64) NOT NULL,
-  `property` VARCHAR(64) NOT NULL,
-  `is_locked` BOOL DEFAULT FALSE,
-  `created_time` DATETIME DEFAULT NULL,
-  `updated_time` DATETIME DEFAULT NULL,
-  `deleted_time` DATETIME DEFAULT NULL,
-  `enabled` BOOL DEFAULT TRUE,
-  `is_deleted` BOOL DEFAULT FALSE,
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `config`;
 
@@ -157,9 +142,9 @@ CREATE TABLE `instance_type` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 
-DROP TABLE IF EXISTS `resource_history`;
+DROP TABLE IF EXISTS `cloud_resource_history`;
 
-CREATE TABLE `resource_history` (
+CREATE TABLE `cloud_resource_history` (
   `xid` VARCHAR(64) NOT NULL,
   `id` VARCHAR(64) DEFAULT NULL,
   `resource` VARCHAR(64) DEFAULT NULL,
