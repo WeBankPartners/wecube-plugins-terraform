@@ -446,7 +446,9 @@ class ModelFormat(object):
         elif define == "$region":
             value = cls._hint_region_id_(value)
         elif define == "$instance.type":
-            value = cls._hint_instance_type_(provider, value, usage_type=resource_name)
+            # instance type转换更新值转换
+            logger.info("instance type revert used value now. skip ...")
+            # value = cls._hint_instance_type_(provider, value, usage_type=resource_name)
         else:
             logger.info("define %s not define now, skip it ..." % (define))
         return value
@@ -475,7 +477,9 @@ class ModelFormat(object):
         elif define == "$region":
             value = cls._hint_region_id_outer_(value)
         elif define == "$instance.type":
-            value, add_infos = cls._hint_instance_type_outer_(provider, value, usage_type=resource_name)
+            # instance type 转换统一使用value进行转换
+            logger.info("instance type used value revert now, skip value ...")
+            _, add_infos = cls._hint_instance_type_outer_(provider, value, usage_type=resource_name)
         else:
             logger.info("define %s not define now, skip it ..." % (define))
         return value, add_infos

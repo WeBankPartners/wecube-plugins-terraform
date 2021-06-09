@@ -270,7 +270,7 @@ class ResBase(object):
         title = '''<?xml version="1.0" encoding="UTF-8"?>'''
 
         xml_result = title + xml_result
-        # print(xml_result)
+        print(xml_result)
         xml_result = xml_result.replace('\n', '').replace('\r', '').replace('\t', '')
         xml_result = minidom.parseString(xml_result.encode('utf-8'))
         return xml_result.toprettyxml(indent='	', encoding='UTF-8')

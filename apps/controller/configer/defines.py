@@ -755,6 +755,35 @@ xml_register = {
                                  'subnet_id', "zone_id", ]
         }
     },
+    "redis": {
+        "apply": {
+            "path": "/terraform/v1/database/backend/redis/apply",
+            "method": "POST",
+            "notnull": ['provider', 'instance_type', "zone_id", "region_id"],
+            "inputParameters": ['id', 'name', 'secret', 'provider',  'password', 'port',
+                                 'version', 'instance_type', 'vpc_id', 'security_group_id',
+                                "zone_id", "region_id", 'asset_id', 'extend_info', "charge_type"],
+            "outputParameters": ['errorMessage', 'errorCode', 'asset_id', 'ipaddress', 'port',
+                                 'id']
+        },
+        "destroy": {
+            "path": "/terraform/v1/database/backend/redis/destroy",
+            "method": "POST",
+            "notnull": ["id"],
+            "inputParameters": ["id"],
+            "outputParameters": ["errorMessage", "errorCode", "id"]
+        },
+        "query": {
+            "path": "/terraform/v1/database/backend/redis/source",
+            "method": "POST",
+            "notnull": ["region_id", "provider"],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'ipaddress', 'port', 'engine', 'version',
+                                'name', 'vpc_id', 'subnet_id', 'tag', "id"],
+            "outputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'errorMessage', 'errorCode', 'name',
+                                 'subnet_id',  'password', 'port', 'version',
+                                 'instance_type', 'vpc_id', 'security_group_id',  "zone_id", 'ipaddress', "charge_type"]
+        }
+    },
 }
 
 # print(xml_register.keys())

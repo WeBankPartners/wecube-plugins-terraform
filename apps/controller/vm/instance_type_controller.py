@@ -46,12 +46,12 @@ class InstanceTypeController(BackendController):
         validation.allowed_key(data, ["id", "name", "provider_id", "origin_name",
                                       "type", "cpu", "memory", "network", "extend_info"])
         validation.not_allowed_null(data=data,
-                                    keys=["provider_id", "origin_name", "name", "cpu", "memory", "type"]
+                                    keys=["provider_id", "name", "cpu", "memory"]
                                     )
 
         validation.validate_string("id", data.get("id"))
         validation.validate_string("name", data["name"])
-        validation.validate_string("origin_name", data["origin_name"])
+        validation.validate_string("origin_name", data.get("origin_name"))
         validation.validate_int("cpu", data.get("cpu"))
         validation.validate_int("memory", data["memory"])
         validation.validate_string("network", data.get("network"))

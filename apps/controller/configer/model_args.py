@@ -15,7 +15,7 @@ resouce_property_models = {
         "cidr",
         "name",
         "vpc_id",
-        "zone"
+        "zone_id"
     ],
     "route_table": [
         "name",
@@ -103,7 +103,7 @@ resouce_property_models = {
         "name",
         "type",
         "size",
-        "zone",
+        "zone_id",
         "charge_type"
     ],
     "disk_attach": [
@@ -157,7 +157,7 @@ resouce_property_models = {
         "disk_type",
         "disk_size",
         "subnet_id",
-        "zone",
+        "zone_id",
         "image",
         "power_action",
         "force_delete",
@@ -167,7 +167,7 @@ resouce_property_models = {
         "name",
         "charge_type",
         "engine",
-        "zone",
+        "zone_id",
         "version",
         "disk_type",
         "disk_size",
@@ -212,7 +212,7 @@ resouce_property_models = {
         "charge_type",
         "name",
         "engine",
-        "zone",
+        "zone_id",
         "version",
         "disk_type",
         "disk_size",
@@ -231,7 +231,7 @@ resouce_property_models = {
         "charge_type",
         "name",
         "engine",
-        "zone",
+        "zone_id",
         "version",
         "disk_type",
         "disk_size",
@@ -249,7 +249,7 @@ resouce_property_models = {
     "rds": [
         "name",
         "engine",
-        "zone",
+        "zone_id",
         "version",
         "disk_type",
         "disk_size",
@@ -266,7 +266,7 @@ resouce_property_models = {
     "nosql": [
         "name",
         "engine",
-        "zone",
+        "zone_id",
         "version",
         "subnet_id",
         "instance_type",
@@ -278,7 +278,7 @@ resouce_property_models = {
     "mongodb": [
         "name",
         "engine",
-        "zone",
+        "zone_id",
         "version",
         "subnet_id",
         "instance_type",
@@ -291,7 +291,7 @@ resouce_property_models = {
     "kvstore": [
         "name",
         "engine",
-        "zone",
+        "zone_id",
         "version",
         "subnet_id",
         "vpc_id",
@@ -305,7 +305,7 @@ resouce_property_models = {
     "redis": [
         "name",
         "engine",
-        "zone",
+        "zone_id",
         "version",
         "subnet_id",
         "vpc_id",
@@ -313,13 +313,12 @@ resouce_property_models = {
         "instance_type",
         "port",
         "password",
-        "charge_type",
-        "force_delete"
+        "charge_type"
     ],
     "memcached": [
         "name",
         "engine",
-        "zone",
+        "zone_id",
         "version",
         "subnet_id",
         "vpc_id",
@@ -510,7 +509,7 @@ data_source_models = {
     ],
     "subnet": [
         "asset_id",
-        "zone",
+        "zone_id",
         "cidr",
         "tag",
         "vpc_id"
@@ -599,7 +598,7 @@ data_source_models = {
         "instance_id",
         "type",
         "tag",
-        "zone"
+        "zone_id"
     ],
     "disk_attach": [
         "asset_id",
@@ -639,7 +638,7 @@ data_source_models = {
         "asset_id",
         "ipaddress",
         "public_ip",
-        "zone",
+        "zone_id",
         "image_id",
         "tag",
         "vpc_id",
@@ -802,6 +801,9 @@ def data_source_output_necessary(resource_name, resource_property):
     if resource_name not in resouce_property_models.keys():
         return
 
+    if not resource_property:
+        return
+
     columns_property = resouce_property_models.get(resource_name)
     for column in columns_property:
         if column not in resource_property.keys():
@@ -815,6 +817,9 @@ def data_source_output_necessary(resource_name, resource_property):
 
 def source_necessary(resource_name, data_source):
     if resource_name not in data_source_models.keys():
+        return
+
+    if not data_source:
         return
 
     columns_property = data_source_models.get(resource_name)

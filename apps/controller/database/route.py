@@ -50,6 +50,7 @@ urlpatterns = [
     url(r'^redis/(?P<rid>[\w-]+)$', redis_controller.RedisIdController()),
     url(r'^backend/redis/apply$', redis_controller.RedisAddController()),
     url(r'^backend/redis/destroy$', redis_controller.RedisDeleteController()),
+    url(r'^backend/redis/source$', redis_controller.RedisSourceController()),
 
     url(r'^redis_backup$', redis_controller.RedisBackupController()),
     url(r'^redis_backup/(?P<rid>[\w-]+)$', redis_controller.RedisBackupIdController()),
