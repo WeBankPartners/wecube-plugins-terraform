@@ -3,6 +3,7 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import json
+import copy
 from lib.uuid_util import get_uuid
 from core import validation
 from core.controller import BackendController
@@ -11,6 +12,7 @@ from apps.common.convert_keys import validate_convert_key
 from apps.common.convert_keys import validate_convert_value
 from apps.api.configer.resource import ResourceObject
 from apps.api.configer.provider import ProviderObject
+from .model_args import output_property_models
 from .model_args import property_necessary
 from .model_args import output_necessary
 from .model_args import source_necessary
@@ -38,12 +40,30 @@ def format_argument(key, data):
         raise ValueError("key: %s 应为json或string" % key)
 
 
+def get_columns(defines):
+    result = []
+    for key, define in defines.items():
+        if isinstance(define, basestring):
+            result.append(key)
+        elif isinstance(define, dict):
+            if define.get("define"):
+                result.append(key)
+                result += get_columns(defines.get("define"))
+            else:
+                tkey = define.get("convert") or key
+                result.append(tkey)
+        else:
+            pass
+
+    return result
+
+
 class ResourceController(BackendController):
     resource = ResourceObject()
 
     def list(self, request, data, orderby=None, page=None, pagesize=None, **kwargs):
-        validation.allowed_key(data, ["id", "provider", "resource_type", "resource_name",
-                                      "data_source_argument", "data_source_name"])
+        validation.allowed_key(["id", "provider", "resource_type", "resource_name",
+                                "data_source_argument", "data_source_name"], data=data)
 
         filter_string = None
         for key in ["resource_type", "provider", "resource_name", "data_source_name"]:
@@ -255,3 +275,68 @@ class ResourceIdController(BackendIdController):
     def delete(self, request, data, **kwargs):
         rid = kwargs.pop("rid", None)
         return self.resource.delete(rid)
+
+
+class ResourceListController(BackendIdController):
+    resource = ResourceObject()
+    allow_methods = ('GET',)
+
+    def show(self, request, data, **kwargs):
+        columns = output_property_models.keys()
+        return {"resource": columns}
+
+
+class ResourceAttrController(BackendIdController):
+    resource = ResourceObject()
+    allow_methods = ('GET',)
+
+    def show(self, request, data, **kwargs):
+        validation.allowed_key(["resource_type", "provider"], data)
+        validation.not_allowed_null(["resource_type", "provider"], data)
+
+        define_data = self.resource.query_one(where_data={"provider": data.get("provider"),
+                                                          "resource_type": data.get("resource_type")})
+
+        define = define_data.get("resource_property") or {}
+        return {"resource": get_columns(define)}
+
+
+class HintResourceController(BackendIdController):
+    resource = ResourceObject()
+    allow_methods = ('GET',)
+
+    def format_resource_type(self, datas):
+        models = copy.deepcopy(output_property_models)
+        for data in datas:
+            resource_type = data.get("resource_type")
+            if models.get(resource_type):
+                r_out = data.get("resource_output") or {}
+                tmp = models[resource_type]
+                models[resource_type] = list(set(r_out.keys() + tmp))
+            # else:
+            #     tmp = data.get("resource_output") or {}
+            #     models[resource_type] = tmp.keys()
+
+        return models
+
+    def get_resource_list(self, data):
+        filter_string = None
+        if data.get("resource_type"):
+            filter_string = "resource_type like '%" + data.get("resource_type") + "%' "
+            data.pop("resource_type", None)
+
+        _, resource_lists = self.resource.list(filters=data, page=1, filter_string=filter_string,
+                                               pagesize=10000, orderby=None)
+        return resource_lists
+
+    def show(self, request, data, **kwargs):
+        validation.allowed_key(["resource_type"], data)
+        resource_attribute = self.format_resource_type(self.get_resource_list(data))
+
+        result = ["$zone", "$region", "$instance.type",
+                  "$instance.type.cpu", "$instance.type.memory", "$resource"]
+
+        for xres in resource_attribute.key():
+            result.append("$resource.%s" % (xres))
+
+        return {"resource": result, "attribute": resource_attribute}

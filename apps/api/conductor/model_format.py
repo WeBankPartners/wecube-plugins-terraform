@@ -170,7 +170,7 @@ class ModelFormat(object):
         '''
 
         def get_value(value, column, data):
-            if column == "resource_id" or (not column):
+            if column in ["resource_id", "asset_id"] or (not column):
                 value = data.get("resource_id") or value
             else:
                 x_res = data.get("output_json") or {}
