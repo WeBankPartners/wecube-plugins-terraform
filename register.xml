@@ -50,93 +50,74 @@
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="apply" path="/terraform/v1/network/backend/route_entry/apply" httpMethod="POST" description="tencentcloud,alicloud,aws">
+      <interface action="apply" path="/terraform/v1/network/backend/route_entry/apply" httpMethod="POST" description="tencentcloud">
         <inputParameters>
           <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y],[alicloud Y],[aws N]">next_hub</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">next_hub</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud N]">name</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">resource_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y],[alicloud Y],[aws N]">next_type</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y],[alicloud Y],[aws Y]">route_table_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y],[alicloud Y],[aws Y]">destination</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">destination</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">extend_info</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">next_type</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">route_table_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud N]">vpc_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">zone_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">gateway_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">nat_gateway_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud N],[alicloud N],[aws N]">name</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">peer_connection_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">local_gateway_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">instance_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">network_interface_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common">extend_info</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud N],[alicloud N],[aws N]">vpc_id</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[tencentcloud N],[alicloud N],[aws N]">asset_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="query" path="/terraform/v1/network/backend/route_entry/source" httpMethod="POST" description="tencentcloud,alicloud,aws">
+      <interface action="query" path="/terraform/v1/network/backend/route_entry/source" httpMethod="POST" description="tencentcloud">
         <inputParameters>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[alicloud N],[aws N]">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">gateway_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">nat_gateway_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">asset_id</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">peer_connection_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">local_gateway_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">instance_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">network_interface_id</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[alicloud N],[aws Y]">route_table_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[alicloud N],[aws N]">cidr</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[alicloud N],[aws N]">type</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">route_table_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">cidr</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">type</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="[aws N]">gateway_id</parameter>
-          <parameter datatype="string" description="common,[tencentcloud Y],[alicloud Y],[aws N]">next_hub</parameter>
-          <parameter datatype="string" description="common">region_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
-          <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common,[tencentcloud Y],[alicloud Y],[aws N]">next_type</parameter>
-          <parameter datatype="string" description="common,[tencentcloud Y],[alicloud Y],[aws Y]">route_table_id</parameter>
-          <parameter datatype="string" description="common,[tencentcloud Y],[alicloud Y],[aws N]">destination</parameter>
-          <parameter datatype="string" description="common,[tencentcloud N],[aws N]">id</parameter>
-          <parameter datatype="string" description="common,[tencentcloud N],[aws N]">asset_id</parameter>
-          <parameter datatype="string" description="[aws N]">nat_gateway_id</parameter>
-          <parameter datatype="string" description="common,[tencentcloud N],[alicloud N],[aws N]">name</parameter>
-          <parameter datatype="string" description="[aws N]">peer_connection_id</parameter>
-          <parameter datatype="string" description="common">secret</parameter>
-          <parameter datatype="string" description="[aws N]">local_gateway_id</parameter>
-          <parameter datatype="string" description="[aws N]">instance_id</parameter>
-          <parameter datatype="string" description="[aws N]">network_interface_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">next_hub</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">name</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">destination</parameter>
           <parameter datatype="string" description="common">provider</parameter>
-          <parameter datatype="string" description="[alicloud N],[aws N]">vpc_id</parameter>
+          <parameter datatype="string" description="common">errorCode</parameter>
+          <parameter datatype="string" description="common">secret</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">next_type</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">route_table_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">id</parameter>
+          <parameter datatype="string" description="common">region_id</parameter>
         </outputParameters>
       </interface>
     </plugin>
     <plugin name="mysql_database">
-      <interface action="apply" path="/terraform/v1/database/backend/mysql_database/apply" httpMethod="POST" description="alicloud">
+      <interface action="apply" path="/terraform/v1/database/backend/mysql_database/apply" httpMethod="POST" description="common">
         <inputParameters>
           <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[alicloud Y]">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">zone_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">resource_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">extend_info</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[alicloud Y]">mysql_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common">mysql_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common">zone_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common">name</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[alicloud N]">asset_id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
+          <parameter datatype="string" description="common">asset_id</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
@@ -163,48 +144,45 @@
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="apply" path="/terraform/v1/network/backend/route_table/apply" httpMethod="POST" description="tencentcloud,aws,alicloud">
+      <interface action="apply" path="/terraform/v1/network/backend/route_table/apply" httpMethod="POST" description="tencentcloud">
         <inputParameters>
           <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y],[aws N],[alicloud Y]">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">name</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">zone_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">extend_info</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y],[aws Y],[alicloud Y]">vpc_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">vpc_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[tencentcloud N],[aws N],[alicloud N]">asset_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="[aws N]">name</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="query" path="/terraform/v1/network/backend/route_table/source" httpMethod="POST" description="tencentcloud,aws,alicloud">
+      <interface action="query" path="/terraform/v1/network/backend/route_table/source" httpMethod="POST" description="tencentcloud">
         <inputParameters>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[aws N],[alicloud N]">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[aws N],[aws N],[alicloud N]">name</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">subnet_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">asset_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">name</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[aws N],[alicloud N]">tag</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">tag</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">route_table_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[aws N],[alicloud N]">vpc_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">vpc_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[tencentcloud N],[aws N],[alicloud N]">asset_id</parameter>
-          <parameter datatype="string" description="common,[tencentcloud Y],[aws Y],[alicloud Y]">name</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">name</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
           <parameter datatype="string" description="common">secret</parameter>
           <parameter datatype="string" description="common">provider</parameter>
-          <parameter datatype="string" description="common,[tencentcloud Y],[aws Y],[alicloud Y]">vpc_id</parameter>
-          <parameter datatype="string" description="common,[tencentcloud N],[aws N],[alicloud N]">id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">vpc_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">id</parameter>
           <parameter datatype="string" description="common">region_id</parameter>
         </outputParameters>
       </interface>
@@ -220,93 +198,88 @@
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="apply" path="/terraform/v1/database/backend/mysql/apply" httpMethod="POST" description="alicloud,tencentcloud,aws">
+      <interface action="apply" path="/terraform/v1/database/backend/mysql/apply" httpMethod="POST" description="tencentcloud">
         <inputParameters>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">max_disk_size</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[alicloud N],[tencentcloud N],[aws N]">port</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[alicloud N],[tencentcloud N],[aws N]">charge_type</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" sensitiveData="Y" description="common,[alicloud N],[tencentcloud N],[aws N]">password</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[alicloud N],[tencentcloud N],[aws N]">parameters</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[alicloud Y],[tencentcloud Y],[aws N]">subnet_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[alicloud N],[tencentcloud N],[aws N]">security_group_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="[tencentcloud N]">parameters</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">port</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">charge_type</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">disk_type</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="[tencentcloud N]">zone</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">subnet_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">security_group_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[alicloud Y],[tencentcloud Y],[aws Y]">version</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">version</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">extend_info</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[alicloud N],[tencentcloud N],[aws N]">second_slave_zone</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[tencentcloud N],[aws N]">zone</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[alicloud N],[tencentcloud N],[aws N]">engine</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">second_slave_zone</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="[tencentcloud N]">engine</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[alicloud N],[tencentcloud N],[aws N]">user</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">subnet_group</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[alicloud N],[tencentcloud N],[aws N]">disk_type</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[alicloud N]">zone_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[alicloud Y],[tencentcloud Y],[aws Y]">disk_size</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[alicloud Y],[tencentcloud Y],[aws Y]">name</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[alicloud N],[tencentcloud N],[aws N]">force_delete</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[alicloud Y],[tencentcloud Y],[aws Y]">instance_type</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[alicloud N],[tencentcloud Y],[aws N]">vpc_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[alicloud N],[tencentcloud N],[aws N]">first_slave_zone</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">user</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" sensitiveData="Y" description="common,[tencentcloud N]">password</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common">zone_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud Y]">disk_size</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="[tencentcloud N]">force_delete</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">instance_type</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud Y]">vpc_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">first_slave_zone</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[alicloud N],[tencentcloud N],[aws N]">asset_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
           <parameter datatype="string" description="common">user</parameter>
           <parameter datatype="string" sensitiveData="Y" description="common">password</parameter>
-          <parameter datatype="string" description="common,[alicloud N],[tencentcloud N],[aws N]">ipaddress</parameter>
-          <parameter datatype="string" description="common,[alicloud N],[tencentcloud N],[aws N]">port</parameter>
-          <parameter datatype="string" description="[aws N]">arn</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">ipaddress</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">port</parameter>
         </outputParameters>
       </interface>
-      <interface action="query" path="/terraform/v1/database/backend/mysql/source" httpMethod="POST" description="alicloud,tencentcloud,aws">
+      <interface action="query" path="/terraform/v1/database/backend/mysql/source" httpMethod="POST" description="tencentcloud">
         <inputParameters>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[alicloud N],[tencentcloud N],[aws N]">engine</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">engine</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[alicloud N],[tencentcloud N],[aws N]">tag</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[alicloud N],[tencentcloud N],[aws N]">ipaddress</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[alicloud N],[tencentcloud N],[aws N]">port</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[alicloud N],[tencentcloud N],[aws N]">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[alicloud N],[tencentcloud N],[aws N]">name</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[alicloud N],[tencentcloud N],[aws N]">subnet_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">tag</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">ipaddress</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">port</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">asset_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">subnet_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[alicloud N],[tencentcloud N],[aws N]">version</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">version</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[alicloud N],[tencentcloud N],[aws N]">vpc_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">vpc_id</parameter>
         </inputParameters>
         <outputParameters>
           <parameter datatype="string" description="common">region_id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common,[alicloud N],[tencentcloud N],[aws N]">id</parameter>
-          <parameter datatype="string" description="[aws N]">max_disk_size</parameter>
-          <parameter datatype="string" description="common,[alicloud N],[tencentcloud N],[aws N]">port</parameter>
-          <parameter datatype="string" description="common,[alicloud N],[tencentcloud N],[aws N]">charge_type</parameter>
-          <parameter datatype="string" sensitiveData="Y" description="common,[alicloud N],[tencentcloud N],[aws N]">password</parameter>
-          <parameter datatype="string" description="[alicloud N],[tencentcloud N],[aws N]">parameters</parameter>
-          <parameter datatype="string" description="common,[alicloud Y],[tencentcloud Y],[aws N]">subnet_id</parameter>
-          <parameter datatype="string" description="common,[alicloud N],[tencentcloud N],[aws N]">security_group_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">charge_type</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">disk_type</parameter>
+          <parameter datatype="string" description="[tencentcloud N]">parameters</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">subnet_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">security_group_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">port</parameter>
           <parameter datatype="string" description="common">secret</parameter>
-          <parameter datatype="string" description="common,[alicloud Y],[tencentcloud Y],[aws Y]">version</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">version</parameter>
           <parameter datatype="string" description="common">provider</parameter>
-          <parameter datatype="string" description="common,[alicloud N],[tencentcloud N],[aws N]">second_slave_zone</parameter>
-          <parameter datatype="string" description="[alicloud N],[tencentcloud N],[aws N]">engine</parameter>
-          <parameter datatype="string" description="common,[alicloud N],[tencentcloud N],[aws N]">asset_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">second_slave_zone</parameter>
+          <parameter datatype="string" description="[tencentcloud N]">engine</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
-          <parameter datatype="string" description="common,[alicloud N],[tencentcloud N],[aws N]">user</parameter>
-          <parameter datatype="string" description="[aws N]">subnet_group</parameter>
-          <parameter datatype="string" description="common,[alicloud N],[tencentcloud N],[aws N]">disk_type</parameter>
-          <parameter datatype="string" description="common,[alicloud N],[tencentcloud N],[aws N]">ipaddress</parameter>
-          <parameter datatype="string" description="common,[alicloud N],[tencentcloud N],[aws N]">zone_id</parameter>
-          <parameter datatype="string" description="common,[alicloud Y],[tencentcloud Y],[aws Y]">disk_size</parameter>
-          <parameter datatype="string" description="common,[alicloud Y],[tencentcloud Y],[aws Y]">name</parameter>
-          <parameter datatype="string" description="[alicloud N],[tencentcloud N],[aws N]">force_delete</parameter>
-          <parameter datatype="string" description="common,[alicloud Y],[tencentcloud Y],[aws Y]">instance_type</parameter>
-          <parameter datatype="string" description="common,[alicloud N],[tencentcloud Y],[aws N]">vpc_id</parameter>
-          <parameter datatype="string" description="common,[alicloud N],[tencentcloud N],[aws N]">first_slave_zone</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">user</parameter>
+          <parameter datatype="string" sensitiveData="Y" description="common,[tencentcloud N]">password</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">ipaddress</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">zone_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">disk_size</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">name</parameter>
+          <parameter datatype="string" description="[tencentcloud N]">force_delete</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">instance_type</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">vpc_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">first_slave_zone</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -321,57 +294,55 @@
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="apply" path="/terraform/v1/storage/backend/disk/apply" httpMethod="POST" description="tencentcloud,aws,alicloud">
+      <interface action="apply" path="/terraform/v1/storage/backend/disk/apply" httpMethod="POST" description="tencentcloud">
         <inputParameters>
           <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">zone_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud N],[aws N],[alicloud N]">size</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[aws N],[alicloud N]">charge_type</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y],[aws N],[alicloud Y]">name</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[tencentcloud N],[aws N],[alicloud N]">zone</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud N]">size</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">charge_type</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="[tencentcloud N]">zone</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">extend_info</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud N],[aws N],[alicloud N]">type</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud N]">type</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[tencentcloud N],[aws N],[alicloud N]">asset_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="[aws N]">name</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="query" path="/terraform/v1/storage/backend/disk/source" httpMethod="POST" description="tencentcloud,aws,alicloud">
+      <interface action="query" path="/terraform/v1/storage/backend/disk/source" httpMethod="POST" description="tencentcloud">
         <inputParameters>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[aws N],[alicloud N]">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">volume_ids</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[aws N],[alicloud N]">name</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[aws N],[alicloud N]">instance_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">asset_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">instance_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[aws N],[alicloud N]">tag</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">tag</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[aws N],[alicloud N]">type</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">type</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">zone_id</parameter>
         </inputParameters>
         <outputParameters>
           <parameter datatype="string" description="common,[tencentcloud N]">charge_type</parameter>
-          <parameter datatype="string" description="common,[tencentcloud N],[aws N],[alicloud N]">asset_id</parameter>
-          <parameter datatype="string" description="common,[tencentcloud Y],[aws Y],[alicloud Y]">name</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">name</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">instance_id</parameter>
           <parameter datatype="string" description="common">secret</parameter>
-          <parameter datatype="string" description="common,[tencentcloud N],[aws N],[alicloud N]">zone_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">zone_id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
           <parameter datatype="string" description="common">provider</parameter>
           <parameter datatype="string" description="common">region_id</parameter>
-          <parameter datatype="string" description="common,[tencentcloud N],[aws N],[alicloud N]">type</parameter>
-          <parameter datatype="string" description="common,[tencentcloud N],[aws N],[alicloud N]">id</parameter>
-          <parameter datatype="string" description="common,[tencentcloud N],[aws N],[alicloud N]">size</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">type</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">size</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -386,54 +357,51 @@
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="apply" path="/terraform/v1/network/backend/peer_connection/apply" httpMethod="POST" description="aws">
+      <interface action="apply" path="/terraform/v1/network/backend/peer_connection/apply" httpMethod="POST" description="common">
         <inputParameters>
           <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[aws N]">name</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">accepter.allow_vpc</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">requester.allow_vpc</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common">zone_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common">extend_info</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[aws N]">peer_vpc_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N]">peer_region</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[aws N]">vpc_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common">peer_vpc_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">extend_info</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">peer_region</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common">vpc_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">zone_id</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[aws N]">asset_id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
+          <parameter datatype="string" description="common">asset_id</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="query" path="/terraform/v1/network/backend/peer_connection/source" httpMethod="POST" description="aws">
+      <interface action="query" path="/terraform/v1/network/backend/peer_connection/source" httpMethod="POST" description="common">
         <inputParameters>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N]">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N]">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N]">peer_vpc_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N]">peer_region</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N]">vpc_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">cidr</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">peer_vpc_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">peer_region</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">vpc_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">name</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[aws N]">asset_id</parameter>
-          <parameter datatype="string" description="common,[aws N]">name</parameter>
+          <parameter datatype="string" description="common">asset_id</parameter>
+          <parameter datatype="string" description="common">region_id</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
-          <parameter datatype="string" description="common">provider</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
           <parameter datatype="string" description="common">secret</parameter>
-          <parameter datatype="string" description="common,[aws N]">peer_vpc_id</parameter>
-          <parameter datatype="string" description="common,[aws N]">peer_region</parameter>
-          <parameter datatype="string" description="common,[aws N]">vpc_id</parameter>
-          <parameter datatype="string" description="common,[aws N]">id</parameter>
-          <parameter datatype="string" description="common">region_id</parameter>
+          <parameter datatype="string" description="common">peer_vpc_id</parameter>
+          <parameter datatype="string" description="common">provider</parameter>
+          <parameter datatype="string" description="common">peer_region</parameter>
+          <parameter datatype="string" description="common">vpc_id</parameter>
+          <parameter datatype="string" description="common">id</parameter>
+          <parameter datatype="string" description="common">name</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -448,54 +416,52 @@
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="apply" path="/terraform/v1/network/backend/subnet/apply" httpMethod="POST" description="tencentcloud,alicloud,aws">
+      <interface action="apply" path="/terraform/v1/network/backend/subnet/apply" httpMethod="POST" description="tencentcloud">
         <inputParameters>
           <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y],[alicloud N],[aws N]">name</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[tencentcloud Y],[alicloud Y],[aws N]">zone</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="[tencentcloud Y]">zone</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">zone_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">extend_info</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y],[alicloud Y],[aws Y]">vpc_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y],[alicloud Y],[aws Y]">cidr</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">vpc_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">cidr</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[tencentcloud N],[alicloud N],[aws N]">asset_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="[aws N]">name</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="query" path="/terraform/v1/network/backend/subnet/source" httpMethod="POST" description="tencentcloud,alicloud,aws">
+      <interface action="query" path="/terraform/v1/network/backend/subnet/source" httpMethod="POST" description="tencentcloud">
         <inputParameters>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[alicloud N],[aws N]">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">name</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[tencentcloud N],[alicloud N],[aws N]">zone</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">asset_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">zone_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="[tencentcloud N]">zone</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[alicloud N],[aws N]">tag</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">tag</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[alicloud N],[aws N]">vpc_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">vpc_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">cidr</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common">zone_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[tencentcloud N],[alicloud N],[aws N]">asset_id</parameter>
-          <parameter datatype="string" description="common,[tencentcloud Y],[alicloud Y],[aws N]">zone_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">zone_id</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
           <parameter datatype="string" description="common">secret</parameter>
           <parameter datatype="string" description="common">provider</parameter>
           <parameter datatype="string" description="common">region_id</parameter>
-          <parameter datatype="string" description="common,[tencentcloud Y],[alicloud Y],[aws Y]">vpc_id</parameter>
-          <parameter datatype="string" description="common,[tencentcloud Y],[alicloud Y],[aws Y]">cidr</parameter>
-          <parameter datatype="string" description="common,[tencentcloud N],[alicloud N],[aws N]">id</parameter>
-          <parameter datatype="string" description="common,[tencentcloud Y],[alicloud N],[aws N]">name</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">vpc_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">cidr</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">name</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -557,64 +523,57 @@
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="apply" path="/terraform/v1/loadbalance/backend/lb/apply" httpMethod="POST" description="aws,tencentcloud,alicloud">
+      <interface action="apply" path="/terraform/v1/loadbalance/backend/lb/apply" httpMethod="POST" description="tencentcloud">
         <inputParameters>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N],[alicloud N]">charge_type</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[aws Y],[tencentcloud Y],[alicloud Y]">name</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[aws Y],[tencentcloud Y],[alicloud Y]">subnet_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">ipaddress</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">zone_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">charge_type</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">subnet_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws Y]">security_group_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">load_balancer_type</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">tag</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">extend_info</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N],[alicloud N]">vpc_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common">ipaddress</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N],[alicloud N]">network_type</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common">zone_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">vpc_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">network_type</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N],[alicloud N]">asset_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
-          <parameter datatype="string" description="[aws N],[tencentcloud N],[alicloud N]">ipaddress</parameter>
+          <parameter datatype="string" description="[tencentcloud N]">ipaddress</parameter>
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="query" path="/terraform/v1/loadbalance/backend/lb/source" httpMethod="POST" description="aws,tencentcloud,alicloud">
+      <interface action="query" path="/terraform/v1/loadbalance/backend/lb/source" httpMethod="POST" description="tencentcloud">
         <inputParameters>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N],[alicloud N]">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N],[alicloud N]">name</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N],[alicloud N]">subnet_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">asset_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">subnet_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N],[alicloud N]">tag</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">tag</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N],[alicloud N]">vpc_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N],[alicloud N]">ipaddress</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">vpc_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">ipaddress</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N],[alicloud N]">asset_id</parameter>
-          <parameter datatype="string" description="common">region_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">charge_type</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">name</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">subnet_id</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="[aws N]">load_balancer_type</parameter>
-          <parameter datatype="string" description="[aws N]">tag</parameter>
-          <parameter datatype="string" description="common,[tencentcloud N],[alicloud N]">ipaddress</parameter>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N],[alicloud N]">id</parameter>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud Y]">charge_type</parameter>
-          <parameter datatype="string" description="common,[aws Y],[tencentcloud Y],[alicloud Y]">name</parameter>
-          <parameter datatype="string" description="common,[aws Y],[tencentcloud Y],[alicloud Y]">subnet_id</parameter>
-          <parameter datatype="string" description="[aws Y]">security_group_id</parameter>
           <parameter datatype="string" description="common">secret</parameter>
           <parameter datatype="string" description="common">provider</parameter>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud Y],[alicloud N]">vpc_id</parameter>
-          <parameter datatype="string" description="[aws N]">type</parameter>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N],[alicloud N]">network_type</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">vpc_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">ipaddress</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">network_type</parameter>
+          <parameter datatype="string" description="common">region_id</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -629,90 +588,89 @@
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="apply" path="/terraform/v1/database/backend/redis/apply" httpMethod="POST" description="aws,tencentcloud,alicloud">
+      <interface action="apply" path="/terraform/v1/database/backend/redis/apply" httpMethod="POST" description="tencentcloud">
         <inputParameters>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N],[tencentcloud N],[alicloud N]">engine</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="[tencentcloud N]">engine</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" sensitiveData="Y" description="common,[aws N],[tencentcloud N],[alicloud N]">password</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N],[alicloud N]">port</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N],[alicloud N]">name</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N],[alicloud N]">charge_type</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[aws Y],[tencentcloud Y],[alicloud Y]">zone_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N],[tencentcloud N],[alicloud N]">subnet_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N],[tencentcloud N],[alicloud N]">cluster_num</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N],[alicloud N]">security_group_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[aws Y],[tencentcloud Y],[alicloud Y]">instance_type</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" sensitiveData="Y" description="common,[tencentcloud N]">password</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">port</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">charge_type</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">zone_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="[tencentcloud N]">subnet_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="[tencentcloud N]">type</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">security_group_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">instance_type</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N],[alicloud N]">version</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">version</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">extend_info</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws Y]">version_parameter</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N],[tencentcloud N],[alicloud N]">replicas_num</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="[tencentcloud N]">replicas_num</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N],[alicloud N]">vpc_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N],[tencentcloud N],[alicloud Y]">type</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">vpc_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="[tencentcloud N]">cluster_num</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N],[alicloud N]">asset_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N],[alicloud N]">ipaddress</parameter>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N],[alicloud N]">port</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">ipaddress</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">port</parameter>
         </outputParameters>
       </interface>
-      <interface action="query" path="/terraform/v1/database/backend/redis/source" httpMethod="POST" description="aws,tencentcloud,alicloud">
+      <interface action="query" path="/terraform/v1/database/backend/redis/source" httpMethod="POST" description="tencentcloud">
         <inputParameters>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N],[alicloud N]">engine</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">engine</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N],[alicloud N]">tag</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N],[alicloud N]">ipaddress</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N],[alicloud N]">port</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N],[alicloud N]">name</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N],[alicloud N]">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N],[tencentcloud N],[alicloud N]">zone_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N],[alicloud N]">subnet_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N],[alicloud N]">id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">tag</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">ipaddress</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">port</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">asset_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="[tencentcloud N]">zone_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">subnet_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N],[alicloud N]">version</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">version</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N],[alicloud N]">vpc_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">vpc_id</parameter>
         </inputParameters>
         <outputParameters>
           <parameter datatype="string" description="common">region_id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N],[alicloud N]">id</parameter>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N],[alicloud N]">port</parameter>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N],[alicloud N]">charge_type</parameter>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N],[alicloud N]">subnet_id</parameter>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N],[alicloud N]">security_group_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">port</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">charge_type</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">subnet_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">security_group_id</parameter>
           <parameter datatype="string" description="common">secret</parameter>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N],[alicloud N]">version</parameter>
-          <parameter datatype="string" description="[aws N],[tencentcloud N],[alicloud N]">replicas_num</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">version</parameter>
+          <parameter datatype="string" description="[tencentcloud N]">replicas_num</parameter>
           <parameter datatype="string" description="common">provider</parameter>
-          <parameter datatype="string" description="[aws Y],[tencentcloud N],[alicloud Y]">type</parameter>
-          <parameter datatype="string" description="[aws N],[tencentcloud N],[alicloud N]">engine</parameter>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N],[alicloud N]">asset_id</parameter>
+          <parameter datatype="string" description="[tencentcloud N]">type</parameter>
+          <parameter datatype="string" description="[tencentcloud N]">engine</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
-          <parameter datatype="string" sensitiveData="Y" description="common,[aws N],[tencentcloud N],[alicloud N]">password</parameter>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N],[alicloud N]">ipaddress</parameter>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N],[alicloud N]">name</parameter>
-          <parameter datatype="string" description="common,[aws Y],[tencentcloud Y],[alicloud Y]">zone_id</parameter>
-          <parameter datatype="string" description="common,[aws Y],[tencentcloud Y],[alicloud Y]">instance_type</parameter>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N],[alicloud N]">vpc_id</parameter>
-          <parameter datatype="string" description="[aws N],[tencentcloud N],[alicloud N]">cluster_num</parameter>
+          <parameter datatype="string" sensitiveData="Y" description="common,[tencentcloud N]">password</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">ipaddress</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">name</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">zone_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">instance_type</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">vpc_id</parameter>
+          <parameter datatype="string" description="[tencentcloud N]">cluster_num</parameter>
         </outputParameters>
       </interface>
     </plugin>
     <plugin name="disk_attach">
-      <interface action="apply" path="/terraform/v1/storage/backend/disk_attach/apply" httpMethod="POST" description="alicloud,tencentcloud,aws">
+      <interface action="apply" path="/terraform/v1/storage/backend/disk_attach/apply" httpMethod="POST" description="tencentcloud">
         <inputParameters>
           <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[aws N]">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common">name</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">resource_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[alicloud Y],[tencentcloud Y],[aws Y]">disk_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[alicloud Y],[tencentcloud Y],[aws Y]">instance_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">disk_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">instance_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">extend_info</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
@@ -721,12 +679,9 @@
           <parameter datatype="string" mappingType="entity" required="Y" description="common">zone_id</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[alicloud N],[tencentcloud N],[aws N]">asset_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="[aws N]">name</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
-          <parameter datatype="string" description="[aws N]">disk_id</parameter>
-          <parameter datatype="string" description="[aws N]">instance_id</parameter>
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
@@ -752,57 +707,50 @@
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="apply" path="/terraform/v1/loadbalance/backend/lb_server_group/apply" httpMethod="POST" description="aws">
+      <interface action="apply" path="/terraform/v1/loadbalance/backend/lb_server_group/apply" httpMethod="POST" description="common">
         <inputParameters>
           <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">protocol</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[aws N]">name</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[aws N]">lb_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common">lb_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">port</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">instance_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common">zone_id</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">vpc_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">type</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N]">port</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">zone_id</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[aws N]">asset_id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
+          <parameter datatype="string" description="common">asset_id</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">id</parameter>
-          <parameter datatype="string" description="[aws N]">arn</parameter>
         </outputParameters>
       </interface>
-      <interface action="query" path="/terraform/v1/loadbalance/backend/lb_server_group/source" httpMethod="POST" description="aws">
+      <interface action="query" path="/terraform/v1/loadbalance/backend/lb_server_group/source" httpMethod="POST" description="common">
         <inputParameters>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N]">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N]">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">lb_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">instance_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">name</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[aws N]">asset_id</parameter>
+          <parameter datatype="string" description="common">asset_id</parameter>
           <parameter datatype="string" description="common">instance_id</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
-          <parameter datatype="string" description="[aws N]">protocol</parameter>
-          <parameter datatype="string" description="common,[aws N]">name</parameter>
-          <parameter datatype="string" description="common,[aws N]">lb_id</parameter>
-          <parameter datatype="string" description="common,[aws N]">id</parameter>
+          <parameter datatype="string" description="common">region_id</parameter>
+          <parameter datatype="string" description="common">lb_id</parameter>
+          <parameter datatype="string" description="common">id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
           <parameter datatype="string" description="common">secret</parameter>
           <parameter datatype="string" description="common">zone_id</parameter>
           <parameter datatype="string" description="common">provider</parameter>
-          <parameter datatype="string" description="[aws N]">vpc_id</parameter>
-          <parameter datatype="string" description="[aws N]">type</parameter>
-          <parameter datatype="string" description="common,[aws N]">port</parameter>
-          <parameter datatype="string" description="common">region_id</parameter>
+          <parameter datatype="string" description="common">port</parameter>
+          <parameter datatype="string" description="common">name</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -817,70 +765,65 @@
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="apply" path="/terraform/v1/network/backend/security_group_rule/apply" httpMethod="POST" description="aws,tencentcloud,alicloud">
+      <interface action="apply" path="/terraform/v1/network/backend/security_group_rule/apply" httpMethod="POST" description="tencentcloud">
         <inputParameters>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N],[alicloud N]">nic_type</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N],[alicloud N]">description</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">cidr_ip</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">resource_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">end_port</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[aws Y],[tencentcloud Y],[alicloud Y]">ip_protocol</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">ip_protocol</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">zone_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[aws Y],[tencentcloud Y],[alicloud Y]">cidr_ip</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">description</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">name</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">begin_port</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[aws Y],[tencentcloud Y],[alicloud Y]">security_group_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N],[alicloud N]">priority</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">security_group_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">extend_info</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[aws N],[tencentcloud Y],[alicloud Y]">policy</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N],[tencentcloud N],[alicloud N]">vpc_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[aws Y],[tencentcloud Y],[alicloud Y]">type</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[aws N],[tencentcloud Y],[alicloud Y]">ports</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">policy</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="[tencentcloud N]">vpc_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">type</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">ports</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N],[alicloud N]">asset_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="query" path="/terraform/v1/network/backend/security_group_rule/source" httpMethod="POST" description="aws,tencentcloud,alicloud">
+      <interface action="query" path="/terraform/v1/network/backend/security_group_rule/source" httpMethod="POST" description="tencentcloud">
         <inputParameters>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws Y],[tencentcloud N],[alicloud N]">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N]">name</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N]">security_group_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">asset_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">security_group_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N]">vpc_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[alicloud N]">group_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">vpc_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">name</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[aws N],[alicloud N]">nic_type</parameter>
-          <parameter datatype="string" description="common">region_id</parameter>
-          <parameter datatype="string" description="common,[aws N]">to_port</parameter>
-          <parameter datatype="string" description="common,[aws Y],[tencentcloud Y],[alicloud Y]">ip_protocol</parameter>
+          <parameter datatype="string" description="common">nic_type</parameter>
+          <parameter datatype="string" description="common">from_port</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">cidr_ip</parameter>
+          <parameter datatype="string" description="common">to_port</parameter>
+          <parameter datatype="string" description="common">errorMessage</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">ip_protocol</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common,[aws N]">id</parameter>
-          <parameter datatype="string" description="common,[aws Y],[tencentcloud Y],[alicloud Y]">cidr_ip</parameter>
-          <parameter datatype="string" description="common,[aws N]">asset_id</parameter>
-          <parameter datatype="string" description="common,[aws Y],[tencentcloud Y],[alicloud Y]">security_group_id</parameter>
-          <parameter datatype="string" description="common,[aws N],[alicloud N]">priority</parameter>
+          <parameter datatype="string" description="common">id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">description</parameter>
+          <parameter datatype="string" description="common">asset_id</parameter>
+          <parameter datatype="string" description="common">region_id</parameter>
+          <parameter datatype="string" description="common">name</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">security_group_id</parameter>
+          <parameter datatype="string" description="common">priority</parameter>
           <parameter datatype="string" description="common">secret</parameter>
           <parameter datatype="string" description="common">provider</parameter>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud Y],[alicloud Y]">policy</parameter>
-          <parameter datatype="string" description="common,[aws Y],[tencentcloud N],[alicloud Y]">type</parameter>
-          <parameter datatype="string" description="common,[aws N]">from_port</parameter>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N],[alicloud N]">description</parameter>
-          <parameter datatype="string" description="common">errorMessage</parameter>
-          <parameter datatype="string" description="common,[aws N]">name</parameter>
-          <parameter datatype="string" description="[aws N],[tencentcloud N],[alicloud N]">vpc_id</parameter>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud Y],[alicloud Y]">ports</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">policy</parameter>
+          <parameter datatype="string" description="[tencentcloud N]">vpc_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">type</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">ports</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -895,94 +838,87 @@
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="apply" path="/terraform/v1/vm/backend/instance/apply" httpMethod="POST" description="aws,alicloud,tencentcloud">
+      <interface action="apply" path="/terraform/v1/vm/backend/instance/apply" httpMethod="POST" description="tencentcloud">
         <inputParameters>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[aws Y],[alicloud Y],[tencentcloud Y]">image</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[alicloud N],[tencentcloud N]">power_action</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">image</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">power_action</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[alicloud N],[tencentcloud N]">charge_type</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" sensitiveData="Y" description="common,[aws N],[alicloud Y],[tencentcloud Y]">password</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws Y],[alicloud Y],[tencentcloud Y]">zone</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[aws Y],[alicloud Y],[tencentcloud Y]">subnet_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">get_password_data</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[aws N],[alicloud N],[tencentcloud Y]">hostname</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[alicloud N],[tencentcloud N]">security_group_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">charge_type</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" sensitiveData="Y" description="common,[tencentcloud Y]">password</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="[tencentcloud Y]">zone</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">subnet_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">hostname</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">security_group_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">extend_info</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="[tencentcloud N]">internet_charge_type</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws Y],[alicloud Y],[tencentcloud Y]">disk_type</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud Y]">disk_type</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">zone_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws Y],[alicloud Y],[tencentcloud Y]">disk_size</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[aws N],[alicloud Y],[tencentcloud Y]">name</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N],[alicloud N],[tencentcloud N]">force_delete</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[aws Y],[alicloud Y],[tencentcloud Y]">instance_type</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[alicloud N],[tencentcloud Y]">vpc_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[alicloud N],[tencentcloud N]">data_disks</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud Y]">disk_size</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="[tencentcloud N]">force_delete</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">instance_type</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud Y]">vpc_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">data_disks</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[aws N],[alicloud N],[tencentcloud N]">asset_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="[aws N]">name</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">cpu</parameter>
-          <parameter datatype="string" description="[aws N],[alicloud N],[tencentcloud N]">public_ip</parameter>
+          <parameter datatype="string" description="[tencentcloud N]">public_ip</parameter>
           <parameter datatype="string" description="common">memory</parameter>
-          <parameter datatype="string" sensitiveData="Y" description="[aws N]">password</parameter>
-          <parameter datatype="string" description="common,[aws N],[alicloud N],[tencentcloud N]">ipaddress</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">ipaddress</parameter>
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="query" path="/terraform/v1/vm/backend/instance/source" httpMethod="POST" description="aws,alicloud,tencentcloud">
+      <interface action="query" path="/terraform/v1/vm/backend/instance/source" httpMethod="POST" description="tencentcloud">
         <inputParameters>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws Y],[alicloud N],[tencentcloud N]">asset_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">asset_id</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N],[alicloud N],[tencentcloud N]">zone</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[alicloud N],[tencentcloud N]">subnet_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">get_password_data</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[alicloud N],[tencentcloud N]">public_ip</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[alicloud N],[tencentcloud N]">image_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="[tencentcloud N]">zone</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">subnet_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">public_ip</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">image_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[alicloud N],[tencentcloud N]">tag</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">tag</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[alicloud N],[tencentcloud N]">vpc_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[alicloud N],[tencentcloud N]">ipaddress</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">vpc_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">ipaddress</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">zone_id</parameter>
         </inputParameters>
         <outputParameters>
           <parameter datatype="string" description="common">region_id</parameter>
-          <parameter datatype="string" description="common,[aws Y],[alicloud Y],[tencentcloud Y]">image</parameter>
-          <parameter datatype="string" description="[alicloud N],[tencentcloud N]">public_ip</parameter>
-          <parameter datatype="string" description="common,[aws N],[alicloud N],[tencentcloud N]">power_action</parameter>
-          <parameter datatype="string" description="common,[alicloud N],[tencentcloud N]">id</parameter>
-          <parameter datatype="string" description="[aws N]">arn</parameter>
-          <parameter datatype="string" description="common,[aws N],[alicloud N],[tencentcloud N]">charge_type</parameter>
-          <parameter datatype="string" description="common,[aws Y],[alicloud Y],[tencentcloud Y]">disk_type</parameter>
-          <parameter datatype="string" description="common,[aws Y],[alicloud Y],[tencentcloud Y]">subnet_id</parameter>
-          <parameter datatype="string" description="[aws N]">get_password_data</parameter>
-          <parameter datatype="string" description="common,[aws N],[alicloud N],[tencentcloud Y]">hostname</parameter>
-          <parameter datatype="string" description="common,[aws N],[alicloud N],[tencentcloud N]">security_group_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">image</parameter>
+          <parameter datatype="string" description="[tencentcloud N]">public_ip</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">power_action</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">charge_type</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">disk_type</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">subnet_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">hostname</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">security_group_id</parameter>
           <parameter datatype="string" description="common">secret</parameter>
           <parameter datatype="string" description="[tencentcloud N]">memory</parameter>
-          <parameter datatype="string" description="common,[alicloud N],[tencentcloud N]">asset_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="[tencentcloud N]">internet_charge_type</parameter>
           <parameter datatype="string" description="common">provider</parameter>
-          <parameter datatype="string" sensitiveData="Y" description="common,[aws N],[alicloud Y],[tencentcloud Y]">password</parameter>
-          <parameter datatype="string" description="common,[alicloud N],[tencentcloud N]">ipaddress</parameter>
-          <parameter datatype="string" description="common,[aws Y],[alicloud Y],[tencentcloud Y]">zone_id</parameter>
+          <parameter datatype="string" sensitiveData="Y" description="common,[tencentcloud Y]">password</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">ipaddress</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">zone_id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="common,[aws Y],[alicloud Y],[tencentcloud Y]">disk_size</parameter>
-          <parameter datatype="string" description="common,[aws N],[alicloud Y],[tencentcloud Y]">name</parameter>
-          <parameter datatype="string" description="common,[aws N],[alicloud N],[tencentcloud N]">force_delete</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">disk_size</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">name</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">force_delete</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">data_disks</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">instance_type</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">vpc_id</parameter>
           <parameter datatype="string" description="[tencentcloud N]">cpu</parameter>
-          <parameter datatype="string" description="[aws N]">instance_id</parameter>
-          <parameter datatype="string" description="common,[aws Y],[alicloud Y],[tencentcloud Y]">instance_type</parameter>
-          <parameter datatype="string" description="common,[aws N],[alicloud N],[tencentcloud Y]">vpc_id</parameter>
-          <parameter datatype="string" description="common,[aws N],[alicloud N],[tencentcloud N]">data_disks</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -1031,67 +967,56 @@
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="apply" path="/terraform/v1/loadbalance/backend/lb_listener/apply" httpMethod="POST" description="aws,alicloud,tencentcloud">
+      <interface action="apply" path="/terraform/v1/loadbalance/backend/lb_listener/apply" httpMethod="POST" description="tencentcloud">
         <inputParameters>
-          <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[alicloud N],[tencentcloud N]">health_check</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[alicloud N],[tencentcloud N]">protocol</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">health_check</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">protocol</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">target_group_arn</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[aws Y],[alicloud Y],[tencentcloud Y]">port</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[alicloud Y],[tencentcloud N]">backend_port</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">port</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">backend_port</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">zone_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">redirect</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[alicloud N],[tencentcloud Y]">name</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[alicloud N],[tencentcloud N]">health_check_uri</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[aws Y],[alicloud Y],[tencentcloud Y]">lb_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud Y]">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">health_check_uri</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">lb_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">extend_info</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">forward</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">default_action</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">type</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[aws N],[alicloud N],[tencentcloud N]">asset_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">id</parameter>
-          <parameter datatype="string" description="[aws N]">arn</parameter>
         </outputParameters>
       </interface>
-      <interface action="query" path="/terraform/v1/loadbalance/backend/lb_listener/source" httpMethod="POST" description="aws,alicloud,tencentcloud">
+      <interface action="query" path="/terraform/v1/loadbalance/backend/lb_listener/source" httpMethod="POST" description="tencentcloud">
         <inputParameters>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N]">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N]">lb_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">tag</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">port</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">lb_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="[aws N]">redirect</parameter>
-          <parameter datatype="string" description="common,[aws N]">health_check</parameter>
-          <parameter datatype="string" description="common,[aws N]">protocol</parameter>
-          <parameter datatype="string" description="common">region_id</parameter>
+          <parameter datatype="string" description="common">asset_id</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
+          <parameter datatype="string" description="common">protocol</parameter>
+          <parameter datatype="string" description="common">region_id</parameter>
+          <parameter datatype="string" description="common">health_check_uri</parameter>
+          <parameter datatype="string" description="common">lb_id</parameter>
+          <parameter datatype="string" description="common">id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="[aws N]">target_group_arn</parameter>
-          <parameter datatype="string" description="common,[aws N]">id</parameter>
-          <parameter datatype="string" description="[aws N]">backend_port</parameter>
-          <parameter datatype="string" description="common,[aws N]">asset_id</parameter>
-          <parameter datatype="string" description="common,[aws N]">name</parameter>
-          <parameter datatype="string" description="common,[aws N]">health_check_uri</parameter>
-          <parameter datatype="string" description="common,[aws Y]">lb_id</parameter>
-          <parameter datatype="string" description="common,[aws Y]">port</parameter>
           <parameter datatype="string" description="common">secret</parameter>
+          <parameter datatype="string" description="common">health_check</parameter>
           <parameter datatype="string" description="common">provider</parameter>
-          <parameter datatype="string" description="[aws N]">forward</parameter>
           <parameter datatype="string" description="common">default_action</parameter>
-          <parameter datatype="string" description="[aws N]">type</parameter>
+          <parameter datatype="string" description="common">port</parameter>
+          <parameter datatype="string" description="common">name</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -1140,33 +1065,32 @@
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="apply" path="/terraform/v1/storage/backend/network_interface/apply" httpMethod="POST" description="tencentcloud,aws">
+      <interface action="apply" path="/terraform/v1/storage/backend/network_interface/apply" httpMethod="POST" description="tencentcloud">
         <inputParameters>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[aws N]">ipaddress</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">ipaddress</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">zone_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y],[aws Y]">name</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y],[aws Y]">subnet_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[aws N]">security_group_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">subnet_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">security_group_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">extend_info</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud Y],[aws N]">vpc_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud Y]">vpc_id</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[tencentcloud N],[aws N]">asset_id</parameter>
-          <parameter datatype="string" description="common">errorMessage</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="[aws N]">mac</parameter>
-          <parameter datatype="string" description="common,[tencentcloud N],[aws N]">ipaddress</parameter>
+          <parameter datatype="string" description="common">errorMessage</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">ipaddress</parameter>
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="query" path="/terraform/v1/storage/backend/network_interface/source" httpMethod="POST" description="tencentcloud,aws">
+      <interface action="query" path="/terraform/v1/storage/backend/network_interface/source" httpMethod="POST" description="tencentcloud">
         <inputParameters>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[aws N]">asset_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">asset_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">name</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">subnet_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">public_ip</parameter>
@@ -1179,17 +1103,17 @@
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[tencentcloud N],[aws N]">asset_id</parameter>
-          <parameter datatype="string" description="common,[tencentcloud Y],[aws Y]">name</parameter>
-          <parameter datatype="string" description="common,[tencentcloud Y],[aws Y]">subnet_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">name</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">subnet_id</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
-          <parameter datatype="string" description="common,[tencentcloud N],[aws N]">security_group_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">security_group_id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
           <parameter datatype="string" description="common">secret</parameter>
           <parameter datatype="string" description="common">provider</parameter>
-          <parameter datatype="string" description="common,[tencentcloud Y],[aws N]">vpc_id</parameter>
-          <parameter datatype="string" description="common,[tencentcloud N],[aws N]">ipaddress</parameter>
-          <parameter datatype="string" description="common,[tencentcloud N],[aws N]">id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">vpc_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">ipaddress</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">id</parameter>
           <parameter datatype="string" description="common">region_id</parameter>
         </outputParameters>
       </interface>
@@ -1205,58 +1129,55 @@
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="apply" path="/terraform/v1/network/backend/nat/apply" httpMethod="POST" description="aws,tencentcloud">
+      <interface action="apply" path="/terraform/v1/network/backend/nat/apply" httpMethod="POST" description="tencentcloud">
         <inputParameters>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N]">bandwidth</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">bandwidth</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">zone_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N]">eip</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[aws N],[tencentcloud N]">name</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N]">subnet_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">eip</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud N]">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">subnet_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">extend_info</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[aws N],[tencentcloud N]">vpc_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud N]">vpc_id</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N]">asset_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
-          <parameter datatype="string" description="[aws N]">public_ip</parameter>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N]">ipaddress</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">ipaddress</parameter>
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="query" path="/terraform/v1/network/backend/nat/source" httpMethod="POST" description="aws,tencentcloud">
+      <interface action="query" path="/terraform/v1/network/backend/nat/source" httpMethod="POST" description="tencentcloud">
         <inputParameters>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N]">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[aws N],[tencentcloud N]">name</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">subnet_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">asset_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">name</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="[tencentcloud N]">bandwidth</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">tag</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N]">vpc_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">vpc_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">type</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N]">asset_id</parameter>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N]">eip</parameter>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N]">name</parameter>
-          <parameter datatype="string" description="[aws N],[tencentcloud N]">subnet_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">eip</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">name</parameter>
+          <parameter datatype="string" description="[tencentcloud N]">subnet_id</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">secret</parameter>
-          <parameter datatype="string" description="[aws N]">public_ip</parameter>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N]">bandwidth</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">bandwidth</parameter>
           <parameter datatype="string" description="common">provider</parameter>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N]">vpc_id</parameter>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N]">ipaddress</parameter>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N]">id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">vpc_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">ipaddress</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">id</parameter>
           <parameter datatype="string" description="common">region_id</parameter>
         </outputParameters>
       </interface>
@@ -1272,50 +1193,46 @@
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="apply" path="/terraform/v1/database/backend/db_subnet_group/apply" httpMethod="POST" description="aws">
+      <interface action="apply" path="/terraform/v1/database/backend/db_subnet_group/apply" httpMethod="POST" description="common">
         <inputParameters>
           <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[aws N]">name</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[aws Y]">subnet_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common">zone_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common">subnet_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">tag</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">extend_info</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common">zone_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common">name</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[aws N]">asset_id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
+          <parameter datatype="string" description="common">asset_id</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">id</parameter>
-          <parameter datatype="string" description="[aws N]">arn</parameter>
         </outputParameters>
       </interface>
-      <interface action="query" path="/terraform/v1/database/backend/db_subnet_group/source" httpMethod="POST" description="aws">
+      <interface action="query" path="/terraform/v1/database/backend/db_subnet_group/source" httpMethod="POST" description="common">
         <inputParameters>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N]">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common">subnet_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">subnet_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">name</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[aws N]">asset_id</parameter>
-          <parameter datatype="string" description="common,[aws N]">name</parameter>
-          <parameter datatype="string" description="common,[aws N]">subnet_id</parameter>
+          <parameter datatype="string" description="common">asset_id</parameter>
+          <parameter datatype="string" description="common">region_id</parameter>
+          <parameter datatype="string" description="common">subnet_id</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
           <parameter datatype="string" description="common">secret</parameter>
           <parameter datatype="string" description="common">zone_id</parameter>
           <parameter datatype="string" description="common">provider</parameter>
-          <parameter datatype="string" description="[aws N]">vpc_id</parameter>
-          <parameter datatype="string" description="common,[aws N]">id</parameter>
-          <parameter datatype="string" description="[aws N]">arn</parameter>
-          <parameter datatype="string" description="common">region_id</parameter>
+          <parameter datatype="string" description="common">id</parameter>
+          <parameter datatype="string" description="common">name</parameter>
         </outputParameters>
       </interface>
     </plugin>
@@ -1365,38 +1282,32 @@
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="apply" path="/terraform/v1/loadbalance/backend/lb_rule/apply" httpMethod="POST" description="aws">
+      <interface action="apply" path="/terraform/v1/loadbalance/backend/lb_rule/apply" httpMethod="POST" description="common">
         <inputParameters>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N]">listener_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common">resource_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">host_header</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N]">frontend_port</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common">condition</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common">zone_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N]">name</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">hint</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[aws N]">lb_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">source_ip</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N]">security_group_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">server_group_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common">lb_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">resource_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">listener_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">security_group_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">extend_info</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">action</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">type</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">frontend_port</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">condition</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">zone_id</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[aws N]">asset_id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="[aws N]">name</parameter>
+          <parameter datatype="string" description="common">asset_id</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="query" path="/terraform/v1/loadbalance/backend/lb_rule/source" httpMethod="POST" description="aws">
+      <interface action="query" path="/terraform/v1/loadbalance/backend/lb_rule/source" httpMethod="POST" description="common">
         <inputParameters>
           <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">listener_id</parameter>
@@ -1435,46 +1346,44 @@
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="apply" path="/terraform/v1/network/backend/vpc/apply" httpMethod="POST" description="tencentcloud,alicloud,aws">
+      <interface action="apply" path="/terraform/v1/network/backend/vpc/apply" httpMethod="POST" description="tencentcloud">
         <inputParameters>
           <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y],[alicloud Y],[aws N]">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">name</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">tag</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">extend_info</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y],[alicloud Y],[aws Y]">cidr</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">cidr</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">region_id</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[tencentcloud N],[alicloud N],[aws N]">asset_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">id</parameter>
-          <parameter datatype="string" description="[aws N]">arn</parameter>
         </outputParameters>
       </interface>
-      <interface action="query" path="/terraform/v1/network/backend/vpc/source" httpMethod="POST" description="tencentcloud,alicloud,aws">
+      <interface action="query" path="/terraform/v1/network/backend/vpc/source" httpMethod="POST" description="tencentcloud">
         <inputParameters>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[alicloud N],[aws N]">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[alicloud N],[aws N],[aws N]">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">asset_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">name</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[alicloud N],[aws N]">tag</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">tag</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[alicloud N],[aws N]">cidr</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N]">id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">cidr</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[tencentcloud N],[alicloud N],[aws N]">asset_id</parameter>
-          <parameter datatype="string" description="common,[tencentcloud Y],[alicloud N],[aws N]">name</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">name</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
           <parameter datatype="string" description="common">secret</parameter>
           <parameter datatype="string" description="common">provider</parameter>
-          <parameter datatype="string" description="common,[tencentcloud Y],[alicloud Y],[aws N]">cidr</parameter>
-          <parameter datatype="string" description="common,[tencentcloud N],[alicloud N],[aws N]">id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">cidr</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">id</parameter>
           <parameter datatype="string" description="common">region_id</parameter>
         </outputParameters>
       </interface>
@@ -1490,70 +1399,62 @@
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="apply" path="/terraform/v1/network/backend/eip/apply" httpMethod="POST" description="tencentcloud,aws">
+      <interface action="apply" path="/terraform/v1/network/backend/eip/apply" httpMethod="POST" description="tencentcloud">
         <inputParameters>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[aws N]">charge_type</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">charge_type</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y],[aws N]">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">name</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">public_ipv4_pool</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">instance</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="[tencentcloud N]">bandwidth_limit_type</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">zone_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">extend_info</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">private_ip</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">vpc</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">ipaddress</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[tencentcloud N],[aws N]">asset_id</parameter>
-          <parameter datatype="string" description="common">errorMessage</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
-          <parameter datatype="string" description="[aws N]">private_ip</parameter>
-          <parameter datatype="string" description="common,[tencentcloud N],[aws N]">ipaddress</parameter>
+          <parameter datatype="string" description="common">errorMessage</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">ipaddress</parameter>
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="query" path="/terraform/v1/network/backend/eip/source" httpMethod="POST" description="tencentcloud,aws">
+      <interface action="query" path="/terraform/v1/network/backend/eip/source" httpMethod="POST" description="tencentcloud">
         <inputParameters>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[aws N]">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[aws N]">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">asset_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">name</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[aws N]">tag</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">tag</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[aws N]">ipaddress</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">ipaddress</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[tencentcloud N],[aws N]">asset_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
           <parameter datatype="string" description="common,[tencentcloud N]">charge_type</parameter>
-          <parameter datatype="string" description="common,[tencentcloud Y],[aws N]">name</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">name</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">secret</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
           <parameter datatype="string" description="[tencentcloud N]">bandwidth_limit_type</parameter>
-          <parameter datatype="string" description="[aws N]">private_ip</parameter>
           <parameter datatype="string" description="common">provider</parameter>
-          <parameter datatype="string" description="common,[tencentcloud N],[aws N]">ipaddress</parameter>
-          <parameter datatype="string" description="common,[tencentcloud N],[aws N]">id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">ipaddress</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">id</parameter>
           <parameter datatype="string" description="common">region_id</parameter>
         </outputParameters>
       </interface>
     </plugin>
     <plugin name="network_interface_attach">
-      <interface action="apply" path="/terraform/v1/vm/backend/network_interface/apply" httpMethod="POST" description="tencentcloud,aws">
+      <interface action="apply" path="/terraform/v1/vm/backend/network_interface/apply" httpMethod="POST" description="tencentcloud">
         <inputParameters>
           <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">name</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">resource_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">device_index</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y],[aws Y]">instance_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y],[aws Y]">network_interface_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">instance_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">network_interface_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">extend_info</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
@@ -1561,7 +1462,7 @@
           <parameter datatype="string" mappingType="entity" required="Y" description="common">zone_id</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[tencentcloud N],[aws N]">asset_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">id</parameter>
@@ -1633,12 +1534,12 @@
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="apply" path="/terraform/v1/storage/backend/object_storage/apply" httpMethod="POST" description="aws,tencentcloud,alicloud">
+      <interface action="apply" path="/terraform/v1/storage/backend/object_storage/apply" httpMethod="POST" description="tencentcloud">
         <inputParameters>
           <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[aws Y],[tencentcloud Y],[alicloud Y]">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">name</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N],[alicloud N]">acl</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">acl</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">extend_info</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">appid</parameter>
@@ -1647,35 +1548,33 @@
           <parameter datatype="string" mappingType="entity" required="N" description="common">zone_id</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N],[alicloud N]">asset_id</parameter>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N],[alicloud N]">url</parameter>
-          <parameter datatype="string" description="common">errorMessage</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">url</parameter>
+          <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">id</parameter>
-          <parameter datatype="string" description="[aws N]">arn</parameter>
         </outputParameters>
       </interface>
-      <interface action="query" path="/terraform/v1/storage/backend/object_storage/source" httpMethod="POST" description="aws,tencentcloud,alicloud">
+      <interface action="query" path="/terraform/v1/storage/backend/object_storage/source" httpMethod="POST" description="tencentcloud">
         <inputParameters>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N],[alicloud N]">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N],[alicloud N]">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">asset_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">name</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[aws N],[tencentcloud N],[alicloud N]">tag</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">tag</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N],[alicloud N]">asset_id</parameter>
-          <parameter datatype="string" description="common,[aws Y],[tencentcloud Y],[alicloud Y]">name</parameter>
-          <parameter datatype="string" description="common,[aws N],[alicloud N]">url</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">name</parameter>
+          <parameter datatype="string" description="common">url</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N],[alicloud N]">acl</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">acl</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
           <parameter datatype="string" description="common">secret</parameter>
           <parameter datatype="string" description="common">provider</parameter>
-          <parameter datatype="string" description="common,[aws N],[tencentcloud N],[alicloud N]">id</parameter>
-          <parameter datatype="string" description="[aws N]">arn</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">id</parameter>
           <parameter datatype="string" description="common">region_id</parameter>
         </outputParameters>
       </interface>
@@ -1691,34 +1590,34 @@
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="apply" path="/terraform/v1/loadbalance/backend/lb_attach/apply" httpMethod="POST" description="alicloud,aws,tencentcloud">
+      <interface action="apply" path="/terraform/v1/loadbalance/backend/lb_attach/apply" httpMethod="POST" description="tencentcloud">
         <inputParameters>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[alicloud N],[aws N],[tencentcloud Y]">listener_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud Y]">listener_id</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[alicloud N],[aws N],[tencentcloud N]">weight</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">weight</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">resource_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[tencentcloud N]">targets</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[alicloud Y],[aws Y],[tencentcloud N]">backend_servers</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">port</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">backend_servers</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">zone_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">name</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[alicloud Y],[aws Y],[tencentcloud Y]">lb_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[alicloud N],[aws N],[tencentcloud N]">port</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[alicloud N],[aws N],[tencentcloud N],[tencentcloud N]">instance_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">lb_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="[tencentcloud N]">targets</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[tencentcloud N]">instance_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">extend_info</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">group_id</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[alicloud N],[aws N],[tencentcloud N]">asset_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="query" path="/terraform/v1/loadbalance/backend/lb_attach/source" httpMethod="POST" description="alicloud,aws,tencentcloud">
+      <interface action="query" path="/terraform/v1/loadbalance/backend/lb_attach/source" httpMethod="POST" description="tencentcloud">
         <inputParameters>
           <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">instance_id</parameter>
@@ -1800,25 +1699,23 @@
       </interface>
     </plugin>
     <plugin name="eip_association">
-      <interface action="apply" path="/terraform/v1/network/backend/eip_association/apply" httpMethod="POST" description="tencentcloud,aws">
+      <interface action="apply" path="/terraform/v1/network/backend/eip_association/apply" httpMethod="POST" description="tencentcloud">
         <inputParameters>
-          <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y],[aws Y]">eip_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[aws N]">name</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common">resource_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">allow_reassociation</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y],[aws Y]">instance_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">network_interface_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common">extend_info</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[aws N]">private_ip</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">resource_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">private_ip</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">zone_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">eip_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">instance_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">extend_info</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[tencentcloud N],[aws N]">asset_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">id</parameter>
@@ -1836,22 +1733,22 @@
       </interface>
     </plugin>
     <plugin name="mysql_account">
-      <interface action="apply" path="/terraform/v1/database/backend/mysql_account/apply" httpMethod="POST" description="alicloud,tencentcloud">
+      <interface action="apply" path="/terraform/v1/database/backend/mysql_account/apply" httpMethod="POST" description="tencentcloud">
         <inputParameters>
           <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[alicloud Y],[tencentcloud Y]">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">name</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">resource_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">extend_info</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[alicloud Y],[tencentcloud Y]">mysql_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" sensitiveData="Y" description="common,[alicloud Y],[tencentcloud Y]">password</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">mysql_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" sensitiveData="Y" description="common,[tencentcloud Y]">password</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">zone_id</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[alicloud N],[tencentcloud N]">asset_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">id</parameter>
@@ -1879,51 +1776,46 @@
           <parameter datatype="string" description="common">id</parameter>
         </outputParameters>
       </interface>
-      <interface action="apply" path="/terraform/v1/network/backend/security_group/apply" httpMethod="POST" description="tencentcloud,aws,alicloud">
+      <interface action="apply" path="/terraform/v1/network/backend/security_group/apply" httpMethod="POST" description="tencentcloud">
         <inputParameters>
           <parameter datatype="string" mappingType="entity" required="N" description="common">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common">zone_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y],[aws N],[alicloud Y]">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud Y]">name</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">tag</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">zone_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">extend_info</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud N],[aws Y],[alicloud Y]">vpc_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common,[tencentcloud N]">vpc_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="[aws N]">description</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[tencentcloud N],[aws N],[alicloud N]">asset_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">id</parameter>
-          <parameter datatype="string" description="[aws N]">arn</parameter>
         </outputParameters>
       </interface>
-      <interface action="query" path="/terraform/v1/network/backend/security_group/source" httpMethod="POST" description="tencentcloud,aws,alicloud">
+      <interface action="query" path="/terraform/v1/network/backend/security_group/source" httpMethod="POST" description="tencentcloud">
         <inputParameters>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[aws N],[alicloud N]">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[aws N],[alicloud N]">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">asset_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">name</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[aws N],[alicloud N]">tag</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">tag</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N],[aws N],[alicloud N]">vpc_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common,[tencentcloud N]">vpc_id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">region_id</parameter>
         </inputParameters>
         <outputParameters>
-          <parameter datatype="string" description="common,[tencentcloud N],[aws N],[alicloud N]">asset_id</parameter>
-          <parameter datatype="string" description="[aws N]">description</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">asset_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud Y]">name</parameter>
           <parameter datatype="string" description="common">errorMessage</parameter>
           <parameter datatype="string" description="common">errorCode</parameter>
           <parameter datatype="string" description="common">secret</parameter>
-          <parameter datatype="string" description="[aws N]">tag</parameter>
           <parameter datatype="string" description="common">provider</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">vpc_id</parameter>
+          <parameter datatype="string" description="common,[tencentcloud N]">id</parameter>
           <parameter datatype="string" description="common">region_id</parameter>
-          <parameter datatype="string" description="common,[tencentcloud N],[aws Y],[alicloud Y]">vpc_id</parameter>
-          <parameter datatype="string" description="common,[tencentcloud N],[aws N],[alicloud N]">id</parameter>
-          <parameter datatype="string" description="common,[tencentcloud Y],[aws N],[alicloud Y]">name</parameter>
         </outputParameters>
       </interface>
     </plugin>
