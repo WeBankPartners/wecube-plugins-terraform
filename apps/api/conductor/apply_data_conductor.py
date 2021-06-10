@@ -35,6 +35,8 @@ def _validate_apply_data(provider, key, value, define, resource_value_config, re
         if define == '-' or not define.strip():
             return {}
 
+        if value is not None:
+            value = client.convert_apply_value(value, resource_value_config)
         key = define or key
     else:
         value = client.format_apply_value(key, value, define)
