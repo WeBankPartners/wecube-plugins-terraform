@@ -21,7 +21,7 @@
         </div>
       </template>
     </TfModalComponent>
-    <Modal :z-index="2000" v-model="showEdit" :title="$t('tf_json_edit')" @on-ok="confirmJsonData">
+    <Modal :z-index="2000" v-model="showEdit" width="800" :title="$t('tf_json_edit')" @on-ok="confirmJsonData">
       <Tree ref="jsonTree" :jsonData="jsonData"></Tree>
     </Modal>
   </div>

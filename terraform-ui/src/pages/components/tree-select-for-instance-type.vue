@@ -36,6 +36,14 @@
       </Select>
       <label class="required-tip">*</label>
     </div>
+    <!-- 名称 -->
+    <div class="marginbottom params-each">
+      <label class="col-md-2 label-name">{{ $t('tf_parameter_conversion') }}:</label>
+      <Select v-model="name" @on-change="changeName" filterable style="width: 338px">
+        <Option v-for="nameItem in nameOptions" :value="nameItem.name" :key="nameItem.id">{{ nameItem.name }}</Option>
+      </Select>
+      <label class="required-tip">*</label>
+    </div>
   </div>
 </template>
 
@@ -50,30 +58,34 @@ export default {
       resourceType: '',
       resourceTypeOptions: [],
       resourceProperty: '',
-      resourcePropertyOptions: []
+      resourcePropertyOptions: [],
+      name: '',
+      nameOptions: []
     }
   },
   mounted () {
     this.getProvider()
   },
   methods: {
-    clear () {
-      this.provider = ''
-      this.providerOptions = []
-      this.resourceType = ''
-      this.resourceTypeOptions = []
-      this.resourceProperty = ''
-      this.resourcePropertyOptions = []
-    },
-    injectionData (val) {
-      this.clear()
-      this.provider = val.provider
-      this.resourceType = val.resource
-      this.resourceProperty = val.property
-      this.getProvider()
-      this.getResourceType()
-      this.getResourceProperty()
-    },
+    // clear () {
+    //   this.provider = ''
+    //   this.providerOptions = []
+    //   this.resourceType = ''
+    //   this.resourceTypeOptions = []
+    //   this.resourceProperty = ''
+    //   this.resourcePropertyOptions = []
+    //   this.name = ''
+    //   this.nameOptions = []
+    // },
+    // injectionData (val) {
+    //   this.clear()
+    //   this.provider = val.provider
+    //   this.resourceType = val.resource
+    //   this.resourceProperty = val.property
+    //   this.getProvider()
+    //   this.getResourceType()
+    //   this.getResourceProperty()
+    // },
     async getProvider () {
       this.providerOptions = []
       const { status, data } = await getTableData('/terraform/v1/configer/provider')
@@ -85,6 +97,7 @@ export default {
       this.clearResourceType()
       this.getResourceType()
       this.clearResourceProperty()
+      this.clearName()
       this.sendValue()
     },
     async getResourceType () {
@@ -97,6 +110,7 @@ export default {
     changeResourceType () {
       this.clearResourceProperty()
       this.getResourceProperty()
+      this.clearName()
       this.sendValue()
     },
     clearResourceType () {
@@ -104,6 +118,8 @@ export default {
       this.resourceTypeOptions = []
     },
     changeResourceProperty (val) {
+      this.clearName()
+      this.getName()
       this.sendValue()
     },
     async getResourceProperty () {
@@ -119,11 +135,33 @@ export default {
       this.resourceProperty = ''
       this.resourcePropertyOptions = []
     },
+    changeName (val) {
+      this.sendValue()
+    },
+    async getName () {
+      this.nameOptions = []
+      const { status, data } = await getTableData(
+        '/terraform/v1/configer/configList?provider=' +
+          this.provider +
+          '&resource_type=' +
+          this.resourceType +
+          '&property=' +
+          this.resourceProperty
+      )
+      if (status === 'OK') {
+        this.nameOptions = data.resource
+      }
+    },
+    clearName () {
+      this.name = ''
+      this.nameOptions = []
+    },
     sendValue () {
+      const find = this.nameOptions.find(item => this.name === item.id)
       const params = {
         provider: this.provider || '',
-        resource: this.resourceType || '',
-        property: this.resourceProperty || ''
+        name: (find && find.name) || '',
+        origin_name: (find && find.origin_name) || ''
       }
       this.$emit('callbackValue', params)
     }
@@ -132,4 +170,12 @@ export default {
 }
 </script>
 
-<style scoped lang="less"></style>
+<style scoped lang="less">
+.marginbottom {
+  margin-top: 12px;
+}
+.label-name {
+  text-align: right;
+  padding: 0;
+}
+</style>

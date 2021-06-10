@@ -2,22 +2,15 @@
   <div class=" ">
     <TerraformPageTable :pageConfig="pageConfig"></TerraformPageTable>
     <TfModalComponent :modelConfig="modelConfig">
-      <template #outer-config>
-        <div class="marginbottom params-each">
-          <label class="col-md-2 label-name">{{ $t('tf_provider') }}:</label>
-          <Select v-model="modelConfig.addRow.provider_id" filterable style="width: 338px">
-            <Option v-for="host in modelConfig.v_select_configs.providerOption" :value="host.id" :key="host.id">{{
-              host.name
-            }}</Option>
-          </Select>
-          <label class="required-tip">*</label>
-        </div>
+      <template #tree-select v-if="modelConfig.isAdd">
+        <TreeSelect @callbackValue="callbackValue" ref="treeSelect"></TreeSelect>
       </template>
     </TfModalComponent>
   </div>
 </template>
 
 <script>
+import TreeSelect from '@/pages/components/tree-select-for-instance-type'
 import { getTableData, addTableRow, editTableRow, deleteTableRow } from '@/api/server'
 let tableEle = [
   {
@@ -35,6 +28,12 @@ let tableEle = [
   {
     title: 'tf_provider',
     value: 'provider', //
+    style: { width: '150px' },
+    display: true
+  },
+  {
+    title: 'field.type',
+    value: 'type', //
     style: { width: '150px' },
     display: true
   },
@@ -126,12 +125,13 @@ export default {
         modalTitle: 'tf_instance_type',
         isAdd: true,
         config: [
+          { name: 'tree-select', type: 'slot' },
           {
             label: 'tf_name',
             value: 'name',
             placeholder: 'tips.inputRequired',
             v_validate: 'required:true|min:2|max:60',
-            disabled: false,
+            disabled: true,
             type: 'text'
           },
           {
@@ -139,10 +139,9 @@ export default {
             value: 'origin_name',
             placeholder: 'tips.inputRequired',
             v_validate: 'required:true|min:2|max:60',
-            disabled: false,
+            disabled: true,
             type: 'text'
           },
-          { name: 'outer-config', type: 'slot' },
           {
             label: 'tf_cpu',
             value: 'cpu',
@@ -179,7 +178,7 @@ export default {
         addRow: {
           // [通用]-保存用户新增、编辑时数据
           name: '',
-          provider_id: '',
+          provider: '',
           origin_name: '',
           cpu: 1,
           memory: 1,
@@ -201,6 +200,9 @@ export default {
     this.initTableData()
   },
   methods: {
+    callbackValue (val) {
+      this.modelConfig.addRow = Object.assign(this.modelConfig.addRow, val)
+    },
     async initTableData () {
       const params = this.$tfCommonUtil.managementUrl(this)
       const { status, data } = await getTableData(params)
@@ -246,6 +248,7 @@ export default {
       this.modelConfig.addRow = this.$tfCommonUtil.manageEditParams(this.modelConfig.addRow, rowData)
       this.modelConfig.addRow.extend_info = JSON.stringify(this.modelConfig.addRow.extend_info)
       this.$root.JQ('#add_edit_Modal').modal('show')
+      // this.$refs.treeSelect.injectionData(this.modelConfig.addRow)
     },
     async editPost () {
       let editData = JSON.parse(JSON.stringify(this.modelConfig.addRow))
@@ -272,7 +275,9 @@ export default {
       })
     }
   },
-  components: {}
+  components: {
+    TreeSelect
+  }
 }
 </script>
 
