@@ -112,7 +112,7 @@
         </div>
       </template>
     </TfModalComponent>
-    <Modal :z-index="2000" v-model="showEdit" :title="$t('tf_json_edit')" @on-ok="confirmJsonData" width="700">
+    <Modal :z-index="2000" v-model="showEdit" width="800" :title="$t('tf_json_edit')" @on-ok="confirmJsonData">
       <Tree ref="jsonTree" :jsonData="jsonData"></Tree>
     </Modal>
   </div>
@@ -333,7 +333,7 @@ export default {
     editJson (value, key) {
       this.editKey = key
       value = value || '{}'
-      this.$refs.jsonTree.initJSON(JSON.parse(value))
+      this.$refs.jsonTree.initJSON(JSON.parse(value), [{ a: 1 }])
       this.jsonData = value
       this.showEdit = true
     },

@@ -123,7 +123,7 @@ export default {
         return (
           <span style="display: 'inline-block';width: '100%'">
             <span style="padding: 0 4px">
-              Key:<Input value={data.title} style="width:100px" onInput={v => formateNodeData(v, 'key')}></Input>
+              Key:<Input value={data.title} style="width:200px" onInput={v => formateNodeData(v, 'key')}></Input>
             </span>
             <span style="display: inline-block;float: right;margin-right: 32px">
               <Button onClick={() => this.append(data)} type="default" size="small" icon="ios-add"></Button>
@@ -140,11 +140,11 @@ export default {
         return (
           <span style="display: 'inline-block';width: '100%'">
             <span style="padding: 0 4px">
-              Key:<Input value={data.title} style="width:100px" onInput={v => formateNodeData(v, 'key')}></Input>
+              Key:<Input value={data.title} style="width:200px" onInput={v => formateNodeData(v, 'key')}></Input>
             </span>
             <span style="padding: 0 4px">
               Value:
-              <Input value={formatData(data)} style="width:100px" onInput={v => formateNodeData(v, 'value')}></Input>
+              <Input value={formatData(data)} style="width:200px" onInput={v => formateNodeData(v, 'value')}></Input>
             </span>
             <span style="display: inline-block;float: right;margin-right: 32px">
               <Button onClick={() => this.append(data)} type="default" size="small" icon="ios-add"></Button>

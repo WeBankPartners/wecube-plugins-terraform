@@ -2,6 +2,9 @@
   <div class=" ">
     <TerraformPageTable :pageConfig="pageConfig"></TerraformPageTable>
     <TfModalComponent :modelConfig="modelConfig">
+      <template #tree-select>
+        <TreeSelect @callbackValue="callbackValue" ref="treeSelect"></TreeSelect>
+      </template>
       <template #outer-config>
         <div class="marginbottom params-each">
           <label class="col-md-2 label-name" style="vertical-align: top;">{{ $t('tf_provider_property') }}:</label>
@@ -22,7 +25,7 @@
         </div>
       </template>
     </TfModalComponent>
-    <Modal :z-index="2000" v-model="showEdit" :title="$t('tf_json_edit')" @on-ok="confirmJsonData">
+    <Modal :z-index="2000" v-model="showEdit" width="800" :title="$t('tf_json_edit')" @on-ok="confirmJsonData">
       <Tree ref="jsonTree" :jsonData="jsonData"></Tree>
     </Modal>
   </div>
@@ -31,6 +34,7 @@
 <script>
 import { getTableData, addTableRow, editTableRow, deleteTableRow } from '@/api/server'
 import Tree from '@/pages/components/tree'
+import TreeSelect from '@/pages/components/tree-select-for-keyconfig'
 import { isJSONStr } from '@/assets/js/utils'
 let tableEle = [
   {
@@ -130,31 +134,24 @@ export default {
         modalTitle: 'tf_keyconfig',
         isAdd: true,
         config: [
-          {
-            label: 'tf_resource_type',
-            value: 'resource',
-            placeholder: 'tips.inputRequired',
-            v_validate: 'required:true|min:2|max:60',
-            disabled: false,
-            type: 'text'
-          },
-          {
-            label: 'tf_provider',
-            value: 'provider',
-            placeholder: 'tips.inputRequired',
-            v_validate: 'required:true',
-            option: 'providerOption',
-            disabled: true,
-            type: 'select'
-          },
-          {
-            label: 'tf_property',
-            value: 'property',
-            placeholder: 'tips.inputRequired',
-            v_validate: 'required:true|min:2|max:60',
-            disabled: false,
-            type: 'text'
-          },
+          // {
+          //   label: 'tf_resource_type',
+          //   value: 'resource',
+          //   placeholder: 'tips.inputRequired',
+          //   v_validate: 'required:true|min:2|max:60',
+          //   disabled: false,
+          //   type: 'text'
+          // },
+          // {
+          //   label: 'tf_provider',
+          //   value: 'provider',
+          //   placeholder: 'tips.inputRequired',
+          //   v_validate: 'required:true',
+          //   option: 'providerOption',
+          //   disabled: true,
+          //   type: 'select'
+          // },
+          { name: 'tree-select', type: 'slot' },
           { name: 'outer-config', type: 'slot' }
         ],
         addRow: {
@@ -179,6 +176,9 @@ export default {
     this.initTableData()
   },
   methods: {
+    callbackValue (val) {
+      this.modelConfig.addRow = Object.assign(this.modelConfig.addRow, val)
+    },
     editJson (value, key) {
       this.editKey = key
       value = value || '{}'
@@ -199,21 +199,22 @@ export default {
         this.pageConfig.pagination.total = data.count
       }
     },
-    async getProvider () {
-      const { status, data } = await getTableData('/terraform/v1/configer/provider')
-      if (status === 'OK') {
-        this.modelConfig.v_select_configs.providerOption = data.data.map(item => {
-          return {
-            value: item.name,
-            label: item.name
-          }
-        })
-        this.$root.JQ('#add_edit_Modal').modal('show')
-      }
-    },
+    // async getProvider () {
+    //   const { status, data } = await getTableData('/terraform/v1/configer/provider')
+    //   if (status === 'OK') {
+    //     this.modelConfig.v_select_configs.providerOption = data.data.map(item => {
+    //       return {
+    //         value: item.name,
+    //         label: item.name
+    //       }
+    //     })
+    //     this.$root.JQ('#add_edit_Modal').modal('show')
+    //   }
+    // },
     async add () {
-      await this.getProvider()
+      // await this.getProvider()
       this.modelConfig.isAdd = true
+      this.$root.JQ('#add_edit_Modal').modal('show')
     },
     beautyParams (params, transformFields) {
       for (let p of transformFields) {
@@ -242,11 +243,13 @@ export default {
     },
     async editF (rowData) {
       this.id = rowData.id
-      await this.getProvider()
+      // await this.getProvider()
       this.modelConfig.isAdd = false
       this.modelTip.value = rowData[this.modelTip.key]
       this.modelConfig.addRow = this.$tfCommonUtil.manageEditParams(this.modelConfig.addRow, rowData)
       this.modelConfig.addRow.value_config = JSON.stringify(this.modelConfig.addRow.value_config)
+      this.$root.JQ('#add_edit_Modal').modal('show')
+      this.$refs.treeSelect.injectionData(this.modelConfig.addRow)
     },
     async editPost () {
       let editData = JSON.parse(JSON.stringify(this.modelConfig.addRow))
@@ -275,7 +278,8 @@ export default {
     }
   },
   components: {
-    Tree
+    Tree,
+    TreeSelect
   }
 }
 </script>
