@@ -20,6 +20,20 @@ class RegionConductor(object):
 
         return asset_id
 
+    def provider_region_info(self, provider, region):
+        '''
+
+        :param provider:
+        :param region:  region id
+        :return:
+        '''
+
+        asset_id, data = RegionApi().provider_region_asset(provider, region)
+        # if provider != data["provider"]:
+        #     raise ValueError("provider: %s 没有region：%s 注册信息，请先注册" % (provider, region))
+
+        return asset_id, data
+
     def zone_info(self, provider, zone):
         '''
 
@@ -33,6 +47,17 @@ class RegionConductor(object):
             raise ValueError("provider: %s zone：%s 注册信息，请先注册" % (provider, zone))
 
         return asset_id
+
+    def provider_zone_info(self, provider, region, zone):
+        '''
+
+        :param provider:
+        :param zone:  zone id
+        :return:
+        '''
+
+        asset_id, data = ZoneApi().provider_zone_object(provider=provider, region=region, zone_id=zone)
+        return asset_id, data
 
     def region_reverse_info(self, provider, region):
         '''

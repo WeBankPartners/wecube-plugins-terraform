@@ -9,7 +9,9 @@ from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.loadbalance.listener import LBListenerApi
 from apps.api.loadbalance.listener import LBListenerBackendApi
-from apps.controller.source_controller import BaseSourceController
+from apps.controller.backend_controller import BackendAddController
+from apps.controller.backend_controller import BackendDeleteController
+from apps.controller.backend_controller import BackendSourceController
 
 
 class ResBase(object):
@@ -125,47 +127,20 @@ class LBListenerIdController(BackendIdController):
         return self.resource.destroy(rid)
 
 
-class LBListenerAddController(BaseController):
+class LBListenerAddController(BackendAddController):
     allow_methods = ("POST",)
     resource = LBListenerBackendApi()
 
-    def before_handler(self, request, data, **kwargs):
-        ResBase.not_null(data)
-        ResBase.validate_keys(data)
 
-    def response_templete(self, data):
-        return {}
-
-    def main_response(self, request, data, **kwargs):
-        res, _ = ResBase.create(resource=self.resource, data=data)
-        return res
-
-
-class LBListenerDeleteController(BaseController):
+class LBListenerDeleteController(BackendDeleteController):
     name = "LBListener"
     resource_describe = "LBListener"
     allow_methods = ("POST",)
     resource = LBListenerBackendApi()
 
-    def before_handler(self, request, data, **kwargs):
-        validation.not_allowed_null(data=data,
-                                    keys=["id"]
-                                    )
 
-        validation.validate_string("id", data.get("id"))
-
-    def response_templete(self, data):
-        return {}
-
-    def main_response(self, request, data, **kwargs):
-        rid = data.pop("id", None)
-        result = self.resource.destroy(rid)
-        return {"result": result}
-
-
-class LBListenerSourceController(BaseSourceController):
+class LBListenerSourceController(BackendSourceController):
     name = "LBListener"
     resource_describe = "LBListener"
     allow_methods = ("POST",)
     resource = LBListenerBackendApi()
-

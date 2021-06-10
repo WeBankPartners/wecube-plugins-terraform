@@ -9,7 +9,9 @@ from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.loadbalance.lb_group import LBGroupApi
 from apps.api.loadbalance.lb_group import LBGroupBackendApi
-from apps.controller.source_controller import BaseSourceController
+from apps.controller.backend_controller import BackendAddController
+from apps.controller.backend_controller import BackendDeleteController
+from apps.controller.backend_controller import BackendSourceController
 
 
 class ResBase(object):
@@ -43,7 +45,7 @@ class ResBase(object):
         name = data.pop("name", None)
         lb_id = data.pop("lb_id", None)
         x_port = data.pop("port", None)
-        port = int(x_port) if x_port is not None else None 
+        port = int(x_port) if x_port is not None else None
         instance_id = data.pop("instance_id", None)
 
         asset_id = data.pop("asset_id", None)
@@ -118,47 +120,20 @@ class LBGroupIdController(BackendIdController):
         return self.resource.destroy(rid)
 
 
-class LBGroupAddController(BaseController):
+class LBGroupAddController(BackendAddController):
     allow_methods = ("POST",)
     resource = LBGroupBackendApi()
 
-    def before_handler(self, request, data, **kwargs):
-        ResBase.not_null(data)
-        ResBase.validate_keys(data)
 
-    def response_templete(self, data):
-        return {}
-
-    def main_response(self, request, data, **kwargs):
-        res, _ = ResBase.create(resource=self.resource, data=data)
-        return res
-
-
-class LBGroupDeleteController(BaseController):
+class LBGroupDeleteController(BackendDeleteController):
     name = "LBGroup"
     resource_describe = "LBGroup"
     allow_methods = ("POST",)
     resource = LBGroupBackendApi()
 
-    def before_handler(self, request, data, **kwargs):
-        validation.not_allowed_null(data=data,
-                                    keys=["id"]
-                                    )
 
-        validation.validate_string("id", data.get("id"))
-
-    def response_templete(self, data):
-        return {}
-
-    def main_response(self, request, data, **kwargs):
-        rid = data.pop("id", None)
-        result = self.resource.destroy(rid)
-        return {"result": result}
-
-
-class LBGroupSourceController(BaseSourceController):
+class LBGroupSourceController(BackendSourceController):
     name = "LBGroup"
     resource_describe = "LBGroup"
     allow_methods = ("POST",)
     resource = LBGroupBackendApi()
-

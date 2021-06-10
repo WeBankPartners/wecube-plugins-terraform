@@ -72,28 +72,6 @@ class RedisBackupBackendApi(KvBackupBackendApi):
         self._flush_resobj()
         self.resource_keys_config = None
 
-    def before_keys_checks(self, provider, create_data, is_update=None):
-        '''
-
-        :param provider:
-        :param create_data:
-        :param is_update:
-        :return:
-        '''
-
-        kvstore_id = create_data.get("redis_id")
-
-        self.resource_info(provider)
-        resource_property = self.resource_keys_config["resource_property"]
-        _kv_status = define_relations_key("redis_id", kvstore_id, resource_property.get("redis_id"))
-
-        ext_info = {}
-        if kvstore_id and (not _kv_status):
-            ext_info["redis_id"] = CrsObject("redis").object_resource_id(kvstore_id)
-
-        logger.info("before_keys_checks add info: %s" % (format_json_dumps(ext_info)))
-        return ext_info
-
 
 class RedisAccountApi(KvAccountApi):
     def __init__(self):
@@ -133,28 +111,3 @@ class RedisAccountBackendApi(KvAccountBackendApi):
         self.resource_workspace = "redis_account"
         self._flush_resobj()
         self.resource_keys_config = None
-
-    def before_keys_checks(self, provider, create_data, is_update=None):
-        '''
-
-        :param provider:
-        :param create_data:
-        :param is_update:
-        :return:
-        '''
-
-        kvstore_id = create_data.get("redis_id")
-
-        self.resource_info(provider)
-        resource_property = self.resource_keys_config["resource_property"]
-        _kv_status = define_relations_key("redis_id", kvstore_id, resource_property.get("redis_id"))
-
-        ext_info = {}
-        if kvstore_id and (not _kv_status):
-            ext_info["redis_id"] = CrsObject("redis").object_resource_id(kvstore_id)
-
-        logger.info("before_keys_checks add info: %s" % (format_json_dumps(ext_info)))
-        return ext_info
-
-    def reverse_asset_ids(self):
-        return ['vpc_id', "subnet_id", "security_group_id", "redis_id"]

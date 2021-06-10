@@ -18,7 +18,6 @@ from apps.background.resource.vm.instance_type import InstanceTypeObject
 from apps.background.resource.resource_base import CrsObject
 from apps.api.conductor.provider import ProviderConductor
 from apps.api.apibase_backend import ApiBackendBase
-from apps.api.conductor.valueReverse import ValueResetConductor
 
 
 class InstanceApi(ApiBase):
@@ -219,19 +218,6 @@ class InstanceApi(ApiBase):
         #                                                      "power_state": "stop"})
 
     def generate_update_data(self, zone, update_data, **kwargs):
-        # r_create_data = {"vpc_id": create_data.get("vpc_id"),
-        #                  "subnet_id": create_data.get("subnet_id"),
-        #                  "security_group_id": create_data.get("security_group_id")}
-        #
-        # x_create_data = {"name": create_data.get("name"),
-        #                  "hostname": create_data.get("hostname"),
-        #                  "disk_type": create_data.get("disk_type"),
-        #                  "disk_size": create_data.get("disk_size"),
-        #                  "data_disks": create_data.get("data_disks"),
-        #                  "zone": zone, "image": create_data.get("image")}
-        #
-        # return x_create_data, r_create_data
-
         x_update_data = {}
         for key in ["name", "image"]:
             if update_data.get(key):
@@ -300,28 +286,6 @@ class InstanceApi(ApiBase):
             raise local_exceptions.ResourceNotFoundError("%s:%s 不存在" % (self.resource_name, rid))
 
         update_data = {"power_action": "start"}
-
-        # _path = self.create_workpath(rid,
-        #                              provider=_obj["provider"],
-        #                              region=_obj["region"])
-        #
-        # define_json = self._generate_update_data(rid, _obj["provider"],
-        #                                          define_json=_obj["define_json"],
-        #                                          update_data=update_data,
-        #                                          extend_info={})
-        #
-        # self.update_data(rid, data={"status": "starting"})
-        # self.write_define(rid, _path, define_json=define_json)
-
-        # try:
-        #     result = self.run(_path)
-        # except Exception, e:
-        #     self.rollback_data(rid)
-        #     raise e
-        #
-        # result = self.formate_result(result)
-        # logger.info(format_json_dumps(result))
-
         count, res = self.run_update(rid=rid, region=resource_obj["region"],
                                      zone=resource_obj.get("zone"),
                                      owner_id=None,
@@ -343,33 +307,11 @@ class InstanceApi(ApiBase):
         :return:
         '''
 
-        # _obj = self.resource_object.show(rid)
-        # if not _obj:
-        #     raise local_exceptions.ResourceNotFoundError("instance %s 不存在" % rid)
-
         resource_obj = self.resource_object.show(rid)
         if not resource_obj:
             raise local_exceptions.ResourceNotFoundError("%s:%s 不存在" % (self.resource_name, rid))
 
         update_data = {"power_action": "stop"}
-
-        # _path = self.create_workpath(rid,
-        #                              provider=_obj["provider"],
-        #                              region=_obj["region"])
-
-        # define_json = self._generate_update_data(rid, _obj["provider"],
-        #                                          define_json=_obj["define_json"],
-        #                                          update_data=update_data,
-        #                                          extend_info={})
-
-        # self.update_data(rid, data={"status": "stopping"})
-        # self.write_define(rid, _path, define_json=define_json)
-        #
-        # try:
-        #     result = self.run(_path)
-        # except Exception, e:
-        #     self.rollback_data(rid)
-        #     raise e
 
         count, res = self.run_update(rid=rid, region=resource_obj["region"],
                                      zone=resource_obj.get("zone"),
@@ -396,254 +338,3 @@ class InstanceBackendApi(ApiBackendBase):
         self.resource_workspace = "instance"
         self._flush_resobj()
         self.resource_keys_config = None
-
-    def before_keys_checks(self, provider, create_data, is_update=None):
-        '''
-
-        :param provider:
-        :param vpc_id:
-        :return:
-        '''
-
-        vpc_id = create_data.get("vpc_id")
-        subnet_id = create_data.get("subnet_id")
-        sg_id = create_data.get("security_group_id")
-
-        self.resource_info(provider)
-        resource_property = self.resource_keys_config["resource_property"]
-        _vpc_status = define_relations_key("vpc_id", vpc_id,
-                                           resource_property.get("vpc_id"), is_update)
-        _subnet_status = define_relations_key("subnet", subnet_id,
-                                              resource_property.get("subnet_id"), is_update)
-        _sg_status = define_relations_key("security_group_id", sg_id,
-                                          resource_property.get("security_group_id"), is_update)
-
-        ext_info = {}
-        if vpc_id and (not _vpc_status):
-            ext_info["vpc_id"] = CrsObject("vpc").object_resource_id(vpc_id)
-        if subnet_id and (not _subnet_status):
-            ext_info["subnet_id"] = CrsObject("subnet").object_resource_id(subnet_id)
-        if sg_id and (not _sg_status):
-            sg_property = resource_property.get("security_group_id")
-            if isinstance(sg_property, dict):
-                if sg_property.get("type", "string") == "list":
-                    sg_list = validate_type(sg_id, "list")
-                    _sg_resource_ids = []
-                    for _sg in sg_list:
-                        _sg_resource_ids.append(CrsObject("security_group").object_resource_id(_sg))
-                else:
-                    _sg_resource_ids = CrsObject("security_group").object_resource_id(sg_id)
-
-                ext_info["security_group_id"] = _sg_resource_ids
-            else:
-                ext_info["security_group_id"] = CrsObject("security_group").object_resource_id(sg_id)
-
-        logger.info("before_keys_checks add info: %s" % (format_json_dumps(ext_info)))
-        return ext_info
-
-    def _generate_update_data(self, rid, provider, define_json, update_data, extend_info):
-        self.resource_info(provider)
-        resource_values_config = self.values_config(provider)
-
-        resource_name = self.resource_keys_config["resource_type"]
-        resource_property = self.resource_keys_config["resource_property"]
-        resource_extend_info = self.resource_keys_config["extend_info"]
-
-        resource_columns = {}
-        for key, value in update_data.items():
-            if resource_values_config.get(key):
-                _values_configs = resource_values_config.get(key)
-                value = convert_value(value, _values_configs.get(value))
-
-            resource_columns[key] = value
-
-        resource_columns = convert_keys(resource_columns, defines=resource_property, is_update=True)
-        if extend_info:
-            _extend_columns = convert_extend_propertys(datas=extend_info,
-                                                       extend_info=resource_extend_info,
-                                                       is_update=True)
-            resource_columns.update(_extend_columns)
-
-        _t = define_json["resource"][resource_name]
-        label_name = self.resource_name + "_" + rid
-        origin_columns = _t[label_name]
-
-        origin_columns.update(resource_columns)
-
-        define_json["resource"] = {
-            resource_name: {
-                label_name: origin_columns
-            }
-        }
-        logger.info(format_json_dumps(define_json))
-        return define_json
-
-    def generate_create_data(self, zone, create_data, **kwargs):
-        r_create_data = {"vpc_id": create_data.get("vpc_id"),
-                         "subnet_id": create_data.get("subnet_id"),
-                         "security_group_id": create_data.get("security_group_id")}
-
-        x_create_data = {"name": create_data.get("name"),
-                         "hostname": create_data.get("hostname"),
-                         "disk_type": create_data.get("disk_type"),
-                         "disk_size": create_data.get("disk_size"),
-                         "data_disks": create_data.get("data_disks"),
-                         "charge_type": create_data.get("charge_type"),
-                         "zone": zone, "image": create_data.get("image")}
-
-        if "power_action" in create_data.keys():
-            if create_data.get("power_action") not in ["stop", "start"]:
-                raise ValueError("instance power action is stop or start")
-
-            x_create_data["power_action"] = create_data.get("power_action")
-
-        return x_create_data, r_create_data
-
-    def generate_owner_data(self, create_data, **kwargs):
-        r_id = {"subnet_id": create_data.get("subnet_id")}
-        return None, r_id
-
-    def apply(self, rid, provider, region, zone, secret,
-              create_data, extend_info,
-              asset_id=None, resource_id=None,
-              **kwargs):
-        '''
-
-        :param rid:
-        :param provider:
-        :param region:
-        :param secret:
-        :param create_data:
-        :param extend_info:
-        :param kwargs:
-        :return:
-        '''
-
-        region = self.region_object(provider, region)
-        zone = self.zone_object(provider, zone)
-
-        extend_info = extend_info or {}
-        provider_object, provider_info = ProviderConductor().conductor_provider_info(provider, region, secret)
-
-        zone = ProviderConductor().zone_info(provider=provider_object["name"], zone=zone)
-        x_create_data, r_create_data = self.generate_create_data(zone, create_data,
-                                                                 provider=provider_object["name"])
-
-        password = create_data.get("password")  # or "Terraform.123"
-        origin_type, instance_type_data = InstanceTypeObject().convert_resource_id(provider_object.get("id"),
-                                                                                   create_data.get("instance_type"))
-
-        cpu = instance_type_data.get("cpu")
-        memory = instance_type_data.get("memory")
-        kwargs["cpu"] = cpu
-        kwargs["memory"] = memory
-
-        x_create_data["password"] = password
-        x_create_data["instance_type"] = origin_type
-
-        _relations_id_dict = self.before_keys_checks(provider_object["name"], r_create_data)
-
-        x_create_data.update(_relations_id_dict)
-
-        owner_id, relation_id = self.generate_owner_data(create_data)
-
-        count, res = self.run_create(rid=rid, region=region, zone=zone,
-                                     provider_object=provider_object,
-                                     provider_info=provider_info,
-                                     asset_id=asset_id, resource_id=resource_id,
-                                     owner_id=owner_id, relation_id=relation_id,
-                                     create_data=x_create_data,
-                                     extend_info=extend_info,
-                                     power_state="running",
-                                     **kwargs)
-
-        return count, res
-
-    def sg_vm_relationship(self, rid, provider, region, zone, secret,
-                           resource_id, **kwargs):
-
-        self.resource_info(provider)
-        resource_property = self.resource_keys_config["resource_property"]
-        _sg_status = define_relations_key("security_group_id", "0000000",
-                                          resource_property.get("security_group_id"))
-        if _sg_status:
-            return []
-        else:
-            result = []
-            instance_datas = self.get_remote_source(rid, provider, region, zone, secret,
-                                                    resource_id=None, **kwargs)
-
-            for instance in instance_datas:
-                sg = instance.get("security_group_id")
-                if isinstance(resource_id, basestring):
-                    if resource_id in sg:
-                        result.append(instance)
-                elif isinstance(resource_id, list):
-                    state = 0
-                    for x_resource in resource_id:
-                        if x_resource in sg:
-                            state = 1
-
-                    if state == 1:
-                        result.append(instance)
-
-            return result
-
-    def before_source_asset(self, provider, query_data):
-        for key in ["vpc_id", "subnet_id"]:
-            if query_data.get(key):
-                query_data[key] = CrsObject().object_asset_id(query_data.get(key))
-
-        return query_data
-
-    def reverse_asset_ids(self):
-        return ['vpc_id', "subnet_id", "security_group_id"]
-
-    def run_query(self, rid, region, zone,
-                  provider_object, provider_info,
-                  query_data, **kwargs):
-        '''
-
-        :param rid:
-        :param region:
-        :param zone:
-        :param owner_id:
-        :param relation_id:
-        :param create_data:
-        :param extend_info:
-        :param kwargs:
-        :return:
-        '''
-
-        # extend_info = extend_info or {}
-        label_name = self.resource_name + "_q_" + rid
-
-        define_json, resource_keys_config = self.source_filter_controller(provider_name=provider_object["name"],
-                                                                          label_name=label_name,
-                                                                          query_data=query_data
-                                                                          )
-
-        result = self._run_create_and_read_result(rid, provider=provider_object["name"],
-                                                  region=region, provider_info=provider_info,
-                                                  define_json=define_json)
-
-        data_source_argument = resource_keys_config.get("data_source_argument")
-        output_json = self.read_query_result_controller(provider_object["name"], result,
-                                                        data_source_argument)
-
-        result_list = []
-        for out_data in output_json:
-            x_json = ValueResetConductor().reset_values(provider=provider_object["name"],
-                                                        resource_name=self.resource_name,
-                                                        data=out_data)
-
-            x_json = self.reverse_asset_object(provider=provider_object["name"], data=x_json)
-
-            instance_type, resource_info = InstanceTypeObject().convert_asset(provider=provider_object["name"],
-                                                                              asset_name=x_json.get("instance_type"))
-            x_json["instance_type"] = instance_type
-            resource_info.update(x_json)
-
-            result_list.append(resource_info)
-
-        return result_list

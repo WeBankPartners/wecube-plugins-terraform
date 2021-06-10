@@ -4,18 +4,23 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import json
 import traceback
 from lib.logs import logger
-from lib.uuid_util import get_uuid
 from lib.json_helper import format_json_dumps
 from core import local_exceptions
 from apps.common.convert_keys import validate_type
-from apps.common.convert_keys import convert_key_only
 from apps.common.convert_keys import define_relations_key
 from apps.api.apibase import ApiBase
 from apps.background.resource.resource_base import CrsObject
 from apps.api.apibase_backend import ApiBackendBase
 
 
-class Common(object):
+class LBRuleApi(ApiBase):
+    def __init__(self):
+        super(LBRuleApi, self).__init__()
+        self.resource_name = "lb_rule"
+        self.resource_workspace = "lb_rule"
+        self._flush_resobj()
+        self.resource_keys_config = None
+
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
 
@@ -65,11 +70,6 @@ class Common(object):
 
         x_create_data = {}
         for key in ["frontend_port", "name",
-                    # "domain", "url",
-                    # "health_check_http_code", "health_check_interval",
-                    # "health_check_uri", "health_check_connect_port",
-                    # "health_check_timeout", "health_check_http_method",
-                    # "scheduler", "certificate_id", "certificate_ca_id"
                     ]:
             x_create_data[key] = create_data.get(key)
         return x_create_data, r_create_data
@@ -77,15 +77,6 @@ class Common(object):
     def generate_owner_data(self, create_data, **kwargs):
         owner_id = None
         return owner_id, None
-
-
-class LBRuleApi(Common, ApiBase):
-    def __init__(self):
-        super(LBRuleApi, self).__init__()
-        self.resource_name = "lb_rule"
-        self.resource_workspace = "lb_rule"
-        self._flush_resobj()
-        self.resource_keys_config = None
 
     def destroy(self, rid):
         '''
@@ -112,40 +103,10 @@ class LBRuleApi(Common, ApiBase):
         return self.resource_object.delete(rid)
 
 
-class LBRuleBackendApi(Common, ApiBackendBase):
+class LBRuleBackendApi(ApiBackendBase):
     def __init__(self):
         super(LBRuleBackendApi, self).__init__()
         self.resource_name = "lb_rule"
         self.resource_workspace = "lb_rule"
         self._flush_resobj()
         self.resource_keys_config = None
-
-    def sg_lb_rule_relationship(self, rid, provider, region, zone, secret,
-                                resource_id, **kwargs):
-
-        self.resource_info(provider)
-        resource_property = self.resource_keys_config["resource_property"]
-        _sg_status = define_relations_key("security_group_id", "0000000",
-                                          resource_property.get("security_group_id"))
-        if _sg_status:
-            return []
-        else:
-            result = []
-            instance_datas = self.get_remote_source(rid, provider, region, zone, secret,
-                                                    resource_id=None, **kwargs)
-
-            for instance in instance_datas:
-                sg = instance.get("security_group_id")
-                if isinstance(resource_id, basestring):
-                    if resource_id in sg:
-                        result.append(instance)
-                elif isinstance(resource_id, list):
-                    state = 0
-                    for x_resource in resource_id:
-                        if x_resource in sg:
-                            state = 1
-
-                    if state == 1:
-                        result.append(instance)
-
-            return result

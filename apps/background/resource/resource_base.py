@@ -45,14 +45,42 @@ class CrsObject(object):
 
         return data
 
-    def list(self, filters=None, page=None, pagesize=None, orderby=None):
+    def list(self, filters=None, page=None,
+             pagesize=None, orderby=None,
+             filter_in=None, filter_string=None):
+        '''
+
+        :param filters:
+        :param page:
+        :param pagesize:
+        :param orderby:
+        :param filter_in:
+        :param filter_string:
+        :return:
+        '''
+
         filters = filters or {}
+        filter_in = filter_in or {}
         filters["is_deleted"] = 0
 
         if self.resource_name:
             filters["resource_name"] = self.resource_name
 
+        for key, value in filter_in.items():
+            if value:
+                f = ''
+                for x in value:
+                    f += "'" + x + "',"
+                f = f[:-1]
+
+                x = '(' + f + ')'
+                if filter_string:
+                    filter_string += 'and ' + key + " in " + x + " "
+                else:
+                    filter_string = key + " in " + x + " "
+
         count, results = self.resource.list(filters=filters, pageAt=page,
+                                            filter_string=filter_string,
                                             pageSize=pagesize, orderby=orderby)
         data = []
         for res in results:

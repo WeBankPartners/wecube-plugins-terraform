@@ -9,7 +9,9 @@ from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.network.peer_connection import PeerConnApi
 from apps.api.network.peer_connection import PeerConnBackendApi
-from apps.controller.source_controller import BaseSourceController
+from apps.controller.backend_controller import BackendAddController
+from apps.controller.backend_controller import BackendDeleteController
+from apps.controller.backend_controller import BackendSourceController
 
 
 class ResBase(object):
@@ -117,47 +119,20 @@ class PeerConnIdController(BackendIdController):
         return self.resource.destroy(rid)
 
 
-class PeerConnAddController(BaseController):
+class PeerConnAddController(BackendAddController):
     allow_methods = ("POST",)
     resource = PeerConnBackendApi()
 
-    def before_handler(self, request, data, **kwargs):
-        ResBase.not_null(data)
-        ResBase.validate_keys(data)
 
-    def response_templete(self, data):
-        return {}
-
-    def main_response(self, request, data, **kwargs):
-        res, _ = ResBase.create(resource=self.resource, data=data)
-        return res
-
-
-class PeerConnDeleteController(BaseController):
+class PeerConnDeleteController(BackendDeleteController):
     name = "PeerConn"
     resource_describe = "PeerConn"
     allow_methods = ("POST",)
     resource = PeerConnBackendApi()
 
-    def before_handler(self, request, data, **kwargs):
-        validation.not_allowed_null(data=data,
-                                    keys=["id"]
-                                    )
 
-        validation.validate_string("id", data.get("id"))
-
-    def response_templete(self, data):
-        return {}
-
-    def main_response(self, request, data, **kwargs):
-        rid = data.pop("id", None)
-        result = self.resource.destroy(rid)
-        return {"result": result}
-
-
-class PeerConnSourceController(BaseSourceController):
+class PeerConnSourceController(BackendSourceController):
     name = "PeerConn"
     resource_describe = "PeerConn"
     allow_methods = ("POST",)
     resource = PeerConnBackendApi()
-

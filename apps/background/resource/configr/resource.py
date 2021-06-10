@@ -13,7 +13,34 @@ class ResourceObject(object):
     def __init__(self):
         self.resource = ResourceManager()
 
-    def list(self, filters=None, page=None, pagesize=None, orderby=None, filter_string=None):
+    def list(self, filters=None, page=None,
+             pagesize=None, orderby=None,
+             filter_string=None, filter_in=None):
+        '''
+
+        :param filters:
+        :param page:
+        :param pagesize:
+        :param orderby:
+        :param filter_string:
+        :param filter_in:
+        :return:
+        '''
+
+        filter_in = filter_in or {}
+        for key, value in filter_in.items():
+            if value:
+                f = ''
+                for x in value:
+                    f += "'" + x + "',"
+                f = f[:-1]
+
+                x = '(' + f + ')'
+                if filter_string:
+                    filter_string += 'and ' + key + " in " + x + " "
+                else:
+                    filter_string = key + " in " + x + " "
+
         count, results = self.resource.list(filters=filters, pageAt=page,
                                             filter_string=filter_string,
                                             pageSize=pagesize, orderby=orderby)

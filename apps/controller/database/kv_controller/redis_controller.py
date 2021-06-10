@@ -13,6 +13,7 @@ from .kvstore_controller import KvStoreController
 from .kvstore_controller import KvStoreIdController
 from .kvstore_controller import KvStoreAddController
 from .kvstore_controller import KvStoreDeleteController
+from .kvstore_controller import KvStoreSourceController
 from .kvstore_backup_controller import KvBackupController
 from .kvstore_backup_controller import KvBackupIdController
 from .kvstore_backup_controller import KvBackupAddController
@@ -35,6 +36,13 @@ class RedisAddController(KvStoreAddController):
 
 
 class RedisDeleteController(KvStoreDeleteController):
+    name = "Redis"
+    resource_describe = "Redis"
+    allow_methods = ("POST",)
+    resource = RedisBackendApi()
+
+
+class RedisSourceController(KvStoreSourceController):
     name = "Redis"
     resource_describe = "Redis"
     allow_methods = ("POST",)

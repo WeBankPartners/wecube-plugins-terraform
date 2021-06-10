@@ -8,16 +8,19 @@ from lib.logs import logger
 from lib.json_helper import format_json_dumps
 from core import local_exceptions
 from apps.common.convert_keys import define_relations_key
-from apps.api.configer.provider import ProviderApi
 from apps.api.apibase import ApiBase
-# from apps.background.resource.vm.eni import ENIObject
-# from apps.background.resource.vm.eni import ENIAttachObject
-# from apps.background.resource.vm.instance import InstanceObject
 from apps.background.resource.resource_base import CrsObject
 from apps.api.apibase_backend import ApiBackendBase
 
 
-class Common(object):
+class ENIAttachApi(ApiBase):
+    def __init__(self):
+        super(ENIAttachApi, self).__init__()
+        self.resource_name = "network_interface_attach"
+        self.resource_workspace = "network_interface_attach"
+        self._flush_resobj()
+        self.resource_keys_config = None
+
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
 
@@ -96,22 +99,10 @@ class Common(object):
         return self.resource_object.delete(rid)
 
 
-class ENIAttachApi(Common, ApiBase):
-    def __init__(self):
-        super(ENIAttachApi, self).__init__()
-        self.resource_name = "network_interface_attach"
-        self.resource_workspace = "network_interface_attach"
-        self._flush_resobj()
-        self.resource_keys_config = None
-
-
-class ENIAttachBackendApi(Common, ApiBackendBase):
+class ENIAttachBackendApi(ApiBackendBase):
     def __init__(self):
         super(ENIAttachBackendApi, self).__init__()
         self.resource_name = "network_interface_attach"
         self.resource_workspace = "network_interface_attach"
         self._flush_resobj()
         self.resource_keys_config = None
-
-    def reverse_asset_ids(self):
-        return ['network_interface_id', "instance_id"]

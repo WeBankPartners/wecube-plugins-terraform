@@ -9,7 +9,9 @@ from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.network.ccn_bandwidth import CCNBandwidthApi
 from apps.api.network.ccn_bandwidth import CCNBandwidthBackendApi
-from apps.controller.source_controller import BaseSourceController
+from apps.controller.backend_controller import BackendAddController
+from apps.controller.backend_controller import BackendDeleteController
+from apps.controller.backend_controller import BackendSourceController
 
 
 class ResBase(object):
@@ -122,47 +124,20 @@ class CCNBandwidthIdController(BackendIdController):
         return self.resource.destroy(rid)
 
 
-class CCNBandwidthAddController(BaseController):
+class CCNBandwidthAddController(BackendAddController):
     allow_methods = ("POST",)
     resource = CCNBandwidthBackendApi()
 
-    def before_handler(self, request, data, **kwargs):
-        ResBase.not_null(data)
-        ResBase.validate_keys(data)
 
-    def response_templete(self, data):
-        return {}
-
-    def main_response(self, request, data, **kwargs):
-        res, _ = ResBase.create(resource=self.resource, data=data)
-        return res
-
-
-class CCNBandwidthDeleteController(BaseController):
+class CCNBandwidthDeleteController(BackendDeleteController):
     name = "CCNBandwidth"
     resource_describe = "CCNBandwidth"
     allow_methods = ("POST",)
     resource = CCNBandwidthBackendApi()
 
-    def before_handler(self, request, data, **kwargs):
-        validation.not_allowed_null(data=data,
-                                    keys=["id"]
-                                    )
 
-        validation.validate_string("id", data.get("id"))
-
-    def response_templete(self, data):
-        return {}
-
-    def main_response(self, request, data, **kwargs):
-        rid = data.pop("id", None)
-        result = self.resource.destroy(rid)
-        return {"result": result}
-
-
-class CCNBandSourceController(BaseSourceController):
+class CCNBandSourceController(BackendSourceController):
     name = "CCNBandwidth"
     resource_describe = "CCNBandwidth"
     allow_methods = ("POST",)
     resource = CCNBandwidthBackendApi()
-

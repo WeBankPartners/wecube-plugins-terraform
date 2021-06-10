@@ -6,7 +6,6 @@ import base64
 import json
 from lib.logs import logger
 from lib.json_helper import format_json_dumps
-from apps.api.configer.provider import ProviderApi
 from apps.common.convert_keys import convert_keys
 from apps.common.convert_keys import convert_value
 from apps.common.convert_keys import convert_key_only
@@ -16,7 +15,14 @@ from apps.background.resource.resource_base import CrsObject
 from apps.api.apibase_backend import ApiBackendBase
 
 
-class Common(object):
+class MysqlAccountApi(ApiBase):
+    def __init__(self):
+        super(MysqlAccountApi, self).__init__()
+        self.resource_name = "mysql_account"
+        self.resource_workspace = "mysql_account"
+        self.owner_resource = "mysql"
+        self._flush_resobj()
+        self.resource_keys_config = None
 
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
@@ -42,7 +48,7 @@ class Common(object):
     def generate_create_data(self, zone, create_data, **kwargs):
         r_create_data = {"mysql_id": create_data.get("mysql_id")}
 
-        password = create_data.get("password") #or "Terraform.123"
+        password = create_data.get("password")  # or "Terraform.123"
         x_create_data = {"password": password,
                          "name": create_data.get("name")}
 
@@ -53,17 +59,7 @@ class Common(object):
         return owner_id, None
 
 
-class MysqlAccountApi(Common, ApiBase):
-    def __init__(self):
-        super(MysqlAccountApi, self).__init__()
-        self.resource_name = "mysql_account"
-        self.resource_workspace = "mysql_account"
-        self.owner_resource = "mysql"
-        self._flush_resobj()
-        self.resource_keys_config = None
-
-
-class MysqlAccountBackendApi(Common, ApiBackendBase):
+class MysqlAccountBackendApi(ApiBackendBase):
     def __init__(self):
         super(MysqlAccountBackendApi, self).__init__()
         self.resource_name = "mysql_account"
@@ -72,19 +68,15 @@ class MysqlAccountBackendApi(Common, ApiBackendBase):
         self._flush_resobj()
         self.resource_keys_config = None
 
-    def before_source_asset(self, provider, query_data):
-        for key in ["instance_id"]:
-            if query_data.get(key):
-                query_data[key] = CrsObject().object_asset_id(query_data.get(key))
 
-        return query_data
-
-    def reverse_asset_ids(self):
-        return ['instance_id']
-
-
-
-class PCommon(object):
+class MysqlPrivilegeApi(ApiBase):
+    def __init__(self):
+        super(MysqlPrivilegeApi, self).__init__()
+        self.resource_name = "mysql_privilege"
+        self.resource_workspace = "mysql_privilege"
+        self.owner_resource = "mysql"
+        self._flush_resobj()
+        self.resource_keys_config = None
 
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
@@ -161,17 +153,7 @@ class PCommon(object):
         return owner_id, None
 
 
-class MysqlPrivilegeApi(PCommon, ApiBase):
-    def __init__(self):
-        super(MysqlPrivilegeApi, self).__init__()
-        self.resource_name = "mysql_privilege"
-        self.resource_workspace = "mysql_privilege"
-        self.owner_resource = "mysql"
-        self._flush_resobj()
-        self.resource_keys_config = None
-
-
-class MysqlPrivilegeBackendApi(PCommon, ApiBackendBase):
+class MysqlPrivilegeBackendApi(ApiBackendBase):
     def __init__(self):
         super(MysqlPrivilegeBackendApi, self).__init__()
         self.resource_name = "mysql_privilege"

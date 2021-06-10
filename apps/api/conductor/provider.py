@@ -118,7 +118,7 @@ class ProviderConductor(object):
 
         secret_info = self._provider_secret(provider, region, secret)
         if not secret_info:
-            # 兼容provider旧的认证方式
+            # 兼容provider的认证方式
             secret_info = {}
             logger.info("not search secret info, try use provider define info")
             provider_data["secret_id"] = self.decrypt_key(provider_data.get("secret_id"))
@@ -206,4 +206,31 @@ class ProviderConductor(object):
 
         region = RegionConductor().region_info(provider, region)
         return self.conductor_provider_info(provider, region, secret)
+
+    def conductor_provider(self, provider_object, region_object, secret_info):
+        '''
+
+        :param provider_object:
+        :param region_object:
+        :param secret_info:
+        :return:
+        '''
+
+        provider = provider_object.get("name")
+        ProviderApi().create_provider_workspace(provider)
+
+        provider_info = {"region": region_object["asset_id"]}
+        provider_property = provider_object.get("provider_property", {})
+
+        provider_info.update(provider_object.get("extend_info", {}))
+        provider_columns = convert_keys(provider_info, defines=provider_property, is_update=True)
+        provider_columns.update(secret_info)
+
+        info = {
+            "provider": {
+                provider: provider_columns
+            }
+        }
+
+        return info
 

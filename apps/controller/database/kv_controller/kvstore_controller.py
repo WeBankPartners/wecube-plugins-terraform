@@ -11,7 +11,9 @@ from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.database.kvstore.kvstore import KvStoreApi
 from apps.api.database.kvstore.kvstore import KvStoreBackendApi
-from apps.controller.source_controller import BaseSourceController
+from apps.controller.backend_controller import BackendAddController
+from apps.controller.backend_controller import BackendDeleteController
+from apps.controller.backend_controller import BackendSourceController
 
 
 class ResBase(object):
@@ -72,7 +74,7 @@ class ResBase(object):
                  vpc_id=vpc_id,
                  security_group_id=security_group_id,
                  subnet_id=subnet_id,
-                 charge_type= charge_type)
+                 charge_type=charge_type)
 
         create_data = {"name": name}
         create_data.update(d)
@@ -148,52 +150,25 @@ class KvStoreIdController(BackendIdController):
         return self.resource.destroy(rid)
 
 
-class KvStoreAddController(BaseController):
+class KvStoreAddController(BackendAddController):
     allow_methods = ("POST",)
     resource = KvStoreBackendApi()
 
-    def before_handler(self, request, data, **kwargs):
-        ResBase.not_null(data)
-        ResBase.validate_keys(data)
 
-    def response_templete(self, data):
-        return {}
-
-    def main_response(self, request, data, **kwargs):
-        res, _ = ResBase.create(resource=self.resource, data=data)
-        return res
-
-
-class KvStoreDeleteController(BaseController):
+class KvStoreDeleteController(BackendDeleteController):
     name = "KvStore"
     resource_describe = "KvStore"
     allow_methods = ("POST",)
     resource = KvStoreBackendApi()
 
-    def before_handler(self, request, data, **kwargs):
-        validation.not_allowed_null(data=data,
-                                    keys=["id"]
-                                    )
 
-        validation.validate_string("id", data.get("id"))
-
-    def response_templete(self, data):
-        return {}
-
-    def main_response(self, request, data, **kwargs):
-        rid = data.pop("id", None)
-        force_delete = data.get("force_delete", False)
-        result = self.resource.destroy(rid)
-        return {"result": result}
-
-
-class KvStoreSourceController(BaseSourceController):
+class KvStoreSourceController(BackendSourceController):
     resource_describe = "KvStore"
     allow_methods = ("POST",)
     resource = KvStoreBackendApi()
 
 
-class KvStoreSGSourceController(BaseSourceController):
+class KvStoreSGSourceController(BackendSourceController):
     resource_describe = "KvStore"
     allow_methods = ("POST",)
     resource = KvStoreBackendApi()

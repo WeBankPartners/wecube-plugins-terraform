@@ -1,7 +1,5 @@
 #@v0.1.0-begin@;
 
-USE `terraform`;
-
 /*Data for the table `cloud_providers` */
 
 insert  into `cloud_providers`(`id`,`display_name`,`name`,`secret_id`,`secret_key`,`region`,`zone`,`plugin_source`,`extend_info`,`provider_property`,`is_init`,`created_time`,`updated_time`,`deleted_time`,`enabled`,`is_deleted`) values

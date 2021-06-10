@@ -10,9 +10,7 @@ WORKDIR /app/wecube_plugins_terraform/
 COPY . .
 
 RUN mkdir -p /usr/local/share/terraform/plugins && \
-    tar -zxvf /app/wecube_plugins_terraform/plugins/registry.terraform.io.tar.gz  -C /usr/local/share/terraform/plugins && \
-    rm -rf /app/wecube_plugins_terraform/plugins/registry.terraform.io.tar.gz && \
-    rm -rf terraform_0.14.5_linux_amd64.zip && \
+    rm -rf /app/wecube_plugins_terraform/bin/terraform_0.15.5_linux_amd64.zip && \
     ls /app/wecube_plugins_terraform/bin && \
     \cp /app/wecube_plugins_terraform/bin/terraform /usr/bin/terraform && \
     ls -la && \

@@ -10,7 +10,9 @@ from core.controller import BackendIdController
 from lib.uuid_util import get_uuid
 from apps.api.vm.instance import InstanceApi
 from apps.api.vm.instance import InstanceBackendApi
-from apps.controller.source_controller import BaseSourceController
+from apps.controller.backend_controller import BackendAddController
+from apps.controller.backend_controller import BackendDeleteController
+from apps.controller.backend_controller import BackendSourceController
 
 
 class ResBase(object):
@@ -35,7 +37,7 @@ class ResBase(object):
     def not_null(cls, data):
         validation.not_allowed_null(data=data,
                                     keys=["region", "provider", "name",
-                                           "subnet_id", "image",
+                                          "subnet_id", "image",
                                           "instance_type"]
                                     )
 
@@ -235,53 +237,26 @@ class InstanceActionController(BackendIdController):
             raise local_exceptions.ValueValidateError("action", "VM 开关机操作，请使用合法值 start/stop")
 
 
-class InstanceAddController(BaseController):
+class InstanceAddController(BackendAddController):
     allow_methods = ("POST",)
     resource = InstanceBackendApi()
 
-    def before_handler(self, request, data, **kwargs):
-        ResBase.not_null(data)
-        ResBase.validate_keys(data)
 
-    def response_templete(self, data):
-        return {}
-
-    def main_response(self, request, data, **kwargs):
-        res, _ = ResBase.create(resource=self.resource, data=data)
-        return res
-
-
-class InstanceDeleteController(BaseController):
-    name = "Instance"
-    resource_describe = "Instance"
-    allow_methods = ("POST",)
-    resource = InstanceBackendApi()
-
-    def before_handler(self, request, data, **kwargs):
-        validation.not_allowed_null(data=data,
-                                    keys=["id"]
-                                    )
-
-        validation.validate_string("id", data.get("id"))
-
-    def response_templete(self, data):
-        return {}
-
-    def main_response(self, request, data, **kwargs):
-        rid = data.pop("id", None)
-        force_delete = data.get("force_delete", False)
-        result = self.resource.destroy(rid)
-        return {"result": result}
-
-
-class InstanceSourceController(BaseSourceController):
+class InstanceDeleteController(BackendDeleteController):
     name = "Instance"
     resource_describe = "Instance"
     allow_methods = ("POST",)
     resource = InstanceBackendApi()
 
 
-class InstanceSGSourceController(BaseSourceController):
+class InstanceSourceController(BackendSourceController):
+    name = "Instance"
+    resource_describe = "Instance"
+    allow_methods = ("POST",)
+    resource = InstanceBackendApi()
+
+
+class InstanceSGSourceController(BackendSourceController):
     name = "Instance"
     resource_describe = "Instance"
     allow_methods = ("POST",)

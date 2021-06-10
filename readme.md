@@ -97,6 +97,11 @@ sh  bin/start.sh
    1. type定义类型, 可定义： [string, int, float, json, list]
    2. allow_null 是否允许为空， 0 为不允许为空，反之则允许为空
    3. convert 转换为对应的字段名称， 若不定义，则不转换
+   4. default  指定默认值
+   5. hint 指定资源转换， 由id转换为云上id，
+      配置为： $zone转换可用区， $region转换区域， $instance.type 转换规格类型
+      $resource表示为可能转换为任意的id， $resource.xxx 表示转换为xxx资源的resource id
+      $resource.xxx.yyy 表示转换为xxx资源的yyy属性值，例如arn， name， resource id等
 
    例如： "name": {"type": "string", "allow_null": 0, "convert": "name"}
     name字段，定义type为string， 不运行为空， 转换为name

@@ -18,11 +18,11 @@ Base.to_dict = to_dict
 
 
 class ResourceHistory(Base):
-    __tablename__ = "resource_history"
+    __tablename__ = "cloud_resource_history"
 
-    xid = Column(String(36), primary_key=True)
-    id = Column(String(36))
-    resource = Column(String(36))
+    xid = Column(String(64), primary_key=True)
+    id = Column(String(64))
+    resource = Column(String(64))
     ora_data = Column(String(65535))
     created_time = Column(DateTime)
 
@@ -37,7 +37,7 @@ class ResourceHistory(Base):
 class Providers(Base):
     __tablename__ = "cloud_providers"
 
-    id = Column(String(36), primary_key=True)
+    id = Column(String(64), primary_key=True)
     name = Column(String(64), nullable=False)
     display_name = Column(String(64), nullable=False)
     plugin_source = Column(String(64))
@@ -76,7 +76,7 @@ class Providers(Base):
 class ProviderSecret(Base):
     __tablename__ = "cloud_secret"
 
-    id = Column(String(36), primary_key=True)
+    id = Column(String(64), primary_key=True)
     name = Column(String(64), nullable=False)
     display_name = Column(String(64))
     provider = Column(String(64), nullable=False)
@@ -107,9 +107,9 @@ class ProviderSecret(Base):
 
 
 class Region(Base):
-    __tablename__ = "region"
+    __tablename__ = "cloud_region"
 
-    id = Column(String(36), primary_key=True)
+    id = Column(String(64), primary_key=True)
     name = Column(String(64))
     provider = Column(String(128), nullable=False)
     asset_id = Column(String(128), nullable=False)
@@ -134,9 +134,9 @@ class Region(Base):
 
 
 class Zone(Base):
-    __tablename__ = "availability_zone"
+    __tablename__ = "cloud_zone"
 
-    id = Column(String(36), primary_key=True)
+    id = Column(String(64), primary_key=True)
     name = Column(String(64))
     provider = Column(String(128), nullable=False)
     asset_id = Column(String(128), nullable=False)
@@ -165,8 +165,8 @@ class Zone(Base):
 class Resource(Base):
     __tablename__ = "resource"
 
-    id = Column(String(36), primary_key=True)
-    provider = Column(String(32), nullable=False)
+    id = Column(String(64), primary_key=True)
+    provider = Column(String(64), nullable=False)
     resource_type = Column(String(64), nullable=False)
     resource_name = Column(String(64), nullable=False)
     extend_info = Column(String(1024))
@@ -210,7 +210,7 @@ class Resource(Base):
 class CommonKeys(Base):
     __tablename__ = "common_keys"
 
-    id = Column(String(36), primary_key=True)
+    id = Column(String(64), primary_key=True)
     resource = Column(String(64), nullable=False)
     property = Column(String(64))
     key = Column(String(64), nullable=False)
@@ -237,8 +237,8 @@ class CommonKeys(Base):
 class Config(Base):
     __tablename__ = "config"
 
-    id = Column(String(36), primary_key=True)
-    provider = Column(String(32), nullable=False)
+    id = Column(String(64), primary_key=True)
+    provider = Column(String(64), nullable=False)
     resource = Column(String(64))
     property = Column(String(64))
     value_config = Column(String(2048))
@@ -266,10 +266,11 @@ class Config(Base):
 class InstanceType(Base):
     __tablename__ = "instance_type"
 
-    id = Column(String(36), primary_key=True)
-    provider_id = Column(String(36))
-    provider = Column(String(32), nullable=False)
+    id = Column(String(64), primary_key=True)
+    provider_id = Column(String(64))
+    provider = Column(String(64), nullable=False)
     name = Column(String(64))
+    type = Column(String(64))
     origin_name = Column(String(64))
     network = Column(String(64))
     cpu = Column(Integer)
@@ -291,6 +292,7 @@ class InstanceType(Base):
         self.is_deleted = data.get("is_deleted")
         self.memory = data.get("memory")
         self.name = data.get("name")
+        self.type = data.get("type")
         self.origin_name = data.get("origin_name")
         self.network = data.get("network")
         self.provider = data.get("provider")
@@ -301,9 +303,9 @@ class InstanceType(Base):
 class Instance(Base):
     __tablename__ = "instance"
 
-    id = Column(String(36), primary_key=True)
-    provider_id = Column(String(36))
-    provider = Column(String(32), nullable=False)
+    id = Column(String(64), primary_key=True)
+    provider_id = Column(String(64))
+    provider = Column(String(64), nullable=False)
     region = Column(String(64))
     zone = Column(String(64))
     resource_id = Column(String(64))
@@ -319,10 +321,10 @@ class Instance(Base):
     public_ip = Column(String(64))
     cpu = Column(Integer)
     memory = Column(Integer)
-    power_state = Column(String(32))
+    power_state = Column(String(64))
     extend_info = Column(String(1024))
     define_json = Column(String(1024))
-    status = Column(String(36))
+    status = Column(String(64))
     result_json = Column(String(5120))
     created_time = Column(DateTime)
     updated_time = Column(DateTime)
@@ -364,9 +366,9 @@ class Instance(Base):
 class CloudResource(Base):
     __tablename__ = "cloud_resource"
 
-    id = Column(String(36), primary_key=True)
-    provider_id = Column(String(36))
-    provider = Column(String(32))
+    id = Column(String(64), primary_key=True)
+    provider_id = Column(String(64))
+    provider = Column(String(64))
     region = Column(String(64))
     zone = Column(String(64))
     resource_id = Column(String(64))
@@ -376,7 +378,7 @@ class CloudResource(Base):
     propertys = Column(String(1024))
     extend_info = Column(String(1024))
     define_json = Column(String(4096))
-    status = Column(String(36))
+    status = Column(String(64))
     output_json = Column(String(2048))
     result_json = Column(String(5120))
     created_time = Column(DateTime)

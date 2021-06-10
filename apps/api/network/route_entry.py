@@ -8,11 +8,17 @@ from lib.json_helper import format_json_dumps
 from apps.common.convert_keys import define_relations_key
 from apps.background.resource.resource_base import CrsObject
 from apps.api.apibase import ApiBase
-from apps.api.conductor.valueReverse import ValueResetConductor
 from apps.api.apibase_backend import ApiBackendBase
 
 
-class Common(object):
+class RouteEntryApi(ApiBase):
+    def __init__(self):
+        super(RouteEntryApi, self).__init__()
+        self.resource_name = "route_entry"
+        self.resource_workspace = "route_entry"
+        self.owner_resource = "route_table"
+        self._flush_resobj()
+        self.resource_keys_config = None
 
     def before_keys_checks(self, provider, create_data, is_update=None):
         '''
@@ -61,17 +67,7 @@ class Common(object):
         return owner_id, None
 
 
-class RouteEntryApi(Common, ApiBase):
-    def __init__(self):
-        super(RouteEntryApi, self).__init__()
-        self.resource_name = "route_entry"
-        self.resource_workspace = "route_entry"
-        self.owner_resource = "route_table"
-        self._flush_resobj()
-        self.resource_keys_config = None
-
-
-class RouteEntryBackendApi(Common, ApiBackendBase):
+class RouteEntryBackendApi(ApiBackendBase):
     def __init__(self):
         super(RouteEntryBackendApi, self).__init__()
         self.resource_name = "route_entry"
@@ -79,64 +75,3 @@ class RouteEntryBackendApi(Common, ApiBackendBase):
         self.owner_resource = "route_table"
         self._flush_resobj()
         self.resource_keys_config = None
-
-    def before_source_asset(self, provider, query_data):
-        for key in ["route_table_id", "vpc_id", "next_hub"]:
-            if query_data.get(key):
-                query_data[key] = CrsObject().object_asset_id(query_data.get(key))
-
-        return query_data
-
-    def reverse_asset_ids(self):
-        return ['vpc_id', "route_table_id", "next_hub"]
-
-    def run_query(self, rid, region, zone,
-                  provider_object, provider_info,
-                  query_data, **kwargs):
-        '''
-
-        :param rid:
-        :param region:
-        :param zone:
-        :param owner_id:
-        :param relation_id:
-        :param create_data:
-        :param extend_info:
-        :param kwargs:
-        :return:
-        '''
-
-        # extend_info = extend_info or {}
-        label_name = self.resource_name + "_q_" + rid
-
-        define_json, resource_keys_config = self.source_filter_controller(provider_name=provider_object["name"],
-                                                                          label_name=label_name,
-                                                                          query_data=query_data
-                                                                          )
-
-        result = self._run_create_and_read_result(rid, provider=provider_object["name"],
-                                                  region=region, provider_info=provider_info,
-                                                  define_json=define_json)
-
-        data_source_argument = resource_keys_config.get("data_source_argument")
-        output_json = self.read_query_result_controller(provider_object["name"], result,
-                                                        data_source_argument)
-
-        result_list = []
-        for out_data in output_json:
-            count = 0
-            for _, x_value in out_data.items():
-                if not x_value:
-                    count += 1
-            if count == len(out_data):
-                logger.info("out data columns is null, skip ...")
-                continue
-
-            x_json = ValueResetConductor().reset_values(provider=provider_object["name"],
-                                                        resource_name=self.resource_name,
-                                                        data=out_data)
-
-            x_json = self.reverse_asset_object(provider=provider_object["name"], data=x_json)
-            result_list.append(x_json)
-
-        return result_list

@@ -7,15 +7,15 @@ xml_register = {
             "path": "/terraform/v1/az/backend/region/apply",
             "method": "POST",
             "notnull": ["asset_id", "provider"],
-            "inputParameters": ['id', 'name', 'provider', 'asset_id', 'extend_info'],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "inputParameters": ['id', 'name', 'provider', 'asset_id', 'extend_info', 'secret'],
+            "outputParameters": ["errorMessage", "errorCode", "id", "asset_id"]
         },
         "destroy": {
             "path": "/terraform/v1/az/backend/region/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/az/backend/region/source",
@@ -28,25 +28,25 @@ xml_register = {
     },
     "az": {
         "apply": {
-            "path": "/terraform/v1/az/backend/az/apply",
+            "path": "/terraform/v1/az/backend/zone/apply",
             "method": "POST",
             "notnull": ["asset_id", "provider"],
-            "inputParameters": ['id', 'name', 'provider', 'asset_id', 'region', 'extend_info'],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "inputParameters": ['id', 'name', 'provider', 'asset_id', "region_id", 'extend_info', 'secret'],
+            "outputParameters": ["errorMessage", "errorCode", "id", "asset_id"]
         },
         "destroy": {
-            "path": "/terraform/v1/az/backend/az/destroy",
+            "path": "/terraform/v1/az/backend/zone/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
-            "path": "/terraform/v1/az/backend/az/source",
+            "path": "/terraform/v1/az/backend/zone/source",
             "method": "POST",
             "notnull": [],
-            "inputParameters": ['id', 'provider', 'asset_id', 'name', 'region'],
-            "outputParameters": ['errorCode', 'errorMessage', 'name', 'id', 'asset_id', 'extend_info', 'region',
+            "inputParameters": ['id', 'provider', 'asset_id', 'name', "region_id"],
+            "outputParameters": ['errorCode', 'errorMessage', 'name', 'id', 'asset_id', 'extend_info', "region_id",
                                  'provider']
         },
     },
@@ -55,23 +55,23 @@ xml_register = {
             "path": "/terraform/v1/network/backend/vpc/apply",
             "method": "POST",
             "notnull": ["name", "cidr", "region", "provider"],
-            "inputParameters": ['id', 'name', 'secret', 'provider', 'region', 'cidr', 'asset_id', 'resource_id',
+            "inputParameters": ['id', 'name', 'secret', 'provider', "region_id", 'cidr',  'asset_id',
                                 'extend_info'],
-            "outputParameters": ["errorMessage", "errorCode", "id", "resource_id"]
+            "outputParameters": ["errorMessage", "errorCode", "id", "asset_id"]
         },
         "destroy": {
             "path": "/terraform/v1/network/backend/vpc/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/network/backend/vpc/source",
             "method": "POST",
-            "notnull": ["region", "provider"],
-            "inputParameters": ['region', 'secret', 'provider', 'resource_id', 'name', 'tag', 'cidr'],
-            "outputParameters": ['errorCode', 'errorMessage', 'name', 'cidr', 'resource_id', 'region', 'secret',
+            "notnull": ["region_id", "provider"],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'name', 'tag', 'cidr', 'id'],
+            "outputParameters": ['errorCode', 'errorMessage', 'name', 'cidr', 'asset_id', "region_id", 'secret',
                                  'provider']
         },
     },
@@ -79,24 +79,24 @@ xml_register = {
         "apply": {
             "path": "/terraform/v1/network/backend/subnet/apply",
             "method": "POST",
-            "notnull": ['name', 'provider', 'vpc_id', 'zone', 'region', 'cidr'],
-            "inputParameters": ['id', 'name', 'secret', 'provider', 'vpc_id', 'zone', 'region', 'cidr', 'asset_id',
-                                'resource_id', 'extend_info'],
-            "outputParameters": ["errorMessage", "errorCode", "id", "resource_id"]
+            "notnull": ['name', 'provider', 'vpc_id', "zone_id", "region_id", 'cidr'],
+            "inputParameters": ['id', 'name', 'secret', 'provider', 'vpc_id', "zone_id", "region_id", 'cidr',
+                                'asset_id', 'extend_info'],
+            "outputParameters": ["errorMessage", "errorCode", "id", "asset_id"]
         },
         "destroy": {
             "path": "/terraform/v1/network/backend/subnet/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/network/backend/subnet/source",
             "method": "POST",
-            "notnull": ["region", "provider"],
-            "inputParameters": ['region', 'secret', 'provider', 'resource_id', 'zone', 'cidr', 'tag', 'vpc_id'],
-            "outputParameters": ['region', 'secret', 'provider', 'errorCode', 'name', 'zone', 'resource_id', 'vpc_id',
+            "notnull": ["region_id", "provider"],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', "zone_id", 'cidr', 'tag', 'vpc_id', "id"],
+            "outputParameters": ["region_id", 'secret', 'provider', 'errorCode', 'name', "zone_id", 'asset_id', 'vpc_id',
                                  'cidr', 'errorMessage']
         }
     },
@@ -104,24 +104,24 @@ xml_register = {
         "apply": {
             "path": "/terraform/v1/network/backend/route_table/apply",
             "method": "POST",
-            "notnull": ['name', 'provider', 'vpc_id', 'region'],
-            "inputParameters": ['id', 'name', 'secret', 'provider', 'vpc_id', 'zone', 'region', 'asset_id',
-                                'resource_id', 'extend_info'],
-            "outputParameters": ["errorMessage", "errorCode", "id", "resource_id"]
+            "notnull": ['name', 'provider', 'vpc_id', "region_id"],
+            "inputParameters": ['id', 'name', 'secret', 'provider', 'vpc_id', "zone_id", "region_id",
+                                'asset_id', 'extend_info'],
+            "outputParameters": ["errorMessage", "errorCode", "id", "asset_id"]
         },
         "destroy": {
             "path": "/terraform/v1/network/backend/route_table/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/network/backend/route_table/source",
             "method": "POST",
-            "notnull": ["region", "provider"],
-            "inputParameters": ['region', 'secret', 'provider', 'resource_id', 'name', 'tag', 'vpc_id'],
-            "outputParameters": ['region', 'secret', 'provider', 'name', 'resource_id', 'errorMessage', 'errorCode',
+            "notnull": ["region_id", "provider"],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'name', 'tag', 'vpc_id', "id"],
+            "outputParameters": ["region_id", 'secret', 'provider', 'name', 'asset_id', 'errorMessage', 'errorCode',
                                  'vpc_id']
         }
     },
@@ -130,24 +130,24 @@ xml_register = {
             "path": "/terraform/v1/network/backend/route_entry/apply",
             "method": "POST",
             "notnull": ['name', 'provider', 'vpc_id', 'destination', 'route_table_id', 'next_type', 'next_hub',
-                        'region'],
+                        "region_id"],
             "inputParameters": ['id', 'name', 'secret', 'provider', 'vpc_id', 'destination', 'route_table_id',
-                                'next_type', 'next_hub', 'zone', 'region', 'asset_id', 'resource_id', 'extend_info'],
-            "outputParameters": ["errorMessage", "errorCode", "id", "resource_id"]
+                                'next_type', 'next_hub', "zone_id", "region_id", 'resource_id', 'asset_id', 'extend_info'],
+            "outputParameters": ["errorMessage", "errorCode", "id", "asset_id"]
         },
         "destroy": {
             "path": "/terraform/v1/network/backend/route_entry/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/network/backend/route_entry/source",
             "method": "POST",
-            "notnull": ["region", "provider"],
-            "inputParameters": ['region', 'secret', 'provider', 'resource_id', 'route_table_id', 'cidr', 'type'],
-            "outputParameters": ['region', 'secret', 'provider', 'next_hub', 'resource_id', 'errorMessage',
+            "notnull": ["region_id", "provider"],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'route_table_id', 'cidr', 'type', "id"],
+            "outputParameters": ["region_id", 'secret', 'provider', 'next_hub', 'asset_id', 'errorMessage',
                                  'errorCode', 'name', 'destination', 'next_type', 'route_table_id']
         }
     },
@@ -155,25 +155,25 @@ xml_register = {
         "apply": {
             "path": "/terraform/v1/network/backend/peer_connection/apply",
             "method": "POST",
-            "notnull": ['name', 'provider', 'vpc_id', 'peer_vpc_id', 'region'],
-            "inputParameters": ['id', 'name', 'secret', 'provider', 'vpc_id', 'peer_vpc_id', 'peer_region', 'zone',
-                                'region', 'asset_id', 'resource_id', 'extend_info'],
-            "outputParameters": ["errorMessage", "errorCode", "id", "resource_id"]
+            "notnull": ['name', 'provider', 'vpc_id', 'peer_vpc_id', "region_id"],
+            "inputParameters": ['id', 'name', 'secret', 'provider', 'vpc_id', 'peer_vpc_id', 'peer_region', "zone_id",
+                                "region_id", 'asset_id', 'extend_info'],
+            "outputParameters": ["errorMessage", "errorCode", "id", "asset_id"]
         },
         "destroy": {
             "path": "/terraform/v1/network/backend/peer_connection/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/network/backend/peer_connection/source",
             "method": "POST",
-            "notnull": ["region", "provider"],
-            "inputParameters": ['region', 'secret', 'provider', 'resource_id', 'name', 'vpc_id', 'peer_vpc_id',
-                                'peer_region'],
-            "outputParameters": ['region', 'secret', 'provider', 'name', 'resource_id', 'errorMessage', 'errorCode',
+            "notnull": ["region_id", "provider"],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'name', 'vpc_id', 'peer_vpc_id',
+                                'peer_region', "id"],
+            "outputParameters": ["region_id", 'secret', 'provider', 'name', 'asset_id', 'errorMessage', 'errorCode',
                                  'vpc_id', 'peer_vpc_id', 'peer_region']
         }
     },
@@ -181,24 +181,24 @@ xml_register = {
         "apply": {
             "path": "/terraform/v1/network/backend/security_group/apply",
             "method": "POST",
-            "notnull": ['name', 'provider', 'vpc_id', 'region'],
-            "inputParameters": ['id', 'name', 'secret', 'provider', 'vpc_id', 'zone', 'region', 'asset_id',
-                                'resource_id', 'extend_info'],
-            "outputParameters": ["errorMessage", "errorCode", "id", "resource_id"]
+            "notnull": ['name', 'provider', 'vpc_id', "region_id"],
+            "inputParameters": ['id', 'name', 'secret', 'provider', 'vpc_id', "zone_id", "region_id",
+                                'asset_id', 'extend_info'],
+            "outputParameters": ["errorMessage", "errorCode", "id", "asset_id"]
         },
         "destroy": {
             "path": "/terraform/v1/network/backend/security_group/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/network/backend/security_group/source",
             "method": "POST",
-            "notnull": ["region", "provider"],
-            "inputParameters": ['region', 'secret', 'provider', 'resource_id', 'name', 'vpc_id', 'tag'],
-            "outputParameters": ['region', 'secret', 'provider', 'resource_id', 'errorMessage', 'errorCode', 'name',
+            "notnull": ["region_id", "provider"],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'name', 'vpc_id', 'tag', 'id'],
+            "outputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'errorMessage', 'errorCode', 'name',
                                  'vpc_id']
         }
     },
@@ -206,42 +206,53 @@ xml_register = {
         "apply": {
             "path": "/terraform/v1/network/backend/security_group_rule/apply",
             "method": "POST",
-            "notnull": ['provider', 'security_group_id', 'region', 'type', 'cidr_ip', 'ip_protocol', 'ports', 'policy'],
-            "inputParameters": ['id', 'name', 'secret', 'provider', 'security_group_id', 'zone', 'region', 'type',
-                                'cidr_ip', 'ip_protocol', 'ports', 'policy', 'asset_id', 'resource_id', 'description',
+            "notnull": ['provider', 'security_group_id', "region_id", 'type', 'cidr_ip', 'ip_protocol', 'ports', 'policy'],
+            "inputParameters": ['id', 'name', 'secret', 'provider', 'security_group_id', "zone_id", "region_id", 'type',
+                                'cidr_ip', 'ip_protocol', 'ports', 'policy', 'resource_id', 'asset_id', 'description',
                                 'extend_info'],
-            "outputParameters": ["errorMessage", "errorCode", "id", "resource_id"]
+            "outputParameters": ["errorMessage", "errorCode", "id", "asset_id"]
         },
         "destroy": {
             "path": "/terraform/v1/network/backend/security_group_rule/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
+        },
+        "query": {
+            "path": "/terraform/v1/network/backend/security_group_rule/source",
+            "method": "POST",
+            "notnull": ["region_id", "provider"],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'vpc_id', 'name', 'security_group_id'],
+            "outputParameters":["region_id", 'secret', 'provider', 'asset_id', 'errorMessage',
+                                'errorCode', 'name', 'security_group_id', 'type', 'cidr_ip',
+                                'ip_protocol', 'ports', 'policy', 'description',
+                                'from_port', 'to_port', 'priority', 'nic_type']
         }
     },
     "nat": {
         "apply": {
             "path": "/terraform/v1/network/backend/nat/apply",
             "method": "POST",
-            "notnull": ['name', 'provider', 'vpc_id', 'region'],
-            "inputParameters": ['id', 'name', 'secret', 'provider', 'vpc_id', 'subnet_id', 'eip', 'zone', 'region',
-                                'asset_id', 'resource_id', 'extend_info', 'bandwidth'],
-            "outputParameters": ['errorMessage', 'errorCode', 'ipaddress', 'id', 'resource_id']
+            "notnull": ['name', 'provider', 'vpc_id', "region_id"],
+            "inputParameters": ['id', 'name', 'secret', 'provider', 'vpc_id', 'subnet_id', 'eip', "zone_id", "region_id",
+                                 'asset_id', 'extend_info', 'bandwidth'],
+            "outputParameters": ['errorMessage', 'errorCode', 'ipaddress', 'id', 'asset_id']
         },
         "destroy": {
             "path": "/terraform/v1/network/backend/nat/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/network/backend/nat/source",
             "method": "POST",
-            "notnull": ["region", "provider"],
-            "inputParameters": ['region', 'secret', 'provider', 'resource_id', 'name', 'type', 'tag', 'vpc_id'],
-            "outputParameters": ['region', 'secret', 'provider', 'resource_id', 'errorMessage', 'errorCode', 'name',
+            "notnull": ["region_id", "provider"],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'name',
+                                'id', 'type', 'tag', 'vpc_id'],
+            "outputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'errorMessage', 'errorCode', 'name',
                                  'vpc_id', 'eip', 'ipaddress', 'bandwidth']
         }
     },
@@ -249,24 +260,24 @@ xml_register = {
         "apply": {
             "path": "/terraform/v1/network/backend/eip/apply",
             "method": "POST",
-            "notnull": ['name', 'provider', 'region'],
-            "inputParameters": ['id', 'name', 'secret', 'provider', 'zone', 'region', 'asset_id', 'resource_id',
+            "notnull": ['name', 'provider', "region_id"],
+            "inputParameters": ['id', 'name', 'secret', 'provider', "zone_id", "region_id",  'asset_id',
                                 'extend_info', "charge_type"],
-            "outputParameters": ['errorMessage', 'errorCode', 'ipaddress', 'id', 'resource_id']
+            "outputParameters": ['errorMessage', 'errorCode', 'ipaddress', 'id', 'asset_id']
         },
         "destroy": {
             "path": "/terraform/v1/network/backend/eip/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/network/backend/eip/source",
             "method": "POST",
-            "notnull": ["region", "provider"],
-            "inputParameters": ['region', 'secret', 'provider', 'resource_id', 'name', 'ipaddress', 'tag'],
-            "outputParameters": ['region', 'secret', 'provider', 'resource_id', 'errorMessage', 'errorCode', 'name',
+            "notnull": ["region_id", "provider"],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'name', 'ipaddress', 'tag', 'id'],
+            "outputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'errorMessage', 'errorCode', 'name',
                                  'ipaddress', "charge_type"]
         }
     },
@@ -274,125 +285,142 @@ xml_register = {
         "apply": {
             "path": "/terraform/v1/network/backend/eip_association/apply",
             "method": "POST",
-            "notnull": ['provider', 'eip_id', 'instance_id', 'region'],
-            "inputParameters": ['id', 'name', 'secret', 'provider', 'eip_id', 'instance_id', 'private_ip', 'zone',
-                                'region', 'asset_id', 'resource_id', 'extend_info'],
-            "outputParameters": ['errorMessage', 'errorCode', 'id', 'resource_id']
+            "notnull": ['provider', 'eip_id', 'instance_id', "region_id"],
+            "inputParameters": ['id', 'name', 'secret', 'provider', 'eip_id', 'instance_id', 'private_ip', "zone_id",
+                                "region_id", 'resource_id', 'asset_id', 'extend_info'],
+            "outputParameters": ['errorMessage', 'errorCode', 'id', 'asset_id']
         },
         "destroy": {
             "path": "/terraform/v1/network/backend/eip_association/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         }
     },
     "ccn": {
         "apply": {
             "path": "/terraform/v1/network/backend/ccn/apply",
             "method": "POST",
-            "notnull": ['name', 'provider', 'region'],
-            "inputParameters": ['id', 'name', 'secret', 'provider', 'zone', 'region', 'asset_id', 'resource_id',
+            "notnull": ['name', 'provider', "region_id"],
+            "inputParameters": ['id', 'name', 'secret', 'provider', "zone_id", "region_id",  'asset_id',
                                 'extend_info'],
-            "outputParameters": ['errorMessage', 'errorCode', 'ipaddress', 'id', 'resource_id']
+            "outputParameters": ['errorMessage', 'errorCode', 'ipaddress', 'id', 'asset_id']
         },
         "destroy": {
             "path": "/terraform/v1/network/backend/ccn/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/network/backend/ccn/source",
             "method": "POST",
-            "notnull": ["region", "provider"],
-            "inputParameters": ['region', 'secret', 'provider', 'resource_id', 'name'],
-            "outputParameters": ['region', 'secret', 'provider', 'resource_id', 'errorMessage', 'errorCode', 'name']
+            "notnull": ["region_id", "provider"],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'name', 'id'],
+            "outputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'errorMessage', 'errorCode', 'name']
         }
     },
     "ccn_attach": {
         "apply": {
             "path": "/terraform/v1/network/backend/ccn_attach/apply",
             "method": "POST",
-            "notnull": ['provider', 'ccn_id', 'instance_id', 'region'],
+            "notnull": ['provider', 'ccn_id', 'instance_id', "region_id"],
             "inputParameters": ['id', 'name', 'secret', 'provider', 'ccn_id', 'instance_id', 'instance_type',
-                                'instance_region', 'zone', 'region', 'asset_id', 'resource_id', 'extend_info'],
-            "outputParameters": ['errorMessage', 'errorCode', 'id', 'resource_id']
+                                'instance_region', "zone_id", "region_id", 'resource_id', 'asset_id', 'extend_info'],
+            "outputParameters": ['errorMessage', 'errorCode', 'id', 'asset_id']
         },
         "destroy": {
             "path": "/terraform/v1/network/backend/ccn_attach/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         }
     },
     "ccn_bandwidth": {
         "apply": {
             "path": "/terraform/v1/network/backend/ccn_bandwidth/apply",
             "method": "POST",
-            "notnull": ['provider', 'ccn_id', 'region'],
+            "notnull": ['provider', 'ccn_id', "region_id"],
             "inputParameters": ['id', 'name', 'secret', 'provider', 'ccn_id', 'from_region', 'dest_region', 'bandwidth',
-                                'zone', 'region', 'asset_id', 'resource_id', 'extend_info'],
-            "outputParameters": ['errorMessage', 'errorCode', 'id', 'resource_id']
+                                "zone_id", "region_id",  'asset_id', 'extend_info'],
+            "outputParameters": ['errorMessage', 'errorCode', 'id', 'asset_id']
         },
         "destroy": {
             "path": "/terraform/v1/network/backend/ccn_bandwidth/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         }
     },
     "disk": {
         "apply": {
             "path": "/terraform/v1/storage/backend/disk/apply",
             "method": "POST",
-            "notnull": ['name', 'provider', 'type', 'size', 'zone', 'region'],
-            "inputParameters": ['id', 'name', 'secret', 'provider', 'type', 'size', 'zone', 'region', 'asset_id',
-                                'resource_id', 'extend_info', "charge_type"],
-            "outputParameters": ['errorMessage', 'errorCode', 'id', 'resource_id']
+            "notnull": ['name', 'provider', 'type', 'size', "zone_id", "region_id"],
+            "inputParameters": ['id', 'name', 'secret', 'provider', 'type', 'size', "zone_id", "region_id",
+                                'asset_id', 'extend_info', "charge_type"],
+            "outputParameters": ['errorMessage', 'errorCode', 'id', 'asset_id']
         },
         "destroy": {
             "path": "/terraform/v1/storage/backend/disk/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/storage/backend/disk/source",
             "method": "POST",
-            "notnull": ["region", "provider"],
-            "inputParameters": ['region', 'secret', 'provider', 'resource_id',
-                                'name', 'instance_id', 'type', 'tag', 'zone'],
-            "outputParameters": ['region', 'secret', 'provider', 'resource_id', 'errorMessage', 'errorCode', 'name',
-                                 'type', 'size', 'zone', "charge_type"]
+            "notnull": ["region_id", "provider"],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id',
+                                'name', 'instance_id', 'type', 'tag', "zone_id", "id"],
+            "outputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'errorMessage', 'errorCode', 'name',
+                                 'type', 'size', "zone_id", "charge_type", "instance_id"]
+        }
+    },
+    "disk_attach": {
+        "apply": {
+            "path": "/terraform/v1/storage/backend/disk_attach/apply",
+            "method": "POST",
+            "notnull": ['name', 'provider', 'disk_id', 'instance_id', "zone_id", "region_id"],
+            "inputParameters": ['id', 'name', 'secret', 'provider', 'disk_id', 'instance_id', "zone_id", "region_id",
+                                'asset_id', 'resource_id', 'extend_info'],
+            "outputParameters": ['errorMessage', 'errorCode', 'id', 'asset_id']
+        },
+        "destroy": {
+            "path": "/terraform/v1/storage/backend/disk/destroy",
+            "method": "POST",
+            "notnull": ["id"],
+            "inputParameters": ["id"],
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         }
     },
     "object_storage": {
         "apply": {
             "path": "/terraform/v1/storage/backend/object_storage/apply",
             "method": "POST",
-            "notnull": ['name', 'provider', 'region'],
-            "inputParameters": ['id', 'name', 'secret', 'provider', 'acl', 'appid', 'zone', 'region', 'asset_id',
-                                'resource_id', 'extend_info'],
-            "outputParameters": ['errorMessage', 'errorCode', 'url', 'id', 'resource_id']
+            "notnull": ['name', 'provider', "region_id"],
+            "inputParameters": ['id', 'name', 'secret', 'provider', 'acl', 'appid', "zone_id", "region_id",
+                                'asset_id', 'extend_info'],
+            "outputParameters": ['errorMessage', 'errorCode', 'url', 'id', 'asset_id']
         },
         "destroy": {
             "path": "/terraform/v1/storage/backend/object_storage/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/storage/backend/object_storage/source",
             "method": "POST",
-            "notnull": ["region", "provider"],
-            "inputParameters": ['region', 'secret', 'provider', 'resource_id', 'name', 'tag'],
-            "outputParameters": ['region', 'secret', 'provider', 'resource_id', 'errorMessage', 'errorCode', 'name',
+            "notnull": ["region_id", "provider"],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'name', 'tag'],
+            "outputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'errorMessage', 'errorCode', 'name',
                                  'acl', 'url']
         }
     },
@@ -400,28 +428,28 @@ xml_register = {
         "apply": {
             "path": "/terraform/v1/vm/backend/instance/apply",
             "method": "POST",
-            "notnull": ['name', 'provider', 'subnet_id', 'hostname', 'image', 'instance_type', 'zone', 'region'],
+            "notnull": ['name', 'provider', 'subnet_id', 'hostname', 'image', 'instance_type', "zone_id", "region_id"],
             "inputParameters": ['id', 'name', 'secret', 'provider', 'subnet_id', 'hostname', 'image', 'instance_type',
                                 'disk_type', 'disk_size', 'password', 'security_group_id', 'vpc_id', 'power_action',
-                                'asset_id', 'resource_id', 'data_disks', 'zone', 'region', 'extend_info', "charge_type"],
-            "outputParameters": ['errorMessage', 'errorCode', 'ipaddress', 'cpu', 'memory', 'id', 'resource_id']
+                                 'asset_id', 'data_disks', "zone_id", "region_id", 'extend_info', "charge_type"],
+            "outputParameters": ['errorMessage', 'errorCode', 'ipaddress', 'cpu', 'memory', 'id', 'asset_id']
         },
         "destroy": {
             "path": "/terraform/v1/vm/backend/instance/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/vm/backend/instance/source",
             "method": "POST",
-            "notnull": ["region", "provider"],
-            "inputParameters": ['region', 'secret', 'provider', 'resource_id', 'ipaddress', 'public_ip', 'zone',
-                                'image_id', 'tag', 'vpc_id', 'subnet_id'],
-            "outputParameters": ['region', 'secret', 'provider', 'resource_id', 'errorMessage', 'errorCode', 'name',
+            "notnull": ["region_id", "provider"],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'ipaddress', 'public_ip', "zone_id",
+                                'image_id', 'tag', 'vpc_id', 'subnet_id', 'id'],
+            "outputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'errorMessage', 'errorCode', 'name',
                                  'subnet_id', 'hostname', 'ipaddress', 'image', 'instance_type', 'disk_type',
-                                 'disk_size', 'password', 'security_group_id', 'vpc_id', 'data_disks', 'zone',
+                                 'disk_size', 'password', 'security_group_id', 'vpc_id', 'data_disks', "zone_id",
                                  'power_action', 'force_delete', "charge_type"]
         }
     },
@@ -429,25 +457,25 @@ xml_register = {
         "apply": {
             "path": "/terraform/v1/storage/backend/network_interface/apply",
             "method": "POST",
-            "notnull": ['name', 'provider', 'subnet_id', 'zone', 'region'],
+            "notnull": ['name', 'provider', 'subnet_id', "zone_id", "region_id"],
             "inputParameters": ['id', 'name', 'secret', 'provider', 'ipaddress', 'subnet_id', 'vpc_id',
-                                'security_group_id', 'zone', 'region', 'asset_id', 'resource_id', 'extend_info'],
-            "outputParameters": ['errorMessage', 'errorCode', 'id', 'ipaddress', 'resource_id']
+                                'security_group_id', "zone_id", "region_id", 'asset_id', 'extend_info'],
+            "outputParameters": ['errorMessage', 'errorCode', 'id', 'ipaddress', 'asset_id']
         },
         "destroy": {
             "path": "/terraform/v1/storage/backend/network_interface/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/storage/backend/network_interface/source",
             "method": "POST",
-            "notnull": ["region", "provider"],
-            "inputParameters": ['region', 'secret', 'provider', 'resource_id', 'name', 'vpc_id', 'subnet_id', 'tag',
-                                'ipaddress', 'public_ip'],
-            "outputParameters": ['region', 'secret', 'provider', 'resource_id', 'errorMessage', 'errorCode', 'name',
+            "notnull": ["region_id", "provider"],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'name', 'vpc_id', 'subnet_id', 'tag',
+                                'ipaddress', 'public_ip', 'id'],
+            "outputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'errorMessage', 'errorCode', 'name',
                                  'ipaddress', 'vpc_id', 'subnet_id', 'security_group_id']
         }
     },
@@ -455,42 +483,42 @@ xml_register = {
         "apply": {
             "path": "/terraform/v1/vm/backend/network_interface/apply",
             "method": "POST",
-            "notnull": ['name', 'provider', 'network_interface_id', 'instance_id', 'zone', 'region'],
-            "inputParameters": ['id', 'name', 'secret', 'provider', 'network_interface_id', 'instance_id', 'zone',
-                                'region', 'extend_info'],
-            "outputParameters": ['errorMessage', 'errorCode', 'id', 'resource_id']
+            "notnull": ['name', 'provider', 'network_interface_id', 'instance_id', "zone_id", "region_id"],
+            "inputParameters": ['id', 'name', 'secret', 'provider', 'network_interface_id', 'instance_id', "zone_id",
+                                "region_id", 'extend_info', 'asset_id', 'resource_id'],
+            "outputParameters": ['errorMessage', 'errorCode', 'id', 'asset_id']
         },
         "destroy": {
             "path": "/terraform/v1/vm/backend/network_interface/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         }
     },
     "lb": {
         "apply": {
             "path": "/terraform/v1/loadbalance/backend/lb/apply",
             "method": "POST",
-            "notnull": ['name', 'provider', 'subnet_id', 'region'],
-            "inputParameters": ['id', 'name', 'secret', 'provider', 'subnet_id', 'network_type', 'vpc_id', 'zone',
-                                'region', 'asset_id', 'ipaddress', 'resource_id', 'extend_info', "charge_type"],
-            "outputParameters": ['errorMessage', 'errorCode', 'id', 'resource_id']
+            "notnull": ['name', 'provider', 'subnet_id', "region_id"],
+            "inputParameters": ['id', 'name', 'secret', 'provider', 'subnet_id', 'network_type', 'vpc_id', "zone_id",
+                                "region_id", 'ipaddress', 'asset_id', 'extend_info', "charge_type"],
+            "outputParameters": ['errorMessage', 'errorCode', 'id', 'asset_id']
         },
         "destroy": {
             "path": "/terraform/v1/loadbalance/backend/lb/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/loadbalance/backend/lb/source",
             "method": "POST",
-            "notnull": ["region", "provider"],
-            "inputParameters": ['region', 'secret', 'provider', 'resource_id', 'name', 'vpc_id', 'subnet_id', 'tag',
-                                'ipaddress'],
-            "outputParameters": ['region', 'secret', 'provider', 'resource_id', 'errorMessage', 'errorCode', 'name',
+            "notnull": ["region_id", "provider"],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'name', 'vpc_id', 'subnet_id', 'tag',
+                                'ipaddress', "id"],
+            "outputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'errorMessage', 'errorCode', 'name',
                                  'network_type', 'vpc_id', 'subnet_id', 'ipaddress', "charge_type"]
         }
     },
@@ -498,51 +526,53 @@ xml_register = {
         "apply": {
             "path": "/terraform/v1/loadbalance/backend/lb_listener/apply",
             "method": "POST",
-            "notnull": ['provider', 'lb_id', 'port', 'region'],
+            "notnull": ['provider', 'lb_id', 'port', "region_id"],
             "inputParameters": ['id', 'name', 'secret', 'provider', 'lb_id', 'port', 'protocol', 'backend_port',
-                                'health_check', 'health_check_uri', 'zone', 'region', 'asset_id', 'resource_id',
-                                'extend_info'],
-            "outputParameters": ['errorMessage', 'errorCode', 'id', 'resource_id']
+                                'health_check', 'health_check_uri', "zone_id", "region_id", 'asset_id',
+                                'extend_info', 'default_action'],
+            "outputParameters": ['errorMessage', 'errorCode', 'id', 'asset_id']
         },
         "destroy": {
             "path": "/terraform/v1/loadbalance/backend/lb_listener/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/loadbalance/backend/lb_listener/source",
             "method": "POST",
-            "notnull": ["region", "provider"],
-            "inputParameters": ['region', 'secret', 'provider', 'resource_id', 'lb_id', 'tag'],
-            "outputParameters": ['region', 'secret', 'provider', 'resource_id', 'errorMessage', 'errorCode',
-                                 'name', 'lb_id', 'port', 'protocol', 'health_check', 'health_check_uri']
+            "notnull": ["region_id", "provider"],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'lb_id', 'tag', 'id'],
+            "outputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'errorMessage', 'errorCode',
+                                 'name', 'lb_id', 'port', 'protocol', 'health_check', 'health_check_uri',
+                                 'default_action']
         }
     },
     "lb_rule": {
         "apply": {
             "path": "/terraform/v1/loadbalance/backend/lb_rule/apply",
             "method": "POST",
-            "notnull": ['provider', 'region', 'lb_id'],
-            "inputParameters": ['id', 'provider', 'secret', 'region', 'zone', 'listener_id', 'extend_info',
-                                'lb_id', 'security_group_id', 'frontend_port', 'name'],
-            "outputParameters": ['errorMessage', 'errorCode', 'id', 'resource_id']
+            "notnull": ['provider', "region_id", 'lb_id'],
+            "inputParameters": ['id', 'provider', 'secret', "region_id", "zone_id", 'listener_id', 'extend_info',
+                                'lb_id', 'security_group_id', 'frontend_port', 'name',
+                                'asset_id', 'action', 'condition', 'resource_id'],
+            "outputParameters": ['errorMessage', 'errorCode', 'id', 'asset_id']
         },
         "destroy": {
             "path": "/terraform/v1/loadbalance/backend/lb_rule/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/loadbalance/backend/lb_rule/source",
             "method": "POST",
-            "notnull": ["region", "provider"],
-            "inputParameters": ['region', 'secret', 'provider', 'resource_id', 'listener_id', 'lb_id', 'name'],
-            "outputParameters": ['region', 'secret', 'provider', 'resource_id', 'errorMessage', 'errorCode',
-                                 'name', 'lb_id', 'listener_id', 'region', 'zone',
+            "notnull": ["region_id", "provider"],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'listener_id', 'lb_id', 'name', 'id'],
+            "outputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'errorMessage', 'errorCode',
+                                 'name', 'lb_id', 'listener_id', "region_id", "zone_id",
                                  'security_group_id', 'frontend_port']
         }
     },
@@ -550,56 +580,66 @@ xml_register = {
         "apply": {
             "path": "/terraform/v1/loadbalance/backend/lb_server_group/apply",
             "method": "POST",
-            "notnull": ['provider', 'region', 'name', 'lb_id'],
-            "inputParameters": ['id', 'provider', 'secret', 'region', 'zone',
-                                'name', 'lb_id', 'instance_id', 'port'],
-            "outputParameters": ['errorMessage', 'errorCode', 'id', 'resource_id']
+            "notnull": ['provider', "region_id", 'name', 'lb_id'],
+            "inputParameters": ['id', 'provider', 'secret', "region_id", "zone_id",
+                                'name', 'lb_id', "asset_id", 'instance_id', 'port'],
+            "outputParameters": ['errorMessage', 'errorCode', 'id', 'asset_id']
         },
         "destroy": {
             "path": "/terraform/v1/loadbalance/backend/lb_server_group/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/loadbalance/backend/lb_server_group/source",
             "method": "POST",
-            "notnull": ["region", "provider"],
-            "inputParameters": ['region', 'secret', 'provider',
-                                'resource_id', 'instance_id', 'lb_id', 'name'],
-            "outputParameters": ['region', 'secret', 'provider', 'resource_id',
+            "notnull": ["region_id", "provider"],
+            "inputParameters": ["region_id", 'secret', 'provider', "id",
+                                'asset_id', 'instance_id', 'lb_id', 'name'],
+            "outputParameters": ["region_id", 'secret', 'provider', 'asset_id',
                                  'errorMessage', 'errorCode', 'name',
-                                 'lb_id', 'instance_id', 'region', 'zone', 'port']
+                                 'lb_id', 'instance_id', "region_id", "zone_id", 'port']
         }
     },
     "lb_attach": {
         "apply": {
             "path": "/terraform/v1/loadbalance/backend/lb_attach/apply",
             "method": "POST",
-            "notnull": ['provider', 'lb_id', 'region'],
+            "notnull": ['provider', 'lb_id', "region_id"],
             "inputParameters": ['id', 'name', 'secret', 'provider', 'lb_id', 'listener_id', 'backend_servers',
-                                'instance_id', 'weight', 'port', 'zone', 'region', 'extend_info'],
-            "outputParameters": ['errorMessage', 'errorCode', 'id', 'resource_id']
+                                'instance_id', 'weight', 'port', "zone_id", "region_id", 'extend_info',
+                                'asset_id', 'group_id', 'resource_id'],
+            "outputParameters": ['errorMessage', 'errorCode', 'id', 'asset_id']
         },
         "destroy": {
             "path": "/terraform/v1/loadbalance/backend/lb_attach/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
+        },
+        "query": {
+            "path": "/terraform/v1/loadbalance/backend/lb_attach/source",
+            "method": "POST",
+            "notnull": ["region_id", "provider"],
+            "inputParameters": ["region_id", 'secret', 'provider',
+                                'asset_id', 'instance_id', 'lb_id'],
+            "outputParameters":["region_id", 'secret', 'provider', 'asset_id', 'errorMessage', 'errorCode', 'name',
+                                'lb_id', 'listener_id', 'backend_servers', 'instance_id', 'weight', 'port']
         }
     },
     "mysql": {
         "apply": {
             "path": "/terraform/v1/database/backend/mysql/apply",
             "method": "POST",
-            "notnull": ['name', 'provider', 'subnet_id', 'version', 'instance_type', 'zone', 'region'],
+            "notnull": ['name', 'provider', 'subnet_id', 'version', 'instance_type', "zone_id", "region_id"],
             "inputParameters": ['id', 'name', 'secret', 'provider', 'subnet_id', 'user', 'password', 'port',
                                 'disk_type', 'disk_size', 'version', 'instance_type', 'vpc_id', 'security_group_id',
-                                'second_slave_zone', 'first_slave_zone', 'zone', 'region', 'asset_id', 'resource_id',
+                                'second_slave_zone', 'first_slave_zone', "zone_id", "region_id", 'asset_id',
                                 'extend_info', "charge_type"],
-            "outputParameters": ['errorMessage', 'errorCode', 'resource_id', 'user', 'password', 'ipaddress', 'port',
+            "outputParameters": ['errorMessage', 'errorCode', 'asset_id', 'user', 'password', 'ipaddress', 'port',
                                  'id']
         },
         "destroy": {
@@ -607,113 +647,148 @@ xml_register = {
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/database/backend/mysql/source",
             "method": "POST",
-            "notnull": ["region", "provider"],
-            "inputParameters": ['region', 'secret', 'provider', 'resource_id', 'ipaddress', 'port', 'engine', 'version',
-                                'name', 'vpc_id', 'subnet_id', 'tag'],
-            "outputParameters": ['region', 'secret', 'provider', 'resource_id', 'errorMessage', 'errorCode', 'name',
+            "notnull": ["region_id", "provider"],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'ipaddress', 'port', 'engine', 'version',
+                                'name', 'vpc_id', 'subnet_id', 'tag', "id"],
+            "outputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'errorMessage', 'errorCode', 'name',
                                  'subnet_id', 'user', 'password', 'port', 'disk_type', 'disk_size', 'version',
                                  'instance_type', 'vpc_id', 'security_group_id', 'second_slave_zone',
-                                 'first_slave_zone', 'zone', 'ipaddress', "charge_type"]
+                                 'first_slave_zone', "zone_id", 'ipaddress', "charge_type"]
         }
     },
     "mysql_database": {
         "apply": {
             "path": "/terraform/v1/database/backend/mysql_database/apply",
             "method": "POST",
-            "notnull": ['name', 'provider', 'mysql_id', 'region'],
-            "inputParameters": ['id', 'name', 'secret', 'provider', 'mysql_id', 'zone', 'region', 'asset_id',
-                                'resource_id', 'extend_info'],
-            "outputParameters": ['errorMessage', 'errorCode', 'id', 'resource_id']
+            "notnull": ['name', 'provider', 'mysql_id', "region_id"],
+            "inputParameters": ['id', 'name', 'secret', 'provider', 'mysql_id', "zone_id", "region_id", 'resource_id',
+                                'asset_id', 'extend_info'],
+            "outputParameters": ['errorMessage', 'errorCode', 'id', 'asset_id']
         },
         "destroy": {
             "path": "/terraform/v1/database/backend/mysql_database/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         }
     },
     "mysql_account": {
         "apply": {
             "path": "/terraform/v1/database/backend/mysql_account/apply",
             "method": "POST",
-            "notnull": ['name', 'provider', 'mysql_id', 'password', 'region'],
-            "inputParameters": ['id', 'name', 'secret', 'provider', 'mysql_id', 'password', 'zone', 'region',
-                                'asset_id', 'resource_id', 'extend_info'],
-            "outputParameters": ['errorMessage', 'errorCode', 'id', 'resource_id']
+            "notnull": ['name', 'provider', 'mysql_id', 'password', "region_id"],
+            "inputParameters": ['id', 'name', 'secret', 'provider', 'mysql_id', 'password', "zone_id", "region_id",
+                                'resource_id', 'asset_id', 'extend_info'],
+            "outputParameters": ['errorMessage', 'errorCode', 'id', 'asset_id']
         },
         "destroy": {
             "path": "/terraform/v1/database/backend/mysql_account/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         }
     },
     "mysql_privilege": {
         "apply": {
             "path": "/terraform/v1/database/backend/mysql_privilege/apply",
             "method": "POST",
-            "notnull": ['provider', 'mysql_id', 'username', 'database', 'privileges', 'region'],
-            "inputParameters": ['id', 'secret', 'provider', 'mysql_id', 'username', 'database', 'privileges', 'zone',
-                                'region', 'asset_id', 'resource_id', 'extend_info'],
-            "outputParameters": ['errorMessage', 'errorCode', 'id', 'resource_id']
+            "notnull": ['provider', 'mysql_id', 'username', 'database', 'privileges', "region_id"],
+            "inputParameters": ['id', 'secret', 'provider', 'mysql_id', 'username', 'database', 'privileges', "zone_id",
+                                "region_id", 'resource_id', 'asset_id', 'extend_info'],
+            "outputParameters": ['errorMessage', 'errorCode', 'id', 'asset_id']
         },
         "destroy": {
             "path": "/terraform/v1/database/backend/mysql_privilege/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         }
     },
     "mysql_backup": {
         "apply": {
             "path": "/terraform/v1/database/backend/mysql_backup/apply",
             "method": "POST",
-            "notnull": ['provider', 'mysql_id', 'backup_model', 'backup_time', 'region'],
-            "inputParameters": ['id', 'name', 'secret', 'provider', 'mysql_id', 'backup_model', 'backup_time', 'zone',
-                                'region', 'asset_id', 'resource_id', 'extend_info'],
-            "outputParameters": ['errorMessage', 'errorCode', 'id', 'resource_id']
+            "notnull": ['provider', 'mysql_id', 'backup_model', 'backup_time', "region_id"],
+            "inputParameters": ['id', 'name', 'secret', 'provider', 'mysql_id', 'backup_model', 'backup_time', "zone_id",
+                                "region_id", 'resource_id', 'asset_id', 'extend_info'],
+            "outputParameters": ['errorMessage', 'errorCode', 'id', 'asset_id']
         },
         "destroy": {
             "path": "/terraform/v1/database/backend/mysql_backup/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         }
     },
     "db_subnet_group": {
         "apply": {
             "path": "/terraform/v1/database/backend/db_subnet_group/apply",
             "method": "POST",
-            "notnull": ['name', 'provider', 'subnet_id', 'zone', 'region'],
+            "notnull": ['name', 'provider', 'subnet_id', "zone_id", "region_id"],
             "inputParameters": ['id', 'name', 'secret', 'provider', 'subnet_id',
-                                'zone', 'region', 'asset_id', 'resource_id',
+                                "zone_id", "region_id", 'asset_id',
                                 'extend_info'],
-            "outputParameters": ['errorMessage', 'errorCode', 'resource_id', 'id']
+            "outputParameters": ['errorMessage', 'errorCode', 'asset_id', 'id']
         },
         "destroy": {
             "path": "/terraform/v1/database/backend/db_subnet_group/destroy",
             "method": "POST",
             "notnull": ["id"],
             "inputParameters": ["id"],
-            "outputParameters": ["errorMessage", "errorCode", "result"]
+            "outputParameters": ["errorMessage", "errorCode", "id"]
         },
         "query": {
             "path": "/terraform/v1/database/backend/db_subnet_group/source",
             "method": "POST",
-            "notnull": ["region", "provider"],
-            "inputParameters": ['region', 'secret', 'provider', 'resource_id', 'name'],
-            "outputParameters": ['region', 'secret', 'provider', 'resource_id', 'errorMessage', 'errorCode', 'name',
-                                 'subnet_id', 'zone', ]
+            "notnull": ["region_id", "provider"],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'name', 'subnet_id', 'id'],
+            "outputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'errorMessage', 'errorCode', 'name',
+                                 'subnet_id', "zone_id", ]
+        }
+    },
+    "redis": {
+        "apply": {
+            "path": "/terraform/v1/database/backend/redis/apply",
+            "method": "POST",
+            "notnull": ['provider', 'instance_type', "zone_id", "region_id"],
+            "inputParameters": ['id', 'name', 'secret', 'provider',  'password', 'port',
+                                 'version', 'instance_type', 'vpc_id', 'security_group_id',
+                                "zone_id", "region_id", 'asset_id', 'extend_info', "charge_type"],
+            "outputParameters": ['errorMessage', 'errorCode', 'asset_id', 'ipaddress', 'port',
+                                 'id']
+        },
+        "destroy": {
+            "path": "/terraform/v1/database/backend/redis/destroy",
+            "method": "POST",
+            "notnull": ["id"],
+            "inputParameters": ["id"],
+            "outputParameters": ["errorMessage", "errorCode", "id"]
+        },
+        "query": {
+            "path": "/terraform/v1/database/backend/redis/source",
+            "method": "POST",
+            "notnull": ["region_id", "provider"],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'ipaddress', 'port', 'engine', 'version',
+                                'name', 'vpc_id', 'subnet_id', 'tag', "id"],
+            "outputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'errorMessage', 'errorCode', 'name',
+                                 'subnet_id',  'password', 'port', 'version',
+                                 'instance_type', 'vpc_id', 'security_group_id',  "zone_id", 'ipaddress', "charge_type"]
         }
     },
 }
 
+# print(xml_register.keys())
+# res = {}
+# for key, define in xml_register.items():
+#     res[key] = define.keys()
+#
+# print res

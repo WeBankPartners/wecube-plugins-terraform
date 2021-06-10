@@ -8,6 +8,9 @@ from core.controller import BackendIdController
 from core.controller import BaseController
 from lib.uuid_util import get_uuid
 from apps.api.storage.bucket_object import BucketObjectApi
+from apps.controller.backend_controller import BackendAddController
+from apps.controller.backend_controller import BackendDeleteController
+from apps.controller.backend_controller import BackendSourceController
 
 
 class ResBase(object):
@@ -114,7 +117,7 @@ class BucketObjectIdController(BackendIdController):
         return self.resource.destroy(rid)
 
 
-class BucketObjectAddController(BaseController):
+class BucketObjectAddController(BackendAddController):
     allow_methods = ("POST",)
     resource = BucketObjectApi()
 
@@ -130,7 +133,7 @@ class BucketObjectAddController(BaseController):
         return res
 
 
-class BucketObjectDeleteController(BaseController):
+class BucketObjectDeleteController(BackendDeleteController):
     name = "BucketObject"
     resource_describe = "BucketObject"
     allow_methods = ("POST",)
@@ -149,4 +152,4 @@ class BucketObjectDeleteController(BaseController):
     def main_response(self, request, data, **kwargs):
         rid = data.pop("id", None)
         result = self.resource.destroy(rid)
-        return {"result": result}
+        return {"id": result}

@@ -13,15 +13,42 @@ class _AreaObject(object):
     def __init__(self):
         self.resource = None
 
-    def list(self, filters=None, page=None, pagesize=None, orderby=None):
+    def list(self, filters=None, page=None, pagesize=None, orderby=None, filter_in=None, filter_string=None):
+        '''
+
+        :param filters:
+        :param page:
+        :param pagesize:
+        :param orderby:
+        :param filter_in:
+        :param filter_string:
+        :return:
+        '''
+
         filters = filters or {}
+        filter_in = filter_in or {}
+
         filters["is_deleted"] = 0
 
+        for key, value in filter_in.items():
+            if value:
+                f = ''
+                for x in value:
+                    f += "'" + x + "',"
+                f = f[:-1]
+
+                x = '(' + f + ')'
+                if filter_string:
+                    filter_string += 'and ' + key + " in " + x + " "
+                else:
+                    filter_string = key + " in " + x + " "
+
         count, results = self.resource.list(filters=filters, pageAt=page,
+                                            filter_string=filter_string,
                                             pageSize=pagesize, orderby=orderby)
         data = []
         for res in results:
-            res["extend_info"] = json.loads(res["extend_info"])
+            res["extend_info"] = json.loads(res["extend_info"]) if res["extend_info"] else {}
             data.append(res)
 
         return count, data
@@ -38,7 +65,7 @@ class _AreaObject(object):
 
         data = self.resource.get(filters=where_data)
         if data:
-            data["extend_info"] = json.loads(data["extend_info"])
+            data["extend_info"] = json.loads(data["extend_info"]) if data["extend_info"] else {}
 
         return data
 
@@ -47,7 +74,7 @@ class _AreaObject(object):
         where_data.update({"is_deleted": 0})
         data = self.resource.get(filters=where_data)
         if data:
-            data["extend_info"] = json.loads(data["extend_info"])
+            data["extend_info"] = json.loads(data["extend_info"]) if data["extend_info"] else {}
 
         return data
 
@@ -57,7 +84,7 @@ class _AreaObject(object):
         update_data["updated_time"] = datetime.datetime.now()
         count, data = self.resource.update(filters=where_data, data=update_data)
         if data:
-            data["extend_info"] = json.loads(data["extend_info"])
+            data["extend_info"] = json.loads(data["extend_info"]) if data["extend_info"] else {}
 
         return count, data
 
@@ -101,6 +128,13 @@ class RegionObject(_AreaObject):
         if not data:
             raise local_exceptions.ResourceValidateError("region", "region asset %s 未注册" % asset_id)
         return data
+
+    def region_asset(self, asset_id, provider=None):
+        where_data = {"asset_id": asset_id}
+        if provider:
+            where_data["provider"] = provider
+
+        return self.query_one(where_data=where_data)
 
 
 class ZoneObject(_AreaObject):
