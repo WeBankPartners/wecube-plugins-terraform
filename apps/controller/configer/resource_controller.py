@@ -62,8 +62,8 @@ class ResourceController(BackendController):
     resource = ResourceObject()
 
     def list(self, request, data, orderby=None, page=None, pagesize=None, **kwargs):
-        validation.allowed_key(["id", "provider", "resource_type", "resource_name",
-                                "data_source_argument", "data_source_name"], data=data)
+        validation.allowed_key(data, ["id", "provider", "resource_type", "resource_name",
+                                      "data_source_argument", "data_source_name"])
 
         filter_string = None
         for key in ["resource_type", "provider", "resource_name", "data_source_name"]:
@@ -281,9 +281,31 @@ class ResourceListController(BackendIdController):
     resource = ResourceObject()
     allow_methods = ('GET',)
 
+    def get_resource_list(self, data):
+        filter_string = None
+        _, resource_lists = self.resource.list(filters=data, page=1, filter_string=filter_string,
+                                               pagesize=10000, orderby=None)
+
+        res = []
+        for xres in resource_lists:
+            res.append(xres["resource_type"])
+
+        return list(set(res))
+
     def show(self, request, data, **kwargs):
-        columns = output_property_models.keys()
-        return {"resource": columns}
+        provider = data.get("provider")
+        if provider:
+            config_columns = self.get_resource_list(data={"provider": provider})
+            columns = output_property_models.keys() + config_columns
+        else:
+            columns = output_property_models.keys()
+
+        columns = list(set(columns))
+        res = []
+        for column in columns:
+            res.append({"id": column, "name": column})
+
+        return {"resource": res}
 
 
 class ResourceAttrController(BackendIdController):
@@ -291,14 +313,23 @@ class ResourceAttrController(BackendIdController):
     allow_methods = ('GET',)
 
     def show(self, request, data, **kwargs):
-        validation.allowed_key(["resource_type", "provider"], data)
+        validation.allowed_key(data, ["resource_type", "provider"])
         validation.not_allowed_null(["resource_type", "provider"], data)
 
         define_data = self.resource.query_one(where_data={"provider": data.get("provider"),
                                                           "resource_type": data.get("resource_type")})
 
         define = define_data.get("resource_property") or {}
-        return {"resource": get_columns(define)}
+        out_define = define_data.get("resource_output") or {}
+
+        columns = get_columns(define) + get_columns(out_define)
+        columns = list(set(columns))
+
+        res = []
+        for column in columns:
+            res.append({"id": column, "name": column})
+
+        return {"resource": res}
 
 
 class HintResourceController(BackendIdController):
@@ -321,22 +352,22 @@ class HintResourceController(BackendIdController):
 
     def get_resource_list(self, data):
         filter_string = None
-        if data.get("resource_type"):
-            filter_string = "resource_type like '%" + data.get("resource_type") + "%' "
-            data.pop("resource_type", None)
-
         _, resource_lists = self.resource.list(filters=data, page=1, filter_string=filter_string,
                                                pagesize=10000, orderby=None)
         return resource_lists
 
     def show(self, request, data, **kwargs):
-        validation.allowed_key(["resource_type"], data)
+        validation.allowed_key(data, ["resource_type"])
         resource_attribute = self.format_resource_type(self.get_resource_list(data))
 
         result = ["$zone", "$region", "$instance.type",
                   "$instance.type.cpu", "$instance.type.memory", "$resource"]
 
-        for xres in resource_attribute.key():
+        for xres in resource_attribute.keys():
             result.append("$resource.%s" % (xres))
 
-        return {"resource": result, "attribute": resource_attribute}
+        res = []
+        for column in result:
+            res.append({"id": column, "name": column})
+
+        return {"resource": res, "attribute": resource_attribute}

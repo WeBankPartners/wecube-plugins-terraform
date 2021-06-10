@@ -1272,3 +1272,36 @@ url: /terraform/v1/configer/resourceAttr
 
 -----
 
+#### 资源配置列表
+##### list:
+
+url: /terraform/v1/configer/configList
+
+参数： "provider", “resource_type”, "property"
+
+输出：
+
+```
+{
+    "status":"OK",
+    "message":"OK",
+    "code":0,
+    "data":{
+        "resource":[
+            {
+                "origin_name":"POSTPAID",
+                "id":"POSTPAID",
+                "name":"POSTPAID"
+            },
+            {
+                "origin_name":"PREPAID",
+                "id":"PREPAID",
+                "name":"PREPAID"
+            }
+        ]
+    }
+}
+```
+
+-----
+

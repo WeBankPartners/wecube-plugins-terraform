@@ -55,8 +55,6 @@ class ConfigController(BackendController):
         validation.not_allowed_null(data=data,
                                     keys=["provider", "property", "resource"]
 
-
-
                                     )
 
         validation.validate_string("id", data.get("id"))
@@ -147,3 +145,67 @@ class ConfigIdController(BackendIdController):
 
         rid = kwargs.pop("rid", None)
         return self.resource.delete(rid)
+
+
+class ConfigAttrController(BackendIdController):
+    resource = ValueConfigObject()
+    allow_methods = ('GET',)
+
+    def get_configs(self, data):
+        data["resource"] = data.pop("resource_type", None)
+        _, config_datas = self.resource.list(filters=data)
+
+        res = {}
+        for xdata in config_datas:
+            res[xdata["property"]] = xdata.get("value_config")
+
+        return res
+
+    def show(self, request, data, **kwargs):
+        '''
+
+        :param request:
+        :param data:
+        :param kwargs:
+        :return:
+        '''
+        validation.allowed_key(data, ["resource_type", "provider"])
+        validation.not_allowed_null(["resource_type", "provider"], data)
+
+        configs = self.get_configs(data)
+
+        columns = configs.keys()
+        res = []
+        for column in columns:
+            res.append({"id": column, "name": column})
+
+        return {"resource": res, "attribute": configs}
+
+
+class ConfigListController(BackendIdController):
+    resource = ValueConfigObject()
+    allow_methods = ('GET',)
+
+    def get_configs(self, data):
+        data["resource"] = data.pop("resource_type", None)
+        config_data = self.resource.query_one(where_data=data)
+
+        return config_data.get("value_config") or {}
+
+    def show(self, request, data, **kwargs):
+        '''
+
+        :param request:
+        :param data:
+        :param kwargs:
+        :return:
+        '''
+        validation.allowed_key(data, ["resource_type", "provider", "property"])
+        validation.not_allowed_null(["resource_type", "provider", "property"], data)
+
+        configs = self.get_configs(data)
+
+        res = []
+        for key, value in configs.items():
+            res.append({"id": key, "name": key, "origin_name": value})
+        return {"resource": res}

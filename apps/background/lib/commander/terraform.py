@@ -18,6 +18,15 @@ class TerrformExecError(Exception):
     pass
 
 
+def path_dir(path):
+    dirs = os.listdir(path)
+    for xdir in dirs:
+        if not xdir.startswith("."):
+            return xdir
+        else:
+            return ""
+
+
 class TerraformDriver(object):
     def __init__(self, terraform_path=None, workdir=None):
         self.terraform = terraform_path or TERRFORM_BIN_PATH
@@ -43,17 +52,21 @@ class TerraformDriver(object):
         else:
             pass
 
+    def _cache_status(self, path, code):
+        if code == 0:
+            with open(path, 'wb+') as f:
+                f.close()
+
     def cache_provider_plugin(self, provider, initd_path):
         path = os.path.join(TERRAFORM_BASE_PATH, ".%s.status" % provider)
         if os.path.exists(path):
             return
 
+        logger.info(" try cache plugin status  %s...." % path)
         plugin_path = os.path.join(initd_path, ".terraform/providers/registry.terraform.io")
         plugin_path2 = os.path.join(initd_path, ".terraform/plugins/registry.terraform.io/")
 
-        if os.path.exists(plugin_path):
-            pass
-        else:
+        if not os.path.exists(plugin_path):
             if os.path.exists(plugin_path2):
                 plugin_path = plugin_path2
             else:
@@ -62,23 +75,38 @@ class TerraformDriver(object):
 
         tmp_path = os.path.join(plugin_path, "hashicorp")
         if os.path.exists(tmp_path):
-            xcmd = "cp -r %s %s" % (os.path.join(tmp_path, "*"),
-                                    os.path.join(TERRAFORM_PLUGIN_CACHE_PATH, "hashicorp"))
-
-            logger.info(xcmd)
-            code, _, _ = command(cmd=xcmd)
+            child_dir = path_dir(tmp_path)
+            if child_dir:
+                exists_cache = os.path.join(TERRAFORM_PLUGIN_CACHE_PATH, "hashicorp", child_dir)
+                if os.path.exists(exists_cache):
+                    logger.info("cache mount already, write status, path: %s" % exists_cache)
+                    self._cache_status(path, 0)
+                    return
+                else:
+                    xcmd = "cp -r %s %s" % (
+                        os.path.join(tmp_path, "*"), os.path.join(TERRAFORM_PLUGIN_CACHE_PATH, "hashicorp"))
+                    logger.info(xcmd)
+                    code, _, _ = command(cmd=xcmd)
+                    logger.info("cached write status, path: %s" % exists_cache)
+                    self._cache_status(path, code)
+            else:
+                logger.info("child_dir is empty, skip cache ...")
         else:
-            xcmd = "cp -r %s %s" % (os.path.join(plugin_path, "*"),
-                                    TERRAFORM_PLUGIN_CACHE_PATH)
-
-            logger.info(xcmd)
-            code, _, _ = command(cmd=xcmd)
-
-        if code == 0:
-            with open(path, 'wb+') as f:
-                f.close()
-
-
+            child_dir = path_dir(plugin_path)
+            if child_dir:
+                exists_cache = os.path.join(TERRAFORM_PLUGIN_CACHE_PATH, child_dir)
+                if os.path.exists(exists_cache):
+                    logger.info("cache mount already, write status, path: %s" % exists_cache)
+                    self._cache_status(path, 0)
+                    return
+                else:
+                    xcmd = "cp -r %s %s" % (os.path.join(plugin_path, "*"), TERRAFORM_PLUGIN_CACHE_PATH)
+                    logger.info(xcmd)
+                    code, _, _ = command(cmd=xcmd)
+                    logger.info("cached, write status, path: %s" % exists_cache)
+                    self._cache_status(path, code)
+            else:
+                logger.info("child_dir is empty, skip cache ...")
 
     def init(self, dir_path=None,
              backend=None, backend_config=None,
@@ -123,7 +151,14 @@ class TerraformDriver(object):
                 logger.info("versions.tf file not exists")
 
         # todo cache plugin file
-        return self.init(dir_path=dir_path)
+        res = self.init(dir_path=dir_path)
+        try:
+            self.cache_provider_plugin(provider, dir_path)
+        except Exception, e:
+            logger.info(traceback.format_exc())
+            logger.info("cache plugin error, continue ... ")
+
+        return res
 
     def _format_cmd(self, cmd, args=None):
         if not args:

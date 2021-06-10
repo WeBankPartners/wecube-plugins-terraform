@@ -43,10 +43,10 @@ class InstanceTypeController(BackendController):
                                                   pagesize=pagesize, orderby=orderby)
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["id", "name", "provider_id", "origin_name",
+        validation.allowed_key(data, ["id", "name", "provider", "origin_name",
                                       "type", "cpu", "memory", "network", "extend_info"])
         validation.not_allowed_null(data=data,
-                                    keys=["provider_id", "name", "cpu", "memory"]
+                                    keys=["provider", "name", "cpu", "memory"]
                                     )
 
         validation.validate_string("id", data.get("id"))
@@ -56,7 +56,7 @@ class InstanceTypeController(BackendController):
         validation.validate_int("memory", data["memory"])
         validation.validate_string("network", data.get("network"))
         validation.validate_string("type", data.get("type"))
-        validation.validate_string("provider_id", data.get("provider_id"))
+        validation.validate_string("provider", data.get("provider"))
         validation.validate_dict("extend_info", data.get("extend_info"))
 
     def create(self, request, data, **kwargs):
@@ -67,11 +67,11 @@ class InstanceTypeController(BackendController):
         memory = data.pop("memory", None)
         network = data.pop("network", None)
         x_type = data.pop("type", None)
-        provider_id = data.pop("provider_id", None)
+        provider = data.pop("provider", None)
         extend_info = validation.validate_dict("extend_info", data.pop("extend_info", None))
 
         data.update(extend_info)
-        return self.resource.create(rid, name, provider_id, origin_name,
+        return self.resource.create(rid, name, provider, origin_name,
                                     cpu, memory, network, x_type, extend_info=data)
 
 
@@ -84,7 +84,7 @@ class InstanceTypeIdController(BackendIdController):
         return self.resource.resource_object.show(rid)
 
     def before_handler(self, request, data, **kwargs):
-        validation.allowed_key(data, ["name", "provider_id", "origin_name", "type",
+        validation.allowed_key(data, ["name", "provider", "origin_name", "type",
                                       "cpu", "memory", "network", "extend_info"])
 
         validation.validate_string("id", data.get("id"))
@@ -94,7 +94,7 @@ class InstanceTypeIdController(BackendIdController):
         validation.validate_int("memory", data.get("memory"))
         validation.validate_string("type", data.get("type"))
         validation.validate_string("network", data.get("network"))
-        validation.validate_string("provider_id", data.get("provider_id"))
+        validation.validate_string("provider", data.get("provider"))
         validation.validate_dict("extend_info", data.get("extend_info"))
 
     def update(self, request, data, **kwargs):
