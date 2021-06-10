@@ -97,7 +97,17 @@ def apply_data_builder(provider, datas, defines, resource_values_config, resourc
                                       resource_value_config=resource_values_config.get(key, {}),
                                       resource_name=resource_name)
             if _t:
-                result.update(_t)
+                for xkey, xvalue in _t.items():
+                    if xkey in result.keys():
+                        if isinstance(xvalue, list) and isinstance(result.get(xkey), list):
+                            xtmp = xvalue + result.get(xkey)
+                            result[xkey] = list(set(xtmp))
+                        elif isinstance(xvalue, list) or isinstance(result.get(xkey), list):
+                            raise ValueError("key -> %s 存在映射同一字段，类型不统一， 请检查" % xkey)
+                        else:
+                            result[xkey] = xvalue
+                    else:
+                        result[xkey] = xvalue
 
     return result
 

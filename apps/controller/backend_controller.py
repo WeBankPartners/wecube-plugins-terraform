@@ -296,7 +296,7 @@ class BackendClient(object):
     @classmethod
     def format_filter_data(cls, data):
         res = []
-        if "id" in data.keys():
+        if data.get("id"):
             ids = TypeFormat.f_list(data.pop("id", None))
             for xid in ids:
                 tmp = copy.deepcopy(data)

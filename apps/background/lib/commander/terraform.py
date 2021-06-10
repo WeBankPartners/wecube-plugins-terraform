@@ -8,6 +8,7 @@ from lib.logs import logger
 from lib.command import command
 from wecube_plugins_terraform.settings import TERRAFORM_BASE_PATH
 from wecube_plugins_terraform.settings import TERRFORM_BIN_PATH
+from wecube_plugins_terraform.settings import TERRAFORM_PLUGIN_CACHE_PATH
 
 if not os.path.exists(TERRAFORM_BASE_PATH):
     os.makedirs(TERRAFORM_BASE_PATH)
@@ -41,6 +42,43 @@ class TerraformDriver(object):
             pass
         else:
             pass
+
+    def cache_provider_plugin(self, provider, initd_path):
+        path = os.path.join(TERRAFORM_BASE_PATH, ".%s.status" % provider)
+        if os.path.exists(path):
+            return
+
+        plugin_path = os.path.join(initd_path, ".terraform/providers/registry.terraform.io")
+        plugin_path2 = os.path.join(initd_path, ".terraform/plugins/registry.terraform.io/")
+
+        if os.path.exists(plugin_path):
+            pass
+        else:
+            if os.path.exists(plugin_path2):
+                plugin_path = plugin_path2
+            else:
+                logger.info("plugin cache path not find, please check... skip ...")
+                return
+
+        tmp_path = os.path.join(plugin_path, "hashicorp")
+        if os.path.exists(tmp_path):
+            xcmd = "cp -r %s %s" % (os.path.join(tmp_path, "*"),
+                                    os.path.join(TERRAFORM_PLUGIN_CACHE_PATH, "hashicorp"))
+
+            logger.info(xcmd)
+            code, _, _ = command(cmd=xcmd)
+        else:
+            xcmd = "cp -r %s %s" % (os.path.join(plugin_path, "*"),
+                                    TERRAFORM_PLUGIN_CACHE_PATH)
+
+            logger.info(xcmd)
+            code, _, _ = command(cmd=xcmd)
+
+        if code == 0:
+            with open(path, 'wb+') as f:
+                f.close()
+
+
 
     def init(self, dir_path=None,
              backend=None, backend_config=None,
@@ -84,6 +122,7 @@ class TerraformDriver(object):
             else:
                 logger.info("versions.tf file not exists")
 
+        # todo cache plugin file
         return self.init(dir_path=dir_path)
 
     def _format_cmd(self, cmd, args=None):

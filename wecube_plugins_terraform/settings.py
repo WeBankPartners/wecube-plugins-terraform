@@ -20,6 +20,7 @@ YAML_TMP_PATH = os.path.join(LOG_BASE_PATH, "yamlfiles")
 CAFILE_PATH = os.path.join(BASE_DIR, 'cafile')
 TERRFORM_BIN_PATH = os.path.join(BASE_DIR, "bin/terraform")
 TERRAFORM_BASE_PATH = os.path.join(BASE_DIR, "terraform")
+TERRAFORM_PLUGIN_CACHE_PATH = '/usr/local/share/terraform/plugins/registry.terraform.io'
 
 INSTALLED_APPS = [
     'django.contrib.contenttypes',

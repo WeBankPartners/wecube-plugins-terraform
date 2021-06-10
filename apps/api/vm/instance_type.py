@@ -10,7 +10,7 @@ class InstanceTypeApi(object):
     def __init__(self):
         self.resource_object = InstanceTypeObject()
 
-    def create(self, rid, name, provider_id, origin_name, cpu, memory, network, type, extend_info):
+    def create(self, rid, name, provider, origin_name, cpu, memory, network, type, extend_info):
         '''
 
         :param rid:
@@ -25,12 +25,12 @@ class InstanceTypeApi(object):
         '''
 
         extend_info = extend_info or {}
-        provider_info = ProviderObject().provider_object(provider_id)
+        provider_info = ProviderObject().provider_name_object(provider)
         create_data = {"id": rid,
                        "name": name,
                        "type": type,
-                       "provider_id": provider_id,
-                       "provider": provider_info.get("name"),
+                       "provider_id": provider_info.get("id"),
+                       "provider": provider,
                        "origin_name": origin_name,
                        "cpu": cpu, "memory": memory,
                        "network": network,
