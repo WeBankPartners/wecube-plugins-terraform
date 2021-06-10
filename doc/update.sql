@@ -83,6 +83,10 @@ UPDATE resource SET  provider='alicloud', resource_type='lb', resource_name='ali
 #@v0.2.0-end@;
 
 #@v0.3.0-begin@;
+
+INSERT INTO terraform.cloud_providers (id,display_name,name,secret_id,secret_key,region,`zone`,plugin_source,extend_info,provider_property,is_init,created_time,updated_time,deleted_time,enabled,is_deleted) VALUES
+	 ('0c851c73d7e94dfabb176c03cb5d77e3','亚马逊云','aws',NULL,NULL,NULL,NULL,NULL,'{}','{"region": "region", "secret_key": "secret_key", "secret_id": "access_key"}',1,'2021-04-25 17:18:50','2021-04-25 17:18:50',NULL,1,0);
+
 ALTER TABLE resource MODIFY COLUMN data_source_argument varchar(256) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL;
 
 ALTER TABLE resource ADD pre_action varchar(256) NULL  after  `data_source_output`;

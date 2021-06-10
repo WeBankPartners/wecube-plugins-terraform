@@ -513,6 +513,7 @@
       <interface action="apply" path="/terraform/v1/az/backend/zone/apply" httpMethod="POST" description="common">
         <inputParameters>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">asset_id</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">extend_info</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">region_id</parameter>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
@@ -1592,10 +1593,11 @@
       <interface action="apply" path="/terraform/v1/az/backend/region/apply" httpMethod="POST" description="common">
         <inputParameters>
           <parameter datatype="string" mappingType="entity" required="Y" description="common">asset_id</parameter>
-          <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">secret</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">extend_info</parameter>
-          <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
           <parameter datatype="string" mappingType="entity" required="N" description="common">name</parameter>
+          <parameter datatype="string" mappingType="entity" required="Y" description="common">provider</parameter>
+          <parameter datatype="string" mappingType="entity" required="N" description="common">id</parameter>
         </inputParameters>
         <outputParameters>
           <parameter datatype="string" description="common">errorCode</parameter>

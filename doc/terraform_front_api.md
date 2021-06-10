@@ -17,7 +17,7 @@ url: /terraform/v1/configer/provider
         "count":2,
         "data":[
             {
-                "display_name":"腾讯云", 
+                "display_name":"腾讯云",
                 "name":"tencentcloud",
                 "zone":null,
                 "deleted_time":null,
@@ -79,9 +79,9 @@ provider_property  json
 "secret_key": "3131313",
 "extend_info": {},
 "provider_property": {
-	"secret_id": "secret_id",
-	"secret_key":"secret_key",
-	"region": "region"
+   "secret_id": "secret_id",
+   "secret_key":"secret_key",
+   "region": "region"
 }
 }
 
@@ -112,7 +112,7 @@ provider_property  json
 
 url: /terraform/v1/configer/provider/{id}
 
-参数： "id", 
+参数： "id",
 
 输出：
 
@@ -153,11 +153,11 @@ url: /terraform/v1/configer/provider/{id}
 
 url: /terraform/v1/configer/provider/{id}
 
-参数： 
-"zone",  
+参数：
+"zone",
 "secret_id",
-"secret_key",  
-"region", 
+"secret_key",
+"region",
 "enabled",
 "extend_info",
 "provider_property"
@@ -292,7 +292,7 @@ url: /terraform/v1/configer/resource
 
 
 ```
-"provider"     云厂商   string  必填 
+"provider"     云厂商   string  必填
 "resource_type"     类别： 如vpc   string  必填
 
 <resource配置>
@@ -337,7 +337,7 @@ pre_action_output 列表输出参数   json 选填
 
 url: /terraform/v1/configer/resource/{id}
 
-参数： "id", 
+参数： "id",
 
 输出：
 
@@ -408,19 +408,19 @@ url: /terraform/v1/configer/resource/{id}
 
 url: /terraform/v1/configer/resource/{id}
 
-参数： 
+参数：
 
 ```
-"provider", 
+"provider",
 "resource_type",
 "extend_info"
-"resource_name", 
+"resource_name",
 "resource_property"
 "resource_output"
-data_source_name  
-data_source_argument  
-data_source  
-data_source_output 
+data_source_name
+data_source_argument
+data_source
+data_source_output
 ```
 例如:
 ```
@@ -592,7 +592,7 @@ url: /terraform/v1/configer/keyconfig
 
 url: /terraform/v1/configer/keyconfig/{id}
 
-参数： "id", 
+参数： "id",
 
 输出：
 
@@ -625,13 +625,13 @@ url: /terraform/v1/configer/keyconfig/{id}
 
 url: /terraform/v1/configer/keyconfig/{id}
 
-参数： 
+参数：
 
 ```
-"provider",   
-"resource",   
-"resource_type",   
-"value_config" 
+"provider",
+"resource",
+"resource_type",
+"value_config"
 ```
 
 
@@ -767,12 +767,12 @@ url: /terraform/v1/vm/instance_type
 "extend_info"    其他信息      list   选填
 type             规格类型如instance  string 必填 （对应名称必须为资源类型name、例如： mysql, instance等）
 
-例如： 
+例如：
 {
 "name": "1C-2G",
- "provider_id": "73aa4d40248849c48cb0fcde88d1d1d1", 
+ "provider_id": "73aa4d40248849c48cb0fcde88d1d1d1",
 "origin_name": "S5.SMALL2",
- "cpu": 1, 
+ "cpu": 1,
 "memory": 2,
  "network": "1.5Gbps  --  25万PPS",
  "extend_info": {}
@@ -802,7 +802,7 @@ type             规格类型如instance  string 必填 （对应名称必须为
 
 url:  /terraform/v1/vm/instance_type/{id}
 
-参数： "id", 
+参数： "id",
 
 输出：
 
@@ -837,15 +837,15 @@ url:  /terraform/v1/vm/instance_type/{id}
 
 url:  /terraform/v1/vm/instance_type/{id}
 
-参数： 
+参数：
 
 ```
-"name", 
-"provider_id", 
+"name",
+"provider_id",
 "origin_name",
-"cpu", 
-"memory", 
-"network", 
+"cpu",
+"memory",
+"network",
 "extend_info"
 ```
 
@@ -918,7 +918,7 @@ url:  /terraform/v1/vm/instance_type/{id}
 
 url: /terraform/v1/configer/secret
 
-参数： "id", "name", "display_name", "region", 
+参数： "id", "name", "display_name", "region",
 
 输出：
 
@@ -976,11 +976,11 @@ extend_info    json
 
 示例：
 {
-"name": "xxxxx", 
-"display_name": "tencenssst", 
+"name": "xxxxx",
+"display_name": "tencenssst",
 "provider": "tencentcloud",
-"secret_info": {"secret_id": "xxxxxx", "secret_key": "xxxx"}, 
-"region": null, 
+"secret_info": {"secret_id": "xxxxxx", "secret_key": "xxxx"},
+"region": null,
 "extend_info": {}
 }
 
@@ -1008,7 +1008,7 @@ extend_info    json
 
 url: /terraform/v1/configer/secret/{id}
 
-参数： "id", 
+参数： "id",
 
 输出：
 
@@ -1041,12 +1041,12 @@ url: /terraform/v1/configer/secret/{id}
 
 url: /terraform/v1/configer/secret/{id}
 
-参数： 
-name         string  
-display_name  string 
-provider    string  
-secret_info    json 
-region        string 
+参数：
+name         string
+display_name  string
+provider    string
+secret_info    json
+region        string
 extend_info    json
 
 输出：
@@ -1100,3 +1100,175 @@ url: /terraform/v1/configer/secret/{id}
 ```
 
 -----
+#### 资源配置列表
+##### list:
+
+url: /terraform/v1/configer/resourceList
+
+参数： "provider",
+
+输出：
+
+```
+{
+    "status":"OK",
+    "message":"OK",
+    "code":0,
+    "data":{
+        "resource":[
+            {
+                "id":"nosql",
+                "name":"nosql"
+            },
+            {
+                "id":"route_entry",
+                "name":"route_entry"
+            },
+			.....
+            {
+                "id":"security_group",
+                "name":"security_group"
+            },
+            {
+                "id":"mysql_backup",
+                "name":"mysql_backup"
+            }
+        ]
+    }
+}
+```
+
+
+-----
+
+#### 资源属性列表
+##### list:
+
+url: /terraform/v1/configer/resourceAttr
+
+参数： "provider", “resource_type”
+
+输出：
+
+```
+{
+    "status":"OK",
+    "message":"OK",
+    "code":0,
+    "data":{
+        "resource":[
+            "asset_id",
+            "cidr_block",
+            "name"
+        ]
+    }
+}
+```
+
+-----
+
+#### 资源属性列表
+##### list:
+
+url: /terraform/v1/configer/resourceHint
+
+参数： “resource_type”
+
+输出：
+
+```
+{
+    "status":"OK",
+    "message":"OK",
+    "code":0,
+    "data":{
+        "attribute":{
+            "nosql":[
+                "asset_id",
+                "ipaddress",
+                "port"
+        	]
+            "disk_attach":[
+                "asset_id"
+            ],
+
+        },
+        "resource":[
+            {
+                "id":"$zone",
+                "name":"$zone"
+            },
+            {
+                "id":"$region",
+                "name":"$region"
+            },
+            {
+                "id":"$instance.type",
+                "name":"$instance.type"
+            },
+            {
+                "id":"$instance.type.cpu",
+                "name":"$instance.type.cpu"
+            },
+            {
+                "id":"$instance.type.memory",
+                "name":"$instance.type.memory"
+            },
+            {
+                "id":"$resource",
+                "name":"$resource"
+            },
+            {
+                "id":"$resource.db_subnet_group",
+                "name":"$resource.db_subnet_group"
+            },
+
+        ]
+    }
+}
+```
+
+-----
+
+
+#### 资源属性列表
+##### list:
+
+url: /terraform/v1/configer/resourceAttr
+
+参数： "provider", “resource_type”
+
+输出：
+
+```
+{
+    "status":"OK",
+    "message":"OK",
+    "code":0,
+    "data":{
+        "attribute":{
+            "charge_type":{
+                "POSTPAID":"POSTPAID",
+                "PREPAID":"PREPAID"
+            },
+            "internet_service":{
+                "0":"0",
+                "1":"1"
+            }
+        },
+        "resource":[
+            {
+                "id":"charge_type",
+                "name":"charge_type"
+            },
+            {
+                "id":"engine",
+                "name":"engine"
+            }
+        ]
+    }
+}
+```
+
+-----
+

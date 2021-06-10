@@ -7,7 +7,7 @@ xml_register = {
             "path": "/terraform/v1/az/backend/region/apply",
             "method": "POST",
             "notnull": ["asset_id", "provider"],
-            "inputParameters": ['id', 'name', 'provider', 'asset_id', 'extend_info'],
+            "inputParameters": ['id', 'name', 'provider', 'asset_id', 'extend_info', 'secret'],
             "outputParameters": ["errorMessage", "errorCode", "id", "asset_id"]
         },
         "destroy": {
@@ -31,7 +31,7 @@ xml_register = {
             "path": "/terraform/v1/az/backend/zone/apply",
             "method": "POST",
             "notnull": ["asset_id", "provider"],
-            "inputParameters": ['id', 'name', 'provider', 'asset_id', "region_id", 'extend_info'],
+            "inputParameters": ['id', 'name', 'provider', 'asset_id', "region_id", 'extend_info', 'secret'],
             "outputParameters": ["errorMessage", "errorCode", "id", "asset_id"]
         },
         "destroy": {
