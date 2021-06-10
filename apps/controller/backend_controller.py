@@ -3,6 +3,8 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import copy
+import json
+import traceback
 from lib.logs import logger
 from core import validation
 from core.controller import BaseController
@@ -340,19 +342,41 @@ class BackendClient(object):
         resource_object = cls.get_resource_object(provider=provider_object["name"],
                                                   resource_name=resource.resource_name)
 
-        if cls.is_need_flush_list(data) and cls.is_pre_action(resource_object):
+        if cls.is_pre_action(resource_object):
+            logger.info("flush pre action ....")
             pre_results = cls.source_pre_action(rid, base_info, base_bodys, resource_object, data)
+            logger.info("pre action result : %s" % (json.dumps(pre_results)))
             query_datas = cls.filter_data(data, pre_results)
 
             result = []
             for query_data in query_datas:
-                x_res = cls.one_query(resource, rid, query_data, base_info, base_bodys)
+                try:
+                    logger.info("try query %s" % (json.dumps(query_data)))
+                    x_res = cls.one_query(resource, rid, query_data, base_info, base_bodys)
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.info("data: %s flush source after list, filter data error, may skip ..." % (json.dumps(query_data)))
+                    x_res = []
                 result += x_res
 
             return result
         else:
             return cls.source_query_datas(resource=resource, rid=rid, data=data,
                                           base_info=base_info, base_bodys=base_bodys)
+
+        # if cls.is_need_flush_list(data) and cls.is_pre_action(resource_object):
+        #     pre_results = cls.source_pre_action(rid, base_info, base_bodys, resource_object, data)
+        #     query_datas = cls.filter_data(data, pre_results)
+        #
+        #     result = []
+        #     for query_data in query_datas:
+        #         x_res = cls.one_query(resource, rid, query_data, base_info, base_bodys)
+        #         result += x_res
+        #
+        #     return result
+        # else:
+        #     return cls.source_query_datas(resource=resource, rid=rid, data=data,
+        #                                   base_info=base_info, base_bodys=base_bodys)
 
     @classmethod
     def query(cls, resource, data, **kwargs):
