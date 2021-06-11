@@ -202,13 +202,13 @@ class ResBase(object):
             description = "common" if isinstance(columns, list) else columns.get(key)
 
             if key == "password":
-                x = '<parameter datatype="string" mappingType="entity" required="N" sensitiveData="Y" description="%s">password</parameter>' % description
+                x = '<parameter datatype="string" mappingType="context" required="N" sensitiveData="Y" description="%s">password</parameter>' % description
             else:
                 if key in notnull:
-                    x = '<parameter datatype="string" mappingType="entity" required="Y" description="%s">%s</parameter>' % (
+                    x = '<parameter datatype="string" mappingType="context" required="Y" description="%s">%s</parameter>' % (
                         description, key)
                 else:
-                    x = '<parameter datatype="string" mappingType="entity" required="N" description="%s">%s</parameter>' % (
+                    x = '<parameter datatype="string" mappingType="context" required="N" description="%s">%s</parameter>' % (
                         description, key)
 
             result += x
