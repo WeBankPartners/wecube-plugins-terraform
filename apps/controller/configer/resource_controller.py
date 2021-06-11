@@ -50,8 +50,8 @@ def get_columns(defines):
                 result.append(key)
                 result += get_columns(defines.get("define"))
             else:
-                tkey = define.get("convert") or key
-                result.append(tkey)
+                # tkey = define.get("convert") or key
+                result.append(key)
         else:
             pass
 
