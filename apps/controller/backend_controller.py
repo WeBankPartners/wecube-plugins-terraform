@@ -435,7 +435,7 @@ class BackendDeleteController(BaseController):
     def main_response(self, request, data, **kwargs):
         rid = data.pop("id", None)
         result = self.resource.destroy(rid)
-        return {"id": result}
+        return {"count": result, "id": rid}
 
 
 class BackendSourceController(BaseController):
