@@ -70,7 +70,7 @@ xml_register = {
             "path": "/terraform/v1/network/backend/vpc/source",
             "method": "POST",
             "notnull": ["region_id", "provider"],
-            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'name', 'tag', 'cidr', 'id'],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'cidr', 'id'],
             "outputParameters": ['errorCode', 'errorMessage', 'name', 'cidr', 'asset_id', "region_id", 'secret',
                                  'provider']
         },
@@ -95,7 +95,7 @@ xml_register = {
             "path": "/terraform/v1/network/backend/subnet/source",
             "method": "POST",
             "notnull": ["region_id", "provider"],
-            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', "zone_id", 'cidr', 'tag', 'vpc_id', "id"],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', "zone_id", 'cidr', 'vpc_id', "id"],
             "outputParameters": ["region_id", 'secret', 'provider', 'errorCode', 'name', "zone_id", 'asset_id', 'vpc_id',
                                  'cidr', 'errorMessage']
         }
@@ -120,7 +120,7 @@ xml_register = {
             "path": "/terraform/v1/network/backend/route_table/source",
             "method": "POST",
             "notnull": ["region_id", "provider"],
-            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'name', 'tag', 'vpc_id', "id"],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', "id"],
             "outputParameters": ["region_id", 'secret', 'provider', 'name', 'asset_id', 'errorMessage', 'errorCode',
                                  'vpc_id']
         }
@@ -146,7 +146,7 @@ xml_register = {
             "path": "/terraform/v1/network/backend/route_entry/source",
             "method": "POST",
             "notnull": ["region_id", "provider"],
-            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'route_table_id', 'cidr', 'type', "id"],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'route_table_id', "id"],
             "outputParameters": ["region_id", 'secret', 'provider', 'next_hub', 'asset_id', 'errorMessage',
                                  'errorCode', 'name', 'destination', 'next_type', 'route_table_id']
         }
@@ -171,8 +171,7 @@ xml_register = {
             "path": "/terraform/v1/network/backend/peer_connection/source",
             "method": "POST",
             "notnull": ["region_id", "provider"],
-            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'name', 'vpc_id', 'peer_vpc_id',
-                                'peer_region', "id"],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id',  'peer_vpc_id', "id"],
             "outputParameters": ["region_id", 'secret', 'provider', 'name', 'asset_id', 'errorMessage', 'errorCode',
                                  'vpc_id', 'peer_vpc_id', 'peer_region']
         }
@@ -197,7 +196,7 @@ xml_register = {
             "path": "/terraform/v1/network/backend/security_group/source",
             "method": "POST",
             "notnull": ["region_id", "provider"],
-            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'name', 'vpc_id', 'tag', 'id'],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'name', 'id'],
             "outputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'errorMessage', 'errorCode', 'name',
                                  'vpc_id']
         }
@@ -223,7 +222,7 @@ xml_register = {
             "path": "/terraform/v1/network/backend/security_group_rule/source",
             "method": "POST",
             "notnull": ["region_id", "provider"],
-            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'vpc_id', 'name', 'security_group_id'],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'security_group_id'],
             "outputParameters":["region_id", 'secret', 'provider', 'asset_id', 'errorMessage',
                                 'errorCode', 'name', 'security_group_id', 'type', 'cidr_ip',
                                 'ip_protocol', 'ports', 'policy', 'description',
@@ -250,8 +249,7 @@ xml_register = {
             "path": "/terraform/v1/network/backend/nat/source",
             "method": "POST",
             "notnull": ["region_id", "provider"],
-            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'name',
-                                'id', 'type', 'tag', 'vpc_id'],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'name','id'],
             "outputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'errorMessage', 'errorCode', 'name',
                                  'vpc_id', 'eip', 'ipaddress', 'bandwidth']
         }
@@ -276,7 +274,7 @@ xml_register = {
             "path": "/terraform/v1/network/backend/eip/source",
             "method": "POST",
             "notnull": ["region_id", "provider"],
-            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'name', 'ipaddress', 'tag', 'id'],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id',  'ipaddress', 'id'],
             "outputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'errorMessage', 'errorCode', 'name',
                                  'ipaddress', "charge_type"]
         }
@@ -318,7 +316,7 @@ xml_register = {
             "path": "/terraform/v1/network/backend/ccn/source",
             "method": "POST",
             "notnull": ["region_id", "provider"],
-            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'name', 'id'],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'id'],
             "outputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'errorMessage', 'errorCode', 'name']
         }
     },
@@ -377,7 +375,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["region_id", "provider"],
             "inputParameters": ["region_id", 'secret', 'provider', 'asset_id',
-                                'name', 'instance_id', 'type', 'tag', "zone_id", "id"],
+                                'name', 'instance_id', "id"],
             "outputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'errorMessage', 'errorCode', 'name',
                                  'type', 'size', "zone_id", "charge_type", "instance_id"]
         }
@@ -419,7 +417,7 @@ xml_register = {
             "path": "/terraform/v1/storage/backend/object_storage/source",
             "method": "POST",
             "notnull": ["region_id", "provider"],
-            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'name', 'tag'],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id'],
             "outputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'errorMessage', 'errorCode', 'name',
                                  'acl', 'url']
         }
@@ -445,8 +443,7 @@ xml_register = {
             "path": "/terraform/v1/vm/backend/instance/source",
             "method": "POST",
             "notnull": ["region_id", "provider"],
-            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'ipaddress', 'public_ip', "zone_id",
-                                'image_id', 'tag', 'vpc_id', 'subnet_id', 'id'],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'ipaddress', 'id'],
             "outputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'errorMessage', 'errorCode', 'name',
                                  'subnet_id', 'hostname', 'ipaddress', 'image', 'instance_type', 'disk_type',
                                  'disk_size', 'password', 'security_group_id', 'vpc_id', 'data_disks', "zone_id",
@@ -473,8 +470,7 @@ xml_register = {
             "path": "/terraform/v1/storage/backend/network_interface/source",
             "method": "POST",
             "notnull": ["region_id", "provider"],
-            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'name', 'vpc_id', 'subnet_id', 'tag',
-                                'ipaddress', 'public_ip', 'id'],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'id'],
             "outputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'errorMessage', 'errorCode', 'name',
                                  'ipaddress', 'vpc_id', 'subnet_id', 'security_group_id']
         }
@@ -516,8 +512,7 @@ xml_register = {
             "path": "/terraform/v1/loadbalance/backend/lb/source",
             "method": "POST",
             "notnull": ["region_id", "provider"],
-            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'name', 'vpc_id', 'subnet_id', 'tag',
-                                'ipaddress', "id"],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'name', "id"],
             "outputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'errorMessage', 'errorCode', 'name',
                                  'network_type', 'vpc_id', 'subnet_id', 'ipaddress', "charge_type"]
         }
@@ -543,7 +538,7 @@ xml_register = {
             "path": "/terraform/v1/loadbalance/backend/lb_listener/source",
             "method": "POST",
             "notnull": ["region_id", "provider"],
-            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'lb_id', 'tag', 'id'],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'lb_id', 'id'],
             "outputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'errorMessage', 'errorCode',
                                  'name', 'lb_id', 'port', 'protocol', 'health_check', 'health_check_uri',
                                  'default_action']
@@ -570,7 +565,7 @@ xml_register = {
             "path": "/terraform/v1/loadbalance/backend/lb_rule/source",
             "method": "POST",
             "notnull": ["region_id", "provider"],
-            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'listener_id', 'lb_id', 'name', 'id'],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'listener_id', 'lb_id', 'id'],
             "outputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'errorMessage', 'errorCode',
                                  'name', 'lb_id', 'listener_id', "region_id", "zone_id",
                                  'security_group_id', 'frontend_port']
@@ -597,7 +592,7 @@ xml_register = {
             "method": "POST",
             "notnull": ["region_id", "provider"],
             "inputParameters": ["region_id", 'secret', 'provider', "id",
-                                'asset_id', 'instance_id', 'lb_id', 'name'],
+                                'asset_id', 'instance_id', 'lb_id'],
             "outputParameters": ["region_id", 'secret', 'provider', 'asset_id',
                                  'errorMessage', 'errorCode', 'name',
                                  'lb_id', 'instance_id', "region_id", "zone_id", 'port']
@@ -653,8 +648,7 @@ xml_register = {
             "path": "/terraform/v1/database/backend/mysql/source",
             "method": "POST",
             "notnull": ["region_id", "provider"],
-            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'ipaddress', 'port', 'engine', 'version',
-                                'name', 'vpc_id', 'subnet_id', 'tag', "id"],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'ipaddress', "id"],
             "outputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'errorMessage', 'errorCode', 'name',
                                  'subnet_id', 'user', 'password', 'port', 'disk_type', 'disk_size', 'version',
                                  'instance_type', 'vpc_id', 'security_group_id', 'second_slave_zone',
@@ -750,7 +744,7 @@ xml_register = {
             "path": "/terraform/v1/database/backend/db_subnet_group/source",
             "method": "POST",
             "notnull": ["region_id", "provider"],
-            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'name', 'subnet_id', 'id'],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'id'],
             "outputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'errorMessage', 'errorCode', 'name',
                                  'subnet_id', "zone_id", ]
         }
@@ -777,8 +771,7 @@ xml_register = {
             "path": "/terraform/v1/database/backend/redis/source",
             "method": "POST",
             "notnull": ["region_id", "provider"],
-            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'ipaddress', 'port', 'engine', 'version',
-                                'name', 'vpc_id', 'subnet_id', 'tag', "id"],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', "id"],
             "outputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'errorMessage', 'errorCode', 'name',
                                  'subnet_id',  'password', 'port', 'version',
                                  'instance_type', 'vpc_id', 'security_group_id',  "zone_id", 'ipaddress', "charge_type"]
