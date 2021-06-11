@@ -21,6 +21,8 @@ class TypeFormat(object):
             except:
                 if value.startswith("{"):
                     return eval(value)
+                if value.startswith("["):
+                    return eval(value)
 
                 raise ValueError()
 

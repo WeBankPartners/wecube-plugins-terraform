@@ -17,7 +17,7 @@ def validate_convert_key(defines):
                              "'property: {}'")
 
         if isinstance(define, dict):
-            if define.get("type", "string") not in ["string", "json", "int", "float", "list", "bool"]:
+            if define.get("type", "string") not in ["string", "json", "int", "float", "list", "bool", "object"]:
                 raise ValueError("未知的类型约束 %s" % define.get("type"))
             if define.get("allow_null", 1) not in [0, 1, '0', '1']:
                 raise ValueError("allow_null 合法值为 0/1")
@@ -36,7 +36,7 @@ def validate_convert_value(defines):
                              "或json:{'type': <type>, 'value':<value>}")
 
         if isinstance(define, dict):
-            if define.get("type", "string") not in ["string", "json", "int", "float", "list", "bool"]:
+            if define.get("type", "string") not in ["string", "json", "int", "float", "list", "bool", "object"]:
                 raise ValueError("未知的类型约束 %s" % define.get("type"))
 
 
@@ -79,6 +79,11 @@ def validate_type(value, type):
             value = json.loads(value)
         except:
             raise ValueError("%s 不是json" % value)
+    elif (type == "object") and (not isinstance(value, dict)):
+        try:
+            value = json.loads(value)
+        except:
+            raise ValueError("%s 不是object" % value)
     elif (type == "list") and (not isinstance(value, list)):
         try:
             if isinstance(value, basestring):
@@ -369,8 +374,8 @@ def convert_extend_propertys(datas, extend_info, is_update=False):
 def _format_type(value, type):
     if type == "string":
         value = str(value)
-    elif type == "json":
-        if not isinstance(value, list):
+    elif type in ["json", "object"]:
+        if not isinstance(value, dict):
             try:
                 value = json.loads(value)
             except Exception, e:

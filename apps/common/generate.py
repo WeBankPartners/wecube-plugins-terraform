@@ -25,7 +25,7 @@ def generate_data(value, model):
             return True
         else:
             raise ValueError("不合法的bool类型值 %s" % value)
-    elif type == "json":
+    elif type in ["json", "object"]:
         if isinstance(value, dict):
             return value
         else:

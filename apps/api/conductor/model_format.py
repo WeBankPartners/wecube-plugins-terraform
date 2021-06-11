@@ -30,6 +30,8 @@ class ModelFormat(object):
             value = TypeFormat.f_float(value)
         elif (type == "json") and (not isinstance(value, dict)):
             value = TypeFormat.f_dict(value)
+        elif (type == "object") and (not isinstance(value, dict)):
+            value = TypeFormat.f_dict(value)
         elif (type == "list") and (not isinstance(value, list)):
             value = TypeFormat.f_list(value)
         elif (type == "bool") and (not isinstance(value, bool)):
