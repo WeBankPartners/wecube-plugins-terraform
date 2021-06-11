@@ -232,6 +232,9 @@ class BackendClient(object):
                 if result.get("zone") and (result.get("zone") not in register_zones):
                     logger.info("resource: %s ,zone: %s searched not in register zone, skip it" % (
                         result.get("id"), result.get("zone")))
+                elif result.get("zone_id") and (result.get("zone_id") not in register_zones):
+                    logger.info("resource: %s ,zone id: %s searched not in register zone, skip it" % (
+                        result.get("id"), result.get("zone_id")))
                 elif result.get("id") and result.get("id") in ignore_resources:
                     logger.info("ignore_resources skip id: %s" % (result.get("id")))
                 else:
@@ -355,7 +358,8 @@ class BackendClient(object):
                     x_res = cls.one_query(resource, rid, query_data, base_info, base_bodys)
                 except:
                     logger.info(traceback.format_exc())
-                    logger.info("data: %s flush source after list, filter data error, may skip ..." % (json.dumps(query_data)))
+                    logger.info(
+                        "data: %s flush source after list, filter data error, may skip ..." % (json.dumps(query_data)))
                     x_res = []
                 result += x_res
 
