@@ -15,6 +15,7 @@ import route_entry_controller
 import security_group_controller
 import security_group_rule_controller
 import peer_connection_controller
+import ip_group_controller
 
 from route_entry_controller import RouteEntryController
 from route_entry_controller import RouteEntryIdController
@@ -37,6 +38,10 @@ urlpatterns = [
     url(r'^backend/vpc/apply$', vpc_controller.VPCAddController()),
     url(r'^backend/vpc/destroy$', vpc_controller.VPCDeleteController()),
     url(r'^backend/vpc/source$', vpc_controller.VPCSourceController()),
+
+    url(r'^backend/ip_group/apply$', ip_group_controller.IpGroupAddController()),
+    url(r'^backend/ip_group/destroy$', ip_group_controller.IpGroupDeleteController()),
+    url(r'^backend/ip_group/source$', ip_group_controller.IpGroupSourceController()),
 
     url(r'^subnet$', subnet_controller.SubnetController()),
     url(r'^subnet/(?P<rid>[\w-]+)$', subnet_controller.SubnetIdController()),

@@ -229,6 +229,31 @@ xml_register = {
                                 'from_port', 'to_port', 'priority', 'nic_type']
         }
     },
+    "ipaddress_group": {
+        "apply": {
+            "path": "/terraform/v1/network/backend/ip_group/apply",
+            "method": "POST",
+            "notnull": ['name', 'provider',  "region_id"],
+            "inputParameters": ['id', 'name', 'secret', 'provider', "addresses", "zone_id", "region_id",
+                                'asset_id', 'extend_info'],
+            "outputParameters": ["errorMessage", "errorCode", "id", "asset_id"]
+        },
+        "destroy": {
+            "path": "/terraform/v1/network/backend/ip_group/destroy",
+            "method": "POST",
+            "notnull": ["id"],
+            "inputParameters": ["id"],
+            "outputParameters": ["errorMessage", "errorCode", "id"]
+        },
+        "query": {
+            "path": "/terraform/v1/network/backend/ip_group/source",
+            "method": "POST",
+            "notnull": ["region_id", "provider"],
+            "inputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'name', 'id'],
+            "outputParameters": ["region_id", 'secret', 'provider', 'asset_id', 'errorMessage', 'errorCode', 'name',
+                                 'addresses']
+        }
+    },
     "nat": {
         "apply": {
             "path": "/terraform/v1/network/backend/nat/apply",

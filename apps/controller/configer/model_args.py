@@ -42,6 +42,10 @@ resouce_property_models = {
         "ip_protocol",
         "ports"
     ],
+    "ipaddress_group": [
+        "name",
+        "addresses"
+    ],
     "nat": [
         "name",
         "vpc_id",
@@ -359,6 +363,9 @@ output_property_models = {
     "route_entry": [
         "asset_id"
     ],
+    "ipaddress_group": [
+        "asset_id"
+    ],
     "security_group": [
         "asset_id"
     ],
@@ -516,6 +523,10 @@ data_source_models = {
     "route_entry": [
         "asset_id",
         "route_table_id"
+    ],
+    "ipaddress_group": [
+        "asset_id",
+        "name",
     ],
     "security_group": [
         "asset_id",
