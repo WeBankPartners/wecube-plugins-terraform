@@ -890,6 +890,58 @@
         </outputParameters>
       </interface>
     </plugin>
+    <plugin name="ipaddress_group">
+      <interface action="destroy" path="/terraform/v1/network/backend/ip_group/destroy" httpMethod="POST" description="common">
+        <inputParameters>
+          <parameter datatype="string" mappingType="context" required="Y" description="common">id</parameter>
+        </inputParameters>
+        <outputParameters>
+          <parameter datatype="string" description="common">errorMessage</parameter>
+          <parameter datatype="string" description="common">errorCode</parameter>
+          <parameter datatype="string" description="common">id</parameter>
+        </outputParameters>
+      </interface>
+      <interface action="apply" path="/terraform/v1/network/backend/ip_group/apply" httpMethod="POST" description="aws,tencentcloud,alicloud">
+        <inputParameters>
+          <parameter datatype="string" mappingType="context" required="N" description="common">zone_id</parameter>
+          <parameter datatype="string" mappingType="context" required="N" description="common">id</parameter>
+          <parameter datatype="string" mappingType="context" required="N" description="common">asset_id</parameter>
+          <parameter datatype="string" mappingType="context" required="Y" description="common">region_id</parameter>
+          <parameter datatype="string" mappingType="context" required="N" description="common">name</parameter>
+          <parameter datatype="string" mappingType="context" required="N" description="common">addresses</parameter>
+          <parameter datatype="string" mappingType="context" required="N" description="common">secret</parameter>
+          <parameter datatype="string" mappingType="context" required="N" description="common">extend_info</parameter>
+          <parameter datatype="string" mappingType="context" required="Y" description="common">provider</parameter>
+        </inputParameters>
+        <outputParameters>
+          <parameter datatype="string" description="common">asset_id</parameter>
+          <parameter datatype="string" description="common">errorCode</parameter>
+          <parameter datatype="string" description="common">errorMessage</parameter>
+          <parameter datatype="string" description="common">id</parameter>
+        </outputParameters>
+      </interface>
+      <interface action="query" path="/terraform/v1/network/backend/ip_group/source" httpMethod="POST" description="aws,tencentcloud,alicloud">
+        <inputParameters>
+          <parameter datatype="string" mappingType="context" required="N" description="common">asset_id</parameter>
+          <parameter datatype="string" mappingType="context" required="N" description="common">name</parameter>
+          <parameter datatype="string" mappingType="context" required="N" description="common">secret</parameter>
+          <parameter datatype="string" mappingType="context" required="Y" description="common">provider</parameter>
+          <parameter datatype="string" mappingType="context" required="N" description="common">id</parameter>
+          <parameter datatype="string" mappingType="context" required="Y" description="common">region_id</parameter>
+        </inputParameters>
+        <outputParameters>
+          <parameter datatype="string" description="common">region_id</parameter>
+          <parameter datatype="string" description="common">errorCode</parameter>
+          <parameter datatype="string" description="common">id</parameter>
+          <parameter datatype="string" description="common">addresses</parameter>
+          <parameter datatype="string" description="common">asset_id</parameter>
+          <parameter datatype="string" description="common">secret</parameter>
+          <parameter datatype="string" description="common">provider</parameter>
+          <parameter datatype="string" description="common">errorMessage</parameter>
+          <parameter datatype="string" description="common">name</parameter>
+        </outputParameters>
+      </interface>
+    </plugin>
     <plugin name="instance">
       <interface action="destroy" path="/terraform/v1/vm/backend/instance/destroy" httpMethod="POST" description="common">
         <inputParameters>
