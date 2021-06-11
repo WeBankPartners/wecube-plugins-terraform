@@ -1713,7 +1713,7 @@
           <parameter datatype="string" mappingType="context" required="N" description="common">resource_id</parameter>
           <parameter datatype="string" mappingType="context" required="N" description="common">id</parameter>
           <parameter datatype="string" mappingType="context" required="N" description="[tencentcloud N]">targets</parameter>
-          <parameter datatype="string" mappingType="context" required="N" description="common,[alicloud Y],[aws Y],[tencentcloud N]">backend_servers</parameter>
+          <parameter datatype="object" mappingType="context" required="N" description="common,[alicloud Y],[aws Y],[tencentcloud N]">backend_servers</parameter>
           <parameter datatype="string" mappingType="context" required="N" description="common">zone_id</parameter>
           <parameter datatype="string" mappingType="context" required="N" description="common">asset_id</parameter>
           <parameter datatype="string" mappingType="context" required="N" description="common">name</parameter>
