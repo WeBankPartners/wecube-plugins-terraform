@@ -130,3 +130,21 @@ func TemplateValueBatchUpdate(c *gin.Context) {
 	}
 	return
 }
+
+func TemplateValueListByParameter(c *gin.Context) {
+	parameterId := c.Param("parameterId")
+	if parameterId == "" {
+		middleware.ReturnParamValidateError(c, fmt.Errorf("Url param pluginId can not be empty"))
+		return
+	}
+	rowData, err := db.TemplateValueListByParameter(parameterId)
+	if err != nil {
+		middleware.ReturnServerHandleError(c, err)
+	} else {
+		if len(rowData) == 0 {
+			rowData = []*models.TemplateValueTable{}
+		}
+		middleware.ReturnData(c, rowData)
+	}
+	return
+}

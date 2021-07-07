@@ -65,6 +65,7 @@ func init() {
 		&handlerFuncObj{Url: "/template_value/:templateValueId", Method: "PUT", HandlerFunc: template.TemplateValueUpdate, LogOperation: true},
 		&handlerFuncObj{Url: "/template_value", Method: "DELETE", HandlerFunc: template.TemplateValueBatchDelete, LogOperation: true},
 		&handlerFuncObj{Url: "/template_value", Method: "PUT", HandlerFunc: template.TemplateValueBatchUpdate, LogOperation: true},
+		&handlerFuncObj{Url: "/template_values/:parameterId", Method: "GET", HandlerFunc: template.TemplateValueListByParameter},
 
 		&handlerFuncObj{Url: "/parameters", Method: "POST", HandlerFunc: parameter.ParameterBatchCreate, LogOperation: true},
 		&handlerFuncObj{Url: "/parameters", Method: "GET", HandlerFunc: parameter.ParameterList},
