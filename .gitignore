@@ -1,0 +1,15 @@
+# IDEA
+.idea
+.editorconfig
+.vscode
+
+
+# dependencies
+*/node_modules/
+*/node/
+*/build
+*/package-lock.json
+*/build
+.DS_Store
+terraform-server/logs
+*.swp

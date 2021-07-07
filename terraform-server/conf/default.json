@@ -1,0 +1,38 @@
+{
+  "default_language": "en",
+  "http_server": {
+    "port": "8999",
+    "cross": true
+  },
+  "log": {
+    "level": "debug",
+    "log_dir": "logs",
+    "access_log_enable": true,
+    "db_log_enable": true,
+    "archive_max_size": 64,
+    "archive_max_backup": 10,
+    "archive_max_day": 15,
+    "compress": true
+  },
+  "database": {
+    "server": "127.0.0.1",
+    "port": "3306",
+    "user": "root",
+    "password": "root",
+    "database": "terraform",
+    "maxOpen": 50,
+    "maxIdle": 10,
+    "timeout": 60
+  },
+  "rsa_key_path": "/data/certs/rsa_key",
+  "wecube": {
+    "base_url": "",
+    "jwt_signing_key": "",
+    "sub_system_code": "",
+    "sub_system_key": ""
+  },
+  "auth": {
+    "password_seed": ""
+  },
+  "terraform_file_path": "/data/terraform/"
+}
