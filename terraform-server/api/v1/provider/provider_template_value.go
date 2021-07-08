@@ -141,7 +141,7 @@ func ProviderTemplateValueListByTemplate(c *gin.Context) {
 		middleware.ReturnServerHandleError(c, err)
 	} else {
 		if len(rowData) == 0 {
-			rowData = []*models.ProviderTemplateValueTable{}
+			rowData = []*models.TemplateValueQuery{}
 		}
 		middleware.ReturnData(c, rowData)
 	}

@@ -135,14 +135,42 @@ func ProviderTemplateValueBatchUpdate(user string, param []*models.ProviderTempl
 	return
 }
 
-func ProviderTemplateValueListByTemplate(templateName string) (rowData []*models.ProviderTemplateValueTable, err error) {
-	sqlCmd := "SELECT * FROM provider_template_value t1 LEFT JOIN template_value t2 on t1.template_value=t2.id LEFT JOIN template t3 on " +
-		"t2.template=t3.name WHERE t3.name=? ORDER BY t1.create_time DESC"
+func ProviderTemplateValueListByTemplate(templateName string) (rowData []*models.TemplateValueQuery, err error) {
+	sqlCmd := "SELECT * FROM template_value WHERE template=? ORDER BY create_time DESC"
 	paramArgs := []interface{}{}
 	paramArgs = append(paramArgs, templateName)
-	err = x.SQL(sqlCmd, paramArgs...).Find(&rowData)
+	var templateValueList []*models.TemplateValueQuery
+	err = x.SQL(sqlCmd, paramArgs...).Find(&templateValueList)
+	if err != nil {
+		log.Logger.Error("Get template_value list by template error", log.String("template", templateName), log.Error(err))
+		return
+	}
+	if len(templateValueList) == 0 {
+		log.Logger.Warn("template_value list can not be found by template", log.String("template", templateName))
+		return
+	}
+
+	m := make(map[string]*models.TemplateValueQuery)
+	for i := range templateValueList {
+		m[templateValueList[i].Id] = templateValueList[i]
+	}
+
+	sqlCmd = "SELECT t1.id AS providerTemplateValueId,t1.value AS providerTemplateValue,t1.provider AS provider,t2.id " +
+		"AS templateValueId,t2.value AS templateValue,t2.template AS templateName FROM provider_template_value t1 LEFT " +
+		"JOIN template_value t2 on t1.template_value=t2.id LEFT JOIN template t3 on t2.template=t3.name WHERE t3.name=? ORDER BY t1.create_time DESC"
+	sqlOrArgs := []interface{}{sqlCmd, templateName}
+	providerTemplateValueList, err := x.QueryString(sqlOrArgs...)
 	if err != nil {
 		log.Logger.Error("Get provider_template_value list by template error", log.String("template", templateName), log.Error(err))
+		return
+	}
+	for _, ptv := range providerTemplateValueList {
+		templateValueInfo := m[ptv["templateValueId"]]
+		if _, ok := templateValueInfo.ProviderTemplateValueInfo[ptv["provider"]]; !ok {
+			templateValueInfo.ProviderTemplateValueInfo[ptv["provider"]] = make(map[string]string)
+		}
+		templateValueInfo.ProviderTemplateValueInfo[ptv["provider"]]["id"] = ptv["providerTemplateValueId"]
+		templateValueInfo.ProviderTemplateValueInfo[ptv["provider"]]["value"] = ptv["providerTemplateValue"]
 	}
 	return
 }
