@@ -3,10 +3,11 @@ package api
 import (
 	"bytes"
 	"fmt"
-	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/api/v1/resource_data"
 	"io/ioutil"
 	"net/http"
 	"time"
+
+	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/api/v1/resource_data"
 
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/api/middleware"
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/api/v1/interfaces"
@@ -124,6 +125,10 @@ func init() {
 	// resource_data
 	httpHandlerFuncList = append(httpHandlerFuncList,
 		&handlerFuncObj{Url: "/resource_datas", Method: "POST", HandlerFunc: resource_data.ResourceDataBatchCreate, LogOperation: true},
+		&handlerFuncObj{Url: "/resource_datas", Method: "GET", HandlerFunc: resource_data.ResourceDataList},
+		&handlerFuncObj{Url: "/resource_data", Method: "DELETE", HandlerFunc: resource_data.ResourceDataBatchDelete, LogOperation: true},
+		&handlerFuncObj{Url: "/resource_data", Method: "PUT", HandlerFunc: resource_data.ResourceDataBatchUpdate, LogOperation: true},
+
 		&handlerFuncObj{Url: "/:plugin/:action", Method: "POST", HandlerFunc: resource_data.TerraformOperation, LogOperation: true},
 	)
 }

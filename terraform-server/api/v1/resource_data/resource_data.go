@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"reflect"
+	"strings"
 )
 
 func ResourceDataBatchCreate(c *gin.Context) {
@@ -25,6 +26,54 @@ func ResourceDataBatchCreate(c *gin.Context) {
 	} else {
 		middleware.ReturnData(c, rowData)
 	}
+}
+
+func ResourceDataList(c *gin.Context) {
+	paramsMap := make(map[string]interface{})
+	rowData, err := db.ResourceDataList(paramsMap)
+	if err != nil {
+		middleware.ReturnServerHandleError(c, err)
+	} else {
+		if len(rowData) == 0 {
+			rowData = []*models.ResourceDataTable{}
+		}
+		middleware.ReturnData(c, rowData)
+	}
+	return
+}
+
+func ResourceDataBatchDelete(c *gin.Context) {
+	ids := c.Query("ids")
+	trimIds := strings.Trim(ids, ",")
+	param := strings.Split(trimIds, ",")
+	if len(param) == 0 {
+		middleware.ReturnParamEmptyError(c, "ids")
+		return
+	}
+	err := db.ResourceDataBatchDelete(param)
+	if err != nil {
+		middleware.ReturnServerHandleError(c, err)
+	} else {
+		middleware.ReturnSuccess(c)
+	}
+	return
+}
+
+func ResourceDataBatchUpdate(c *gin.Context) {
+	var param []*models.ResourceDataTable
+	var err error
+	if err = c.ShouldBindJSON(&param); err != nil {
+		middleware.ReturnParamValidateError(c, err)
+		return
+	}
+	user := middleware.GetRequestUser(c)
+	err = db.ResourceDataBatchUpdate(user, param)
+	if err != nil {
+		middleware.ReturnServerHandleError(c, err)
+	} else {
+		middleware.ReturnSuccess(c)
+	}
+	return
 }
 
 func TerraformOperation(c *gin.Context) {
