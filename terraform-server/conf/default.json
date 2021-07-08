@@ -34,5 +34,6 @@
   "auth": {
     "password_seed": ""
   },
-  "terraform_file_path": "/data/terraform/"
+  "terraform_file_path": "/data/terraform/",
+  "terraform_cmd_path": "/usr/local/bin/terraform"
 }

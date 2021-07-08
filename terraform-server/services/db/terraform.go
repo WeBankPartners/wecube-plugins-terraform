@@ -1,159 +1,315 @@
 package db
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
+	"os"
+	"os/exec"
+	"strconv"
+	"strings"
+
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/common-lib/cipher"
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/common/log"
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/models"
-	"os"
-	"strings"
 )
 
-func GenProviderFile(providerName string, filePath string, region string) (err error) {
-	file, err := os.OpenFile(filePath, os.O_CREATE, 0666)
+func GenFile(content []byte, filePath string) (err error) {
+	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		log.Logger.Error("open file error", log.String("file", filePath), log.Error(err))
 		return
 	}
 	defer file.Close()
+
+	_, err = file.Write(content)
+	if err != nil {
+		log.Logger.Error("write file error", log.String("file", filePath), log.Error(err))
+	}
+	return
+	/*
+		// test
+		param["test1"] = "param"
+		test2 := []int{1, 2, 3}
+		param["test2"] = test2
+		test3 := make(map[string]interface{})
+		test3["aa"] = true
+		test3["bb"] = false
+		test3["cc"] = []int{11,22,33}
+		param["test3"] = test3
+		// ans, err := json.Marshal(param)
+		ans, err := json.MarshalIndent(param, "", "    ")
+		fmt.Printf("%v", string(ans))
+	*/
+	return
+}
+
+func TerraformImport(dirPath, address, resourceId string) (err error) {
+	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " import " + address + " " + resourceId
+	cmd := exec.Command(cmdStr)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	cmdErr := cmd.Run()
+	if cmdErr != nil {
+		err = fmt.Errorf("cmd:%s run failed with %s", cmdStr, cmdErr.Error())
+		log.Logger.Error("cmd run failed", log.String("cmd", cmdStr), log.Error(cmdErr))
+	}
+	return
+}
+
+func TerraformPlan(dirPath string) (destroyCnt int, err error) {
+	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " plan -out=" + dirPath + "/planfile"
+	cmd := exec.Command(cmdStr)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	cmdErr := cmd.Run()
+	if cmdErr != nil {
+		err = fmt.Errorf("cmd:%s run failed with %s", cmdStr, cmdErr.Error())
+		log.Logger.Error("cmd run failed", log.String("cmd", cmdStr), log.Error(cmdErr))
+		return
+	}
+	//outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
+	filePath := dirPath + "/planfile"
+	planFile, err := os.Open(filePath)
+	if err != nil {
+		log.Logger.Error("open planfile error", log.String("planfile", filePath), log.Error(err))
+		return
+	}
+	defer planFile.Close()
+
+	// 每行读取
+	scanner := bufio.NewScanner(planFile)
+	for scanner.Scan() {
+		if strings.Contains(scanner.Text(), "Plan:") && strings.Contains(scanner.Text(), "to add") && strings.Contains(scanner.Text(), "to change") && strings.Contains(scanner.Text(), "to destroy") {
+			// 获取 to destroy 前面的数值
+			planStr := scanner.Text()
+			idx := strings.Index(planStr, "to destroy")
+			sIdx, eIdx := -1, -1
+			for idx >= 0 {
+				if planStr[idx] >= '0' && planStr[idx] <= '9' {
+					break
+				}
+				eIdx = idx
+				idx--
+			}
+			for idx >= 0 {
+				if planStr[idx] >= '0' && planStr[idx] <= '9' {
+					sIdx = idx
+					idx--
+				} else {
+					break
+				}
+			}
+			if sIdx != -1 && eIdx != -1 {
+				destroyNumStr := planStr[sIdx:eIdx]
+				destroyCnt, err = strconv.Atoi(destroyNumStr)
+				if err != nil {
+					err = fmt.Errorf("plan text:%s error", planStr)
+					log.Logger.Error("plan text error", log.String("planText", planStr), log.Error(err))
+				}
+			} else {
+				err = fmt.Errorf("plan text:%s error", planStr)
+				log.Logger.Error("plan text error", log.String("planText", planStr), log.Error(err))
+			}
+			return
+		}
+	}
+	return
+}
+
+func TerraformApply(dirPath string) (err error) {
+	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " apply -auto-approve"
+	cmd := exec.Command(cmdStr)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	cmdErr := cmd.Run()
+	if cmdErr != nil {
+		err = fmt.Errorf("cmd:%s run failed with %s", cmdStr, cmdErr.Error())
+		log.Logger.Error("cmd run failed", log.String("cmd", cmdStr), log.Error(cmdErr))
+	}
+	return
+}
+
+func TerraformDestroy(dirPath string) (err error) {
+	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " destroy -auto-approve"
+	cmd := exec.Command(cmdStr)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	cmdErr := cmd.Run()
+	if cmdErr != nil {
+		err = fmt.Errorf("cmd:%s run failed with %s", cmdStr, cmdErr.Error())
+		log.Logger.Error("cmd run failed", log.String("cmd", cmdStr), log.Error(cmdErr))
+	}
 	return
 }
 
 func TerraformOperation(plugin string, action string, param map[string]interface{}) (rowData []*interface{}, err error) {
-	// Get source list by plugin and action
-	sqlCmd := `SELECT * FROM source WHERE plugin=? AND action=?`
-	paramArgs := []interface{}{}
-	paramArgs = append(paramArgs, plugin)
-	paramArgs = append(paramArgs, action)
-	var sourceList []*models.SourceTable
-	err = x.SQL(sqlCmd, paramArgs...).Find(&sourceList)
-	if err != nil {
-		log.Logger.Error("Get source list error", log.Error(err))
-		return
-	}
-	if len(sourceList) == 0 {
-		err = fmt.Errorf("source list can not be found by plugin:%s and action:%s", plugin, action)
-		log.Logger.Warn("source list can not be found by plugin and action", log.String("plugin", plugin), log.String("action", action), log.Error(err))
-		return
-	}
-
-	// Get tf_argument_list by source_list
-	sourceIdList := []string{}
-	for i := range sourceList {
-		sourceIdList = append(sourceIdList, sourceList[i].Id)
-	}
-	sourceIdStr := strings.Join(sourceIdList, "','")
-	sqlCmd = "SELECT * FROM tf_argument WHERE source IN ('" + sourceIdStr + "')"
-	var tfArgumentList []*models.TfArgumentTable
-	err = x.SQL(sqlCmd).Find(&tfArgumentList)
-	if err != nil {
-		log.Logger.Error("Get tf_argument list error", log.Error(err))
-		return
-	}
-	if len(tfArgumentList) == 0 {
-		err = fmt.Errorf("tf_argument list can not be found by source:%s", sourceIdList)
-		log.Logger.Warn("tf_argument list can not be found by source", log.String("source", sourceIdStr), log.Error(err))
-		return
-	}
-
-	// Get providerInfo data
-	sqlCmd = `SELECT * FROM provider_info WHERE id=?`
-	paramArgs = []interface{}{}
-	paramArgs = append(paramArgs, param["providerInfoId"])
-	var providerInfoList []*models.ProviderInfoTable
-	err = x.SQL(sqlCmd, paramArgs...).Find(&providerInfoList)
-	if err != nil {
-		log.Logger.Error("Get providerInfo error", log.String("providerInfoId", param["providerInfoId"].(string)), log.Error(err))
-		return
-	}
-	if len(providerInfoList) == 0 {
-		err = fmt.Errorf("providerInfo can not be found by id:%s", param["providerInfoId"])
-		log.Logger.Warn("providerInfo can not be found by id", log.String("id", param["providerInfoId"].(string)), log.Error(err))
-		return
-	}
-	providerInfoData := providerInfoList[0]
-	providerSecretId, decodeErr := cipher.AesDePassword(models.Config.Auth.PasswordSeed, providerInfoData.SecretId)
-	if decodeErr != nil {
-		log.Logger.Error("Try to decode secretId fail", log.Error(decodeErr))
-		return
-	}
-	providerSecretKey, decodeErr := cipher.AesDePassword(models.Config.Auth.PasswordSeed, providerInfoData.SecretKey)
-	if decodeErr != nil {
-		log.Logger.Error("Try to decode secretKey fail", log.Error(decodeErr))
-		return
-	}
-
-	// Get provider data
-	sqlCmd = `SELECT * FROM provider WHERE id=?`
-	paramArgs = []interface{}{}
-	paramArgs = append(paramArgs, providerInfoData.Provider)
-	var providerList []*models.ProviderTable
-	err = x.SQL(sqlCmd, paramArgs...).Find(&providerList)
-	if err != nil {
-		log.Logger.Error("Get provider error", log.String("providerId", providerInfoData.Provider), log.Error(err))
-		return
-	}
-	if len(providerList) == 0 {
-		err = fmt.Errorf("provider can not be found by id:%s", providerInfoData.Provider)
-		log.Logger.Warn("provider can not be found by id", log.String("id", providerInfoData.Provider), log.Error(err))
-		return
-	}
-	providerData := providerList[0]
-	// providerVersion := providerList[0].Version
-
-	// Get region data
-	sqlCmd = `SELECT * FROM resource_data WHERE id=?`
-	paramArgs = []interface{}{}
-	paramArgs = append(paramArgs, param["regionId"])
-	var regionList []*models.ResourceDataTable
-	err = x.SQL(sqlCmd, paramArgs...).Find(&regionList)
-	if err != nil {
-		log.Logger.Error("Get region data error", log.String("regionId", param["regionId"].(string)), log.Error(err))
-		return
-	}
-	if len(regionList) == 0 {
-		err = fmt.Errorf("region can not be found by id:%s", param["regionId"])
-		log.Logger.Warn("region can not be found by id", log.String("id", param["regionId"].(string)), log.Error(err))
-		return
-	}
-	regionData := regionList[0]
-
-	fmt.Printf("%v, %v, %v", providerSecretId, providerSecretKey, regionData)
-	tfArguments := make(map[string]interface{})
-	// 循环处理每一个 tf_argument
-	for i := range tfArgumentList {
-		convertWay := tfArgumentList[i].ConvertWay
-		var arg interface{}
-		switch convertWay {
-		case "data":
-			arg, err = convertData(tfArgumentList[i].Parameter, tfArgumentList[i].Source)
-		case "template":
-			arg, err = convertTemplate(tfArgumentList[i].Parameter, providerData.Name)
-		case "context":
-			arg, err = convertContext(tfArgumentList[i].Parameter, tfArgumentList[i].Name)
-		case "pipe":
-			sourceIdList := make(map[string]bool)
-			for i := range sourceList {
-				sourceIdList[sourceList[i].Id] = true
-			}
-			handlingSourceIds := make(map[string]bool)
-			handlingSourceIds[tfArgumentList[i].Source] = true
-			arg, err = convertPipe(tfArgumentList[i].TfstateAttribute, sourceIdList, handlingSourceIds, providerData.Name)
-		case "default":
-			arg, err = convertDefault(tfArgumentList[i].Parameter, tfArgumentList[i].DefaultValue)
-		}
+	if action == "apply" {
+		// Get source list by plugin and action
+		sqlCmd := `SELECT * FROM source WHERE plugin=? AND action=?`
+		paramArgs := []interface{}{}
+		paramArgs = append(paramArgs, plugin)
+		paramArgs = append(paramArgs, action)
+		var sourceList []*models.SourceTable
+		err = x.SQL(sqlCmd, paramArgs...).Find(&sourceList)
 		if err != nil {
-			log.Logger.Error("convert parameter:%s error", log.String("parameterId", tfArgumentList[i].Parameter), log.Error(err))
+			log.Logger.Error("Get source list error", log.Error(err))
 			return
 		}
-		tfArguments[tfArgumentList[i].Name]	= arg
-		if convertWay == "default" && arg.(string) == "null" {
-			delete(tfArguments, tfArgumentList[i].Name)
+		if len(sourceList) == 0 {
+			err = fmt.Errorf("source list can not be found by plugin:%s and action:%s", plugin, action)
+			log.Logger.Warn("source list can not be found by plugin and action", log.String("plugin", plugin), log.String("action", action), log.Error(err))
+			return
+		}
+
+		// Get tf_argument_list by source_list
+		sourceIdList := []string{}
+		for i := range sourceList {
+			sourceIdList = append(sourceIdList, sourceList[i].Id)
+		}
+		sourceIdStr := strings.Join(sourceIdList, "','")
+		sqlCmd = "SELECT * FROM tf_argument WHERE source IN ('" + sourceIdStr + "')"
+		var tfArgumentList []*models.TfArgumentTable
+		err = x.SQL(sqlCmd).Find(&tfArgumentList)
+		if err != nil {
+			log.Logger.Error("Get tf_argument list error", log.Error(err))
+			return
+		}
+		if len(tfArgumentList) == 0 {
+			err = fmt.Errorf("tf_argument list can not be found by source:%s", sourceIdList)
+			log.Logger.Warn("tf_argument list can not be found by source", log.String("source", sourceIdStr), log.Error(err))
+			return
+		}
+
+		// Get providerInfo data
+		sqlCmd = `SELECT * FROM provider_info WHERE id=?`
+		paramArgs = []interface{}{}
+		paramArgs = append(paramArgs, param["providerInfoId"])
+		var providerInfoList []*models.ProviderInfoTable
+		err = x.SQL(sqlCmd, paramArgs...).Find(&providerInfoList)
+		if err != nil {
+			log.Logger.Error("Get providerInfo error", log.String("providerInfoId", param["providerInfoId"].(string)), log.Error(err))
+			return
+		}
+		if len(providerInfoList) == 0 {
+			err = fmt.Errorf("providerInfo can not be found by id:%s", param["providerInfoId"])
+			log.Logger.Warn("providerInfo can not be found by id", log.String("id", param["providerInfoId"].(string)), log.Error(err))
+			return
+		}
+		providerInfoData := providerInfoList[0]
+		providerSecretId, decodeErr := cipher.AesDePassword(models.Config.Auth.PasswordSeed, providerInfoData.SecretId)
+		if decodeErr != nil {
+			log.Logger.Error("Try to decode secretId fail", log.Error(decodeErr))
+			return
+		}
+		providerSecretKey, decodeErr := cipher.AesDePassword(models.Config.Auth.PasswordSeed, providerInfoData.SecretKey)
+		if decodeErr != nil {
+			log.Logger.Error("Try to decode secretKey fail", log.Error(decodeErr))
+			return
+		}
+
+		// Get provider data
+		sqlCmd = `SELECT * FROM provider WHERE id=?`
+		paramArgs = []interface{}{}
+		paramArgs = append(paramArgs, providerInfoData.Provider)
+		var providerList []*models.ProviderTable
+		err = x.SQL(sqlCmd, paramArgs...).Find(&providerList)
+		if err != nil {
+			log.Logger.Error("Get provider error", log.String("providerId", providerInfoData.Provider), log.Error(err))
+			return
+		}
+		if len(providerList) == 0 {
+			err = fmt.Errorf("provider can not be found by id:%s", providerInfoData.Provider)
+			log.Logger.Warn("provider can not be found by id", log.String("id", providerInfoData.Provider), log.Error(err))
+			return
+		}
+		providerData := providerList[0]
+		// providerVersion := providerList[0].Version
+
+		// Get region data
+		sqlCmd = `SELECT * FROM resource_data WHERE id=?`
+		paramArgs = []interface{}{}
+		paramArgs = append(paramArgs, param["regionId"])
+		var regionList []*models.ResourceDataTable
+		err = x.SQL(sqlCmd, paramArgs...).Find(&regionList)
+		if err != nil {
+			log.Logger.Error("Get region data error", log.String("regionId", param["regionId"].(string)), log.Error(err))
+			return
+		}
+		if len(regionList) == 0 {
+			err = fmt.Errorf("region can not be found by id:%s", param["regionId"])
+			log.Logger.Warn("region can not be found by id", log.String("id", param["regionId"].(string)), log.Error(err))
+			return
+		}
+		regionData := regionList[0]
+
+		fmt.Printf("%v, %v, %v", providerSecretId, providerSecretKey, regionData)
+		tfArguments := make(map[string]interface{})
+		// 循环处理每一个 tf_argument
+		for i := range tfArgumentList {
+			convertWay := tfArgumentList[i].ConvertWay
+			var arg interface{}
+			switch convertWay {
+			case "data":
+				arg, err = convertData(tfArgumentList[i].Parameter, tfArgumentList[i].Source)
+			case "template":
+				arg, err = convertTemplate(tfArgumentList[i].Parameter, providerData.Name)
+			case "context":
+				arg, err = convertContext(tfArgumentList[i].Parameter, tfArgumentList[i].Name)
+			case "pipe":
+				sourceIdList := make(map[string]bool)
+				for i := range sourceList {
+					sourceIdList[sourceList[i].Id] = true
+				}
+				handlingSourceIds := make(map[string]bool)
+				handlingSourceIds[tfArgumentList[i].Source] = true
+				arg, err = convertPipe(tfArgumentList[i].TfstateAttribute, sourceIdList, handlingSourceIds, providerData.Name)
+			case "default":
+				arg, err = convertDefault(tfArgumentList[i].Parameter, tfArgumentList[i].DefaultValue)
+			}
+			if err != nil {
+				log.Logger.Error("convert parameter:%s error", log.String("parameterId", tfArgumentList[i].Parameter), log.Error(err))
+				return
+			}
+			tfArguments[tfArgumentList[i].Name] = arg
+			if convertWay == "default" && arg.(string) == "null" {
+				delete(tfArguments, tfArgumentList[i].Name)
+			}
+		}
+		var dirPath, address, resourceId string
+		// terraform import
+		err = TerraformImport(dirPath, address, resourceId)
+		if err != nil {
+
+		}
+		// terraform plan
+		destroyCnt, err := TerraformPlan(dirPath)
+		if err != nil {
+
+		}
+		if destroyCnt > 0 {
+			// 二次确认
+		}
+
+		// terraform apply
+		err = TerraformApply(dirPath)
+		if err != nil {
+
+		}
+	} else if action == "destroy" {
+		var dirPath string
+		// terraform destroy
+		err = TerraformDestroy(dirPath)
+		if err != nil {
+
 		}
 	}
 	return
 }
-
 
 func convertData(parameterId string, source string) (arg interface{}, err error) {
 	sqlCmd := `SELECT * FROM parameter WHERE id=?`
@@ -308,7 +464,7 @@ func convertPipe(tfstateAttributeId string, sourceIdList map[string]bool, handli
 			log.Logger.Error("convert parameter:%s error", log.String("parameterId", tfArgumentList[i].Parameter), log.Error(err))
 			return
 		}
-		tfArguments[tfArgumentList[i].Name]	= arg
+		tfArguments[tfArgumentList[i].Name] = arg
 		if convertWay == "default" && arg.(string) == "null" {
 			delete(tfArguments, tfArgumentList[i].Name)
 		}

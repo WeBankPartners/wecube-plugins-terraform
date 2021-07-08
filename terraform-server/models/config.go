@@ -68,6 +68,7 @@ type GlobalConfig struct {
 	MenuApiMap           MenuApiMapConfig              `json:"menu_api_map"`
 	DefaultReportObjAttr []*DefaultReportObjAttrConfig `json:"default_report_obj_attr"`
 	TerraformFilePath    string                        `json:"terraform_file_path"`
+	TerraformCmdPath     string                        `json:"terraform_cmd_path"`
 	// default json
 }
 
