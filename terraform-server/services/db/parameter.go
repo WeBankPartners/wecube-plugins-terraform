@@ -12,11 +12,11 @@ import (
 func ParameterCreate(param *models.ParameterTable) (rowData *models.ParameterTable, err error) {
 	id := guid.CreateGuid()
 	createTime := time.Now().Format(models.DateTimeFormat)
-	_, err = x.Exec("INSERT INTO parameter(id,name,type,reference_type,interface,template,value,create_user,create_time) VALUE (?,?,?,?,?,?,?,?,?)",
-		id, param.Name, param.Type, param.ReferenceType, param.Interface, param.Template, param.Value, param.CreateUser, createTime)
+	_, err = x.Exec("INSERT INTO parameter(id,name,type,multiple,interface,template,datatype,object_name,create_user,create_time) VALUE (?,?,?,?,?,?,?,?,?,?)",
+		id, param.Name, param.Type, param.Multiple, param.Interface, param.Template, param.DataType, param.ObjectName, param.CreateUser, createTime)
 
-	rowData = &models.ParameterTable{Id: id, Name: param.Name, Type: param.Type, ReferenceType: param.ReferenceType, Interface: param.Interface,
-		Template: param.Template, Value: param.Value, CreateUser: param.CreateUser, CreateTime: createTime}
+	rowData = &models.ParameterTable{Id: id, Name: param.Name, Type: param.Type, Multiple: param.Multiple, Interface: param.Interface,
+		Template: param.Template, DataType: param.DataType, ObjectName: param.ObjectName, CreateUser: param.CreateUser, CreateTime: createTime}
 
 	if err != nil {
 		err = fmt.Errorf("Try to create parameter fail,%s ", err.Error())
@@ -64,8 +64,8 @@ func ParameterUpdate(parameterId string, param *models.ParameterTable) (err erro
 		return
 	}
 	updateTime := time.Now().Format(models.DateTimeFormat)
-	_, err = x.Exec("UPDATE parameter SET name=?,type=?,reference_type=?,interface=?,template=?,value=?,update_time=?,update_user=? WHERE id=?",
-		param.Name, param.Type, param.ReferenceType, param.Interface, param.Template, param.Value, updateTime, param.UpdateUser, parameterId)
+	_, err = x.Exec("UPDATE parameter SET name=?,type=?,multiple=?,interface=?,template=?,datatype=?,object_name=?,update_time=?,update_user=? WHERE id=?",
+		param.Name, param.Type, param.Multiple, param.Interface, param.Template, param.DataType, param.ObjectName, updateTime, param.UpdateUser, parameterId)
 	return
 }
 
@@ -76,8 +76,8 @@ func ParameterBatchCreate(user string, param []*models.ParameterTable) (rowData 
 
 	for i := range param {
 		id := guid.CreateGuid()
-		data := &models.ParameterTable{Id: id, Name: param[i].Name, Type: param[i].Type, ReferenceType: param[i].ReferenceType,
-			Interface: param[i].Interface, Template: param[i].Template, Value: param[i].Value, CreateUser: user, CreateTime: createTime, UpdateTime: createTime}
+		data := &models.ParameterTable{Id: id, Name: param[i].Name, Type: param[i].Type, Multiple: param[i].Multiple,
+			Interface: param[i].Interface, Template: param[i].Template, DataType: param[i].DataType, ObjectName: param[i].ObjectName, CreateUser: user, CreateTime: createTime, UpdateTime: createTime}
 		rowData = append(rowData, data)
 	}
 

@@ -255,11 +255,11 @@ func TerraformOperation(plugin string, action string, param map[string]interface
 			var arg interface{}
 			switch convertWay {
 			case "data":
-				arg, err = convertData(tfArgumentList[i].Parameter, tfArgumentList[i].Source)
+				arg, err = convertData(tfArgumentList[i].Parameter, tfArgumentList[i].Source, param)
 			case "template":
-				arg, err = convertTemplate(tfArgumentList[i].Parameter, providerData.Name)
+				arg, err = convertTemplate(tfArgumentList[i].Parameter, providerData.Name, param)
 			case "context":
-				arg, err = convertContext(tfArgumentList[i].Parameter, tfArgumentList[i].Name)
+				arg, err = convertContext(tfArgumentList[i].Parameter, tfArgumentList[i].Name, param)
 			case "pipe":
 				sourceIdList := make(map[string]bool)
 				for i := range sourceList {
@@ -267,9 +267,9 @@ func TerraformOperation(plugin string, action string, param map[string]interface
 				}
 				handlingSourceIds := make(map[string]bool)
 				handlingSourceIds[tfArgumentList[i].Source] = true
-				arg, err = convertPipe(tfArgumentList[i].TfstateAttribute, sourceIdList, handlingSourceIds, providerData.Name)
+				arg, err = convertPipe(tfArgumentList[i].TfstateAttribute, sourceIdList, handlingSourceIds, providerData.Name, param)
 			case "default":
-				arg, err = convertDefault(tfArgumentList[i].Parameter, tfArgumentList[i].DefaultValue)
+				arg, err = convertDefault(tfArgumentList[i].Parameter, tfArgumentList[i].DefaultValue, param)
 			}
 			if err != nil {
 				log.Logger.Error("convert parameter:%s error", log.String("parameterId", tfArgumentList[i].Parameter), log.Error(err))
@@ -311,7 +311,7 @@ func TerraformOperation(plugin string, action string, param map[string]interface
 	return
 }
 
-func convertData(parameterId string, source string) (arg interface{}, err error) {
+func convertData(parameterId string, source string, reqParam map[string]interface{}) (arg interface{}, err error) {
 	sqlCmd := `SELECT * FROM parameter WHERE id=?`
 	paramArgs := []interface{}{}
 	paramArgs = append(paramArgs, parameterId)
@@ -331,23 +331,23 @@ func convertData(parameterId string, source string) (arg interface{}, err error)
 	sqlCmd = `SELECT * FROM resource_data WHERE source=? AND resource_id=?`
 	paramArgs = []interface{}{}
 	paramArgs = append(paramArgs, source)
-	paramArgs = append(paramArgs, parameterData.Value)
+	paramArgs = append(paramArgs, reqParam[parameterData.Name])
 	var resourceDataList []*models.ResourceDataTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataList)
 	if err != nil {
-		log.Logger.Error("Get resource_data error", log.String("source", source), log.String("resource_id", parameterData.Value), log.Error(err))
+		log.Logger.Error("Get resource_data error", log.String("source", source), log.String("resource_id", reqParam[parameterData.Name].(string)), log.Error(err))
 		return
 	}
 	if len(resourceDataList) == 0 {
-		err = fmt.Errorf("resource_data can not be found by source:%s and resource_id:%s", source, parameterData.Value)
-		log.Logger.Warn("resource_data can not be found by source and resource_id", log.String("source", source), log.String("value", parameterData.Value), log.Error(err))
+		err = fmt.Errorf("resource_data can not be found by source:%s and resource_id:%s", source, reqParam[parameterData.Name])
+		log.Logger.Warn("resource_data can not be found by source and resource_id", log.String("source", source), log.String("value", reqParam[parameterData.Name].(string)), log.Error(err))
 		return
 	}
 	arg = resourceDataList[0].ResourceAssetId
 	return
 }
 
-func convertTemplate(parameterId string, provider string) (arg interface{}, err error) {
+func convertTemplate(parameterId string, provider string, reqParam map[string]interface{}) (arg interface{}, err error) {
 	sqlCmd := `SELECT * FROM parameter WHERE id=?`
 	paramArgs := []interface{}{}
 	paramArgs = append(paramArgs, parameterId)
@@ -367,7 +367,7 @@ func convertTemplate(parameterId string, provider string) (arg interface{}, err 
 	sqlCmd = `SELECT * FROM template_value WHERE template=? AND value=?`
 	paramArgs = []interface{}{}
 	paramArgs = append(paramArgs, parameterData.Template)
-	paramArgs = append(paramArgs, parameterData.Value)
+	paramArgs = append(paramArgs, reqParam[parameterData.Name])
 	var templateValueList []*models.TemplateValueTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&templateValueList)
 	if err != nil {
@@ -375,8 +375,8 @@ func convertTemplate(parameterId string, provider string) (arg interface{}, err 
 		return
 	}
 	if len(templateValueList) == 0 {
-		err = fmt.Errorf("template_value can not be found by template:%s and value:%s", parameterData.Template, parameterData.Value)
-		log.Logger.Warn("template_value can not be found by template and value", log.String("template", parameterData.Template), log.String("value", parameterData.Value), log.Error(err))
+		err = fmt.Errorf("template_value can not be found by template:%s and value:%s", parameterData.Template, reqParam[parameterData.Name])
+		log.Logger.Warn("template_value can not be found by template and value", log.String("template", parameterData.Template), log.String("value", reqParam[parameterData.Name].(string)), log.Error(err))
 		return
 	}
 	templateValueData := templateValueList[0]
@@ -399,7 +399,7 @@ func convertTemplate(parameterId string, provider string) (arg interface{}, err 
 	return
 }
 
-func convertPipe(tfstateAttributeId string, sourceIdList map[string]bool, handlingSourceIds map[string]bool, providerName string) (tfArguments map[string]interface{}, err error) {
+func convertPipe(tfstateAttributeId string, sourceIdList map[string]bool, handlingSourceIds map[string]bool, providerName string, reqParam map[string]interface{}) (tfArguments map[string]interface{}, err error) {
 	sqlCmd := `SELECT * FROM tfstate_attribute WHERE id=?`
 	paramArgs := []interface{}{}
 	paramArgs = append(paramArgs, tfstateAttributeId)
@@ -449,16 +449,16 @@ func convertPipe(tfstateAttributeId string, sourceIdList map[string]bool, handli
 		var arg interface{}
 		switch convertWay {
 		case "data":
-			arg, err = convertData(tfArgumentList[i].Parameter, tfArgumentList[i].Source)
+			arg, err = convertData(tfArgumentList[i].Parameter, tfArgumentList[i].Source, reqParam)
 		case "template":
-			arg, err = convertTemplate(tfArgumentList[i].Parameter, providerName)
+			arg, err = convertTemplate(tfArgumentList[i].Parameter, providerName, reqParam)
 		case "context":
-			arg, err = convertContext(tfArgumentList[i].Parameter, tfArgumentList[i].Name)
+			arg, err = convertContext(tfArgumentList[i].Parameter, tfArgumentList[i].Name, reqParam)
 		case "pipe":
 			handlingSourceIds[tfArgumentList[i].Source] = true
-			arg, err = convertPipe(tfArgumentList[i].TfstateAttribute, sourceIdList, handlingSourceIds, providerName)
+			arg, err = convertPipe(tfArgumentList[i].TfstateAttribute, sourceIdList, handlingSourceIds, providerName, reqParam)
 		case "default":
-			arg, err = convertDefault(tfArgumentList[i].Parameter, tfArgumentList[i].DefaultValue)
+			arg, err = convertDefault(tfArgumentList[i].Parameter, tfArgumentList[i].DefaultValue, reqParam)
 		}
 		if err != nil {
 			log.Logger.Error("convert parameter:%s error", log.String("parameterId", tfArgumentList[i].Parameter), log.Error(err))
@@ -472,7 +472,7 @@ func convertPipe(tfstateAttributeId string, sourceIdList map[string]bool, handli
 	return
 }
 
-func convertContext(parameterId string, tfArgumentName string) (arg interface{}, err error) {
+func convertContext(parameterId string, tfArgumentName string, reqParam map[string]interface{}) (arg interface{}, err error) {
 	sqlCmd := `SELECT * FROM parameter WHERE id=?`
 	paramArgs := []interface{}{}
 	paramArgs = append(paramArgs, parameterId)
@@ -489,12 +489,12 @@ func convertContext(parameterId string, tfArgumentName string) (arg interface{},
 	}
 	parameterData := parameterList[0]
 	if parameterData.Name == tfArgumentName {
-		arg = parameterData.Value
+		arg = reqParam[parameterData.Name]
 	}
 	return
 }
 
-func convertDefault(parameterId string, defaultValue string) (arg interface{}, err error) {
+func convertDefault(parameterId string, defaultValue string, reqParam map[string]interface{}) (arg interface{}, err error) {
 	sqlCmd := `SELECT * FROM parameter WHERE id=?`
 	paramArgs := []interface{}{}
 	paramArgs = append(paramArgs, parameterId)
@@ -510,12 +510,12 @@ func convertDefault(parameterId string, defaultValue string) (arg interface{}, e
 		return
 	}
 	parameterData := parameterList[0]
-	if parameterData.Value == "null" {
+	if reqParam[parameterData.Name] == "null" {
 		arg = "null"
-	} else if parameterData.Value == "" || parameterData.Value == "0" || parameterData.Value == "[]" {
+	} else if reqParam[parameterData.Name] == "" || reqParam[parameterData.Name] == "0" || reqParam[parameterData.Name] == "[]" {
 		arg = defaultValue
 	} else {
-		arg = parameterData.Value
+		arg = reqParam[parameterData.Name]
 	}
 	return
 }
