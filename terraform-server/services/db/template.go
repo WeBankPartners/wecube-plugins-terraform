@@ -137,8 +137,8 @@ func TemplateBatchUpdate(user string, param []*models.TemplateTable) (err error)
 }
 
 func TemplateListByPlugin(pluginId string) (rowData []*models.TemplateTable, err error) {
-	sqlCmd := "SELECT * FROM template t1 LEFT JOIN parameter t2 on t1.name=t2.template LEFT JOIN interface t3 on " +
-		"t2.interface=t3.id LEFT JOIN plugin t4 on t3.plugin=t4.name WHERE t4.id=? ORDER BY t1.create_time DESC"
+	sqlCmd := "SELECT t1.* FROM template t1 LEFT JOIN parameter t2 on t1.name=t2.template LEFT JOIN interface t3 on " +
+		"t2.interface=t3.id LEFT JOIN plugin t4 on t3.plugin=t4.name WHERE t4.id=? GROUP BY t1.id ORDER BY t1.create_time DESC"
 	paramArgs := []interface{}{}
 	paramArgs = append(paramArgs, pluginId)
 	err = x.SQL(sqlCmd, paramArgs...).Find(&rowData)

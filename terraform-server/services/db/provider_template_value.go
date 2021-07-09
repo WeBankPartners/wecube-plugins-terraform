@@ -152,10 +152,11 @@ func ProviderTemplateValueListByTemplate(templateName string) (rowData []*models
 
 	m := make(map[string]*models.TemplateValueQuery)
 	for i := range templateValueList {
+		templateValueList[i].ProviderTemplateValueInfo = make(map[string]map[string]string)
 		m[templateValueList[i].Id] = templateValueList[i]
 	}
 
-	sqlCmd = "SELECT t1.id AS providerTemplateValueId,t1.value AS providerTemplateValue,t1.provider AS provider,t2.id " +
+	sqlCmd = "SELECT t1.id AS providerTemplateValueId,t1.value AS providerTemplateValue,t1.provider AS provider,t1.create_time AS providerTemplateValueCreateTime,t1.create_user AS providerTemplateValueCreateUser,t2.id " +
 		"AS templateValueId,t2.value AS templateValue,t2.template AS templateName FROM provider_template_value t1 LEFT " +
 		"JOIN template_value t2 on t1.template_value=t2.id LEFT JOIN template t3 on t2.template=t3.name WHERE t3.name=? ORDER BY t1.create_time DESC"
 	sqlOrArgs := []interface{}{sqlCmd, templateName}
@@ -171,6 +172,9 @@ func ProviderTemplateValueListByTemplate(templateName string) (rowData []*models
 		}
 		templateValueInfo.ProviderTemplateValueInfo[ptv["provider"]]["id"] = ptv["providerTemplateValueId"]
 		templateValueInfo.ProviderTemplateValueInfo[ptv["provider"]]["value"] = ptv["providerTemplateValue"]
+		templateValueInfo.ProviderTemplateValueInfo[ptv["provider"]]["createTime"] = ptv["providerTemplateValueCreateTime"]
+		templateValueInfo.ProviderTemplateValueInfo[ptv["provider"]]["createUser"] = ptv["providerTemplateValueCreateUser"]
 	}
+	rowData = templateValueList
 	return
 }
