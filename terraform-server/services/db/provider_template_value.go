@@ -9,20 +9,6 @@ import (
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/models"
 )
 
-func ProviderTemplateValueCreate(param *models.ProviderTemplateValueTable) (rowData *models.ProviderTemplateValueTable, err error) {
-	id := guid.CreateGuid()
-	createTime := time.Now().Format(models.DateTimeFormat)
-	_, err = x.Exec("INSERT INTO provider_template_value(id,value,provider,template_value,create_user,create_time) VALUE (?,?,?,?,?,?)",
-		id, param.Value, param.Provider, param.TemplateValue, param.CreateUser, createTime)
-
-	rowData = &models.ProviderTemplateValueTable{Id: id, Value: param.Value, Provider: param.Provider, TemplateValue: param.TemplateValue, CreateUser: param.CreateUser, CreateTime: createTime}
-
-	if err != nil {
-		err = fmt.Errorf("Try to create providerTemplateValue fail,%s ", err.Error())
-	}
-	return
-}
-
 func ProviderTemplateValueList(paramsMap map[string]interface{}) (rowData []*models.ProviderTemplateValueTable, err error) {
 	sqlCmd := "SELECT * FROM provider_template_value WHERE 1=1"
 	paramArgs := []interface{}{}
@@ -35,36 +21,6 @@ func ProviderTemplateValueList(paramsMap map[string]interface{}) (rowData []*mod
 	if err != nil {
 		log.Logger.Error("Get providerTemplateValue list error", log.Error(err))
 	}
-	return
-}
-
-func ProviderTemplateValueDelete(providerTemplateValueId string) (err error) {
-	var providerTemplateValueList []*models.ProviderTemplateValueTable
-	err = x.SQL("SELECT id FROM provider_template_value WHERE id=?", providerTemplateValueId).Find(&providerTemplateValueList)
-	if err != nil {
-		log.Logger.Error("Try to query providerTemplateValue fail", log.String("providerTemplateValueId", providerTemplateValueId), log.Error(err))
-		return
-	}
-	if len(providerTemplateValueList) == 0 {
-		return
-	}
-	_, err = x.Exec("DELETE FROM provider_template_value WHERE id=?", providerTemplateValueId)
-	return
-}
-
-func ProviderTemplateValueUpdate(providerTemplateValueId string, param *models.ProviderTemplateValueTable) (err error) {
-	var providerTemplateValueList []*models.ProviderTemplateValueTable
-	err = x.SQL("SELECT id FROM provider_template_value WHERE id=?", providerTemplateValueId).Find(&providerTemplateValueList)
-	if err != nil {
-		log.Logger.Error("Try to query providerTemplateValue fail", log.String("providerTemplateValueId", providerTemplateValueId), log.Error(err))
-		return
-	}
-	if len(providerTemplateValueList) == 0 {
-		return
-	}
-	updateTime := time.Now().Format(models.DateTimeFormat)
-	_, err = x.Exec("UPDATE provider_template_value SET value=?,provider=?,template_value=?,update_time=?,update_user=? WHERE id=?",
-		param.Value, param.Provider, param.TemplateValue, updateTime, param.UpdateUser, providerTemplateValueId)
 	return
 }
 

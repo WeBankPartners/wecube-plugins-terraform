@@ -9,21 +9,6 @@ import (
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/models"
 )
 
-func ParameterCreate(param *models.ParameterTable) (rowData *models.ParameterTable, err error) {
-	id := guid.CreateGuid()
-	createTime := time.Now().Format(models.DateTimeFormat)
-	_, err = x.Exec("INSERT INTO parameter(id,name,type,multiple,interface,template,datatype,object_name,create_user,create_time) VALUE (?,?,?,?,?,?,?,?,?,?)",
-		id, param.Name, param.Type, param.Multiple, param.Interface, param.Template, param.DataType, param.ObjectName, param.CreateUser, createTime)
-
-	rowData = &models.ParameterTable{Id: id, Name: param.Name, Type: param.Type, Multiple: param.Multiple, Interface: param.Interface,
-		Template: param.Template, DataType: param.DataType, ObjectName: param.ObjectName, CreateUser: param.CreateUser, CreateTime: createTime}
-
-	if err != nil {
-		err = fmt.Errorf("Try to create parameter fail,%s ", err.Error())
-	}
-	return
-}
-
 func ParameterList(paramsMap map[string]interface{}) (rowData []*models.ParameterTable, err error) {
 	sqlCmd := "SELECT * FROM parameter WHERE 1=1"
 	paramArgs := []interface{}{}
@@ -36,36 +21,6 @@ func ParameterList(paramsMap map[string]interface{}) (rowData []*models.Paramete
 	if err != nil {
 		log.Logger.Error("Get parameter list error", log.Error(err))
 	}
-	return
-}
-
-func ParameterDelete(parameterId string) (err error) {
-	var parameterList []*models.ParameterTable
-	err = x.SQL("SELECT id FROM parameter WHERE id=?", parameterId).Find(&parameterList)
-	if err != nil {
-		log.Logger.Error("Try to query parameter fail", log.String("parameterId", parameterId), log.Error(err))
-		return
-	}
-	if len(parameterList) == 0 {
-		return
-	}
-	_, err = x.Exec("DELETE FROM parameter WHERE id=?", parameterId)
-	return
-}
-
-func ParameterUpdate(parameterId string, param *models.ParameterTable) (err error) {
-	var parameterList []*models.ParameterTable
-	err = x.SQL("SELECT id FROM parameter WHERE id=?", parameterId).Find(&parameterList)
-	if err != nil {
-		log.Logger.Error("Try to query parameter fail", log.String("parameterId", parameterId), log.Error(err))
-		return
-	}
-	if len(parameterList) == 0 {
-		return
-	}
-	updateTime := time.Now().Format(models.DateTimeFormat)
-	_, err = x.Exec("UPDATE parameter SET name=?,type=?,multiple=?,interface=?,template=?,datatype=?,object_name=?,update_time=?,update_user=? WHERE id=?",
-		param.Name, param.Type, param.Multiple, param.Interface, param.Template, param.DataType, param.ObjectName, updateTime, param.UpdateUser, parameterId)
 	return
 }
 

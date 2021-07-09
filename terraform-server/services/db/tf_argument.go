@@ -9,21 +9,6 @@ import (
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/models"
 )
 
-func TfArgumentCreate(param *models.TfArgumentTable) (rowData *models.TfArgumentTable, err error) {
-	id := guid.CreateGuid()
-	createTime := time.Now().Format(models.DateTimeFormat)
-	_, err = x.Exec("INSERT INTO tf_argument(id,name,source,parameter,tfstate_attribute,default_value,is_null,type,is_multi,convert_way,relative_parameter,relative_value,create_user,create_time) VALUE (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-		id, param.Name, param.Source, param.Parameter, param.TfstateAttribute, param.DefaultValue, param.IsNull, param.Type, param.IsMulti, param.ConvertWay, param.RelativeParameter, param.RelativeValue, param.CreateUser, createTime)
-
-	rowData = &models.TfArgumentTable{Id: id, Name: param.Name, Source: param.Source, Parameter: param.Parameter, TfstateAttribute: param.TfstateAttribute,
-		DefaultValue: param.DefaultValue, IsNull: param.IsNull, Type: param.Type, IsMulti: param.IsMulti, ConvertWay: param.ConvertWay, RelativeParameter: param.RelativeParameter, RelativeValue: param.RelativeValue, CreateUser: param.CreateUser, CreateTime: createTime}
-
-	if err != nil {
-		err = fmt.Errorf("Try to create tfArgument fail,%s ", err.Error())
-	}
-	return
-}
-
 func TfArgumentList(paramsMap map[string]interface{}) (rowData []*models.TfArgumentTable, err error) {
 	sqlCmd := "SELECT * FROM tf_argument WHERE 1=1"
 	paramArgs := []interface{}{}
@@ -36,36 +21,6 @@ func TfArgumentList(paramsMap map[string]interface{}) (rowData []*models.TfArgum
 	if err != nil {
 		log.Logger.Error("Get tfArgument list error", log.Error(err))
 	}
-	return
-}
-
-func TfArgumentDelete(tfArgumentId string) (err error) {
-	var tfArgumentList []*models.TfArgumentTable
-	err = x.SQL("SELECT id FROM tf_argument WHERE id=?", tfArgumentId).Find(&tfArgumentList)
-	if err != nil {
-		log.Logger.Error("Try to query tfArgument fail", log.String("tfArgumentId", tfArgumentId), log.Error(err))
-		return
-	}
-	if len(tfArgumentList) == 0 {
-		return
-	}
-	_, err = x.Exec("DELETE FROM tf_argument WHERE id=?", tfArgumentId)
-	return
-}
-
-func TfArgumentUpdate(tfArgumentId string, param *models.TfArgumentTable) (err error) {
-	var tfArgumentList []*models.TfArgumentTable
-	err = x.SQL("SELECT id FROM tf_argument WHERE id=?", tfArgumentId).Find(&tfArgumentList)
-	if err != nil {
-		log.Logger.Error("Try to query tfArgument fail", log.String("tfArgumentId", tfArgumentId), log.Error(err))
-		return
-	}
-	if len(tfArgumentList) == 0 {
-		return
-	}
-	updateTime := time.Now().Format(models.DateTimeFormat)
-	_, err = x.Exec("UPDATE tf_argument SET name=?,source=?,parameter=?,tfstate_attribute=?,default_value=?,is_null=?,type=?,is_multi=?,convert_way=?relative_parameter=?,relative_value=?,update_time=?,update_user=? WHERE id=?",
-		param.Name, param.Source, param.Parameter, param.TfstateAttribute, param.DefaultValue, param.IsNull, param.Type, param.IsMulti, param.ConvertWay, param.RelativeParameter, param.RelativeValue, updateTime, param.UpdateUser, tfArgumentId)
 	return
 }
 

@@ -9,20 +9,6 @@ import (
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/models"
 )
 
-func SourceCreate(param *models.SourceTable) (rowData *models.SourceTable, err error) {
-	id := guid.CreateGuid()
-	createTime := time.Now().Format(models.DateTimeFormat)
-	_, err = x.Exec("INSERT INTO source(id,name,plugin,provider,resource_asset_id_attribute,action,create_user,create_time) VALUE (?,?,?,?,?,?,?,?)",
-		id, param.Name, param.Plugin, param.Provider, param.ResourceAssetIdAttribute, param.Action, param.CreateUser, createTime)
-
-	rowData = &models.SourceTable{Id: id, Name: param.Name, Plugin: param.Plugin, Provider: param.Provider, ResourceAssetIdAttribute: param.ResourceAssetIdAttribute, Action: param.Action, CreateUser: param.CreateUser, CreateTime: createTime}
-
-	if err != nil {
-		err = fmt.Errorf("Try to create source fail,%s ", err.Error())
-	}
-	return
-}
-
 func SourceList(paramsMap map[string]interface{}) (rowData []*models.SourceTable, err error) {
 	sqlCmd := "SELECT * FROM source WHERE 1=1"
 	paramArgs := []interface{}{}
@@ -35,36 +21,6 @@ func SourceList(paramsMap map[string]interface{}) (rowData []*models.SourceTable
 	if err != nil {
 		log.Logger.Error("Get source list error", log.Error(err))
 	}
-	return
-}
-
-func SourceDelete(sourceId string) (err error) {
-	var sourceList []*models.SourceTable
-	err = x.SQL("SELECT id FROM source WHERE id=?", sourceId).Find(&sourceList)
-	if err != nil {
-		log.Logger.Error("Try to query source fail", log.String("sourceId", sourceId), log.Error(err))
-		return
-	}
-	if len(sourceList) == 0 {
-		return
-	}
-	_, err = x.Exec("DELETE FROM source WHERE id=?", sourceId)
-	return
-}
-
-func SourceUpdate(sourceId string, param *models.SourceTable) (err error) {
-	var sourceList []*models.SourceTable
-	err = x.SQL("SELECT id FROM source WHERE id=?", sourceId).Find(&sourceList)
-	if err != nil {
-		log.Logger.Error("Try to query source fail", log.String("sourceId", sourceId), log.Error(err))
-		return
-	}
-	if len(sourceList) == 0 {
-		return
-	}
-	updateTime := time.Now().Format(models.DateTimeFormat)
-	_, err = x.Exec("UPDATE source SET name=?,plugin=?,provider=?,resource_asset_id_attribute=?,action=?,update_time=?,update_user=? WHERE id=?",
-		param.Name, param.Plugin, param.Provider, param.ResourceAssetIdAttribute, param.Action, updateTime, param.UpdateUser, sourceId)
 	return
 }
 

@@ -9,21 +9,6 @@ import (
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/models"
 )
 
-func InterfaceCreate(param *models.InterfaceTable) (rowData *models.InterfaceTable, err error) {
-	id := guid.CreateGuid()
-	createTime := time.Now().Format(models.DateTimeFormat)
-	_, err = x.Exec("INSERT INTO interface(id,name,plugin,description,create_time,create_user) VALUE (?,?,?,?,?,?)",
-		id, param.Name, param.Plugin, param.Description, createTime, param.CreateUser)
-
-	rowData = &models.InterfaceTable{Id: id, Name: param.Name, Plugin: param.Plugin, Description: param.Description,
-		CreateTime: createTime, CreateUser: param.CreateUser}
-
-	if err != nil {
-		err = fmt.Errorf("Try to create interface fail,%s ", err.Error())
-	}
-	return
-}
-
 func InterfaceList(paramsMap map[string]interface{}) (rowData []*models.InterfaceTable, err error) {
 	sqlCmd := "SELECT * FROM interface WHERE 1=1"
 	paramArgs := []interface{}{}
@@ -36,36 +21,6 @@ func InterfaceList(paramsMap map[string]interface{}) (rowData []*models.Interfac
 	if err != nil {
 		log.Logger.Error("Get interface list error", log.Error(err))
 	}
-	return
-}
-
-func InterfaceDelete(interfaceId string) (err error) {
-	var interfaceList []*models.InterfaceTable
-	err = x.SQL("SELECT id FROM interface WHERE id=?", interfaceId).Find(&interfaceList)
-	if err != nil {
-		log.Logger.Error("Try to query interface fail", log.String("interfaceId", interfaceId), log.Error(err))
-		return
-	}
-	if len(interfaceList) == 0 {
-		return
-	}
-	_, err = x.Exec("DELETE FROM interface WHERE id=?", interfaceId)
-	return
-}
-
-func InterfaceUpdate(interfaceId string, param *models.InterfaceTable) (err error) {
-	var interfaceList []*models.InterfaceTable
-	err = x.SQL("SELECT id FROM interface WHERE id=?", interfaceId).Find(&interfaceList)
-	if err != nil {
-		log.Logger.Error("Try to query interface fail", log.String("interfaceId", interfaceId), log.Error(err))
-		return
-	}
-	if len(interfaceList) == 0 {
-		return
-	}
-	updateTime := time.Now().Format(models.DateTimeFormat)
-	_, err = x.Exec("UPDATE interface SET name=?,plugin=?,description=?,update_time=?,update_user=? WHERE id=?",
-		param.Name, param.Plugin, param.Description, updateTime, param.UpdateUser, interfaceId)
 	return
 }
 

@@ -10,24 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func TemplateCreate(c *gin.Context) {
-	var param models.TemplateTable
-	var err error
-	if err = c.ShouldBindJSON(&param); err != nil {
-		middleware.ReturnParamValidateError(c, err)
-		return
-	}
-	user := middleware.GetRequestUser(c)
-	param.CreateUser = user
-	rowData, err := db.TemplateCreate(&param)
-	if err != nil {
-		middleware.ReturnServerHandleError(c, err)
-	} else {
-		middleware.ReturnData(c, rowData)
-	}
-	return
-}
-
 func TemplateList(c *gin.Context) {
 	paramsMap := make(map[string]interface{})
 	rowData, err := db.TemplateList(paramsMap)
@@ -38,45 +20,6 @@ func TemplateList(c *gin.Context) {
 			rowData = []*models.TemplateTable{}
 		}
 		middleware.ReturnData(c, rowData)
-	}
-	return
-}
-
-func TemplateDelete(c *gin.Context) {
-	templateId := c.Param("templateId")
-
-	if templateId == "" {
-		middleware.ReturnParamValidateError(c, fmt.Errorf("Url param templateId can not be empty"))
-		return
-	}
-	err := db.TemplateDelete(templateId)
-	if err != nil {
-		middleware.ReturnServerHandleError(c, err)
-	} else {
-		middleware.ReturnSuccess(c)
-	}
-	return
-}
-
-func TemplateUpdate(c *gin.Context) {
-	var param models.TemplateTable
-	var err error
-	if err = c.ShouldBindJSON(&param); err != nil {
-		middleware.ReturnParamValidateError(c, err)
-		return
-	}
-	templateId := c.Param("templateId")
-	if templateId == "" {
-		middleware.ReturnParamValidateError(c, fmt.Errorf("Url param templateId can not be empty"))
-		return
-	}
-	user := middleware.GetRequestUser(c)
-	param.UpdateUser = user
-	err = db.TemplateUpdate(templateId, &param)
-	if err != nil {
-		middleware.ReturnServerHandleError(c, err)
-	} else {
-		middleware.ReturnSuccess(c)
 	}
 	return
 }

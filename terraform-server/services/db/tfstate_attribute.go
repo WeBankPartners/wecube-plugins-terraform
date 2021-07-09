@@ -9,21 +9,6 @@ import (
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/models"
 )
 
-func TfstateAttributeCreate(param *models.TfstateAttributeTable) (rowData *models.TfstateAttributeTable, err error) {
-	id := guid.CreateGuid()
-	createTime := time.Now().Format(models.DateTimeFormat)
-	_, err = x.Exec("INSERT INTO tfstate_attribute(id,name,source,parameter,default_value,is_null,type,is_multi,convert_way,relative_parameter,relative_value,create_user,create_time) VALUE (?,?,?,?,?,?,?,?,?,?,?,?,?)",
-		id, param.Name, param.Source, param.Parameter, param.DefaultValue, param.IsNull, param.Type, param.IsMulti, param.ConvertWay, param.RelativeParameter, param.RelativeValue, param.CreateUser, createTime)
-
-	rowData = &models.TfstateAttributeTable{Id: id, Name: param.Name, Source: param.Source, Parameter: param.Parameter, DefaultValue: param.DefaultValue,
-		IsNull: param.IsNull, Type: param.Type, IsMulti: param.IsMulti, ConvertWay: param.ConvertWay, RelativeParameter: param.RelativeParameter, RelativeValue: param.RelativeValue, CreateUser: param.CreateUser, CreateTime: createTime}
-
-	if err != nil {
-		err = fmt.Errorf("Try to create tfstateAttribute fail,%s ", err.Error())
-	}
-	return
-}
-
 func TfstateAttributeList(paramsMap map[string]interface{}) (rowData []*models.TfstateAttributeTable, err error) {
 	sqlCmd := "SELECT * FROM tfstate_attribute WHERE 1=1"
 	paramArgs := []interface{}{}
@@ -36,36 +21,6 @@ func TfstateAttributeList(paramsMap map[string]interface{}) (rowData []*models.T
 	if err != nil {
 		log.Logger.Error("Get tfstateAttribute list error", log.Error(err))
 	}
-	return
-}
-
-func TfstateAttributeDelete(tfstateAttributeId string) (err error) {
-	var tfstateAttributeList []*models.TfstateAttributeTable
-	err = x.SQL("SELECT id FROM tfstate_attribute WHERE id=?", tfstateAttributeId).Find(&tfstateAttributeList)
-	if err != nil {
-		log.Logger.Error("Try to query tfstateAttribute fail", log.String("tfstateAttributeId", tfstateAttributeId), log.Error(err))
-		return
-	}
-	if len(tfstateAttributeList) == 0 {
-		return
-	}
-	_, err = x.Exec("DELETE FROM tfstate_attribute WHERE id=?", tfstateAttributeId)
-	return
-}
-
-func TfstateAttributeUpdate(tfstateAttributeId string, param *models.TfstateAttributeTable) (err error) {
-	var tfstateAttributeList []*models.TfstateAttributeTable
-	err = x.SQL("SELECT id FROM tfstate_attribute WHERE id=?", tfstateAttributeId).Find(&tfstateAttributeList)
-	if err != nil {
-		log.Logger.Error("Try to query tfstateAttribute fail", log.String("tfstateAttributeId", tfstateAttributeId), log.Error(err))
-		return
-	}
-	if len(tfstateAttributeList) == 0 {
-		return
-	}
-	updateTime := time.Now().Format(models.DateTimeFormat)
-	_, err = x.Exec("UPDATE tfstate_attribute SET name=?,source=?,parameter=?,default_value=?,is_null=?,type=?,is_multi=?,convert_way=?relative_parameter=?,relative_value=?,update_time=?,update_user=? WHERE id=?",
-		param.Name, param.Source, param.Parameter, param.DefaultValue, param.IsNull, param.Type, param.IsMulti, param.ConvertWay, param.RelativeParameter, param.RelativeValue, updateTime, param.UpdateUser, tfstateAttributeId)
 	return
 }
 

@@ -9,21 +9,6 @@ import (
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/models"
 )
 
-func TemplateCreate(param *models.TemplateTable) (rowData *models.TemplateTable, err error) {
-	id := guid.CreateGuid()
-	createTime := time.Now().Format(models.DateTimeFormat)
-	_, err = x.Exec("INSERT INTO template(id,name,description,create_user,create_time) VALUE (?,?,?,?,?)",
-		id, param.Name, param.Description, param.CreateUser, createTime)
-
-	rowData = &models.TemplateTable{Id: id, Name: param.Name, Description: param.Description,
-		CreateUser: param.CreateUser, CreateTime: createTime}
-
-	if err != nil {
-		err = fmt.Errorf("Try to create template fail,%s ", err.Error())
-	}
-	return
-}
-
 func TemplateList(paramsMap map[string]interface{}) (rowData []*models.TemplateTable, err error) {
 	sqlCmd := "SELECT * FROM template WHERE 1=1"
 	paramArgs := []interface{}{}
@@ -36,36 +21,6 @@ func TemplateList(paramsMap map[string]interface{}) (rowData []*models.TemplateT
 	if err != nil {
 		log.Logger.Error("Get template list error", log.Error(err))
 	}
-	return
-}
-
-func TemplateDelete(templateId string) (err error) {
-	var templateList []*models.TemplateTable
-	err = x.SQL("SELECT id FROM template WHERE id=?", templateId).Find(&templateList)
-	if err != nil {
-		log.Logger.Error("Try to query template fail", log.String("templateId", templateId), log.Error(err))
-		return
-	}
-	if len(templateList) == 0 {
-		return
-	}
-	_, err = x.Exec("DELETE FROM template WHERE id=?", templateId)
-	return
-}
-
-func TemplateUpdate(templateId string, param *models.TemplateTable) (err error) {
-	var templateList []*models.TemplateTable
-	err = x.SQL("SELECT id FROM template WHERE id=?", templateId).Find(&templateList)
-	if err != nil {
-		log.Logger.Error("Try to query template fail", log.String("templateId", templateId), log.Error(err))
-		return
-	}
-	if len(templateList) == 0 {
-		return
-	}
-	updateTime := time.Now().Format(models.DateTimeFormat)
-	_, err = x.Exec("UPDATE template SET name=?,description=?,update_time=?,update_user=? WHERE id=?",
-		param.Name, param.Description, updateTime, param.UpdateUser, templateId)
 	return
 }
 

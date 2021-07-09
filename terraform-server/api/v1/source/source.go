@@ -1,7 +1,6 @@
 package source
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/api/middleware"
@@ -9,23 +8,6 @@ import (
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/services/db"
 	"github.com/gin-gonic/gin"
 )
-
-func SourceCreate(c *gin.Context) {
-	var param models.SourceTable
-	var err error
-	if err = c.ShouldBindJSON(&param); err != nil {
-		middleware.ReturnParamValidateError(c, err)
-		return
-	}
-	user := middleware.GetRequestUser(c)
-	param.CreateUser = user
-	rowData, err := db.SourceCreate(&param)
-	if err != nil {
-		middleware.ReturnServerHandleError(c, err)
-	} else {
-		middleware.ReturnData(c, rowData)
-	}
-}
 
 func SourceList(c *gin.Context) {
 	paramsMap := make(map[string]interface{})
@@ -37,45 +19,6 @@ func SourceList(c *gin.Context) {
 			rowData = []*models.SourceTable{}
 		}
 		middleware.ReturnData(c, rowData)
-	}
-	return
-}
-
-func SourceDelete(c *gin.Context) {
-	sourceId := c.Param("sourceId")
-
-	if sourceId == "" {
-		middleware.ReturnParamValidateError(c, fmt.Errorf("Url param sourceId can not be empty"))
-		return
-	}
-	err := db.SourceDelete(sourceId)
-	if err != nil {
-		middleware.ReturnServerHandleError(c, err)
-	} else {
-		middleware.ReturnSuccess(c)
-	}
-	return
-}
-
-func SourceUpdate(c *gin.Context) {
-	var param models.SourceTable
-	var err error
-	if err = c.ShouldBindJSON(&param); err != nil {
-		middleware.ReturnParamValidateError(c, err)
-		return
-	}
-	sourceId := c.Param("sourceId")
-	if sourceId == "" {
-		middleware.ReturnParamValidateError(c, fmt.Errorf("Url param sourceId can not be empty"))
-		return
-	}
-	user := middleware.GetRequestUser(c)
-	param.UpdateUser = user
-	err = db.SourceUpdate(sourceId, &param)
-	if err != nil {
-		middleware.ReturnServerHandleError(c, err)
-	} else {
-		middleware.ReturnSuccess(c)
 	}
 	return
 }

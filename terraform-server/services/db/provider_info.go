@@ -9,21 +9,6 @@ import (
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/models"
 )
 
-func ProviderInfoCreate(param *models.ProviderInfoTable) (rowData *models.ProviderInfoTable, err error) {
-	id := guid.CreateGuid()
-	createTime := time.Now().Format(models.DateTimeFormat)
-	_, err = x.Exec("INSERT INTO provider_info(id,name,provider,secret_id,secret_key,create_user,create_time) VALUE (?,?,?,?,?,?,?)",
-		id, param.Name, param.Provider, param.SecretId, param.SecretKey, param.CreateUser, createTime)
-
-	rowData = &models.ProviderInfoTable{Id: id, Name: param.Name, Provider: param.Provider, SecretId: param.SecretId,
-		SecretKey: param.SecretKey, CreateUser: param.CreateUser, CreateTime: createTime}
-
-	if err != nil {
-		err = fmt.Errorf("Try to create providerInfo fail,%s ", err.Error())
-	}
-	return
-}
-
 func ProviderInfoList(paramsMap map[string]interface{}) (rowData []*models.ProviderInfoTable, err error) {
 	sqlCmd := "SELECT * FROM provider_info WHERE 1=1"
 	paramArgs := []interface{}{}
@@ -36,36 +21,6 @@ func ProviderInfoList(paramsMap map[string]interface{}) (rowData []*models.Provi
 	if err != nil {
 		log.Logger.Error("Get providerInfo list error", log.Error(err))
 	}
-	return
-}
-
-func ProviderInfoDelete(providerInfoId string) (err error) {
-	var providerInfoList []*models.ProviderInfoTable
-	err = x.SQL("SELECT id FROM provider_info WHERE id=?", providerInfoId).Find(&providerInfoList)
-	if err != nil {
-		log.Logger.Error("Try to query providerInfo fail", log.String("providerInfoId", providerInfoId), log.Error(err))
-		return
-	}
-	if len(providerInfoList) == 0 {
-		return
-	}
-	_, err = x.Exec("DELETE FROM provider_info WHERE id=?", providerInfoId)
-	return
-}
-
-func ProviderInfoUpdate(providerInfoId string, param *models.ProviderInfoTable) (err error) {
-	var providerInfoList []*models.ProviderInfoTable
-	err = x.SQL("SELECT id FROM provider_info WHERE id=?", providerInfoId).Find(&providerInfoList)
-	if err != nil {
-		log.Logger.Error("Try to query providerInfo fail", log.String("providerInfoId", providerInfoId), log.Error(err))
-		return
-	}
-	if len(providerInfoList) == 0 {
-		return
-	}
-	updateTime := time.Now().Format(models.DateTimeFormat)
-	_, err = x.Exec("UPDATE provider_info SET name=?,provider=?,secret_id=?,secret_key=?,update_time=?,update_user=? WHERE id=?",
-		param.Name, param.Provider, param.SecretId, param.SecretKey, updateTime, param.UpdateUser, providerInfoId)
 	return
 }
 

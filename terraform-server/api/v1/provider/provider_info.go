@@ -11,37 +11,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ProviderInfoCreate(c *gin.Context) {
-	var param models.ProviderInfoTable
-	var err error
-	if err = c.ShouldBindJSON(&param); err != nil {
-		middleware.ReturnParamValidateError(c, err)
-		return
-	}
-	user := middleware.GetRequestUser(c)
-	param.CreateUser = user
-
-	enCodeSecretId, encodeErr := cipher.AesEnPassword(models.Config.Auth.PasswordSeed, param.SecretId)
-	if encodeErr != nil {
-		err = fmt.Errorf("Try to encode secretId fail,%s ", encodeErr.Error())
-		return
-	}
-	enCodeSecretKey, encodeErr := cipher.AesEnPassword(models.Config.Auth.PasswordSeed, param.SecretKey)
-	if encodeErr != nil {
-		err = fmt.Errorf("Try to encode secretKey fail,%s ", encodeErr.Error())
-		return
-	}
-	param.SecretId = enCodeSecretId
-	param.SecretKey = enCodeSecretKey
-
-	rowData, err := db.ProviderInfoCreate(&param)
-	if err != nil {
-		middleware.ReturnServerHandleError(c, err)
-	} else {
-		middleware.ReturnData(c, rowData)
-	}
-}
-
 func ProviderInfoList(c *gin.Context) {
 	paramsMap := make(map[string]interface{})
 	rowData, err := db.ProviderInfoList(paramsMap)
@@ -52,59 +21,6 @@ func ProviderInfoList(c *gin.Context) {
 			rowData = []*models.ProviderInfoTable{}
 		}
 		middleware.ReturnData(c, rowData)
-	}
-	return
-}
-
-func ProviderInfoDelete(c *gin.Context) {
-	providerInfoId := c.Param("providerInfoId")
-
-	if providerInfoId == "" {
-		middleware.ReturnParamValidateError(c, fmt.Errorf("Url param providerInfoId can not be empty"))
-		return
-	}
-	err := db.ProviderInfoDelete(providerInfoId)
-	if err != nil {
-		middleware.ReturnServerHandleError(c, err)
-	} else {
-		middleware.ReturnSuccess(c)
-	}
-	return
-}
-
-func ProviderInfoUpdate(c *gin.Context) {
-	var param models.ProviderInfoTable
-	var err error
-	if err = c.ShouldBindJSON(&param); err != nil {
-		middleware.ReturnParamValidateError(c, err)
-		return
-	}
-	providerInfoId := c.Param("providerInfoId")
-	if providerInfoId == "" {
-		middleware.ReturnParamValidateError(c, fmt.Errorf("Url param providerInfoId can not be empty"))
-		return
-	}
-	user := middleware.GetRequestUser(c)
-	param.UpdateUser = user
-
-	enCodeSecretId, encodeErr := cipher.AesEnPassword(models.Config.Auth.PasswordSeed, param.SecretId)
-	if encodeErr != nil {
-		err = fmt.Errorf("Try to encode secretId fail,%s ", encodeErr.Error())
-		return
-	}
-	enCodeSecretKey, encodeErr := cipher.AesEnPassword(models.Config.Auth.PasswordSeed, param.SecretKey)
-	if encodeErr != nil {
-		err = fmt.Errorf("Try to encode secretKey fail,%s ", encodeErr.Error())
-		return
-	}
-	param.SecretId = enCodeSecretId
-	param.SecretKey = enCodeSecretKey
-
-	err = db.ProviderInfoUpdate(providerInfoId, &param)
-	if err != nil {
-		middleware.ReturnServerHandleError(c, err)
-	} else {
-		middleware.ReturnSuccess(c)
 	}
 	return
 }
