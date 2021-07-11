@@ -107,7 +107,7 @@ func init() {
 		&handlerFuncObj{Url: "/resource_data", Method: "DELETE", HandlerFunc: resource_data.ResourceDataBatchDelete, LogOperation: true},
 		&handlerFuncObj{Url: "/resource_data", Method: "PUT", HandlerFunc: resource_data.ResourceDataBatchUpdate, LogOperation: true},
 
-		&handlerFuncObj{Url: "/:plugin/:action", Method: "POST", HandlerFunc: resource_data.TerraformOperation, LogOperation: true},
+		// &handlerFuncObj{Url: "/:plugin/:action", Method: "POST", HandlerFunc: resource_data.TerraformOperation, LogOperation: true},
 	)
 }
 
@@ -180,6 +180,8 @@ func InitHttpServer() {
 		r.POST(urlPrefix+"/plugin/ci-data/operation", middleware.AuthCorePluginToken(), ci.PluginCiDataOperationHandle, ci.HandleOperationLog)
 		r.POST(urlPrefix+"/plugin/ci-data/attr-value", middleware.AuthCorePluginToken(), ci.PluginCiDataAttrValueHandle, ci.HandleOperationLog)
 	*/
+	// r.POST(urlPrefix + "/api/v1/:plugin/:action", middleware.AuthCoreRequestToken(), resource_data.TerraformOperation, log_operation.HandleOperationLog)
+	r.POST(urlPrefix + "/api/v1/:plugin/:action", resource_data.TerraformOperation, log_operation.HandleOperationLog)
 	r.Run(":" + models.Config.HttpServer.Port)
 }
 

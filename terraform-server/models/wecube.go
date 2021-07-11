@@ -95,3 +95,19 @@ type CoreRoleDataObj struct {
 	Email       string `json:"email"`
 	DisplayName string `json:"displayName"`
 }
+
+type PluginInterfaceResultObj struct {
+	ResultCode    string                      `json:"resultCode"`
+	ResultMessage string                      `json:"resultMessage"`
+	Results       PluginInterfaceResultOutput `json:"results"`
+}
+
+type PluginInterfaceResultOutput struct {
+	Outputs []*PluginCiDataOperationOutputObj `json:"outputs"`
+}
+
+type PluginInterfaceResultOutputObj struct {
+	ErrorCode         string `json:"errorCode"`
+	ErrorMessage      string `json:"errorMessage"`
+	CallbackParameter string `json:"callbackParameter"`
+}
