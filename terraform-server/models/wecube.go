@@ -103,7 +103,7 @@ type PluginInterfaceResultObj struct {
 }
 
 type PluginInterfaceResultOutput struct {
-	Outputs []*PluginCiDataOperationOutputObj `json:"outputs"`
+	Outputs []map[string]string `json:"outputs"`
 }
 
 type PluginInterfaceResultOutputObj struct {

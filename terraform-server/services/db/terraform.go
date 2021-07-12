@@ -10,8 +10,10 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/common-lib/cipher"
+	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/common-lib/guid"
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/common/log"
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/models"
 )
@@ -166,8 +168,8 @@ func handleTerraformApplyOrQuery(plugin string,
  								 sourceList []*models.SourceTable,
 								 providerData *models.ProviderTable,
 							     providerInfo *models.ProviderInfoTable,
-  							     regionData *models.ResourceDataTable) (retData *models.PluginInterfaceResultOutputObj, err error) {
-	retData = &models.PluginInterfaceResultOutputObj{}
+  							     regionData *models.ResourceDataTable) (retOutput map[string]string, err error) {
+	retData := &models.PluginInterfaceResultOutputObj{}
 	retData.CallbackParameter = reqParam["callbackParameter"].(string)
 	retData.ErrorCode = "1"
 	// Get tf_argument_list by source_list
@@ -318,28 +320,32 @@ func handleTerraformApplyOrQuery(plugin string,
 	}
 	retData.ErrorCode = "0"
 	// TODO Add outPutArgs to retData, insertInto resource_data table
+	retOutput = make(map[string]string)
+	retOutput["CallbackParameter"] = retData.CallbackParameter
+	retOutput["ErrorCode"] = retData.ErrorCode
+	retOutput["ErrorMessage"] = retData.ErrorMessage
+	for k, v := range outPutArgs {
+		retOutput[k] = v
+	}
+	resourceDataId := guid.CreateGuid()
+	resourceDataSourceId := sourceList[0].Id
+	resourceDataResourceId := reqParam["id"]
+	resourceDataResourceAssetId := tfstateContent[sourceList[0].ResourceAssetIdAttribute]
+	createTime := time.Now().Format(models.DateTimeFormat)
+	_, err = x.Exec("INSERT INTO resource_data(id,source,resource_id,resource_asset_id,tf_file,tf_state_file,create_time,create_user,update_time) VALUE (?,?,?,?,?,?,?,?,?)",
+		resourceDataId, resourceDataSourceId, resourceDataResourceId, resourceDataResourceAssetId, createTime, "", createTime)
+	if err != nil {
+		err = fmt.Errorf("try to create resource_data fail,%s ", err.Error())
+		log.Logger.Error("try to create resource_data fail", log.Error(err))
+		retData.ErrorMessage = err.Error()
+	}
 	return
 }
 
-func TerraformOperation(plugin string, action string, reqParam map[string]interface{}) (rowData *models.PluginInterfaceResultOutputObj, err error) {
-	// Get source list by plugin and action
-	sqlCmd := `SELECT * FROM source WHERE plugin=? AND action=?`
-	paramArgs := []interface{}{plugin, action}
-	var sourceList []*models.SourceTable
-	err = x.SQL(sqlCmd, paramArgs...).Find(&sourceList)
-	if err != nil {
-		log.Logger.Error("Get source list error", log.Error(err))
-		return
-	}
-	if len(sourceList) == 0 {
-		err = fmt.Errorf("source list can not be found by plugin:%s and action:%s", plugin, action)
-		log.Logger.Warn("source list can not be found by plugin and action", log.String("plugin", plugin), log.String("action", action), log.Error(err))
-		return
-	}
-
+func TerraformOperation(plugin string, action string, reqParam map[string]interface{}) (rowData *models.PluginInterfaceResultOutput, err error) {
 	// Get providerInfo data
-	sqlCmd = `SELECT * FROM provider_info WHERE id=?`
-	paramArgs = []interface{}{reqParam["providerInfoId"]}
+	sqlCmd := `SELECT * FROM provider_info WHERE id=?`
+	paramArgs := []interface{}{reqParam["providerInfoId"]}
 	var providerInfoList []*models.ProviderInfoTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&providerInfoList)
 	if err != nil {
@@ -382,6 +388,21 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	providerData := providerList[0]
 	// providerVersion := providerList[0].Version
 
+	// Get source list by plugin and action
+	sqlCmd = `SELECT * FROM source WHERE plugin=? AND action=? AND provider=?`
+	paramArgs = []interface{}{plugin, action, providerData.Name}
+	var sourceList []*models.SourceTable
+	err = x.SQL(sqlCmd, paramArgs...).Find(&sourceList)
+	if err != nil {
+		log.Logger.Error("Get source list error", log.Error(err))
+		return
+	}
+	if len(sourceList) == 0 {
+		err = fmt.Errorf("source list can not be found by plugin:%s and action:%s", plugin, action)
+		log.Logger.Warn("source list can not be found by plugin and action", log.String("plugin", plugin), log.String("action", action), log.Error(err))
+		return
+	}
+
 	// Get region data
 	sqlCmd = `SELECT * FROM resource_data WHERE id=?`
 	paramArgs = []interface{}{reqParam["regionId"]}
@@ -399,14 +420,22 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	regionData := regionList[0]
 
 	if action == "apply" || action == "query" {
-		rowData, err = handleTerraformApplyOrQuery(plugin, action, reqParam, sourceList, providerData, providerInfoData, regionData)
+		retOutput, tmpErr := handleTerraformApplyOrQuery(plugin, action, reqParam, sourceList, providerData, providerInfoData, regionData)
+		rowData.Outputs = append(rowData.Outputs, retOutput)
+		if tmpErr != nil {
+			err = tmpErr
+			log.Logger.Error("handle TerraformApplyOrQuery error", log.Error(err))
+			return
+		}
 	} else if action == "destroy" {
-		var dirPath string
-		// terraform destroy
+		dirPath := models.Config.TerraformFilePath + reqParam["id"].(string)
 		err = TerraformDestroy(dirPath)
 		if err != nil {
-
+			log.Logger.Error("handle TerraformApplyOrQuery error", log.Error(err))
+			return
 		}
+	} else {
+		log.Logger.Error("action is inValid", log.String("action", action), log.Error(err))
 	}
 	return
 }
