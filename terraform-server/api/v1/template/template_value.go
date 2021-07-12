@@ -32,7 +32,8 @@ func TemplateValueBatchCreate(c *gin.Context) {
 		return
 	}
 	user := middleware.GetRequestUser(c)
-	rowData, err := db.TemplateValueBatchCreate(user, param)
+	// rowData, err := db.TemplateValueBatchCreate(user, param)
+	rowData, err := db.TemplateValueBatchCreateUpdate(user, param)
 	if err != nil {
 		middleware.ReturnServerHandleError(c, err)
 	} else {
