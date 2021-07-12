@@ -134,11 +134,12 @@ func TemplateValueBatchCreateUpdate(user string, param []*models.TemplateValueTa
 		var data *models.TemplateValueTable
 		if param[i].Id == "" {
 			templateValueId = guid.CreateGuid()
+			data = &models.TemplateValueTable{Id: templateValueId, Value: param[i].Value, Template: param[i].Template, CreateUser: user, CreateTime: createTime, UpdateUser: user, UpdateTime: createTime}
 		} else {
 			updateDataIds[param[i].Id] = true
 			templateValueId = param[i].Id
+			data = &models.TemplateValueTable{Id: templateValueId, Value: param[i].Value, Template: param[i].Template, CreateUser: param[i].CreateUser, CreateTime: param[i].CreateTime, UpdateUser: user, UpdateTime: createTime}
 		}
-		data = &models.TemplateValueTable{Id: templateValueId, Value: param[i].Value, Template: param[i].Template, CreateUser: user, CreateTime: createTime, UpdateUser: user, UpdateTime: createTime}
 		rowData = append(rowData, data)
 	}
 
@@ -147,10 +148,14 @@ func TemplateValueBatchCreateUpdate(user string, param []*models.TemplateValueTa
 		var action *execAction
 		if _, ok := updateDataIds[rowData[i].Id]; ok {
 			action, tmpErr = GetUpdateTableExecAction(tableName, "id", rowData[i].Id, *rowData[i], nil)
+			if tmpErr != nil {
+				err = fmt.Errorf("Try to get update_template_value execAction fail,%s ", tmpErr.Error())
+				return
+			}
 		} else {
 			action, tmpErr = GetInsertTableExecAction(tableName, *rowData[i], nil)
 			if tmpErr != nil {
-				err = fmt.Errorf("Try to create template_value fail,%s ", tmpErr.Error())
+				err = fmt.Errorf("Try to get create_template_value execAction fail,%s ", tmpErr.Error())
 				return
 			}
 		}
@@ -158,7 +163,7 @@ func TemplateValueBatchCreateUpdate(user string, param []*models.TemplateValueTa
 	}
 	err = transaction(actions)
 	if err != nil {
-		err = fmt.Errorf("Try to create template_value fail,%s ", err.Error())
+		err = fmt.Errorf("Try to create or update template_value fail,%s ", err.Error())
 	}
 	return
 }

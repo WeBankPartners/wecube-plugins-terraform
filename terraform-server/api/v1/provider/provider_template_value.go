@@ -32,7 +32,8 @@ func ProviderTemplateValueBatchCreate(c *gin.Context) {
 		return
 	}
 	user := middleware.GetRequestUser(c)
-	rowData, err := db.ProviderTemplateValueBatchCreate(user, param)
+	// rowData, err := db.ProviderTemplateValueBatchCreate(user, param)
+	rowData, err := db.ProviderTemplateValueBatchCreateUpdate(user, param)
 	if err != nil {
 		middleware.ReturnServerHandleError(c, err)
 	} else {

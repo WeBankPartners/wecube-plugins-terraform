@@ -134,3 +134,48 @@ func ProviderTemplateValueListByTemplate(templateName string) (rowData []*models
 	rowData = templateValueList
 	return
 }
+
+func ProviderTemplateValueBatchCreateUpdate(user string, param []*models.ProviderTemplateValueTable) (rowData []*models.ProviderTemplateValueTable, err error) {
+	actions := []*execAction{}
+	tableName := "provider_template_value"
+	createTime := time.Now().Format(models.DateTimeFormat)
+	updateDataIds := make(map[string]bool)
+	var providerTemplateValueId string
+	for i := range param {
+		var data *models.ProviderTemplateValueTable
+		if param[i].Id == "" {
+			providerTemplateValueId = guid.CreateGuid()
+			data = &models.ProviderTemplateValueTable{Id: providerTemplateValueId, Value: param[i].Value, Provider: param[i].Provider, TemplateValue: param[i].TemplateValue, CreateUser: user, CreateTime: createTime, UpdateUser: user, UpdateTime: createTime}
+		} else {
+			updateDataIds[param[i].Id] = true
+			providerTemplateValueId = param[i].Id
+			data = &models.ProviderTemplateValueTable{Id: providerTemplateValueId, Value: param[i].Value, Provider: param[i].Provider, TemplateValue: param[i].TemplateValue, CreateUser: param[i].CreateUser, CreateTime: param[i].CreateTime, UpdateUser: user, UpdateTime: createTime}
+		}
+		rowData = append(rowData, data)
+	}
+
+	var tmpErr error
+	for i := range rowData {
+		var action *execAction
+		if _, ok := updateDataIds[rowData[i].Id]; ok {
+			action, tmpErr = GetUpdateTableExecAction(tableName, "id", rowData[i].Id, *rowData[i], nil)
+			if tmpErr != nil {
+				err = fmt.Errorf("Try to get update_provider_template_value execAction fail,%s ", tmpErr.Error())
+				return
+			}
+		} else {
+			action, tmpErr = GetInsertTableExecAction(tableName, *rowData[i], nil)
+			if tmpErr != nil {
+				err = fmt.Errorf("Try to get create_provider_template_value execAction fail,%s ", tmpErr.Error())
+				return
+			}
+		}
+		actions = append(actions, action)
+	}
+
+	err = transaction(actions)
+	if err != nil {
+		err = fmt.Errorf("Try to create or update provider_template_value fail,%s ", err.Error())
+	}
+	return
+}
