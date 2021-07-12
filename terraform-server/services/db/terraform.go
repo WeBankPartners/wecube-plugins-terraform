@@ -21,14 +21,14 @@ import (
 func GenFile(content []byte, filePath string) (err error) {
 	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
-		log.Logger.Error("open file error", log.String("file", filePath), log.Error(err))
+		log.Logger.Error("Open file error", log.String("file", filePath), log.Error(err))
 		return
 	}
 	defer file.Close()
 
 	_, err = file.Write(content)
 	if err != nil {
-		log.Logger.Error("write file error", log.String("file", filePath), log.Error(err))
+		log.Logger.Error("Write file error", log.String("file", filePath), log.Error(err))
 	}
 	return
 	/*
@@ -51,7 +51,7 @@ func GenFile(content []byte, filePath string) (err error) {
 func ReadFile(filePath string) (content []byte, err error) {
 	file, err := os.Open(filePath)
 	if err != nil {
-		log.Logger.Error("open file error", log.String("file", filePath), log.Error(err))
+		log.Logger.Error("Open file error", log.String("file", filePath), log.Error(err))
 		return
 	}
 	defer file.Close()
@@ -67,8 +67,8 @@ func TerraformImport(dirPath, address, resourceId string) (err error) {
 	cmd.Stderr = &stderr
 	cmdErr := cmd.Run()
 	if cmdErr != nil {
-		err = fmt.Errorf("cmd:%s run failed with %s", cmdStr, cmdErr.Error())
-		log.Logger.Error("cmd run failed", log.String("cmd", cmdStr), log.Error(cmdErr))
+		err = fmt.Errorf("Cmd:%s run failed with %s", cmdStr, cmdErr.Error())
+		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.Error(cmdErr))
 	}
 	return
 }
@@ -81,15 +81,15 @@ func TerraformPlan(dirPath string) (destroyCnt int, err error) {
 	cmd.Stderr = &stderr
 	cmdErr := cmd.Run()
 	if cmdErr != nil {
-		err = fmt.Errorf("cmd:%s run failed with %s", cmdStr, cmdErr.Error())
-		log.Logger.Error("cmd run failed", log.String("cmd", cmdStr), log.Error(cmdErr))
+		err = fmt.Errorf("Cmd:%s run failed with %s", cmdStr, cmdErr.Error())
+		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.Error(cmdErr))
 		return
 	}
 	//outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
 	filePath := dirPath + "/planfile"
 	planFile, err := os.Open(filePath)
 	if err != nil {
-		log.Logger.Error("open planfile error", log.String("planfile", filePath), log.Error(err))
+		log.Logger.Error("Open planfile error", log.String("planfile", filePath), log.Error(err))
 		return
 	}
 	defer planFile.Close()
@@ -121,12 +121,12 @@ func TerraformPlan(dirPath string) (destroyCnt int, err error) {
 				destroyNumStr := planStr[sIdx:eIdx]
 				destroyCnt, err = strconv.Atoi(destroyNumStr)
 				if err != nil {
-					err = fmt.Errorf("plan text:%s error", planStr)
-					log.Logger.Error("plan text error", log.String("planText", planStr), log.Error(err))
+					err = fmt.Errorf("Plan text:%s error", planStr)
+					log.Logger.Error("Plan text error", log.String("planText", planStr), log.Error(err))
 				}
 			} else {
-				err = fmt.Errorf("plan text:%s error", planStr)
-				log.Logger.Error("plan text error", log.String("planText", planStr), log.Error(err))
+				err = fmt.Errorf("Plan text:%s error", planStr)
+				log.Logger.Error("Plan text error", log.String("planText", planStr), log.Error(err))
 			}
 			return
 		}
@@ -142,8 +142,8 @@ func TerraformApply(dirPath string) (err error) {
 	cmd.Stderr = &stderr
 	cmdErr := cmd.Run()
 	if cmdErr != nil {
-		err = fmt.Errorf("cmd:%s run failed with %s", cmdStr, cmdErr.Error())
-		log.Logger.Error("cmd run failed", log.String("cmd", cmdStr), log.Error(cmdErr))
+		err = fmt.Errorf("Cmd:%s run failed with %s", cmdStr, cmdErr.Error())
+		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.Error(cmdErr))
 	}
 	return
 }
@@ -156,8 +156,8 @@ func TerraformDestroy(dirPath string) (err error) {
 	cmd.Stderr = &stderr
 	cmdErr := cmd.Run()
 	if cmdErr != nil {
-		err = fmt.Errorf("cmd:%s run failed with %s", cmdStr, cmdErr.Error())
-		log.Logger.Error("cmd run failed", log.String("cmd", cmdStr), log.Error(cmdErr))
+		err = fmt.Errorf("Cmd:%s run failed with %s", cmdStr, cmdErr.Error())
+		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.Error(cmdErr))
 	}
 	return
 }
@@ -188,8 +188,8 @@ func handleTerraformApplyOrQuery(plugin string,
 		return
 	}
 	if len(tfArgumentList) == 0 {
-		err = fmt.Errorf("tf_argument list can not be found by source:%s", sourceIdList)
-		log.Logger.Warn("tf_argument list can not be found by source", log.String("source", sourceIdStr), log.Error(err))
+		err = fmt.Errorf("Tf_argument list can not be found by source:%s", sourceIdList)
+		log.Logger.Warn("Tf_argument list can not be found by source", log.String("source", sourceIdStr), log.Error(err))
 		retData.ErrorMessage = err.Error()
 		return
 	}
@@ -205,8 +205,8 @@ func handleTerraformApplyOrQuery(plugin string,
 		return
 	}
 	if len(tfstateAttributeList) == 0 {
-		err = fmt.Errorf("tfstate_attribute list can not be found by source:%s", sourceIdList)
-		log.Logger.Warn("tfstate_attribute list can not be found by source", log.String("source", sourceIdStr), log.Error(err))
+		err = fmt.Errorf("Tfstate_attribute list can not be found by source:%s", sourceIdList)
+		log.Logger.Warn("Tfstate_attribute list can not be found by source", log.String("source", sourceIdStr), log.Error(err))
 		retData.ErrorMessage = err.Error()
 		return
 	}
@@ -235,8 +235,8 @@ func handleTerraformApplyOrQuery(plugin string,
 			arg, err = convertDirect(tfArgumentList[i].Parameter, tfArgumentList[i].DefaultValue, reqParam)
 		}
 		if err != nil {
-			err = fmt.Errorf("convert parameter:%s error:%s", tfArgumentList[i].Parameter, err.Error())
-			log.Logger.Error("convert parameter error", log.String("parameterId", tfArgumentList[i].Parameter), log.Error(err))
+			err = fmt.Errorf("Convert parameter:%s error:%s", tfArgumentList[i].Parameter, err.Error())
+			log.Logger.Error("Convert parameter error", log.String("parameterId", tfArgumentList[i].Parameter), log.Error(err))
 			retData.ErrorMessage = err.Error()
 			return
 		}
@@ -249,14 +249,14 @@ func handleTerraformApplyOrQuery(plugin string,
 	// terraform import
 	err = TerraformImport(dirPath, address, resourceId)
 	if err != nil {
-		err = fmt.Errorf("do TerraformImport error:%s", err.Error())
+		err = fmt.Errorf("Do TerraformImport error:%s", err.Error())
 		retData.ErrorMessage = err.Error()
 		return
 	}
 	// terraform plan
 	destroyCnt, err := TerraformPlan(dirPath)
 	if err != nil {
-		err = fmt.Errorf("do TerraformPlan error:%s", err.Error())
+		err = fmt.Errorf("Do TerraformPlan error:%s", err.Error())
 		retData.ErrorMessage = err.Error()
 		return
 	}
@@ -270,7 +270,7 @@ func handleTerraformApplyOrQuery(plugin string,
 	// terraform apply
 	err = TerraformApply(dirPath)
 	if err != nil {
-		err = fmt.Errorf("do TerraformApply error:%s", err.Error())
+		err = fmt.Errorf("Do TerraformApply error:%s", err.Error())
 		retData.ErrorMessage = err.Error()
 		return
 	}
@@ -282,14 +282,14 @@ func handleTerraformApplyOrQuery(plugin string,
 	// 读取 tfstate.tf.json 文件
 	tfstateFileData, err := ReadFile(dirPath+"/tfstate.tf.json")
 	if err != nil {
-		err = fmt.Errorf("read tfstate file error:%s", err.Error())
+		err = fmt.Errorf("Read tfstate file error:%s", err.Error())
 		retData.ErrorMessage = err.Error()
 		return
 	}
 	var tfstateContent map[string]string
 	err = json.Unmarshal(tfstateFileData, tfstateContent)
 	if err != nil {
-		err = fmt.Errorf("marshal tfstate file data error:%s", err.Error())
+		err = fmt.Errorf("Marshal tfstate file data error:%s", err.Error())
 		retData.ErrorMessage = err.Error()
 		return
 	}
@@ -310,8 +310,8 @@ func handleTerraformApplyOrQuery(plugin string,
 				outArgKey, outArgVal, err = reverseConvertDirect(tfstateAttr.Parameter, v)
 			}
 			if err != nil {
-				err = fmt.Errorf("reverse convert parameter:%s error:%s", tfstateAttr.Parameter, err.Error())
-				log.Logger.Error("revese convert parameter error", log.String("parameterId", tfstateAttr.Parameter), log.Error(err))
+				err = fmt.Errorf("Reverse convert parameter:%s error:%s", tfstateAttr.Parameter, err.Error())
+				log.Logger.Error("Revese convert parameter error", log.String("parameterId", tfstateAttr.Parameter), log.Error(err))
 				retData.ErrorMessage = err.Error()
 				return
 			}
@@ -319,11 +319,7 @@ func handleTerraformApplyOrQuery(plugin string,
 		}
 	}
 	retData.ErrorCode = "0"
-	// TODO Add outPutArgs to retData, insertInto resource_data table
 	retOutput = make(map[string]string)
-	retOutput["CallbackParameter"] = retData.CallbackParameter
-	retOutput["ErrorCode"] = retData.ErrorCode
-	retOutput["ErrorMessage"] = retData.ErrorMessage
 	for k, v := range outPutArgs {
 		retOutput[k] = v
 	}
@@ -335,37 +331,51 @@ func handleTerraformApplyOrQuery(plugin string,
 	_, err = x.Exec("INSERT INTO resource_data(id,source,resource_id,resource_asset_id,tf_file,tf_state_file,create_time,create_user,update_time) VALUE (?,?,?,?,?,?,?,?,?)",
 		resourceDataId, resourceDataSourceId, resourceDataResourceId, resourceDataResourceAssetId, createTime, "", createTime)
 	if err != nil {
-		err = fmt.Errorf("try to create resource_data fail,%s ", err.Error())
-		log.Logger.Error("try to create resource_data fail", log.Error(err))
+		err = fmt.Errorf("Try to create resource_data fail,%s ", err.Error())
+		log.Logger.Error("Try to create resource_data fail", log.Error(err))
 		retData.ErrorMessage = err.Error()
 	}
+	retOutput["callbackParameter"] = retData.CallbackParameter
+	retOutput["errorCode"] = retData.ErrorCode
+	retOutput["errorMessage"] = retData.ErrorMessage
 	return
 }
 
-func TerraformOperation(plugin string, action string, reqParam map[string]interface{}) (rowData *models.PluginInterfaceResultOutput, err error) {
+func TerraformOperation(plugin string, action string, reqParam map[string]interface{}) (rowData map[string]string, err error) {
+	rowData = make(map[string]string)
+	rowData["callbackParameter"] = reqParam["callbackParameter"].(string)
+	rowData["errorCode"] = "1"
+	rowData["errorMessage"] = ""
 	// Get providerInfo data
 	sqlCmd := `SELECT * FROM provider_info WHERE id=?`
 	paramArgs := []interface{}{reqParam["providerInfoId"]}
 	var providerInfoList []*models.ProviderInfoTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&providerInfoList)
 	if err != nil {
+		err = fmt.Errorf("Get providerInfo error:%s", err.Error())
 		log.Logger.Error("Get providerInfo error", log.String("providerInfoId", reqParam["providerInfoId"].(string)), log.Error(err))
+		rowData["errorMessage"] = err.Error()
 		return
 	}
 	if len(providerInfoList) == 0 {
-		err = fmt.Errorf("providerInfo can not be found by id:%s", reqParam["providerInfoId"])
-		log.Logger.Warn("providerInfo can not be found by id", log.String("id", reqParam["providerInfoId"].(string)), log.Error(err))
+		err = fmt.Errorf("ProviderInfo can not be found by id:%s", reqParam["providerInfoId"])
+		log.Logger.Warn("ProviderInfo can not be found by id", log.String("id", reqParam["providerInfoId"].(string)), log.Error(err))
+		rowData["errorMessage"] = err.Error()
 		return
 	}
 	providerInfoData := providerInfoList[0]
 	providerSecretId, decodeErr := cipher.AesDePassword(models.Config.Auth.PasswordSeed, providerInfoData.SecretId)
 	if decodeErr != nil {
+		err = fmt.Errorf("Try to decode secretId fail: %s", decodeErr.Error())
 		log.Logger.Error("Try to decode secretId fail", log.Error(decodeErr))
+		rowData["errorMessage"] = err.Error()
 		return
 	}
 	providerSecretKey, decodeErr := cipher.AesDePassword(models.Config.Auth.PasswordSeed, providerInfoData.SecretKey)
 	if decodeErr != nil {
+		err = fmt.Errorf("Try to decode secretId fail: %s", decodeErr.Error())
 		log.Logger.Error("Try to decode secretKey fail", log.Error(decodeErr))
+		rowData["errorMessage"] = err.Error()
 		return
 	}
 	providerInfoData.SecretId = providerSecretId
@@ -377,12 +387,15 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	var providerList []*models.ProviderTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&providerList)
 	if err != nil {
+		err = fmt.Errorf("Get provider error:%s", err.Error())
 		log.Logger.Error("Get provider error", log.String("providerId", providerInfoData.Provider), log.Error(err))
+		rowData["errorMessage"] = err.Error()
 		return
 	}
 	if len(providerList) == 0 {
-		err = fmt.Errorf("provider can not be found by id:%s", providerInfoData.Provider)
-		log.Logger.Warn("provider can not be found by id", log.String("id", providerInfoData.Provider), log.Error(err))
+		err = fmt.Errorf("Provider can not be found by id:%s", providerInfoData.Provider)
+		log.Logger.Warn("Provider can not be found by id", log.String("id", providerInfoData.Provider), log.Error(err))
+		rowData["errorMessage"] = err.Error()
 		return
 	}
 	providerData := providerList[0]
@@ -394,12 +407,15 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	var sourceList []*models.SourceTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&sourceList)
 	if err != nil {
+		err = fmt.Errorf("Get source list error:%s", err.Error())
 		log.Logger.Error("Get source list error", log.Error(err))
+		rowData["errorMessage"] = err.Error()
 		return
 	}
 	if len(sourceList) == 0 {
-		err = fmt.Errorf("source list can not be found by plugin:%s and action:%s", plugin, action)
-		log.Logger.Warn("source list can not be found by plugin and action", log.String("plugin", plugin), log.String("action", action), log.Error(err))
+		err = fmt.Errorf("Source list can not be found by plugin:%s and action:%s", plugin, action)
+		log.Logger.Warn("Source list can not be found by plugin and action", log.String("plugin", plugin), log.String("action", action), log.Error(err))
+		rowData["errorMessage"] = err.Error()
 		return
 	}
 
@@ -409,33 +425,44 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	var regionList []*models.ResourceDataTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&regionList)
 	if err != nil {
+		err = fmt.Errorf("Get region data error:%s", err.Error())
 		log.Logger.Error("Get region data error", log.String("regionId", reqParam["regionId"].(string)), log.Error(err))
+		rowData["errorMessage"] = err.Error()
 		return
 	}
 	if len(regionList) == 0 {
-		err = fmt.Errorf("region can not be found by id:%s", reqParam["regionId"])
-		log.Logger.Warn("region can not be found by id", log.String("id", reqParam["regionId"].(string)), log.Error(err))
+		err = fmt.Errorf("Region can not be found by id:%s", reqParam["regionId"])
+		log.Logger.Warn("Region can not be found by id", log.String("id", reqParam["regionId"].(string)), log.Error(err))
+		rowData["errorMessage"] = err.Error()
 		return
 	}
 	regionData := regionList[0]
 
 	if action == "apply" || action == "query" {
 		retOutput, tmpErr := handleTerraformApplyOrQuery(plugin, action, reqParam, sourceList, providerData, providerInfoData, regionData)
-		rowData.Outputs = append(rowData.Outputs, retOutput)
 		if tmpErr != nil {
-			err = tmpErr
-			log.Logger.Error("handle TerraformApplyOrQuery error", log.Error(err))
+			err = fmt.Errorf("Handle TerraformApplyOrQuery error: %s", tmpErr.Error())
+			log.Logger.Error("Handle TerraformApplyOrQuery error", log.Error(err))
+			rowData["errorMessage"] = err.Error()
 			return
+		}
+		rowData["errorCode"] = "0"
+		for k, v := range retOutput {
+			rowData[k] = v
 		}
 	} else if action == "destroy" {
 		dirPath := models.Config.TerraformFilePath + reqParam["id"].(string)
 		err = TerraformDestroy(dirPath)
 		if err != nil {
-			log.Logger.Error("handle TerraformApplyOrQuery error", log.Error(err))
+			err = fmt.Errorf("Handle TerraformDestroy error: %s", err.Error())
+			log.Logger.Error("Handle TerraformDestroy error", log.Error(err))
 			return
 		}
+		rowData["errorCode"] = "0"
 	} else {
-		log.Logger.Error("action is inValid", log.String("action", action), log.Error(err))
+		err = fmt.Errorf("Action: %s is inValid", action)
+		log.Logger.Error("Action is inValid", log.String("action", action), log.Error(err))
+		rowData["errorMessage"] = err.Error()
 	}
 	return
 }
@@ -451,8 +478,8 @@ func convertData(parameterId string, source string, reqParam map[string]interfac
 		return
 	}
 	if len(parameterList) == 0 {
-		err = fmt.Errorf("parameter can not be found by id:%s", parameterId)
-		log.Logger.Warn("parameter can not be found by id", log.String("id", parameterId), log.Error(err))
+		err = fmt.Errorf("Parameter can not be found by id:%s", parameterId)
+		log.Logger.Warn("Parameter can not be found by id", log.String("id", parameterId), log.Error(err))
 		return
 	}
 	parameterData := parameterList[0]
@@ -466,8 +493,8 @@ func convertData(parameterId string, source string, reqParam map[string]interfac
 		return
 	}
 	if len(resourceDataList) == 0 {
-		err = fmt.Errorf("resource_data can not be found by source:%s and resource_id:%s", source, reqParam[parameterData.Name])
-		log.Logger.Warn("resource_data can not be found by source and resource_id", log.String("source", source), log.String("value", reqParam[parameterData.Name].(string)), log.Error(err))
+		err = fmt.Errorf("Resource_data can not be found by source:%s and resource_id:%s", source, reqParam[parameterData.Name])
+		log.Logger.Warn("Resource_data can not be found by source and resource_id", log.String("source", source), log.String("value", reqParam[parameterData.Name].(string)), log.Error(err))
 		return
 	}
 	arg = resourceDataList[0].ResourceAssetId
@@ -485,8 +512,8 @@ func reverseConvertData(parameterId string, source string, tfstateVal string) (a
 		return
 	}
 	if len(parameterList) == 0 {
-		err = fmt.Errorf("parameter can not be found by id:%s", parameterId)
-		log.Logger.Warn("parameter can not be found by id", log.String("id", parameterId), log.Error(err))
+		err = fmt.Errorf("Parameter can not be found by id:%s", parameterId)
+		log.Logger.Warn("Parameter can not be found by id", log.String("id", parameterId), log.Error(err))
 		return
 	}
 	parameterData := parameterList[0]
@@ -500,8 +527,8 @@ func reverseConvertData(parameterId string, source string, tfstateVal string) (a
 		return
 	}
 	if len(resourceDataList) == 0 {
-		err = fmt.Errorf("resource_data can not be found by source:%s and resource_asset_id:%s", source, tfstateVal)
-		log.Logger.Warn("resource_data can not be found by source and resource_asset_id", log.String("source", source), log.String("value", tfstateVal), log.Error(err))
+		err = fmt.Errorf("Resource_data can not be found by source:%s and resource_asset_id:%s", source, tfstateVal)
+		log.Logger.Warn("Resource_data can not be found by source and resource_asset_id", log.String("source", source), log.String("value", tfstateVal), log.Error(err))
 		return
 	}
 	argKey = parameterData.Name
@@ -520,8 +547,8 @@ func convertTemplate(parameterId string, providerName string, reqParam map[strin
 		return
 	}
 	if len(parameterList) == 0 {
-		err = fmt.Errorf("parameter can not be found by id:%s", parameterId)
-		log.Logger.Warn("parameter can not be found by id", log.String("id", parameterId), log.Error(err))
+		err = fmt.Errorf("Parameter can not be found by id:%s", parameterId)
+		log.Logger.Warn("Parameter can not be found by id", log.String("id", parameterId), log.Error(err))
 		return
 	}
 	parameterData := parameterList[0]
@@ -537,8 +564,8 @@ func convertTemplate(parameterId string, providerName string, reqParam map[strin
 		return
 	}
 	if len(templateValueList) == 0 {
-		err = fmt.Errorf("template_value can not be found by template:%s and value:%s", parameterData.Template, reqParam[parameterData.Name])
-		log.Logger.Warn("template_value can not be found by template and value", log.String("template", parameterData.Template), log.String("value", reqParam[parameterData.Name].(string)), log.Error(err))
+		err = fmt.Errorf("Template_value can not be found by template:%s and value:%s", parameterData.Template, reqParam[parameterData.Name])
+		log.Logger.Warn("Template_value can not be found by template and value", log.String("template", parameterData.Template), log.String("value", reqParam[parameterData.Name].(string)), log.Error(err))
 		return
 	}
 	templateValueData := templateValueList[0]
@@ -553,8 +580,8 @@ func convertTemplate(parameterId string, providerName string, reqParam map[strin
 		return
 	}
 	if len(providerTemplateValueList) == 0 {
-		err = fmt.Errorf("provider_template_value can not be found by template_value:%s and provider:%s", parameterData.Template)
-		log.Logger.Warn("provider_template_value can not be found by template_value and provider", log.String("template_value", templateValueData.Id), log.String("provider", providerName), log.Error(err))
+		err = fmt.Errorf("Provider_template_value can not be found by template_value:%s and provider:%s", parameterData.Template)
+		log.Logger.Warn("Provider_template_value can not be found by template_value and provider", log.String("template_value", templateValueData.Id), log.String("provider", providerName), log.Error(err))
 		return
 	}
 	arg = providerTemplateValueList[0].Value
@@ -572,8 +599,8 @@ func reverseConvertTemplate(parameterId string, providerName string, tfstateVal 
 		return
 	}
 	if len(parameterList) == 0 {
-		err = fmt.Errorf("parameter can not be found by id:%s", parameterId)
-		log.Logger.Warn("parameter can not be found by id", log.String("id", parameterId), log.Error(err))
+		err = fmt.Errorf("Parameter can not be found by id:%s", parameterId)
+		log.Logger.Warn("Parameter can not be found by id", log.String("id", parameterId), log.Error(err))
 		return
 	}
 	parameterData := parameterList[0]
@@ -587,8 +614,8 @@ func reverseConvertTemplate(parameterId string, providerName string, tfstateVal 
 		return
 	}
 	if len(templateValueList) == 0 {
-		err = fmt.Errorf("template_value can not be found by provider:%s and tfstateValue:%s", providerName, tfstateVal)
-		log.Logger.Warn("template_value can not be found by provider and tfstateValue", log.String("provider", providerName), log.String("tfstateValue", tfstateVal), log.Error(err))
+		err = fmt.Errorf("Template_value can not be found by provider:%s and tfstateValue:%s", providerName, tfstateVal)
+		log.Logger.Warn("Template_value can not be found by provider and tfstateValue", log.String("provider", providerName), log.String("tfstateValue", tfstateVal), log.Error(err))
 		return
 	}
 	templateValueData := templateValueList[0]
@@ -608,20 +635,20 @@ func convertAttr(tfstateAttributeId string, sourceIdList map[string]bool, handli
 		return
 	}
 	if len(tfStateAttributeList) == 0 {
-		err = fmt.Errorf("tfstate_attribute can not be found by id:%s", tfstateAttributeId)
-		log.Logger.Warn("tfstate_attribute can not be found by id", log.String("id", tfstateAttributeId), log.Error(err))
+		err = fmt.Errorf("Tfstate_attribute can not be found by id:%s", tfstateAttributeId)
+		log.Logger.Warn("Tfstate_attribute can not be found by id", log.String("id", tfstateAttributeId), log.Error(err))
 		return
 	}
 
 	tfStateAttributeData := tfStateAttributeList[0]
 	if _, ok := sourceIdList[tfStateAttributeData.Source]; !ok {
-		err = fmt.Errorf("tfstate_attribute's source:%s is config error", tfStateAttributeData.Source)
-		log.Logger.Error("tfstate_attribute's source is config error", log.String("tfstate_attribute_source", tfStateAttributeData.Source), log.Error(err))
+		err = fmt.Errorf("Tfstate_attribute's source:%s is config error", tfStateAttributeData.Source)
+		log.Logger.Error("Tfstate_attribute's source is config error", log.String("tfstate_attribute_source", tfStateAttributeData.Source), log.Error(err))
 		return
 	}
 	if _, ok := handlingSourceIds[tfStateAttributeData.Source]; !ok {
-		err = fmt.Errorf("tfstate_attribute's source:%s is config error, dead loop", tfStateAttributeData.Source)
-		log.Logger.Error("tfstate_attribute's source is config error, dead loop", log.String("tfstate_attribute_source", tfStateAttributeData.Source), log.Error(err))
+		err = fmt.Errorf("Tfstate_attribute's source:%s is config error, dead loop", tfStateAttributeData.Source)
+		log.Logger.Error("Tfstate_attribute's source is config error, dead loop", log.String("tfstate_attribute_source", tfStateAttributeData.Source), log.Error(err))
 		return
 	}
 
@@ -635,8 +662,8 @@ func convertAttr(tfstateAttributeId string, sourceIdList map[string]bool, handli
 		return
 	}
 	if len(tfArgumentList) == 0 {
-		err = fmt.Errorf("tf_argument list can not be found by tfstate_attribute source:%s", tfStateAttributeData.Source)
-		log.Logger.Warn("tf_argument list can not be found by tfstate_attribute source", log.String("tfstate_attribute_source", tfStateAttributeData.Source), log.Error(err))
+		err = fmt.Errorf("Tf_argument list can not be found by tfstate_attribute source:%s", tfStateAttributeData.Source)
+		log.Logger.Warn("Tf_argument list can not be found by tfstate_attribute source", log.String("tfstate_attribute_source", tfStateAttributeData.Source), log.Error(err))
 		return
 	}
 
@@ -659,7 +686,7 @@ func convertAttr(tfstateAttributeId string, sourceIdList map[string]bool, handli
 			arg, err = convertDirect(tfArgumentList[i].Parameter, tfArgumentList[i].DefaultValue, reqParam)
 		}
 		if err != nil {
-			log.Logger.Error("convert parameter:%s error", log.String("parameterId", tfArgumentList[i].Parameter), log.Error(err))
+			log.Logger.Error("Convert parameter:%s error", log.String("parameterId", tfArgumentList[i].Parameter), log.Error(err))
 			return
 		}
 		tfArguments[tfArgumentList[i].Name] = arg
@@ -681,8 +708,8 @@ func convertContext(parameterId string, tfArgument *models.TfArgumentTable, reqP
 		return
 	}
 	if len(parameterList) == 0 {
-		err = fmt.Errorf("parameter can not be found by id:%s", parameterId)
-		log.Logger.Warn("parameter can not be found by id", log.String("id", parameterId), log.Error(err))
+		err = fmt.Errorf("Parameter can not be found by id:%s", parameterId)
+		log.Logger.Warn("Parameter can not be found by id", log.String("id", parameterId), log.Error(err))
 		return
 	}
 	parameterData := parameterList[0]
@@ -702,8 +729,8 @@ func reverseConvertContext(parameterId string, tfstateVal string) (argKey string
 		return
 	}
 	if len(parameterList) == 0 {
-		err = fmt.Errorf("parameter can not be found by id:%s", parameterId)
-		log.Logger.Warn("parameter can not be found by id", log.String("id", parameterId), log.Error(err))
+		err = fmt.Errorf("Parameter can not be found by id:%s", parameterId)
+		log.Logger.Warn("Parameter can not be found by id", log.String("id", parameterId), log.Error(err))
 		return
 	}
 	parameterData := parameterList[0]
@@ -723,8 +750,8 @@ func convertDirect(parameterId string, defaultValue string, reqParam map[string]
 		return
 	}
 	if len(parameterList) == 0 {
-		err = fmt.Errorf("parameter can not be found by id:%s", parameterId)
-		log.Logger.Warn("parameter can not be found by id", log.String("id", parameterId), log.Error(err))
+		err = fmt.Errorf("Parameter can not be found by id:%s", parameterId)
+		log.Logger.Warn("Parameter can not be found by id", log.String("id", parameterId), log.Error(err))
 		return
 	}
 	parameterData := parameterList[0]
@@ -748,8 +775,8 @@ func reverseConvertDirect(parameterId string, tfstateVal string) (argKey string,
 		return
 	}
 	if len(parameterList) == 0 {
-		err = fmt.Errorf("parameter can not be found by id:%s", parameterId)
-		log.Logger.Warn("parameter can not be found by id", log.String("id", parameterId), log.Error(err))
+		err = fmt.Errorf("Parameter can not be found by id:%s", parameterId)
+		log.Logger.Warn("Parameter can not be found by id", log.String("id", parameterId), log.Error(err))
 		return
 	}
 	parameterData := parameterList[0]

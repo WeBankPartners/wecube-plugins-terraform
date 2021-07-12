@@ -8,6 +8,7 @@ import (
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/services/db"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
+	"net/http"
 	"reflect"
 	"strings"
 )
@@ -105,18 +106,17 @@ func TerraformOperation(c *gin.Context) {
 		params = append(params, p.Index(i).Interface().(map[string]interface{}))
 	}
 
+	rowData := models.PluginInterfaceResultObj{}
+	rowData.ResultCode = "0"
+	rowData.ResultMessage = "success"
 	for i := range params {
-		rowData, err := db.TerraformOperation(plugin, action, params[i])
-
+		retData, err := db.TerraformOperation(plugin, action, params[i])
 		if err != nil {
-			middleware.ReturnServerHandleError(c, err)
-		} else {
-			if rowData == nil {
-				middleware.ReturnData(c, []string{})
-			} else {
-				middleware.ReturnData(c, rowData)
-			}
+			rowData.ResultCode = "1"
+			rowData.ResultMessage = "fail"
 		}
+		rowData.Results.Outputs = append(rowData.Results.Outputs, retData)
 	}
+	c.JSON(http.StatusOK, rowData)
 	return
 }
