@@ -11,6 +11,10 @@ import (
 
 func ParameterList(c *gin.Context) {
 	paramsMap := make(map[string]interface{})
+	interfaceId := c.Query("interface")
+	if interfaceId != "" {
+		paramsMap["interface"] = interfaceId
+	}
 	rowData, err := db.ParameterList(paramsMap)
 	if err != nil {
 		middleware.ReturnServerHandleError(c, err)
