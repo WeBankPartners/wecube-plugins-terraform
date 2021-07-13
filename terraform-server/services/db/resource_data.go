@@ -30,7 +30,7 @@ func ResourceDataBatchCreate(user string, param []*models.ResourceDataTable) (ro
 
 	for i := range param {
 		id := guid.CreateGuid()
-		data := &models.ResourceDataTable{Id: id, Source: param[i].Source, ResourceId: param[i].ResourceId, ResourceAssetId: param[i].ResourceAssetId,
+		data := &models.ResourceDataTable{Id: id, Resource: param[i].Resource, ResourceId: param[i].ResourceId, ResourceAssetId: param[i].ResourceAssetId,
 			CreateUser: user, CreateTime: createTime, UpdateTime: createTime}
 		rowData = append(rowData, data)
 	}

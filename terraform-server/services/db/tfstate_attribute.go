@@ -32,7 +32,8 @@ func TfstateAttributeBatchCreate(user string, param []*models.TfstateAttributeTa
 	for i := range param {
 		id := guid.CreateGuid()
 		data := &models.TfstateAttributeTable{Id: id, Name: param[i].Name, Source: param[i].Source, Parameter: param[i].Parameter, DefaultValue: param[i].DefaultValue, IsNull: param[i].IsNull, Type: param[i].Type,
-			IsMulti: param[i].IsMulti, ConvertWay: param[i].ConvertWay, RelativeParameter: param[i].RelativeParameter, RelativeValue: param[i].RelativeValue, CreateUser: user, CreateTime: createTime, UpdateTime: createTime}
+			IsMulti: param[i].IsMulti, ConvertWay: param[i].ConvertWay, RelativeSource: param[i].RelativeSource, RelativeTfstateAttribute: param[i].RelativeTfstateAttribute, RelativeParameter: param[i].RelativeParameter,
+			RelativeParameterValue: param[i].RelativeParameterValue, CreateUser: user, CreateTime: createTime, UpdateTime: createTime}
 		rowData = append(rowData, data)
 	}
 

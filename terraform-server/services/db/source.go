@@ -31,8 +31,8 @@ func SourceBatchCreate(user string, param []*models.SourceTable) (rowData []*mod
 
 	for i := range param {
 		id := guid.CreateGuid()
-		data := &models.SourceTable{Id: id, Name: param[i].Name, Plugin: param[i].Plugin, Provider: param[i].Provider,
-			ResourceAssetIdAttribute: param[i].ResourceAssetIdAttribute, Action: param[i].Action, CreateUser: user, CreateTime: createTime, UpdateTime: createTime}
+		data := &models.SourceTable{Id: id, Interface: param[i].Interface, Provider: param[i].Provider, Name: param[i].Name,
+			AssetIdAttribute: param[i].AssetIdAttribute, TerraformUsed: param[i].TerraformUsed, CreateUser: user, CreateTime: createTime, UpdateTime: createTime}
 		rowData = append(rowData, data)
 	}
 

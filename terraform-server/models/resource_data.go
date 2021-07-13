@@ -2,7 +2,7 @@ package models
 
 type ResourceDataTable struct {
 	Id              string `json:"id" xorm:"id"`
-	Source          string `json:"source" xorm:"source"`
+	Resource        string `json:"resource" xorm:"resource"`
 	ResourceId      string `json:"resourceId" xorm:"resource_id"`
 	ResourceAssetId string `json:"resourceAssetId" xorm:"resource_asset_id"`
 	TfFile          string `json:"tfFile" xorm:"tf_file"`

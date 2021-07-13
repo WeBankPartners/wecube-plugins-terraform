@@ -230,7 +230,7 @@ func handleTerraformApplyOrQuery(plugin string,
 			}
 			handlingSourceIds := make(map[string]bool)
 			handlingSourceIds[tfArgumentList[i].Source] = true
-			arg, err = convertAttr(tfArgumentList[i].TfstateAttribute, sourceIdList, handlingSourceIds, providerData.Name, reqParam)
+			arg, err = convertAttr(tfArgumentList[i].RelativeTfstateAttribute, sourceIdList, handlingSourceIds, providerData.Name, reqParam)
 		case models.ConvertWay["Direct"]:
 			arg, err = convertDirect(tfArgumentList[i].Parameter, tfArgumentList[i].DefaultValue, reqParam)
 		}
@@ -326,7 +326,7 @@ func handleTerraformApplyOrQuery(plugin string,
 	resourceDataId := guid.CreateGuid()
 	resourceDataSourceId := sourceList[0].Id
 	resourceDataResourceId := reqParam["id"]
-	resourceDataResourceAssetId := tfstateContent[sourceList[0].ResourceAssetIdAttribute]
+	resourceDataResourceAssetId := tfstateContent[sourceList[0].AssetIdAttribute]
 	createTime := time.Now().Format(models.DateTimeFormat)
 	_, err = x.Exec("INSERT INTO resource_data(id,source,resource_id,resource_asset_id,tf_file,tf_state_file,create_time,create_user,update_time) VALUE (?,?,?,?,?,?,?,?,?)",
 		resourceDataId, resourceDataSourceId, resourceDataResourceId, resourceDataResourceAssetId, createTime, "", createTime)
@@ -681,7 +681,7 @@ func convertAttr(tfstateAttributeId string, sourceIdList map[string]bool, handli
 			arg, err = convertContext(tfArgumentList[i].RelativeParameter, tfArgumentList[i], reqParam)
 		case models.ConvertWay["Attr"]:
 			handlingSourceIds[tfArgumentList[i].Source] = true
-			arg, err = convertAttr(tfArgumentList[i].TfstateAttribute, sourceIdList, handlingSourceIds, providerName, reqParam)
+			arg, err = convertAttr(tfArgumentList[i].RelativeTfstateAttribute, sourceIdList, handlingSourceIds, providerName, reqParam)
 		case models.ConvertWay["Direct"]:
 			arg, err = convertDirect(tfArgumentList[i].Parameter, tfArgumentList[i].DefaultValue, reqParam)
 		}
@@ -713,7 +713,7 @@ func convertContext(parameterId string, tfArgument *models.TfArgumentTable, reqP
 		return
 	}
 	parameterData := parameterList[0]
-	if reqParam[parameterData.Name] == tfArgument.RelativeValue {
+	if reqParam[parameterData.Name] == tfArgument.RelativeParameterValue {
 		arg = reqParam[parameterData.Name]
 	}
 	return
