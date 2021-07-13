@@ -16,7 +16,7 @@ func InterfaceList(paramsMap map[string]interface{}) (rowData []*models.Interfac
 		sqlCmd += " AND " + k + "=?"
 		paramArgs = append(paramArgs, v)
 	}
-	sqlCmd += " ORDER BY create_time DESC"
+	sqlCmd += " ORDER BY id DESC"
 	err = x.SQL(sqlCmd, paramArgs...).Find(&rowData)
 	if err != nil {
 		log.Logger.Error("Get interface list error", log.Error(err))
