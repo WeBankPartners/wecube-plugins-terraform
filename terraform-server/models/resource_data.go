@@ -15,8 +15,11 @@ type ResourceDataTable struct {
 }
 
 type RegionProviderData struct {
-	ProviderName    string `json:"providerName"`
-	ProviderVersion string `json:"providerVersion"`
-	SecretId        string `json:"secretId"`
-	SecretKey       string `json:"secretKey"`
+	ProviderName      string `json:"providerName"`
+	ProviderVersion   string `json:"providerVersion"`
+	SecretId          string `json:"secretId"`
+	SecretKey         string `json:"secretKey"`
+	SecretIdAttrName  string `json:"secretIdAttrName"`
+	SecretKeyAttrName string `json:"secretKeyAttrName"`
+	RegionAttrName    string `json:"regionAttrName"`
 }

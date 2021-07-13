@@ -403,26 +403,30 @@ func RegionApply(reqParam map[string]interface{}, interfaceData *models.Interfac
 	}
 	providerData := providerList[0]
 
-	/*
 	regionProviderInfo := models.RegionProviderData{}
 	regionProviderInfo.ProviderName = providerData.Name
 	regionProviderInfo.ProviderVersion = providerData.Version
 	regionProviderInfo.SecretId = providerSecretId
 	regionProviderInfo.SecretKey = providerSecretKey
+	regionProviderInfo.SecretIdAttrName = providerData.SecretIdAttrName
+	regionProviderInfo.SecretKeyAttrName = providerData.SecretKeyAttrName
+	regionProviderInfo.RegionAttrName = providerData.RegionAttrName
 
-	regionProviderInfoSlice, err := json.Marshal(regionProviderInfo)
+	regionProviderInfoByte, err := json.Marshal(regionProviderInfo)
 	if err != nil {
 		err = fmt.Errorf("Try to marshal regionProviderInfo fail: %s", err.Error())
 		log.Logger.Error("Try to marshal regionProviderInfo fail", log.Error(err))
 		rowData["errorMessage"] = err.Error()
 		return
 	}
-	 */
+	providerTfContent := string(regionProviderInfoByte)
+	/*
 	providerTfContent := "provider + \"" + providerData.Name + "\" {"
 	providerTfContent += providerData.SecretIdAttrName + " = \"" + providerSecretId + "\","
 	providerTfContent += providerData.SecretKeyAttrName + " = \"" + providerSecretKey + "\","
 	providerTfContent += providerData.RegionAttrName + " = \"" + reqParam["asset_id"].(string)
 	providerTfContent += "}"
+	 */
 
 	enCodeproviderTfContent, encodeErr := cipher.AesEnPassword(models.Config.Auth.PasswordSeed, providerTfContent)
 	if encodeErr != nil {
@@ -471,6 +475,11 @@ func RegionApply(reqParam map[string]interface{}, interfaceData *models.Interfac
 }
 
 func TerraformOperation(plugin string, action string, reqParam map[string]interface{}) (rowData map[string]string, err error) {
+	rowData = make(map[string]string)
+	rowData["callbackParameter"] = reqParam["callbackParameter"].(string)
+	rowData["errorCode"] = "1"
+	rowData["errorMessage"] = ""
+
 	// Get interface by plugin and action
 	sqlCmd := `SELECT * FROM interface WHERE plugin=? AND name=?`
 	paramArgs := []interface{}{plugin, action}
@@ -490,17 +499,10 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	}
 	interfaceData := interfaceInfoList[0]
 
-	if plugin == "region" {
-		if action == "apply" {
-			rowData, err = RegionApply(reqParam, interfaceData)
-		}
+	if plugin == "region" && action == "apply" {
+		rowData, err = RegionApply(reqParam, interfaceData)
 		return
 	}
-
-	rowData = make(map[string]string)
-	rowData["callbackParameter"] = reqParam["callbackParameter"].(string)
-	rowData["errorCode"] = "1"
-	rowData["errorMessage"] = ""
 
 	// Get providerInfo data
 	sqlCmd = `SELECT * FROM provider_info WHERE id=?`
