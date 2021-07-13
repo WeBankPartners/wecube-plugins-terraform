@@ -107,7 +107,7 @@ func init() {
 		&handlerFuncObj{Url: "/resource_datas", Method: "DELETE", HandlerFunc: resource_data.ResourceDataBatchDelete, LogOperation: true},
 		&handlerFuncObj{Url: "/resource_datas", Method: "PUT", HandlerFunc: resource_data.ResourceDataBatchUpdate, LogOperation: true},
 
-		// &handlerFuncObj{Url: "/:plugin/:action", Method: "POST", HandlerFunc: resource_data.TerraformOperation, LogOperation: true},
+		// &handlerFuncObj{Url: "/terraform/:plugin/:action", Method: "POST", HandlerFunc: resource_data.TerraformOperation, LogOperation: true},
 	)
 }
 
@@ -181,7 +181,7 @@ func InitHttpServer() {
 		r.POST(urlPrefix+"/plugin/ci-data/attr-value", middleware.AuthCorePluginToken(), ci.PluginCiDataAttrValueHandle, ci.HandleOperationLog)
 	*/
 	// r.POST(urlPrefix + "/api/v1/:plugin/:action", middleware.AuthCoreRequestToken(), resource_data.TerraformOperation, log_operation.HandleOperationLog)
-	r.POST(urlPrefix + "/api/v1/:plugin/:action", resource_data.TerraformOperation, log_operation.HandleOperationLog)
+	r.POST(urlPrefix + "/api/v1/terraform/:plugin/:action", resource_data.TerraformOperation, log_operation.HandleOperationLog)
 	r.Run(":" + models.Config.HttpServer.Port)
 }
 

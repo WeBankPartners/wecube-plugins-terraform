@@ -80,6 +80,20 @@ func ProviderInfoBatchUpdate(c *gin.Context) {
 		return
 	}
 	user := middleware.GetRequestUser(c)
+	for i := range param {
+		enCodeSecretId, encodeErr := cipher.AesEnPassword(models.Config.Auth.PasswordSeed, param[i].SecretId)
+		if encodeErr != nil {
+			err = fmt.Errorf("Try to encode secretId fail,%s ", encodeErr.Error())
+			return
+		}
+		enCodeSecretKey, encodeErr := cipher.AesEnPassword(models.Config.Auth.PasswordSeed, param[i].SecretKey)
+		if encodeErr != nil {
+			err = fmt.Errorf("Try to encode secretKey fail,%s ", encodeErr.Error())
+			return
+		}
+		param[i].SecretId = enCodeSecretId
+		param[i].SecretKey = enCodeSecretKey
+	}
 	err = db.ProviderInfoBatchUpdate(user, param)
 	if err != nil {
 		middleware.ReturnServerHandleError(c, err)

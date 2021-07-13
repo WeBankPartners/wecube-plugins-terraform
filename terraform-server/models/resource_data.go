@@ -7,6 +7,7 @@ type ResourceDataTable struct {
 	ResourceAssetId string `json:"resourceAssetId" xorm:"resource_asset_id"`
 	TfFile          string `json:"tfFile" xorm:"tf_file"`
 	TfStateFile     string `json:"tfStateFile" xorm:"tf_state_file"`
+	RegionId        string `json:"regionId" xorm:"region_id"`
 	CreateTime      string `json:"createTime" xorm:"create_time"`
 	CreateUser      string `json:"createUser" xorm:"create_user"`
 	UpdateTime      string `json:"updateTime" xorm:"update_time"`

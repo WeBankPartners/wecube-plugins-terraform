@@ -328,7 +328,8 @@ func handleTerraformApplyOrQuery(plugin string,
 	resourceDataResourceId := reqParam["id"]
 	resourceDataResourceAssetId := tfstateContent[sourceList[0].AssetIdAttribute]
 	createTime := time.Now().Format(models.DateTimeFormat)
-	_, err = x.Exec("INSERT INTO resource_data(id,source,resource_id,resource_asset_id,tf_file,tf_state_file,create_time,create_user,update_time) VALUE (?,?,?,?,?,?,?,?,?)",
+	// TODO lackof regionId
+	_, err = x.Exec("INSERT INTO resource_data(id,resource,resource_id,resource_asset_id,tf_file,tf_state_file,region_id,create_time,create_user,update_time) VALUE (?,?,?,?,?,?,?,?,?,?)",
 		resourceDataId, resourceDataSourceId, resourceDataResourceId, resourceDataResourceAssetId, createTime, "", createTime)
 	if err != nil {
 		err = fmt.Errorf("Try to create resource_data fail,%s ", err.Error())
@@ -341,7 +342,7 @@ func handleTerraformApplyOrQuery(plugin string,
 	return
 }
 
-func RegionApply(reqParam map[string]interface{}) (rowData map[string]string, err error) {
+func RegionApply(reqParam map[string]interface{}, interfaceData *models.InterfaceTable) (rowData map[string]string, err error) {
 	rowData = make(map[string]string)
 	rowData["callbackParameter"] = reqParam["callbackParameter"].(string)
 	rowData["errorCode"] = "1"
@@ -380,8 +381,8 @@ func RegionApply(reqParam map[string]interface{}) (rowData map[string]string, er
 		rowData["errorMessage"] = err.Error()
 		return
 	}
-	providerInfoData.SecretId = providerSecretId
-	providerInfoData.SecretKey = providerSecretKey
+	// providerSecretId := providerInfoData.SecretId
+	// providerSecretKey := providerInfoData.SecretKey
 
 	// Get provider data
 	sqlCmd = `SELECT * FROM provider WHERE id=?`
@@ -402,29 +403,74 @@ func RegionApply(reqParam map[string]interface{}) (rowData map[string]string, er
 	}
 	providerData := providerList[0]
 
+	/*
 	regionProviderInfo := models.RegionProviderData{}
 	regionProviderInfo.ProviderName = providerData.Name
 	regionProviderInfo.ProviderVersion = providerData.Version
 	regionProviderInfo.SecretId = providerSecretId
 	regionProviderInfo.SecretKey = providerSecretKey
 
-	// TODO  regionProviderInfo -> string, 加密，存储到 tf_file
+	regionProviderInfoSlice, err := json.Marshal(regionProviderInfo)
+	if err != nil {
+		err = fmt.Errorf("Try to marshal regionProviderInfo fail: %s", err.Error())
+		log.Logger.Error("Try to marshal regionProviderInfo fail", log.Error(err))
+		rowData["errorMessage"] = err.Error()
+		return
+	}
+	 */
+	providerTfContent := "provider + \"" + providerData.Name + "\" {"
+	providerTfContent += providerData.SecretIdAttrName + " = \"" + providerSecretId + "\","
+	providerTfContent += providerData.SecretKeyAttrName + " = \"" + providerSecretKey + "\","
+	providerTfContent += providerData.RegionAttrName + " = \"" + reqParam["asset_id"].(string)
+	providerTfContent += "}"
+
+	enCodeproviderTfContent, encodeErr := cipher.AesEnPassword(models.Config.Auth.PasswordSeed, providerTfContent)
+	if encodeErr != nil {
+		err = fmt.Errorf("Try to encode enCodeproviderTfContent fail,%s ", encodeErr.Error())
+		log.Logger.Error("Try to encode enCodeproviderTfContent fail", log.Error(err))
+		rowData["errorMessage"] = err.Error()
+		return
+	}
+
+	sqlCmd = `SELECT * FROM source WHERE interface=? AND provider=?`
+	paramArgs = []interface{}{interfaceData.Id, providerData.Name}
+	var sourceList []*models.SourceTable
+	err = x.SQL(sqlCmd, paramArgs...).Find(&sourceList)
+	if err != nil {
+		err = fmt.Errorf("Get source by interface:%s and provider:%s error:%s", interfaceData.Id, providerData.Name, err.Error())
+		log.Logger.Error("Get source by interface and provider error", log.String("interface", interfaceData.Id), log.String("provider", providerData.Name), log.Error(err))
+		rowData["errorMessage"] = err.Error()
+		return
+	}
+	if len(sourceList) == 0 {
+		err = fmt.Errorf("Provider can not be found by interface:%s and provider:%s", interfaceData.Id, providerData.Name)
+		log.Logger.Warn("Provider can not be found by interface and provider", log.String("interface", interfaceData.Id), log.String("provider", providerData.Name), log.Error(err))
+		rowData["errorMessage"] = err.Error()
+		return
+	}
+	sourceData := sourceList[0]
+
+	uuid := guid.CreateGuid()
+	createTime := time.Now().Format(models.DateTimeFormat)
+	resourceId := reqParam["id"].(string)
+	resourceAssetId := reqParam["asset_id"].(string)
+
+	_, err = x.Exec("INSERT INTO resource_data(id,resource,resource_id,resource_asset_id,tf_file,region_id,create_time,create_user,update_time) VALUE (?,?,?,?,?,?,?,?,?)",
+		uuid, sourceData.Id, resourceId, resourceAssetId, enCodeproviderTfContent, resourceId, createTime, "", createTime)
+	if err != nil {
+		err = fmt.Errorf("Try to create resource_data fail,%s ", err.Error())
+		log.Logger.Error("Try to create resource_data fail", log.Error(err))
+		rowData["errorMessage"] = err.Error()
+		return
+	}
+
+	rowData["errorCode"] = "0"
+	rowData["asset_id"] = resourceAssetId
+	rowData["id"] = resourceId
 	return
 }
 
 func TerraformOperation(plugin string, action string, reqParam map[string]interface{}) (rowData map[string]string, err error) {
-	if plugin == "region" {
-		if action == "apply" {
-			rowData, err = RegionApply(reqParam)
-		}
-		return
-	}
-
-	rowData = make(map[string]string)
-	rowData["callbackParameter"] = reqParam["callbackParameter"].(string)
-	rowData["errorCode"] = "1"
-	rowData["errorMessage"] = ""
-
 	// Get interface by plugin and action
 	sqlCmd := `SELECT * FROM interface WHERE plugin=? AND name=?`
 	paramArgs := []interface{}{plugin, action}
@@ -443,6 +489,18 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 		return
 	}
 	interfaceData := interfaceInfoList[0]
+
+	if plugin == "region" {
+		if action == "apply" {
+			rowData, err = RegionApply(reqParam, interfaceData)
+		}
+		return
+	}
+
+	rowData = make(map[string]string)
+	rowData["callbackParameter"] = reqParam["callbackParameter"].(string)
+	rowData["errorCode"] = "1"
+	rowData["errorMessage"] = ""
 
 	// Get providerInfo data
 	sqlCmd = `SELECT * FROM provider_info WHERE id=?`
