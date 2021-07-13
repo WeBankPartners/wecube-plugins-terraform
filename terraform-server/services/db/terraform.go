@@ -341,14 +341,112 @@ func handleTerraformApplyOrQuery(plugin string,
 	return
 }
 
-func TerraformOperation(plugin string, action string, reqParam map[string]interface{}) (rowData map[string]string, err error) {
+func RegionApply(reqParam map[string]interface{}) (rowData map[string]string, err error) {
 	rowData = make(map[string]string)
 	rowData["callbackParameter"] = reqParam["callbackParameter"].(string)
 	rowData["errorCode"] = "1"
 	rowData["errorMessage"] = ""
+
+	providerInfoId := reqParam["provider_info"].(string)
 	// Get providerInfo data
 	sqlCmd := `SELECT * FROM provider_info WHERE id=?`
-	paramArgs := []interface{}{reqParam["providerInfoId"]}
+	paramArgs := []interface{}{providerInfoId}
+	var providerInfoList []*models.ProviderInfoTable
+	err = x.SQL(sqlCmd, paramArgs...).Find(&providerInfoList)
+	if err != nil {
+		err = fmt.Errorf("Get providerInfo error:%s", err.Error())
+		log.Logger.Error("Get providerInfo error", log.String("providerInfoId", providerInfoId), log.Error(err))
+		rowData["errorMessage"] = err.Error()
+		return
+	}
+	if len(providerInfoList) == 0 {
+		err = fmt.Errorf("ProviderInfo can not be found by id:%s", providerInfoId)
+		log.Logger.Warn("ProviderInfo can not be found by id", log.String("id", providerInfoId), log.Error(err))
+		rowData["errorMessage"] = err.Error()
+		return
+	}
+	providerInfoData := providerInfoList[0]
+	providerSecretId, decodeErr := cipher.AesDePassword(models.Config.Auth.PasswordSeed, providerInfoData.SecretId)
+	if decodeErr != nil {
+		err = fmt.Errorf("Try to decode secretId fail: %s", decodeErr.Error())
+		log.Logger.Error("Try to decode secretId fail", log.Error(decodeErr))
+		rowData["errorMessage"] = err.Error()
+		return
+	}
+	providerSecretKey, decodeErr := cipher.AesDePassword(models.Config.Auth.PasswordSeed, providerInfoData.SecretKey)
+	if decodeErr != nil {
+		err = fmt.Errorf("Try to decode secretId fail: %s", decodeErr.Error())
+		log.Logger.Error("Try to decode secretKey fail", log.Error(decodeErr))
+		rowData["errorMessage"] = err.Error()
+		return
+	}
+	providerInfoData.SecretId = providerSecretId
+	providerInfoData.SecretKey = providerSecretKey
+
+	// Get provider data
+	sqlCmd = `SELECT * FROM provider WHERE id=?`
+	paramArgs = []interface{}{providerInfoData.Provider}
+	var providerList []*models.ProviderTable
+	err = x.SQL(sqlCmd, paramArgs...).Find(&providerList)
+	if err != nil {
+		err = fmt.Errorf("Get provider error:%s", err.Error())
+		log.Logger.Error("Get provider error", log.String("providerId", providerInfoData.Provider), log.Error(err))
+		rowData["errorMessage"] = err.Error()
+		return
+	}
+	if len(providerList) == 0 {
+		err = fmt.Errorf("Provider can not be found by id:%s", providerInfoData.Provider)
+		log.Logger.Warn("Provider can not be found by id", log.String("id", providerInfoData.Provider), log.Error(err))
+		rowData["errorMessage"] = err.Error()
+		return
+	}
+	providerData := providerList[0]
+
+	regionProviderInfo := models.RegionProviderData{}
+	regionProviderInfo.ProviderName = providerData.Name
+	regionProviderInfo.ProviderVersion = providerData.Version
+	regionProviderInfo.SecretId = providerSecretId
+	regionProviderInfo.SecretKey = providerSecretKey
+
+	// TODO  regionProviderInfo -> string, 加密，存储到 tf_file
+	return
+}
+
+func TerraformOperation(plugin string, action string, reqParam map[string]interface{}) (rowData map[string]string, err error) {
+	if plugin == "region" {
+		if action == "apply" {
+			rowData, err = RegionApply(reqParam)
+		}
+		return
+	}
+
+	rowData = make(map[string]string)
+	rowData["callbackParameter"] = reqParam["callbackParameter"].(string)
+	rowData["errorCode"] = "1"
+	rowData["errorMessage"] = ""
+
+	// Get interface by plugin and action
+	sqlCmd := `SELECT * FROM interface WHERE plugin=? AND name=?`
+	paramArgs := []interface{}{plugin, action}
+	var interfaceInfoList []*models.InterfaceTable
+	err = x.SQL(sqlCmd, paramArgs...).Find(&interfaceInfoList)
+	if err != nil {
+		err = fmt.Errorf("Get interfaceInfo error:%s", err.Error())
+		log.Logger.Error("Get interfaceInfo error", log.String("plugin", plugin), log.String("name", action), log.Error(err))
+		rowData["errorMessage"] = err.Error()
+		return
+	}
+	if len(interfaceInfoList) == 0 {
+		err = fmt.Errorf("InterfaceInfo can not be found by plugin:%s and name:%s", plugin, action)
+		log.Logger.Warn("InterfaceInfo can not be found by plugin and name", log.String("plugin", plugin), log.String("name", action), log.Error(err))
+		rowData["errorMessage"] = err.Error()
+		return
+	}
+	interfaceData := interfaceInfoList[0]
+
+	// Get providerInfo data
+	sqlCmd = `SELECT * FROM provider_info WHERE id=?`
+	paramArgs = []interface{}{reqParam["providerInfoId"]}
 	var providerInfoList []*models.ProviderInfoTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&providerInfoList)
 	if err != nil {
@@ -401,9 +499,9 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	providerData := providerList[0]
 	// providerVersion := providerList[0].Version
 
-	// Get source list by plugin and action
-	sqlCmd = `SELECT * FROM source WHERE plugin=? AND action=? AND provider=?`
-	paramArgs = []interface{}{plugin, action, providerData.Name}
+	// Get source list by interfaceId
+	sqlCmd = `SELECT * FROM source WHERE interface=? AND provider=?`
+	paramArgs = []interface{}{interfaceData.Id, providerData.Name}
 	var sourceList []*models.SourceTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&sourceList)
 	if err != nil {

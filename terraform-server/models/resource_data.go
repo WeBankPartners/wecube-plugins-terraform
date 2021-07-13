@@ -12,3 +12,10 @@ type ResourceDataTable struct {
 	UpdateTime      string `json:"updateTime" xorm:"update_time"`
 	UpdateUser      string `json:"updateUser" xorm:"update_user"`
 }
+
+type RegionProviderData struct {
+	ProviderName    string `json:"providerName"`
+	ProviderVersion string `json:"providerVersion"`
+	SecretId        string `json:"secretId"`
+	SecretKey       string `json:"secretKey"`
+}
