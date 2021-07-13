@@ -559,7 +559,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	providerData := providerList[0]
 	// providerVersion := providerList[0].Version
 
-	// Get source list by interfaceId
+	// Get source list by interfaceId and provider
 	sqlCmd = `SELECT * FROM source WHERE interface=? AND provider=?`
 	paramArgs = []interface{}{interfaceData.Id, providerData.Name}
 	var sourceList []*models.SourceTable

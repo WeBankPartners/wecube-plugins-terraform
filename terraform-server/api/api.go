@@ -82,7 +82,7 @@ func init() {
 		&handlerFuncObj{Url: "/provider_template_values", Method: "GET", HandlerFunc: provider.ProviderTemplateValueList},
 		&handlerFuncObj{Url: "/provider_template_values", Method: "DELETE", HandlerFunc: provider.ProviderTemplateValueBatchDelete, LogOperation: true},
 		&handlerFuncObj{Url: "/provider_template_values", Method: "PUT", HandlerFunc: provider.ProviderTemplateValueBatchUpdate, LogOperation: true},
-		&handlerFuncObj{Url: "/provider_template_values/:templateName", Method: "GET", HandlerFunc: provider.ProviderTemplateValueListByTemplate},
+		&handlerFuncObj{Url: "/provider_template_values/:templateId", Method: "GET", HandlerFunc: provider.ProviderTemplateValueListByTemplate},
 
 		&handlerFuncObj{Url: "/sources", Method: "POST", HandlerFunc: source.SourceBatchCreate, LogOperation: true},
 		&handlerFuncObj{Url: "/sources", Method: "GET", HandlerFunc: source.SourceList},

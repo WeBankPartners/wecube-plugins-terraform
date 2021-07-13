@@ -76,12 +76,12 @@ func ProviderTemplateValueBatchUpdate(c *gin.Context) {
 }
 
 func ProviderTemplateValueListByTemplate(c *gin.Context) {
-	templateName := c.Param("templateName")
-	if templateName == "" {
-		middleware.ReturnParamValidateError(c, fmt.Errorf("Url param templateName can not be empty"))
+	templateId := c.Param("templateId")
+	if templateId == "" {
+		middleware.ReturnParamValidateError(c, fmt.Errorf("Url param templateId can not be empty"))
 		return
 	}
-	rowData, err := db.ProviderTemplateValueListByTemplate(templateName)
+	rowData, err := db.ProviderTemplateValueListByTemplate(templateId)
 	if err != nil {
 		middleware.ReturnServerHandleError(c, err)
 	} else {
