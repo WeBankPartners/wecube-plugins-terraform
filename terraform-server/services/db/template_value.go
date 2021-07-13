@@ -114,7 +114,7 @@ func TemplateValueBatchUpdate(user string, param []*models.TemplateValueTable) (
 
 func TemplateValueListByParameter(parameterId string) (rowData []*models.TemplateValueTable, err error) {
 	sqlCmd := "SELECT t1.* FROM template_value t1 LEFT JOIN template t2 on t1.template=t2.name LEFT JOIN parameter t3 on " +
-		"t2.name=t3.template WHERE t3.id=? ORDER BY t1.create_time DESC"
+		"t2.name=t3.template WHERE t3.id=? ORDER BY t1.id DESC"
 	paramArgs := []interface{}{}
 	paramArgs = append(paramArgs, parameterId)
 	err = x.SQL(sqlCmd, paramArgs...).Find(&rowData)
