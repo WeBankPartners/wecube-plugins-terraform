@@ -1,5 +1,16 @@
 {
   "t_plugin_definition": "Plugin Definition",
   "t_conversion_configuration": "Conversion Configuration",
-  "t_template_data": "Template Data"
+  "t_template_data": "Template Data",
+  "t_plugin": "Plugin",
+  "t_search": "Search",
+  "t_save": "Save",
+  "t_delete": "Delete",
+  "t_name": "Name",
+  "t_description": "Description",
+  "t_add_template": "Add Tempalte",
+  "t_template": "Template",
+  "t_template_value": "Template Value",
+  "t_action": "Action",
+  "t_confirm_delete": "Delete Confirm ？"
 }

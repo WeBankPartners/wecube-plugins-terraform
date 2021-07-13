@@ -11,4 +11,11 @@ if (window.request) {
   }
 }
 
-export const getTableData = url => req.get(url)
+export const getPluginList = () => req.get('/plugins')
+export const getProviderList = () => req.get('/providers')
+export const createTemplate = data => req.post('/templates', data)
+export const getTemplateByPlugin = pluginId => req.get(`/templates/${pluginId}`)
+export const getTemplateValue = templateValue => req.get(`/provider_template_values/${templateValue}`)
+export const createTemplateValue = data => req.post(`/template_values`, data)
+export const deleteTemplateValue = id => req.delete(`/template_values?ids=${id}`)
+export const createProviderTemplateValues = data => req.post(`/provider_template_values`, data)

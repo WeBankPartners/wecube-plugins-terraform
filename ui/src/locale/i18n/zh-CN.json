@@ -1,5 +1,16 @@
 {
   "t_plugin_definition": "插件定义",
   "t_conversion_configuration": "转化配置",
-  "t_template_data": "模板数据"
+  "t_template_data": "模板数据",
+  "t_plugin": "插件",
+  "t_search": "查询",
+  "t_save": "保存",
+  "t_delete": "删除",
+  "t_name": "名称",
+  "t_description": "描述",
+  "t_add_template": "新增模板",
+  "t_template": "模板",
+  "t_template_value": "模板值",
+  "t_action": "操作",
+  "t_confirm_delete": "确定删除？"
 }
