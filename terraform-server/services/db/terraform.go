@@ -476,30 +476,55 @@ func RegionApply(reqParam map[string]interface{}, interfaceData *models.Interfac
 	return
 }
 
-func handleApplyOrQuery(reqParam map[string]interface{}, sourceData *models.SourceTable) (rowData map[string]string, err error) {
+func handleApplyOrQuery(action string, reqParam map[string]interface{}, sourceData *models.SourceTable) (rowData map[string]string, err error) {
 	rowData = make(map[string]string)
 	rowData["callbackParameter"] = reqParam["callbackParameter"].(string)
 	rowData["errorCode"] = "1"
 	rowData["errorMessage"] = ""
 
-	uuid := guid.CreateGuid()
-	createTime := time.Now().Format(models.DateTimeFormat)
-	resourceId := reqParam["id"].(string)
-	resourceAssetId := reqParam["asset_id"].(string)
-	createUser := reqParam["operator_user"].(string)
-	regionId := reqParam["region_id"].(string)
+	if action == "apply" {
+		uuid := guid.CreateGuid()
+		createTime := time.Now().Format(models.DateTimeFormat)
+		resourceId := reqParam["id"].(string)
+		resourceAssetId := reqParam["asset_id"].(string)
+		createUser := reqParam["operator_user"].(string)
+		regionId := reqParam["region_id"].(string)
 
-	_, err = x.Exec("INSERT INTO resource_data(id,resource,resource_id,resource_asset_id,region_id,create_time,create_user,update_time) VALUE (?,?,?,?,?,?,?,?)",
-		uuid, sourceData.Id, resourceId, resourceAssetId, regionId, createTime, createUser, createTime)
-	if err != nil {
-		err = fmt.Errorf("Try to create resource_data fail,%s ", err.Error())
-		log.Logger.Error("Try to create resource_data fail", log.Error(err))
-		rowData["errorMessage"] = err.Error()
-		return
+		_, err = x.Exec("INSERT INTO resource_data(id,resource,resource_id,resource_asset_id,region_id,create_time,create_user,update_time) VALUE (?,?,?,?,?,?,?,?)",
+			uuid, sourceData.Id, resourceId, resourceAssetId, regionId, createTime, createUser, createTime)
+		if err != nil {
+			err = fmt.Errorf("Try to create resource_data fail,%s ", err.Error())
+			log.Logger.Error("Try to create resource_data fail", log.Error(err))
+			rowData["errorMessage"] = err.Error()
+			return
+		}
+		rowData["errorCode"] = "0"
+		rowData["asset_id"] = resourceAssetId
+		rowData["id"] = resourceId
+	} else if action == "query" {
+		resourceId := reqParam["id"].(string)
+		sqlCmd := `SELECT * FROM resource_data WHERE resource_id=?`
+		paramArgs := []interface{}{resourceId}
+		var resourceDataList []*models.ResourceDataTable
+		err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataList)
+		if err != nil {
+			err = fmt.Errorf("Get resource_data by resourceId:%s error:%s", resourceId, err.Error())
+			log.Logger.Error("Get resource_data by resourceId error", log.String("resourceId", resourceId), log.Error(err))
+			rowData["errorMessage"] = err.Error()
+			return
+		}
+		if len(resourceDataList) == 0 {
+			err = fmt.Errorf("ResourceData can not be found by resourceId:%s", resourceId)
+			log.Logger.Warn("ResourceData can not be found by resourceId", log.String("resourceId", resourceId), log.Error(err))
+			rowData["errorMessage"] = err.Error()
+			return
+		}
+		resourceData := resourceDataList[0]
+		rowData["errorCode"] = "0"
+		rowData["asset_id"] = resourceData.ResourceAssetId
+		rowData["id"] = resourceId
+		rowData["region_id"] = resourceData.RegionId
 	}
-	rowData["errorCode"] = "0"
-	rowData["asset_id"] = resourceAssetId
-	rowData["id"] = resourceId
 	return
 }
 
@@ -508,6 +533,13 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	rowData["callbackParameter"] = reqParam["callbackParameter"].(string)
 	rowData["errorCode"] = "1"
 	rowData["errorMessage"] = ""
+
+	defer func(){
+		if r := recover(); r != nil {
+			err = fmt.Errorf("TerraformOperation error: %v", r)
+			rowData["errorMessage"] = err.Error()
+		}
+	}()
 
 	// Get interface by plugin and action
 	sqlCmd := `SELECT * FROM interface WHERE plugin=? AND name=?`
@@ -659,7 +691,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 		if sourceData.TerraformUsed == "Y" {
 			retOutput, tmpErr = handleTerraformApplyOrQuery(reqParam, sourceList, providerData, providerInfoData, regionData)
 		} else {
-			retOutput, tmpErr = handleApplyOrQuery(reqParam, sourceData)
+			retOutput, tmpErr = handleApplyOrQuery(action, reqParam, sourceData)
 		}
 		if tmpErr != nil {
 			err = fmt.Errorf("Handle ApplyOrQuery error: %s", tmpErr.Error())
