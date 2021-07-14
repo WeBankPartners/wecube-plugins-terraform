@@ -35,7 +35,8 @@ func TfstateAttributeBatchCreate(c *gin.Context) {
 		return
 	}
 	user := middleware.GetRequestUser(c)
-	rowData, err := db.TfstateAttributeBatchCreate(user, param)
+	// rowData, err := db.TfstateAttributeBatchCreate(user, param)
+	rowData, err := db.TfstateAttributeBatchCreateUpdate(user, param)
 	if err != nil {
 		middleware.ReturnServerHandleError(c, err)
 	} else {

@@ -35,7 +35,8 @@ func TfArgumentBatchCreate(c *gin.Context) {
 		return
 	}
 	user := middleware.GetRequestUser(c)
-	rowData, err := db.TfArgumentBatchCreate(user, param)
+	// rowData, err := db.TfArgumentBatchCreate(user, param)
+	rowData, err := db.TfArgumentBatchCreateUpdate(user, param)
 	if err != nil {
 		middleware.ReturnServerHandleError(c, err)
 	} else {
