@@ -39,6 +39,7 @@ func ParameterBatchCreate(user string, param []*models.ParameterTable) (rowData 
 	// 当 transNullStr 的 key 表示的字段为空时，表示需要将其插入 null
 	transNullStr := make(map[string]string)
 	transNullStr["template"] = "true"
+	transNullStr["object_name"] = "true"
 
 	for i := range rowData {
 		action, tmpErr := GetInsertTableExecAction(tableName, *rowData[i], transNullStr)
@@ -82,6 +83,7 @@ func ParameterBatchUpdate(user string, param []*models.ParameterTable) (err erro
 	// 当 transNullStr 的 key 表示的字段为空时，表示需要将其插入 null
 	transNullStr := make(map[string]string)
 	transNullStr["template"] = "true"
+	transNullStr["object_name"] = "true"
 
 	for i := range param {
 		param[i].UpdateTime = updateTime
@@ -97,6 +99,57 @@ func ParameterBatchUpdate(user string, param []*models.ParameterTable) (err erro
 	err = transaction(actions)
 	if err != nil {
 		err = fmt.Errorf("Try to update parameter fail,%s ", err.Error())
+	}
+	return
+}
+
+func ParameterBatchCreateUpdate(user string, param []*models.ParameterTable) (rowData []*models.ParameterTable, err error) {
+	actions := []*execAction{}
+	tableName := "parameter"
+	createTime := time.Now().Format(models.DateTimeFormat)
+	updateDataIds := make(map[string]bool)
+	var parameterId string
+
+	for i := range param {
+		var data *models.ParameterTable
+		if param[i].Id == "" {
+			parameterId = guid.CreateGuid()
+			data = &models.ParameterTable{Id: parameterId, Name: param[i].Name, Type: param[i].Type, Multiple: param[i].Multiple, Interface: param[i].Interface, Template: param[i].Template, DataType: param[i].DataType, ObjectName: param[i].ObjectName, CreateUser: user, CreateTime: createTime, UpdateTime: createTime}
+		} else {
+			updateDataIds[param[i].Id] = true
+			parameterId = param[i].Id
+			data = &models.ParameterTable{Id: parameterId, Name: param[i].Name, Type: param[i].Type, Multiple: param[i].Multiple, Interface: param[i].Interface, Template: param[i].Template, DataType: param[i].DataType, ObjectName: param[i].ObjectName, CreateUser: param[i].CreateUser, CreateTime: param[i].CreateTime, UpdateUser: user, UpdateTime: createTime}
+		}
+		rowData = append(rowData, data)
+	}
+
+	// 当 transNullStr 的 key 表示的字段为空时，表示需要将其插入 null
+	transNullStr := make(map[string]string)
+	transNullStr["template"] = "true"
+	transNullStr["object_name"] = "true"
+
+	var tmpErr error
+	for i := range rowData {
+		var action *execAction
+		if _, ok := updateDataIds[rowData[i].Id]; ok {
+			action, tmpErr = GetUpdateTableExecAction(tableName, "id", rowData[i].Id, *rowData[i], transNullStr)
+			if tmpErr != nil {
+				err = fmt.Errorf("Try to get update_parameter execAction fail,%s ", tmpErr.Error())
+				return
+			}
+		} else {
+			action, tmpErr = GetInsertTableExecAction(tableName, *rowData[i], transNullStr)
+			if tmpErr != nil {
+				err = fmt.Errorf("Try to get create_parameter execAction fail,%s ", tmpErr.Error())
+				return
+			}
+		}
+		actions = append(actions, action)
+	}
+
+	err = transaction(actions)
+	if err != nil {
+		err = fmt.Errorf("Try to create or update parameter fail,%s ", err.Error())
 	}
 	return
 }

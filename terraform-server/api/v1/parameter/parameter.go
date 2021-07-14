@@ -35,7 +35,8 @@ func ParameterBatchCreate(c *gin.Context) {
 		return
 	}
 	user := middleware.GetRequestUser(c)
-	rowData, err := db.ParameterBatchCreate(user, param)
+	// rowData, err := db.ParameterBatchCreate(user, param)
+	rowData, err := db.ParameterBatchCreateUpdate(user, param)
 	if err != nil {
 		middleware.ReturnServerHandleError(c, err)
 	} else {
