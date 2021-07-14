@@ -12,5 +12,14 @@
   "t_template": "模板",
   "t_template_value": "模板值",
   "t_action": "操作",
-  "t_confirm_delete": "确定删除？"
+  "t_confirm_delete": "确定删除？",
+  "t_add": "新增",
+  "t_edit": "编辑",
+  "t_params_type": "参数类型",
+  "t_interface": "接口",
+  "t_data_type": "数据类型",
+  "t_multiple": "多选",
+  "t_input_params": "输入参数",
+  "t_output_params": "输出参数",
+  "t_object_name": "关联对象"
 }

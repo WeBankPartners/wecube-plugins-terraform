@@ -17,7 +17,6 @@
       <div style="font-size: 0">
         <div class="config-title">
           {{ $t('t_template') }}
-          <!-- <Button @click="newTempalte.isShow = true" type="primary" ghost icon="md-add" size="small"></Button> -->
         </div>
         <div class="config-title">
           {{ $t('t_template_value') }}
@@ -79,20 +78,6 @@
         </div>
       </template>
     </div>
-    <!-- <Modal
-      v-model="newTempalte.isShow"
-      :title="$t('t_add_template')"
-      @on-ok="addTempalte"
-      @on-cancel="newTempalte.isShow = false">
-      <Form>
-        <FormItem :label="$t('t_name')">
-          <Input type="text" v-model="newTempalte.form.name"></Input>
-        </FormItem>
-        <FormItem :label="$t('t_description')">
-          <Input type="password" v-model="newTempalte.form.description"></Input>
-        </FormItem>
-      </Form>
-    </Modal> -->
   </div>
 </template>
 <script>
@@ -103,7 +88,6 @@ import {
   getTemplateValue,
   deleteTemplateValue,
   createTemplateValue,
-  createTemplate,
   createProviderTemplateValues
 } from '@/api/server'
 export default {
@@ -112,13 +96,6 @@ export default {
     return {
       pageHeight: '',
       showOperateZone: false,
-      newTempalte: {
-        isShow: false,
-        form: {
-          name: '',
-          description: ''
-        }
-      },
       provider: [],
       providerList: [],
       plugin: '',
@@ -139,16 +116,6 @@ export default {
     this.getPlugin()
   },
   methods: {
-    async addTempalte () {
-      const { statusCode } = await createTemplate([this.newTempalte.form])
-      if (statusCode === 'OK') {
-        this.$Notice.success({
-          title: 'Successful',
-          desc: 'Successful'
-        })
-        this.getTemplates()
-      }
-    },
     clearPlugin () {
       this.showOperateZone = false
     },

@@ -12,5 +12,14 @@
   "t_template": "Template",
   "t_template_value": "Template Value",
   "t_action": "Action",
-  "t_confirm_delete": "Delete Confirm ？"
+  "t_confirm_delete": "Delete Confirm ？",
+  "t_add": "Add",
+  "t_edit": "Edit",
+  "t_params_type": "Params Type",
+  "t_interface": "Interface",
+  "t_data_type": "Data Type",
+  "t_multiple": "Multiple",
+  "t_input_params": "Input Params",
+  "t_output_params": "Output Params",
+  "t_object_name": "Object Name"
 }
