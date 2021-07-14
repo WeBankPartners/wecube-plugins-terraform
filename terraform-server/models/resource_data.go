@@ -22,4 +22,5 @@ type RegionProviderData struct {
 	SecretIdAttrName  string `json:"secretIdAttrName"`
 	SecretKeyAttrName string `json:"secretKeyAttrName"`
 	RegionAttrName    string `json:"regionAttrName"`
+	ProviderInfoId    string `json:"providerInfoId"`
 }

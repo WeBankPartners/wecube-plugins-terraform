@@ -110,6 +110,7 @@ func TerraformOperation(c *gin.Context) {
 	rowData.ResultCode = "0"
 	rowData.ResultMessage = "success"
 	for i := range params {
+		params[i]["operator_user"] = request_param["operator"]
 		retData, err := db.TerraformOperation(plugin, action, params[i])
 		if err != nil {
 			rowData.ResultCode = "1"

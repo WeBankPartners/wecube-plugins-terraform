@@ -162,9 +162,7 @@ func TerraformDestroy(dirPath string) (err error) {
 	return
 }
 
-func handleTerraformApplyOrQuery(plugin string,
-	                             action string,
-	                             reqParam map[string]interface{},
+func handleTerraformApplyOrQuery(reqParam map[string]interface{},
  								 sourceList []*models.SourceTable,
 								 providerData *models.ProviderTable,
 							     providerInfo *models.ProviderInfoTable,
@@ -245,6 +243,7 @@ func handleTerraformApplyOrQuery(plugin string,
 			delete(tfArguments, tfArgumentList[i].Name)
 		}
 	}
+	// TODO write tfArguments to tf.json file
 	var dirPath, address, resourceId string
 	// terraform import
 	err = TerraformImport(dirPath, address, resourceId)
@@ -328,7 +327,7 @@ func handleTerraformApplyOrQuery(plugin string,
 	resourceDataResourceId := reqParam["id"]
 	resourceDataResourceAssetId := tfstateContent[sourceList[0].AssetIdAttribute]
 	createTime := time.Now().Format(models.DateTimeFormat)
-	// TODO lackof regionId
+	// TODO lack of tf_file, tfstate_file
 	_, err = x.Exec("INSERT INTO resource_data(id,resource,resource_id,resource_asset_id,tf_file,tf_state_file,region_id,create_time,create_user,update_time) VALUE (?,?,?,?,?,?,?,?,?,?)",
 		resourceDataId, resourceDataSourceId, resourceDataResourceId, resourceDataResourceAssetId, createTime, "", createTime)
 	if err != nil {
@@ -404,6 +403,7 @@ func RegionApply(reqParam map[string]interface{}, interfaceData *models.Interfac
 	providerData := providerList[0]
 
 	regionProviderInfo := models.RegionProviderData{}
+	regionProviderInfo.ProviderInfoId = providerInfoId
 	regionProviderInfo.ProviderName = providerData.Name
 	regionProviderInfo.ProviderVersion = providerData.Version
 	regionProviderInfo.SecretId = providerSecretId
@@ -436,19 +436,20 @@ func RegionApply(reqParam map[string]interface{}, interfaceData *models.Interfac
 		return
 	}
 
+	// get source data by interfaceId and providerId
 	sqlCmd = `SELECT * FROM source WHERE interface=? AND provider=?`
-	paramArgs = []interface{}{interfaceData.Id, providerData.Name}
+	paramArgs = []interface{}{interfaceData.Id, providerData.Id}
 	var sourceList []*models.SourceTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&sourceList)
 	if err != nil {
-		err = fmt.Errorf("Get source by interface:%s and provider:%s error:%s", interfaceData.Id, providerData.Name, err.Error())
-		log.Logger.Error("Get source by interface and provider error", log.String("interface", interfaceData.Id), log.String("provider", providerData.Name), log.Error(err))
+		err = fmt.Errorf("Get source by interface:%s and provider:%s error:%s", interfaceData.Id, providerData.Id, err.Error())
+		log.Logger.Error("Get source by interface and provider error", log.String("interface", interfaceData.Id), log.String("provider", providerData.Id), log.Error(err))
 		rowData["errorMessage"] = err.Error()
 		return
 	}
 	if len(sourceList) == 0 {
-		err = fmt.Errorf("Provider can not be found by interface:%s and provider:%s", interfaceData.Id, providerData.Name)
-		log.Logger.Warn("Provider can not be found by interface and provider", log.String("interface", interfaceData.Id), log.String("provider", providerData.Name), log.Error(err))
+		err = fmt.Errorf("Provider can not be found by interface:%s and provider:%s", interfaceData.Id, providerData.Id)
+		log.Logger.Warn("Provider can not be found by interface and provider", log.String("interface", interfaceData.Id), log.String("provider", providerData.Id), log.Error(err))
 		rowData["errorMessage"] = err.Error()
 		return
 	}
@@ -458,9 +459,10 @@ func RegionApply(reqParam map[string]interface{}, interfaceData *models.Interfac
 	createTime := time.Now().Format(models.DateTimeFormat)
 	resourceId := reqParam["id"].(string)
 	resourceAssetId := reqParam["asset_id"].(string)
+	createUser := reqParam["operator_user"].(string)
 
 	_, err = x.Exec("INSERT INTO resource_data(id,resource,resource_id,resource_asset_id,tf_file,region_id,create_time,create_user,update_time) VALUE (?,?,?,?,?,?,?,?,?)",
-		uuid, sourceData.Id, resourceId, resourceAssetId, enCodeproviderTfContent, resourceId, createTime, "", createTime)
+		uuid, sourceData.Id, resourceId, resourceAssetId, enCodeproviderTfContent, resourceId, createTime, createUser, createTime)
 	if err != nil {
 		err = fmt.Errorf("Try to create resource_data fail,%s ", err.Error())
 		log.Logger.Error("Try to create resource_data fail", log.Error(err))
@@ -468,6 +470,33 @@ func RegionApply(reqParam map[string]interface{}, interfaceData *models.Interfac
 		return
 	}
 
+	rowData["errorCode"] = "0"
+	rowData["asset_id"] = resourceAssetId
+	rowData["id"] = resourceId
+	return
+}
+
+func handleApplyOrQuery(reqParam map[string]interface{}, sourceData *models.SourceTable) (rowData map[string]string, err error) {
+	rowData = make(map[string]string)
+	rowData["callbackParameter"] = reqParam["callbackParameter"].(string)
+	rowData["errorCode"] = "1"
+	rowData["errorMessage"] = ""
+
+	uuid := guid.CreateGuid()
+	createTime := time.Now().Format(models.DateTimeFormat)
+	resourceId := reqParam["id"].(string)
+	resourceAssetId := reqParam["asset_id"].(string)
+	createUser := reqParam["operator_user"].(string)
+	regionId := reqParam["region_id"].(string)
+
+	_, err = x.Exec("INSERT INTO resource_data(id,resource,resource_id,resource_asset_id,region_id,create_time,create_user,update_time) VALUE (?,?,?,?,?,?,?,?)",
+		uuid, sourceData.Id, resourceId, resourceAssetId, regionId, createTime, createUser, createTime)
+	if err != nil {
+		err = fmt.Errorf("Try to create resource_data fail,%s ", err.Error())
+		log.Logger.Error("Try to create resource_data fail", log.Error(err))
+		rowData["errorMessage"] = err.Error()
+		return
+	}
 	rowData["errorCode"] = "0"
 	rowData["asset_id"] = resourceAssetId
 	rowData["id"] = resourceId
@@ -504,20 +533,62 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 		return
 	}
 
+	// Get providerInfoData and providerData by regionId
+	regionId := reqParam["region_id"].(string)
+	sqlCmd = `SELECT * FROM resource_data WHERE region_id=?`
+	paramArgs = []interface{}{regionId}
+	var resourceDataInfoList []*models.ResourceDataTable
+	err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataInfoList)
+	if err != nil {
+		err = fmt.Errorf("Get resourceDataInfo by regionId:%s error:%s", regionId, err.Error())
+		log.Logger.Error("Get resourceDataInfo by regionId error", log.String("regionId", regionId), log.Error(err))
+		rowData["errorMessage"] = err.Error()
+		return
+	}
+	if len(resourceDataInfoList) == 0 {
+		err = fmt.Errorf("ResourceDataInfo can not be found by regionId:%s", regionId)
+		log.Logger.Warn("ResourceDataInfo can not be found by regionId", log.String("regionId", regionId), log.Error(err))
+		rowData["errorMessage"] = err.Error()
+		return
+	}
+	resourceData := resourceDataInfoList[0]
+	decodeProviderInfoStr, decodeErr := cipher.AesDePassword(models.Config.Auth.PasswordSeed, resourceData.TfFile)
+	if decodeErr != nil {
+		err = fmt.Errorf("Try to decode resourceData tfFile fail: %s", decodeErr.Error())
+		log.Logger.Error("Try to decode resourceData tfFile fail", log.Error(decodeErr))
+		rowData["errorMessage"] = err.Error()
+		return
+	}
+	var regionProviderData models.RegionProviderData
+	err = json.Unmarshal([]byte(decodeProviderInfoStr), &regionProviderData)
+	if err != nil {
+		err = fmt.Errorf("Unmarshal decodeProviderInfoStr fail: %s", err.Error())
+		log.Logger.Error("Unmarshal decodeProviderInfoStr fail", log.Error(err))
+		rowData["errorMessage"] = err.Error()
+		return
+	}
+	/*
+	providerInfoData := models.ProviderInfoTable{Id: regionProviderData.ProviderInfoId, SecretId: regionProviderData.SecretId, SecretKey: regionProviderData.SecretKey}
+	providerData := models.ProviderTable{Name:regionProviderData.ProviderName, Version: regionProviderData.ProviderVersion,
+		SecretIdAttrName: regionProviderData.SecretIdAttrName, SecretKeyAttrName: regionProviderData.SecretKeyAttrName,
+		RegionAttrName: regionProviderData.RegionAttrName}
+	*/
+
 	// Get providerInfo data
+	providerInfoId := regionProviderData.ProviderInfoId
 	sqlCmd = `SELECT * FROM provider_info WHERE id=?`
-	paramArgs = []interface{}{reqParam["providerInfoId"]}
+	paramArgs = []interface{}{providerInfoId}
 	var providerInfoList []*models.ProviderInfoTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&providerInfoList)
 	if err != nil {
 		err = fmt.Errorf("Get providerInfo error:%s", err.Error())
-		log.Logger.Error("Get providerInfo error", log.String("providerInfoId", reqParam["providerInfoId"].(string)), log.Error(err))
+		log.Logger.Error("Get providerInfo error", log.String("providerInfoId", providerInfoId), log.Error(err))
 		rowData["errorMessage"] = err.Error()
 		return
 	}
 	if len(providerInfoList) == 0 {
-		err = fmt.Errorf("ProviderInfo can not be found by id:%s", reqParam["providerInfoId"])
-		log.Logger.Warn("ProviderInfo can not be found by id", log.String("id", reqParam["providerInfoId"].(string)), log.Error(err))
+		err = fmt.Errorf("ProviderInfo can not be found by id:%s", providerInfoId)
+		log.Logger.Warn("ProviderInfo can not be found by id", log.String("id", providerInfoId), log.Error(err))
 		rowData["errorMessage"] = err.Error()
 		return
 	}
@@ -540,19 +611,20 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	providerInfoData.SecretKey = providerSecretKey
 
 	// Get provider data
+	providerId := providerInfoData.Provider
 	sqlCmd = `SELECT * FROM provider WHERE id=?`
-	paramArgs = []interface{}{providerInfoData.Provider}
+	paramArgs = []interface{}{providerId}
 	var providerList []*models.ProviderTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&providerList)
 	if err != nil {
 		err = fmt.Errorf("Get provider error:%s", err.Error())
-		log.Logger.Error("Get provider error", log.String("providerId", providerInfoData.Provider), log.Error(err))
+		log.Logger.Error("Get provider error", log.String("providerId", providerId), log.Error(err))
 		rowData["errorMessage"] = err.Error()
 		return
 	}
 	if len(providerList) == 0 {
-		err = fmt.Errorf("Provider can not be found by id:%s", providerInfoData.Provider)
-		log.Logger.Warn("Provider can not be found by id", log.String("id", providerInfoData.Provider), log.Error(err))
+		err = fmt.Errorf("Provider can not be found by id:%s", providerId)
+		log.Logger.Warn("Provider can not be found by id", log.String("id", providerId), log.Error(err))
 		rowData["errorMessage"] = err.Error()
 		return
 	}
@@ -561,46 +633,37 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 
 	// Get source list by interfaceId and provider
 	sqlCmd = `SELECT * FROM source WHERE interface=? AND provider=?`
-	paramArgs = []interface{}{interfaceData.Id, providerData.Name}
+	paramArgs = []interface{}{interfaceData.Id, providerData.Id}
 	var sourceList []*models.SourceTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&sourceList)
 	if err != nil {
-		err = fmt.Errorf("Get source list error:%s", err.Error())
-		log.Logger.Error("Get source list error", log.Error(err))
+		err = fmt.Errorf("Get source list by interface:%s and provider:%s error:%s", interfaceData.Id, providerData.Id, err.Error())
+		log.Logger.Error("Get source list by interface and provider error", log.Error(err))
 		rowData["errorMessage"] = err.Error()
 		return
 	}
 	if len(sourceList) == 0 {
-		err = fmt.Errorf("Source list can not be found by plugin:%s and action:%s", plugin, action)
-		log.Logger.Warn("Source list can not be found by plugin and action", log.String("plugin", plugin), log.String("action", action), log.Error(err))
+		err = fmt.Errorf("Source list can not be found by interface:%s and provider:%s", interfaceData.Id, providerData.Id)
+		log.Logger.Warn("Source list can not be found by interface and provider", log.String("interface", interfaceData.Id), log.String("provider", providerData.Id), log.Error(err))
 		rowData["errorMessage"] = err.Error()
 		return
 	}
+	sourceData := sourceList[0]
 
 	// Get region data
-	sqlCmd = `SELECT * FROM resource_data WHERE id=?`
-	paramArgs = []interface{}{reqParam["regionId"]}
-	var regionList []*models.ResourceDataTable
-	err = x.SQL(sqlCmd, paramArgs...).Find(&regionList)
-	if err != nil {
-		err = fmt.Errorf("Get region data error:%s", err.Error())
-		log.Logger.Error("Get region data error", log.String("regionId", reqParam["regionId"].(string)), log.Error(err))
-		rowData["errorMessage"] = err.Error()
-		return
-	}
-	if len(regionList) == 0 {
-		err = fmt.Errorf("Region can not be found by id:%s", reqParam["regionId"])
-		log.Logger.Warn("Region can not be found by id", log.String("id", reqParam["regionId"].(string)), log.Error(err))
-		rowData["errorMessage"] = err.Error()
-		return
-	}
-	regionData := regionList[0]
+	regionData := resourceData
 
 	if action == "apply" || action == "query" {
-		retOutput, tmpErr := handleTerraformApplyOrQuery(plugin, action, reqParam, sourceList, providerData, providerInfoData, regionData)
+		var retOutput map[string]string
+		var tmpErr error
+		if sourceData.TerraformUsed == "Y" {
+			retOutput, tmpErr = handleTerraformApplyOrQuery(reqParam, sourceList, providerData, providerInfoData, regionData)
+		} else {
+			retOutput, tmpErr = handleApplyOrQuery(reqParam, sourceData)
+		}
 		if tmpErr != nil {
-			err = fmt.Errorf("Handle TerraformApplyOrQuery error: %s", tmpErr.Error())
-			log.Logger.Error("Handle TerraformApplyOrQuery error", log.Error(err))
+			err = fmt.Errorf("Handle ApplyOrQuery error: %s", tmpErr.Error())
+			log.Logger.Error("Handle ApplyOrQuery error", log.Error(err))
 			rowData["errorMessage"] = err.Error()
 			return
 		}
