@@ -32,14 +32,19 @@ func TfArgumentBatchCreate(user string, param []*models.TfArgumentTable) (rowDat
 	for i := range param {
 		id := guid.CreateGuid()
 		data := &models.TfArgumentTable{Id: id, Name: param[i].Name, Source: param[i].Source, Parameter: param[i].Parameter, DefaultValue: param[i].DefaultValue,
-			IsNull: param[i].IsNull, Type: param[i].Type, IsMulti: param[i].IsMulti, ConvertWay: param[i].ConvertWay, RelativeSource: param[i].RelativeSource,
+			IsNull: param[i].IsNull, Type: param[i].Type, ObjectName: param[i].ObjectName, IsMulti: param[i].IsMulti, ConvertWay: param[i].ConvertWay, RelativeSource: param[i].RelativeSource,
 			RelativeTfstateAttribute: param[i].RelativeTfstateAttribute, RelativeParameter: param[i].RelativeParameter, RelativeParameterValue: param[i].RelativeParameterValue, CreateUser: user, CreateTime: createTime, UpdateTime: createTime}
 		rowData = append(rowData, data)
 	}
 
 	// 当 transNullStr 的 key 表示的字段为空时，表示需要将其插入 null
 	transNullStr := make(map[string]string)
-	transNullStr["tfstate_attribute"] = "true"
+	transNullStr["default_value"] = "true"
+	transNullStr["object_name"] = "true"
+	transNullStr["relative_source"] = "true"
+	transNullStr["relative_tfstate_attribute"] = "true"
+	transNullStr["relative_parameter"] = "true"
+	transNullStr["relative_parameter_value"] = "true"
 
 	for i := range rowData {
 		action, tmpErr := GetInsertTableExecAction(tableName, *rowData[i], transNullStr)
@@ -82,7 +87,12 @@ func TfArgumentBatchUpdate(user string, param []*models.TfArgumentTable) (err er
 
 	// 当 transNullStr 的 key 表示的字段为空时，表示需要将其插入 null
 	transNullStr := make(map[string]string)
-	transNullStr["tfstate_attribute"] = "true"
+	transNullStr["default_value"] = "true"
+	transNullStr["object_name"] = "true"
+	transNullStr["relative_source"] = "true"
+	transNullStr["relative_tfstate_attribute"] = "true"
+	transNullStr["relative_parameter"] = "true"
+	transNullStr["relative_parameter_value"] = "true"
 
 	for i := range param {
 		param[i].UpdateTime = updateTime

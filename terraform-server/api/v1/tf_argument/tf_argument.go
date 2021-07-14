@@ -11,6 +11,10 @@ import (
 
 func TfArgumentList(c *gin.Context) {
 	paramsMap := make(map[string]interface{})
+	sourceId := c.Query("sourceId")
+	if sourceId != "" {
+		paramsMap["source"] = sourceId
+	}
 	rowData, err := db.TfArgumentList(paramsMap)
 	if err != nil {
 		middleware.ReturnServerHandleError(c, err)

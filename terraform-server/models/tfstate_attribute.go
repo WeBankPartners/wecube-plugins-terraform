@@ -8,6 +8,7 @@ type TfstateAttributeTable struct {
 	DefaultValue             string `json:"defaultValue" xorm:"default_value"`
 	IsNull                   string `json:"isNull" xorm:"is_null"`
 	Type                     string `json:"type" xorm:"type"`
+	ObjectName               string `json:"objectName" xorm:"object_name"`
 	IsMulti                  string `json:"isMulti" xorm:"is_multi"`
 	ConvertWay               string `json:"convertWay" xorm:"convert_way"`
 	RelativeSource           string `json:"relativeSource" xorm:"relative_source"`

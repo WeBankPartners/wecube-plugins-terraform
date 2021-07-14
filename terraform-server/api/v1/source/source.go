@@ -11,6 +11,17 @@ import (
 
 func SourceList(c *gin.Context) {
 	paramsMap := make(map[string]interface{})
+
+	interfaceId := c.Query("interfaceId")
+	if interfaceId != "" {
+		paramsMap["interface"] = interfaceId
+	}
+
+	providerId := c.Query("providerId")
+	if providerId != "" {
+		paramsMap["provider"] = providerId
+	}
+
 	rowData, err := db.SourceList(paramsMap)
 	if err != nil {
 		middleware.ReturnServerHandleError(c, err)

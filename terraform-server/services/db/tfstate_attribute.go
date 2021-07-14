@@ -29,16 +29,25 @@ func TfstateAttributeBatchCreate(user string, param []*models.TfstateAttributeTa
 	tableName := "tfstate_attribute"
 	createTime := time.Now().Format(models.DateTimeFormat)
 
+	// 当 transNullStr 的 key 表示的字段为空时，表示需要将其插入 null
+	transNullStr := make(map[string]string)
+	transNullStr["default_value"] = "true"
+	transNullStr["object_name"] = "true"
+	transNullStr["relative_source"] = "true"
+	transNullStr["relative_tfstate_attribute"] = "true"
+	transNullStr["relative_parameter"] = "true"
+	transNullStr["relative_parameter_value"] = "true"
+
 	for i := range param {
 		id := guid.CreateGuid()
-		data := &models.TfstateAttributeTable{Id: id, Name: param[i].Name, Source: param[i].Source, Parameter: param[i].Parameter, DefaultValue: param[i].DefaultValue, IsNull: param[i].IsNull, Type: param[i].Type,
+		data := &models.TfstateAttributeTable{Id: id, Name: param[i].Name, Source: param[i].Source, Parameter: param[i].Parameter, DefaultValue: param[i].DefaultValue, IsNull: param[i].IsNull, Type: param[i].Type, ObjectName: param[i].ObjectName,
 			IsMulti: param[i].IsMulti, ConvertWay: param[i].ConvertWay, RelativeSource: param[i].RelativeSource, RelativeTfstateAttribute: param[i].RelativeTfstateAttribute, RelativeParameter: param[i].RelativeParameter,
 			RelativeParameterValue: param[i].RelativeParameterValue, CreateUser: user, CreateTime: createTime, UpdateTime: createTime}
 		rowData = append(rowData, data)
 	}
 
 	for i := range rowData {
-		action, tmpErr := GetInsertTableExecAction(tableName, *rowData[i], nil)
+		action, tmpErr := GetInsertTableExecAction(tableName, *rowData[i], transNullStr)
 		if tmpErr != nil {
 			err = fmt.Errorf("Try to create tfstate_attribute fail,%s ", tmpErr.Error())
 			return
@@ -75,10 +84,20 @@ func TfstateAttributeBatchUpdate(user string, param []*models.TfstateAttributeTa
 	actions := []*execAction{}
 	tableName := "tfstate_attribute"
 	updateTime := time.Now().Format(models.DateTimeFormat)
+
+	// 当 transNullStr 的 key 表示的字段为空时，表示需要将其插入 null
+	transNullStr := make(map[string]string)
+	transNullStr["default_value"] = "true"
+	transNullStr["object_name"] = "true"
+	transNullStr["relative_source"] = "true"
+	transNullStr["relative_tfstate_attribute"] = "true"
+	transNullStr["relative_parameter"] = "true"
+	transNullStr["relative_parameter_value"] = "true"
+
 	for i := range param {
 		param[i].UpdateTime = updateTime
 		param[i].UpdateUser = user
-		action, tmpErr := GetUpdateTableExecAction(tableName, "id", param[i].Id, *param[i], nil)
+		action, tmpErr := GetUpdateTableExecAction(tableName, "id", param[i].Id, *param[i], transNullStr)
 		if tmpErr != nil {
 			err = fmt.Errorf("Try to update tfstate_attribute fail,%s ", tmpErr.Error())
 			return
