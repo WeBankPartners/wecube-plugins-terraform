@@ -166,7 +166,8 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
  								 sourceData *models.SourceTable,
 								 providerData *models.ProviderTable,
 							     providerInfo *models.ProviderInfoTable,
-  							     regionData *models.ResourceDataTable) (retOutput map[string]string, err error) {
+  							     regionData *models.ResourceDataTable,
+  							     action string) (retOutput map[string]string, err error) {
 	retOutput = make(map[string]string)
 	retOutput["callbackParameter"] = reqParam["callbackParameter"].(string)
 	retOutput["errorCode"] = "1"
@@ -275,9 +276,9 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 		if convertWay == "direct" && arg.(string) == "null" {
 			delete(tfArguments, tfArgumentList[i].Name)
 		}
-		if tfArgumentList[i].Type == "object" || tfArgumentList[i].Type == "object_str" {
-			tmpVal := make(map[string]interface{})
-			err = json.Unmarshal(arg.([]byte), tmpVal)
+		if parameterData.DataType == "object" || parameterData.DataType == "object_str" {
+			var tmpVal map[string]interface{}
+			err = json.Unmarshal([]byte(arg.(string)), &tmpVal)
 			tfArguments[tfArgumentList[i].Name]	= tmpVal
 			if err != nil {
 				err = fmt.Errorf("Unmarshal arg error:%s", err.Error())
@@ -297,7 +298,7 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 	if resourceId == "" {
 		resourceId = resourceAssetId
 	}
-	// TODO write tfArguments to tf.json file
+
 	var dirPath string
 	dirPath = models.Config.TerraformFilePath + resourceId
 	_, err = os.Stat(dirPath)
@@ -318,9 +319,14 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 		}
 	}
 
-	tfFilePath := dirPath + "/" + sourceData.Name + ".tf.json"
+	var tfFilePath, fileContentStr string
+	tfFilePath = dirPath + "/" + sourceData.Name + ".tf.json"
 	fileContent, err := json.Marshal(tfArguments)
-	fileContentStr := "resource \"" + sourceData.Name + "\" \"" + resourceId + "\" " + string(fileContent)
+	if action == "apply" {
+		fileContentStr = "resource \"" + sourceData.Name + "\" \"" + resourceId + "\" " + string(fileContent)
+	} else {
+		fileContentStr = "data \"" + sourceData.Name + "\" \"" + resourceId + "\" " + string(fileContent)
+	}
 	err = GenFile([]byte(fileContentStr), tfFilePath)
 	if err != nil {
 		err = fmt.Errorf("Gen tfFile: %s error: %s", tfFilePath, err.Error())
@@ -446,6 +452,7 @@ func RegionApply(reqParam map[string]interface{}, interfaceData *models.Interfac
 		return
 	}
 	providerInfoData := providerInfoList[0]
+	/*
 	providerSecretId, decodeErr := cipher.AesDePassword(models.Config.Auth.PasswordSeed, providerInfoData.SecretId)
 	if decodeErr != nil {
 		err = fmt.Errorf("Try to decode secretId fail: %s", decodeErr.Error())
@@ -460,6 +467,7 @@ func RegionApply(reqParam map[string]interface{}, interfaceData *models.Interfac
 		rowData["errorMessage"] = err.Error()
 		return
 	}
+	*/
 	// providerSecretId := providerInfoData.SecretId
 	// providerSecretKey := providerInfoData.SecretKey
 
@@ -481,7 +489,7 @@ func RegionApply(reqParam map[string]interface{}, interfaceData *models.Interfac
 		return
 	}
 	providerData := providerList[0]
-
+	/*
 	regionProviderInfo := models.RegionProviderData{}
 	regionProviderInfo.ProviderInfoId = providerInfoId
 	regionProviderInfo.ProviderName = providerData.Name
@@ -500,6 +508,7 @@ func RegionApply(reqParam map[string]interface{}, interfaceData *models.Interfac
 		return
 	}
 	providerTfContent := string(regionProviderInfoByte)
+	*/
 	/*
 	providerTfContent := "provider + \"" + providerData.Name + "\" {"
 	providerTfContent += providerData.SecretIdAttrName + " = \"" + providerSecretId + "\","
@@ -508,6 +517,7 @@ func RegionApply(reqParam map[string]interface{}, interfaceData *models.Interfac
 	providerTfContent += "}"
 	 */
 
+	/*
 	enCodeproviderTfContent, encodeErr := cipher.AesEnPassword(models.Config.Auth.PasswordSeed, providerTfContent)
 	if encodeErr != nil {
 		err = fmt.Errorf("Try to encode enCodeproviderTfContent fail,%s ", encodeErr.Error())
@@ -515,6 +525,8 @@ func RegionApply(reqParam map[string]interface{}, interfaceData *models.Interfac
 		rowData["errorMessage"] = err.Error()
 		return
 	}
+	*/
+	enCodeproviderTfContent := ""
 
 	// get source data by interfaceId and providerId
 	sqlCmd = `SELECT * FROM source WHERE interface=? AND provider=?`
@@ -773,7 +785,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 		var retOutput map[string]string
 		var tmpErr error
 		if sourceData.TerraformUsed == "Y" {
-			retOutput, tmpErr = handleTerraformApplyOrQuery(reqParam, sourceData, providerData, providerInfoData, regionData)
+			retOutput, tmpErr = handleTerraformApplyOrQuery(reqParam, sourceData, providerData, providerInfoData, regionData, action)
 		} else {
 			retOutput, tmpErr = handleApplyOrQuery(action, reqParam, sourceData)
 		}
