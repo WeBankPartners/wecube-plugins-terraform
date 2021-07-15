@@ -103,7 +103,7 @@ type PluginInterfaceResultObj struct {
 }
 
 type PluginInterfaceResultOutput struct {
-	Outputs []map[string]string `json:"outputs"`
+	Outputs []map[string]interface{} `json:"outputs"`
 }
 
 type PluginInterfaceResultOutputObj struct {

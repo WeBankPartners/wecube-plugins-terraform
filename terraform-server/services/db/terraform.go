@@ -62,7 +62,7 @@ func ReadFile(filePath string) (content []byte, err error) {
 
 func TerraformImport(dirPath, address, resourceId string) (err error) {
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " import " + address + " " + resourceId
-	cmd := exec.Command(cmdStr)
+	cmd := exec.Command("/bin/bash", "-c", cmdStr)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
@@ -75,8 +75,8 @@ func TerraformImport(dirPath, address, resourceId string) (err error) {
 }
 
 func TerraformPlan(dirPath string) (destroyCnt int, err error) {
-	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " plan -out=" + dirPath + "/planfile"
-	cmd := exec.Command(cmdStr)
+	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " plan -input=false -out=" + dirPath + "/planfile"
+	cmd := exec.Command("/bin/bash", "-c", cmdStr)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
@@ -137,7 +137,7 @@ func TerraformPlan(dirPath string) (destroyCnt int, err error) {
 
 func TerraformApply(dirPath string) (err error) {
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " apply -auto-approve"
-	cmd := exec.Command(cmdStr)
+	cmd := exec.Command("/bin/bash", "-c", cmdStr)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
@@ -151,7 +151,21 @@ func TerraformApply(dirPath string) (err error) {
 
 func TerraformDestroy(dirPath string) (err error) {
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " destroy -auto-approve"
-	cmd := exec.Command(cmdStr)
+	cmd := exec.Command("/bin/bash", "-c", cmdStr)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	cmdErr := cmd.Run()
+	if cmdErr != nil {
+		err = fmt.Errorf("Cmd:%s run failed with %s", cmdStr, cmdErr.Error())
+		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.Error(cmdErr))
+	}
+	return
+}
+
+func TerraformInit(dirPath string) (err error) {
+	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " init"
+	cmd := exec.Command("/bin/bash", "-c", cmdStr)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
@@ -168,8 +182,8 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 								 providerData *models.ProviderTable,
 							     providerInfo *models.ProviderInfoTable,
   							     regionData *models.ResourceDataTable,
-  							     action string) (retOutput map[string]string, err error) {
-	retOutput = make(map[string]string)
+  							     action string) (retOutput map[string]interface{}, err error) {
+	retOutput = make(map[string]interface{})
 	retOutput["callbackParameter"] = reqParam["callbackParameter"].(string)
 	retOutput["errorCode"] = "1"
 	retOutput["errorMessage"] = ""
@@ -342,12 +356,10 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 	if action == "apply" {
 		tfFileData["resource"] = make(map[string]map[string]map[string]interface{})
 		tfFileData["resource"][sourceData.Name] = make(map[string]map[string]interface{})
-		// tfFileData["resource"][sourceData.Name][resourceId] = make(map[string]interface{})
 		tfFileData["resource"][sourceData.Name][resourceId] = tfArguments
 	} else {
 		tfFileData["data"] = make(map[string]map[string]map[string]interface{})
 		tfFileData["data"][sourceData.Name] = make(map[string]map[string]interface{})
-		// tfFileData["data"][sourceData.Name][resourceId] = make(map[string]interface{})
 		tfFileData["resource"][sourceData.Name][resourceId] = tfArguments
 	}
 
@@ -362,9 +374,6 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 	tfFileContentStr = string(tfFileContent)
 
 	// Gen provider.tf.json
-	//providerFileData := models.ProviderFileData{}
-	//providerFileData.Provider = make(map[string]interface{})
-	//providerFileData.Provider[providerData.Name] = make(map[string]interface{})
 	providerFileData := make(map[string]map[string]map[string]interface{})
 	providerFileData["provider"] = make(map[string]map[string]interface{})
 	providerFileData["provider"][providerData.Name] = make(map[string]interface{})
@@ -398,6 +407,15 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 	}
 	*/
 
+	// terraform init
+	err = TerraformInit(dirPath)
+	if err != nil {
+		err = fmt.Errorf("Do TerraformInit error:%s", err.Error())
+		log.Logger.Error("Do TerraformInit error", log.Error(err))
+		retOutput["errorMessage"] = err.Error()
+		return
+	}
+
 	// terraform plan
 	destroyCnt, err := TerraformPlan(dirPath)
 	if err != nil {
@@ -417,19 +435,22 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 	err = TerraformApply(dirPath)
 	if err != nil {
 		err = fmt.Errorf("Do TerraformApply error:%s", err.Error())
-		log.Logger.Error("Do TerraformPlan error", log.Error(err))
+		log.Logger.Error("Do TerraformApply error", log.Error(err))
 	    retOutput["errorMessage"] = err.Error()
 		return
 	}
 
 	tfstateAttrNameMap := make(map[string]*models.TfstateAttributeTable)
 	for _, v := range tfstateAttributeList {
+		//if v.Name == sourceData.AssetIdAttribute {
+		//	continue
+		//}
 		tfstateAttrNameMap[v.Name] = v
 	}
 
 	// Read tfstate.tf.json 文件
 	var tfstateFilePath string
-	tfstateFilePath = dirPath + "/tfstate.tf.json"
+	tfstateFilePath = dirPath + "/terraform.tfstate"
 	tfstateFileData, err := ReadFile(tfstateFilePath)
 	if err != nil {
 		err = fmt.Errorf("Read tfstate file error:%s", err.Error())
@@ -438,27 +459,32 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 		return
 	}
 	tfstateFileContent := string(tfstateFileData)
-	var tfstateContent map[string]string
-	err = json.Unmarshal(tfstateFileData, tfstateContent)
+	// var tfstateContent map[string]string
+	var tfstateContent map[string]interface{}
+	var unmarshalTfstateFileData models.TfstateFileData
+	err = json.Unmarshal(tfstateFileData, &unmarshalTfstateFileData)
 	if err != nil {
 		err = fmt.Errorf("Marshal tfstate file data error:%s", err.Error())
 		log.Logger.Error("Marshal tfstate file data error", log.Error(err))
 	    retOutput["errorMessage"] = err.Error()
 		return
 	}
-	outPutArgs := make(map[string]string)
+	tfstateContent = unmarshalTfstateFileData.Resources[0].Instances[0].Attributes
+
+	outPutArgs := make(map[string]interface{})
 	// 循环遍历每个 tfstateContent，进行 reverseConvert 生成输出参数
 	for k, v := range tfstateContent {
 		if tfstateAttr, ok := tfstateAttrNameMap[k]; ok {
 			convertWay := tfstateAttr.ConvertWay
-			var outArgKey, outArgVal string
+			var outArgKey string
+			var outArgVal interface{}
 			switch convertWay {
 			case models.ConvertWay["Data"]:
-				outArgKey, outArgVal, err = reverseConvertData(tfstateAttr.Parameter, tfstateAttr.Source, v)
+				outArgKey, outArgVal, err = reverseConvertData(tfstateAttr.Parameter, tfstateAttr.Source, v.(string))
 			case models.ConvertWay["Template"]:
-				outArgKey, outArgVal, err = reverseConvertTemplate(tfstateAttr.Parameter, providerData.Name, v)
+				outArgKey, outArgVal, err = reverseConvertTemplate(tfstateAttr.Parameter, providerData.Name, v.(string))
 			case models.ConvertWay["Context"]:
-				outArgKey, outArgVal, err = reverseConvertContext(tfstateAttr.RelativeParameter, v)
+				outArgKey, outArgVal, err = reverseConvertContext(tfstateAttr.RelativeParameter, v.(string))
 			case models.ConvertWay["Direct"]:
 				outArgKey, outArgVal, err = reverseConvertDirect(tfstateAttr.Parameter, v)
 			}
@@ -487,11 +513,14 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 	    retOutput["errorMessage"] = err.Error()
 	}
 	retOutput["errorCode"] = "0"
+	for k, v := range outPutArgs {
+		retOutput[k] = v
+	}
 	return
 }
 
-func RegionApply(reqParam map[string]interface{}, interfaceData *models.InterfaceTable) (rowData map[string]string, err error) {
-	rowData = make(map[string]string)
+func RegionApply(reqParam map[string]interface{}, interfaceData *models.InterfaceTable) (rowData map[string]interface{}, err error) {
+	rowData = make(map[string]interface{})
 	rowData["callbackParameter"] = reqParam["callbackParameter"].(string)
 	rowData["errorCode"] = "1"
 	rowData["errorMessage"] = ""
@@ -631,8 +660,8 @@ func RegionApply(reqParam map[string]interface{}, interfaceData *models.Interfac
 	return
 }
 
-func handleApplyOrQuery(action string, reqParam map[string]interface{}, sourceData *models.SourceTable) (rowData map[string]string, err error) {
-	rowData = make(map[string]string)
+func handleApplyOrQuery(action string, reqParam map[string]interface{}, sourceData *models.SourceTable) (rowData map[string]interface{}, err error) {
+	rowData = make(map[string]interface{})
 	rowData["callbackParameter"] = reqParam["callbackParameter"].(string)
 	rowData["errorCode"] = "1"
 	rowData["errorMessage"] = ""
@@ -683,8 +712,8 @@ func handleApplyOrQuery(action string, reqParam map[string]interface{}, sourceDa
 	return
 }
 
-func TerraformOperation(plugin string, action string, reqParam map[string]interface{}) (rowData map[string]string, err error) {
-	rowData = make(map[string]string)
+func TerraformOperation(plugin string, action string, reqParam map[string]interface{}) (rowData map[string]interface{}, err error) {
+	rowData = make(map[string]interface{})
 	rowData["callbackParameter"] = reqParam["callbackParameter"].(string)
 	rowData["errorCode"] = "1"
 	rowData["errorMessage"] = ""
@@ -845,7 +874,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	regionData := resourceData
 
 	if action == "apply" || action == "query" {
-		var retOutput map[string]string
+		var retOutput map[string]interface{}
 		var tmpErr error
 		if sourceData.TerraformUsed == "Y" {
 			retOutput, tmpErr = handleTerraformApplyOrQuery(reqParam, sourceData, providerData, providerInfoData, regionData, action)
@@ -1178,7 +1207,7 @@ func convertDirect(parameterId string, defaultValue string, reqParam map[string]
 	return
 }
 
-func reverseConvertDirect(parameterId string, tfstateVal string) (argKey string, argVal string, err error) {
+func reverseConvertDirect(parameterId string, tfstateVal interface{}) (argKey string, argVal interface{}, err error) {
 	sqlCmd := `SELECT * FROM parameter WHERE id=?`
 	paramArgs := []interface{}{parameterId}
 	var parameterList []*models.ParameterTable

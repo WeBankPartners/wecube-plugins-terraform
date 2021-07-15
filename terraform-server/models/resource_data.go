@@ -25,6 +25,14 @@ type RegionProviderData struct {
 	ProviderInfoId    string `json:"providerInfoId"`
 }
 
-type ProviderFileData struct {
-	Provider map[string]interface{} `json:"provider"`
+type TfstateFileData struct {
+	Resources []TfstateFileResources `json:"resources"`
+}
+
+type TfstateFileResources struct {
+	Instances []TfstateFileAttributes `json:"instances"`
+}
+
+type TfstateFileAttributes struct {
+	Attributes map[string]interface{} `json:"attributes"`
 }
