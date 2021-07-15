@@ -19,7 +19,8 @@ import (
 )
 
 func GenFile(content []byte, filePath string) (err error) {
-	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY, 0666)
+	// 覆盖写入需加：os.O_TRUNC
+	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
 	if err != nil {
 		log.Logger.Error("Open file error", log.String("file", filePath), log.Error(err))
 		return
@@ -173,7 +174,7 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 	retOutput["errorCode"] = "1"
 	retOutput["errorMessage"] = ""
 
-	// Get tf_argument_list by source_list
+	// Get tf_argument_list by sourceId
 	sourceIdStr := sourceData.Id
 	sqlCmd := "SELECT * FROM tf_argument WHERE source IN ('" + sourceIdStr + "')"
 	var tfArgumentList []*models.TfArgumentTable
@@ -191,7 +192,7 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 		return
 	}
 
-	// Get tfstate_attribute by source_list
+	// Get tfstate_attribute by sourceId
 	sqlCmd = "SELECT * FROM tfstate_attribute WHERE source IN ('" + sourceIdStr + "')"
 	var tfstateAttributeList []*models.TfstateAttributeTable
 	err = x.SQL(sqlCmd).Find(&tfstateAttributeList)
@@ -319,18 +320,70 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 		}
 	}
 
-	var tfFilePath, fileContentStr string
+	// Gen tf.json file
+	var tfFilePath, tfFileContentStr string
 	tfFilePath = dirPath + "/" + sourceData.Name + ".tf.json"
+	/*
 	fileContent, err := json.Marshal(tfArguments)
-	if action == "apply" {
-		fileContentStr = "resource \"" + sourceData.Name + "\" \"" + resourceId + "\" " + string(fileContent)
-	} else {
-		fileContentStr = "data \"" + sourceData.Name + "\" \"" + resourceId + "\" " + string(fileContent)
+	if err != nil {
+		err = fmt.Errorf("Marshal tfArguments error: %s", err.Error())
+		log.Logger.Error("Marshal tfArguments error", log.Error(err))
+		retOutput["errorMessage"] = err.Error()
+		return
 	}
-	err = GenFile([]byte(fileContentStr), tfFilePath)
+
+	if action == "apply" {
+		tfFileContent = "resource \"" + sourceData.Name + "\" \"" + resourceId + "\" " + string(fileContent)
+	} else {
+		tfFileContent = "data \"" + sourceData.Name + "\" \"" + resourceId + "\" " + string(fileContent)
+	}
+	*/
+	tfFileData := make(map[string]map[string]map[string]map[string]interface{})
+	if action == "apply" {
+		tfFileData["resource"] = make(map[string]map[string]map[string]interface{})
+		tfFileData["resource"][sourceData.Name] = make(map[string]map[string]interface{})
+		// tfFileData["resource"][sourceData.Name][resourceId] = make(map[string]interface{})
+		tfFileData["resource"][sourceData.Name][resourceId] = tfArguments
+	} else {
+		tfFileData["data"] = make(map[string]map[string]map[string]interface{})
+		tfFileData["data"][sourceData.Name] = make(map[string]map[string]interface{})
+		// tfFileData["data"][sourceData.Name][resourceId] = make(map[string]interface{})
+		tfFileData["resource"][sourceData.Name][resourceId] = tfArguments
+	}
+
+	tfFileContent, err := json.Marshal(tfFileData)
+	err = GenFile((tfFileContent), tfFilePath)
 	if err != nil {
 		err = fmt.Errorf("Gen tfFile: %s error: %s", tfFilePath, err.Error())
 		log.Logger.Error("Gen tfFile error", log.String("tfFilePath", tfFilePath), log.Error(err))
+		retOutput["errorMessage"] = err.Error()
+		return
+	}
+	tfFileContentStr = string(tfFileContent)
+
+	// Gen provider.tf.json
+	//providerFileData := models.ProviderFileData{}
+	//providerFileData.Provider = make(map[string]interface{})
+	//providerFileData.Provider[providerData.Name] = make(map[string]interface{})
+	providerFileData := make(map[string]map[string]map[string]interface{})
+	providerFileData["provider"] = make(map[string]map[string]interface{})
+	providerFileData["provider"][providerData.Name] = make(map[string]interface{})
+	providerFileData["provider"][providerData.Name][providerData.SecretIdAttrName] = providerInfo.SecretId
+	providerFileData["provider"][providerData.Name][providerData.SecretKeyAttrName] = providerInfo.SecretKey
+	providerFileData["provider"][providerData.Name][providerData.RegionAttrName] = regionData.ResourceAssetId
+
+	providerFileContent, err := json.Marshal(providerFileData)
+	if err != nil {
+		err = fmt.Errorf("Marshal providerFileData error: %s", err.Error())
+		log.Logger.Error("Marshal providerFileData error", log.Error(err))
+		retOutput["errorMessage"] = err.Error()
+		return
+	}
+	providerFilePath := dirPath + "/provider.tf.json"
+	err = GenFile(providerFileContent, providerFilePath)
+	if err != nil {
+		err = fmt.Errorf("Gen providerFile: %s error: %s", providerFilePath, err.Error())
+		log.Logger.Error("Gen providerFile error", log.String("providerFilePath", providerFilePath), log.Error(err))
 		retOutput["errorMessage"] = err.Error()
 		return
 	}
@@ -343,10 +396,13 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 	    retOutput["errorMessage"] = err.Error()
 		return
 	}
+	*/
+
 	// terraform plan
 	destroyCnt, err := TerraformPlan(dirPath)
 	if err != nil {
 		err = fmt.Errorf("Do TerraformPlan error:%s", err.Error())
+		log.Logger.Error("Do TerraformPlan error", log.Error(err))
 	    retOutput["errorMessage"] = err.Error()
 		return
 	}
@@ -361,6 +417,7 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 	err = TerraformApply(dirPath)
 	if err != nil {
 		err = fmt.Errorf("Do TerraformApply error:%s", err.Error())
+		log.Logger.Error("Do TerraformPlan error", log.Error(err))
 	    retOutput["errorMessage"] = err.Error()
 		return
 	}
@@ -369,17 +426,23 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 	for _, v := range tfstateAttributeList {
 		tfstateAttrNameMap[v.Name] = v
 	}
-	// 读取 tfstate.tf.json 文件
-	tfstateFileData, err := ReadFile(dirPath+"/tfstate.tf.json")
+
+	// Read tfstate.tf.json 文件
+	var tfstateFilePath string
+	tfstateFilePath = dirPath + "/tfstate.tf.json"
+	tfstateFileData, err := ReadFile(tfstateFilePath)
 	if err != nil {
 		err = fmt.Errorf("Read tfstate file error:%s", err.Error())
+		log.Logger.Error("Read tfstate file error", log.Error(err))
 	    retOutput["errorMessage"] = err.Error()
 		return
 	}
+	tfstateFileContent := string(tfstateFileData)
 	var tfstateContent map[string]string
 	err = json.Unmarshal(tfstateFileData, tfstateContent)
 	if err != nil {
 		err = fmt.Errorf("Marshal tfstate file data error:%s", err.Error())
+		log.Logger.Error("Marshal tfstate file data error", log.Error(err))
 	    retOutput["errorMessage"] = err.Error()
 		return
 	}
@@ -411,18 +474,18 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 
 	resourceDataId := guid.CreateGuid()
 	resourceDataSourceId := sourceData.Id
-	resourceDataResourceId := reqParam["id"]
+	resourceDataResourceId := resourceId
 	resourceDataResourceAssetId := tfstateContent[sourceData.AssetIdAttribute]
 	createTime := time.Now().Format(models.DateTimeFormat)
-	// TODO lack of tf_file, tfstate_file
+	createUser := reqParam["operator_user"].(string)
+
 	_, err = x.Exec("INSERT INTO resource_data(id,resource,resource_id,resource_asset_id,tf_file,tf_state_file,region_id,create_time,create_user,update_time) VALUE (?,?,?,?,?,?,?,?,?,?)",
-		resourceDataId, resourceDataSourceId, resourceDataResourceId, resourceDataResourceAssetId, createTime, "", createTime)
+		resourceDataId, resourceDataSourceId, resourceDataResourceId, resourceDataResourceAssetId, tfFileContentStr, tfstateFileContent, regionData.RegionId, createTime, createUser, createTime)
 	if err != nil {
 		err = fmt.Errorf("Try to create resource_data fail,%s ", err.Error())
 		log.Logger.Error("Try to create resource_data fail", log.Error(err))
 	    retOutput["errorMessage"] = err.Error()
 	}
-	*/
 	retOutput["errorCode"] = "0"
 	return
 }
@@ -657,7 +720,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 		return
 	}
 
-	// Get providerInfoData and providerData by regionId
+	// Get regionInfo by regionId
 	regionId := reqParam["region_id"].(string)
 	sqlCmd = `SELECT * FROM resource_data WHERE region_id=?`
 	paramArgs = []interface{}{regionId}

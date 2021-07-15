@@ -24,3 +24,7 @@ type RegionProviderData struct {
 	RegionAttrName    string `json:"regionAttrName"`
 	ProviderInfoId    string `json:"providerInfoId"`
 }
+
+type ProviderFileData struct {
+	Provider map[string]interface{} `json:"provider"`
+}
