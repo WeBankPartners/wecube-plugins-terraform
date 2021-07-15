@@ -32,3 +32,11 @@ export const editPlugin = data => req.put(`/plugins`, data)
 export const addParameter = data => req.post(`/parameters`, data)
 export const editParameter = data => req.put(`/parameters`, data)
 export const deleteParameter = id => req.delete(`/parameters?ids=${id}`)
+
+export const getSourceByfilter = (interfaceId, providerId) =>
+  req.get(`/sources?interfaceId=${interfaceId}&providerId=${providerId}`)
+export const getSourceByProvider = providerId => req.get(`/sources?providerId=${providerId}`)
+export const getArgBySource = sourceId => req.get(`/tf_arguments?sourceId=${sourceId}`)
+export const updateArgs = data => req.post(`/tf_arguments`, data)
+export const deleteArg = id => req.delete(`/tf_arguments?ids=${id}`)
+export const getAttrBySource = sourceId => req.get(`/tfstate_attributes?sourceId=${sourceId}`)

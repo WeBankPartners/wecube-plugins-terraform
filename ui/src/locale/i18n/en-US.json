@@ -21,5 +21,14 @@
   "t_multiple": "Multiple",
   "t_input_params": "Input Params",
   "t_output_params": "Output Params",
-  "t_object_name": "Object Name"
+  "t_object_name": "Object Name",
+  "t_provider": "Provider",
+  "t_is_null": "Is Null",
+  "t_conversion": "Conversion",
+  "t_conversion_type": "Type",
+  "t_related_params": "Related Params",
+  "t_related_value": "Related Value",
+  "t_related_attr": "Related Attr",
+  "t_default_value": "Default Value",
+  "t_parameter": "Parameter"
 }

@@ -18,8 +18,17 @@
   "t_params_type": "参数类型",
   "t_interface": "接口",
   "t_data_type": "数据类型",
-  "t_multiple": "多选",
+  "t_multiple": "多个",
   "t_input_params": "输入参数",
   "t_output_params": "输出参数",
-  "t_object_name": "关联对象"
+  "t_object_name": "关联对象",
+  "t_provider": "云厂商",
+  "t_is_null": "允许为空",
+  "t_conversion": "转化配置",
+  "t_conversion_type": "转化类型",
+  "t_related_params": "关联参数",
+  "t_related_value": "关联值",
+  "t_related_attr": "关联属性",
+  "t_default_value": "默认值",
+  "t_parameter": "参数"
 }
