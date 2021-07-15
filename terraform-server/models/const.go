@@ -18,5 +18,5 @@ const (
 
 var (
 	SEPERATOR  = string([]byte{0x01})
-	ConvertWay = map[string]string{"Data": "data", "Template": "template", "Context": "context", "Attr": "attr", "Direct": "direct"}
+	ConvertWay = map[string]string{"Data": "data", "Template": "template", "Context": "context_data", "Attr": "attribute", "Direct": "direct"}
 )
