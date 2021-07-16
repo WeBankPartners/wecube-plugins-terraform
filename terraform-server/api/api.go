@@ -117,10 +117,10 @@ func InitHttpServer() {
 	if !models.PluginRunningMode {
 		// reflect ui resource
 		r.LoadHTMLGlob("public/*.html")
-		r.Static(fmt.Sprintf("%s/js", urlPrefix), fmt.Sprintf("public%s/js", urlPrefix))
-		r.Static(fmt.Sprintf("%s/css", urlPrefix), fmt.Sprintf("public%s/css", urlPrefix))
-		r.Static(fmt.Sprintf("%s/img", urlPrefix), fmt.Sprintf("public%s/img", urlPrefix))
-		//r.Static(fmt.Sprintf("%s/fonts", urlPrefix), fmt.Sprintf("public%s/fonts", urlPrefix))
+		r.Static(fmt.Sprintf("%s/js", urlPrefix), "public/js")
+		r.Static(fmt.Sprintf("%s/css", urlPrefix),"public/css")
+		r.Static(fmt.Sprintf("%s/img", urlPrefix),"public/img")
+		r.Static(fmt.Sprintf("%s/fonts", urlPrefix),"public/fonts")
 		r.GET(fmt.Sprintf("%s/", urlPrefix), func(c *gin.Context) {
 			c.HTML(http.StatusOK, "index.html", gin.H{})
 		})
@@ -129,7 +129,6 @@ func InitHttpServer() {
 			crossHandler(r)
 		}
 	}
-	r.Static(fmt.Sprintf("%s/fonts", urlPrefix), fmt.Sprintf("public%s/fonts", urlPrefix))
 	// access log
 	if models.Config.Log.AccessLogEnable {
 		r.Use(httpLogHandle())

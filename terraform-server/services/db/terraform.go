@@ -320,6 +320,12 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 			}
 		}
 
+		if action == "query" {
+			if arg == nil || arg == "" {
+				continue
+			}
+		}
+
 		if err != nil {
 			err = fmt.Errorf("Convert parameter:%s error:%s", tfArgumentList[i].Parameter, err.Error())
 			log.Logger.Error("Convert parameter error", log.String("parameterId", tfArgumentList[i].Parameter), log.Error(err))
@@ -343,29 +349,17 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 		}
 	}
 
-	if resourceId == "" && resourceAssetId == "" {
-		err = fmt.Errorf("ResourceId and resourceAssetId can not be all empty")
-		log.Logger.Error("ResourceId and resourceAssetId can not be all empty")
-		retOutput["errorMessage"] = err.Error()
-		return
+	if action == "apply" {
+		if resourceId == "" && resourceAssetId == "" {
+			err = fmt.Errorf("ResourceId and resourceAssetId can not be all empty")
+			log.Logger.Error("ResourceId and resourceAssetId can not be all empty")
+			retOutput["errorMessage"] = err.Error()
+			return
+		}
+		if resourceId == "" {
+			resourceId = resourceAssetId
+		}
 	}
-	if resourceId == "" {
-		resourceId = resourceAssetId
-	}
-
-	/*
-	terraformFilePath := models.Config.TerraformFilePath
-	if terraformFilePath[len(terraformFilePath)-1] != '/' {
-		terraformFilePath += "/"
-	}
-	dirPathResourceId := reqParam["id"].(string)
-	if dirPathResourceId == "" {
-		dirPathResourceId = reqParam["requestSn"].(string)
-	}
-	dirPath := terraformFilePath + providerData.Name + "/" + regionData.ResourceAssetId + "/" + plugin + "/" +
-		reqParam["requestId"].(string) + "/" + dirPathResourceId + "/" + sourceData.Name
-
-	 */
 
 	_, err = os.Stat(dirPath)
 	if err != nil {
@@ -397,6 +391,9 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 	} else {
 		tfFileData["data"] = make(map[string]map[string]map[string]interface{})
 		tfFileData["data"][sourceData.Name] = make(map[string]map[string]interface{})
+		if resourceId == "" {
+			resourceId = guid.CreateGuid()
+		}
 		tfFileData["resource"][sourceData.Name][resourceId] = tfArguments
 	}
 
@@ -989,12 +986,14 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 			rowData[k] = v
 		}
 	} else if action == "destroy" {
+		// TODo !! not the workDirPath
 		err = TerraformDestroy(workDirPath)
 		if err != nil {
 			err = fmt.Errorf("Handle TerraformDestroy error: %s", err.Error())
 			log.Logger.Error("Handle TerraformDestroy error", log.Error(err))
 			return
 		}
+		// TODO del item in resource_data
 		rowData["errorCode"] = "0"
 	} else {
 		err = fmt.Errorf("Action: %s is inValid", action)
