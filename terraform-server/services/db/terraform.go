@@ -79,8 +79,8 @@ func DelFile(filePath string) (err error) {
 	return
 }
 
-func TerraformImport(dirPath, address, resourceId string) (err error) {
-	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " import " + address + " " + resourceId
+func TerraformImport(dirPath, address, resourceAssetId string) (err error) {
+	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " import " + address + " " + resourceAssetId
 	cmd := exec.Command("/bin/bash", "-c", cmdStr)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
@@ -94,7 +94,8 @@ func TerraformImport(dirPath, address, resourceId string) (err error) {
 }
 
 func TerraformPlan(dirPath string) (destroyCnt int, err error) {
-	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " plan -input=false -out=" + dirPath + "/planfile"
+	// cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " plan -input=false -out=" + dirPath + "/planfile"
+	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " plan -input=false"
 	cmd := exec.Command("/bin/bash", "-c", cmdStr)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
@@ -176,7 +177,89 @@ func TerraformApply(dirPath string) (err error) {
 	return
 }
 
-func TerraformDestroy(dirPath string) (err error) {
+func TerraformDestroy(dirPath string, sourceData *models.SourceTable, providerData *models.ProviderTable, providerInfo *models.ProviderInfoTable, regionData *models.ResourceDataTable, resourceAssetId string) (err error) {
+	sourceName := sourceData.Name
+	// Gen .tf 文件, 然后执行 terraform import cmd
+	uuid := "_" + guid.CreateGuid()
+	tfFilePath := dirPath + "/" + sourceName + ".tf"
+	tfFileContent := "resource " + sourceName + " " + uuid + " {}"
+
+	_, err = os.Stat(dirPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			err = os.MkdirAll(dirPath, os.ModePerm)
+			if err != nil {
+				err = fmt.Errorf("Make dir: %s error: %s", dirPath, err.Error())
+				log.Logger.Error("Make dir error", log.String("dirPath", dirPath), log.Error(err))
+				//retOutput["errorMessage"] = err.Error()
+				return
+			}
+		} else {
+			err = fmt.Errorf("Os stat dir: %s error: %s", dirPath, err.Error())
+			log.Logger.Error("Os stat dir error", log.String("dirPath", dirPath), log.Error(err))
+			// retOutput["errorMessage"] = err.Error()
+			return
+		}
+	}
+
+	// Gen provider.tf.json
+	providerFileData := make(map[string]map[string]map[string]interface{})
+	providerFileData["provider"] = make(map[string]map[string]interface{})
+	providerFileData["provider"][providerData.Name] = make(map[string]interface{})
+	providerFileData["provider"][providerData.Name][providerData.SecretIdAttrName] = providerInfo.SecretId
+	providerFileData["provider"][providerData.Name][providerData.SecretKeyAttrName] = providerInfo.SecretKey
+	providerFileData["provider"][providerData.Name][providerData.RegionAttrName] = regionData.ResourceAssetId
+
+	providerFileContent, err := json.Marshal(providerFileData)
+	if err != nil {
+		err = fmt.Errorf("Marshal providerFileData error: %s", err.Error())
+		log.Logger.Error("Marshal providerFileData error", log.Error(err))
+		return
+	}
+	providerFilePath := dirPath + "/provider.tf.json"
+	err = GenFile(providerFileContent, providerFilePath)
+	if err != nil {
+		err = fmt.Errorf("Gen providerFile: %s error: %s", providerFilePath, err.Error())
+		log.Logger.Error("Gen providerFile error", log.String("providerFilePath", providerFilePath), log.Error(err))
+		return
+	}
+
+	// Gen version.tf
+	terraformFilePath := models.Config.TerraformFilePath
+	if terraformFilePath[len(terraformFilePath)-1] != '/' {
+		terraformFilePath += "/"
+	}
+	if providerData.Name == "tencentcloud" {
+		versionTfFilePath := terraformFilePath + "version.tf"
+		versionTfFileContent, tmpErr := ReadFile(versionTfFilePath)
+		if tmpErr != nil {
+			err = fmt.Errorf("Read versionTfFile: %s error: %s", versionTfFilePath, tmpErr.Error())
+			log.Logger.Error("Read versionTfFile error", log.String("versionTfFilePath", versionTfFilePath), log.Error(err))
+			return
+		}
+
+		genVersionTfFilePath := dirPath + "/version.tf"
+		err = GenFile(versionTfFileContent, genVersionTfFilePath)
+		if err != nil {
+			err = fmt.Errorf("Gen versionTfFile: %s error: %s", genVersionTfFilePath, err.Error())
+			log.Logger.Error("Gen versionTfFile error", log.String("genVersionTfFilePath", genVersionTfFilePath), log.Error(err))
+			return
+		}
+	}
+
+	GenFile([]byte(tfFileContent), tfFilePath)
+	err = TerraformInit(dirPath)
+	if err != nil {
+		return
+	}
+	err = TerraformImport(dirPath, sourceName+"."+uuid, resourceAssetId)
+	if err != nil {
+		return
+	}
+
+	// clear tf file
+	os.Truncate(tfFilePath, 0)
+
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " destroy -auto-approve"
 	cmd := exec.Command("/bin/bash", "-c", cmdStr)
 	var stdout, stderr bytes.Buffer
@@ -893,8 +976,13 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	}()
 
 	// Get interface by plugin and action
+	var actionName string
+	actionName = action
+	if actionName == "destroy" {
+		actionName = "apply"
+	}
 	sqlCmd := `SELECT * FROM interface WHERE plugin=? AND name=?`
-	paramArgs := []interface{}{plugin, action}
+	paramArgs := []interface{}{plugin, actionName}
 	var interfaceInfoList []*models.InterfaceTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&interfaceInfoList)
 	if err != nil {
@@ -1051,6 +1139,12 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	workDirPath := terraformFilePath + providerData.Name + "/" + regionData.ResourceAssetId + "/" + plugin + "/" +
 		reqParam["requestId"].(string) + "/" + dirPathResourceId + "/" + sourceData.Name
 
+	//workDirPath := terraformFilePath + providerData.Name + "/" + regionData.ResourceAssetId + "/" + plugin + "/" +
+	//	reqParam["requestId"].(string) + "/" + dirPathResourceId
+	//if action != "destroy" {
+	//	workDirPath += "/" + sourceData.Name
+	//}
+
 	if action == "apply" || action == "query" {
 		var retOutput map[string]interface{}
 		var tmpErr error
@@ -1071,11 +1165,31 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 			rowData[k] = v
 		}
 	} else if action == "destroy" {
-		// TODo !! not the workDirPath
-		err = TerraformDestroy(workDirPath)
+		// init version
+		// Get resource_asset_id by resourceId
+		resourceId := reqParam["id"].(string)
+		sqlCmd = `SELECT * FROM resource_data WHERE resource_id=?`
+		paramArgs = []interface{}{resourceId}
+		var resourceDataInfoList []*models.ResourceDataTable
+		err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataInfoList)
+		if err != nil {
+			err = fmt.Errorf("Get resourceDataInfo by resource_id:%s error:%s", resourceId, err.Error())
+			log.Logger.Error("Get resourceDataInfo by resource_id error", log.String("resource_id", resourceId), log.Error(err))
+			rowData["errorMessage"] = err.Error()
+			return
+		}
+		if len(resourceDataInfoList) == 0 {
+			err = fmt.Errorf("ResourceDataInfo can not be found by resource_id:%s", resourceId)
+			log.Logger.Warn("ResourceDataInfo can not be found by resource_id", log.String("resource_id", resourceId), log.Error(err))
+			rowData["errorMessage"] = err.Error()
+			return
+		}
+		resourceData := resourceDataInfoList[0]
+		err = TerraformDestroy(workDirPath, sourceData, providerData, providerInfoData, regionData, resourceData.ResourceAssetId)
 		if err != nil {
 			err = fmt.Errorf("Handle TerraformDestroy error: %s", err.Error())
 			log.Logger.Error("Handle TerraformDestroy error", log.Error(err))
+			rowData["errorMessage"] = err.Error()
 			return
 		}
 		// TODO del item in resource_data
