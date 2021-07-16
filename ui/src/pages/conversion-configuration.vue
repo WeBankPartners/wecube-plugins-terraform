@@ -5,7 +5,7 @@
       <Row>
         <Col span="5">
           <span>{{ $t('t_plugin') }}</span>
-          <Select v-model="plugin" clearable filterable style="width:300px">
+          <Select v-model="plugin" clearable filterable style="width:200px">
             <Option v-for="item in pluginOptions" :value="item.id" :key="item.id">{{ item.name }}</Option>
           </Select>
         </Col>
@@ -36,7 +36,7 @@
       </Row>
     </div>
     <!-- 配置区 -->
-    <div style="margin-top: 36px; max-height: 840px; overflow: auto; text-align: center;">
+    <div style="margin-top: 36px; text-align: center;width:1800px;overflow:auto">
       <header>
         <div style="font-size: 0">
           <div class="table-title title-width-level2">
@@ -110,246 +110,325 @@
           </div>
         </div>
       </header>
-      <div
-        v-for="(source, sourceIndex) in sourceInfo"
-        :key="source.id"
-        style="font-size: 0;margin-top:-1px;margin-left:-4px"
-      >
-        <div class="style-widthout-height" style="font-size: 0;margin-left:-1px">
-          <div
-            class="style-widthout-height"
-            :style="{ width: '120px', 'line-height': (source.args.length + source.attrs.length) * 39 + 'px' }"
-          >
-            {{ source.name }}
-          </div>
-          <div class="style-widthout-height" style="width:120px;vertical-align: top;border:none">
-            <div class="style-widthout-height" style="font-size: 0;margin-left:-1px;border:none">
-              <div
-                class="style-widthout-height"
-                :style="{ width: '120px', 'line-height': source.args.length * 39 + 'px' }"
-              >
-                Arg
-                <Button @click="addArgParams(source, 'args')" size="small" icon="ios-add"></Button>
-              </div>
-              <div
-                class="style-widthout-height"
-                :style="{ width: '120px', 'line-height': source.attrs.length * 39 + 'px' }"
-              >
-                Attr
-                <!-- <Button @click="addParams('input')" size="small" icon="ios-add"></Button> -->
+      <div :style="{ 'max-height': MODALHEIGHT + 'px', overflow: 'auto' }">
+        <div
+          v-for="(source, sourceIndex) in sourceInfo"
+          :key="source.id"
+          style="font-size: 0;margin-top:-1px;margin-left:-4px;"
+        >
+          <div class="style-widthout-height" style="font-size: 0;margin-left:-1px">
+            <div
+              class="style-widthout-height"
+              :style="{ width: '120px', 'line-height': (source.args.length + source.attrs.length) * 39 + 'px' }"
+            >
+              {{ source.name }}
+            </div>
+            <div class="style-widthout-height" style="width:120px;vertical-align: top;border:none">
+              <div class="style-widthout-height" style="font-size: 0;margin-left:-1px;border:none">
+                <div
+                  class="style-widthout-height"
+                  :style="{ width: '120px', 'line-height': source.args.length * 39 + 'px' }"
+                >
+                  Arg
+                  <Button @click="addParams(source, 'args')" type="primary" ghost size="small" icon="ios-add"></Button>
+                </div>
+                <div
+                  class="style-widthout-height"
+                  :style="{ width: '120px', 'line-height': source.attrs.length * 39 + 'px' }"
+                >
+                  Attr
+                  <Button @click="addParams(source, 'attrs')" type="primary" ghost size="small" icon="ios-add"></Button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <div style="display:inline-block;vertical-align: top;margin-top:1px;margin-letf:-1px;">
-          <div>
-            <div style="margin-top: -1px;" v-for="(item, argIndex) in source.args" :key="item.id">
-              <template>
-                <div class="table-col title-width-level1">
-                  <Input v-model="item.name" size="small" />
-                </div>
-                <div class="table-col title-width-level1">
-                  <Select v-model="item.type" clearable filterable size="small">
-                    <Option v-for="item in dataTypeOptions" :value="item.value" :key="item.value">{{
-                      item.label
-                    }}</Option>
-                  </Select>
-                </div>
-                <div class="table-col title-width-level1">
-                  <Select v-model="item.objectName" clearable filterable size="small">
-                    <Option v-for="item in source.argsObjetcNameOptions" :value="item.id" :key="item.id">{{
-                      item.name
-                    }}</Option>
-                  </Select>
-                </div>
-                <div class="table-col title-width-level0">
-                  <Select v-model="item.isMulti" clearable filterable size="small">
-                    <Option value="Y">Y</Option>
-                    <Option value="N">N</Option>
-                  </Select>
-                </div>
-                <div class="table-col title-width-level0">
-                  <Select v-model="item.isNull" clearable filterable size="small">
-                    <Option value="Y">Y</Option>
-                    <Option value="N">N</Option>
-                  </Select>
-                </div>
+          <div style="display:inline-block;vertical-align: top;margin-top:1px;margin-letf:-1px;">
+            <div>
+              <div style="margin-top: -1px;" v-for="(item, argIndex) in source.args" :key="item.id">
+                <template>
+                  <div class="table-col title-width-level1">
+                    <Input v-model="item.name" size="small" />
+                  </div>
+                  <div class="table-col title-width-level1">
+                    <Select v-model="item.type" clearable filterable size="small">
+                      <Option v-for="item in dataTypeOptions" :value="item.value" :key="item.value">{{
+                        item.label
+                      }}</Option>
+                    </Select>
+                  </div>
+                  <div class="table-col title-width-level1">
+                    <Select v-model="item.objectName" clearable filterable size="small">
+                      <Option v-for="item in source.argsObjetcNameOptions" :value="item.id" :key="item.id">{{
+                        item.name
+                      }}</Option>
+                    </Select>
+                  </div>
+                  <div class="table-col title-width-level0">
+                    <Select v-model="item.isMulti" clearable filterable size="small">
+                      <Option value="Y">Y</Option>
+                      <Option value="N">N</Option>
+                    </Select>
+                  </div>
+                  <div class="table-col title-width-level0">
+                    <Select v-model="item.isNull" clearable filterable size="small">
+                      <Option value="Y">Y</Option>
+                      <Option value="N">N</Option>
+                    </Select>
+                  </div>
 
-                <div class="table-col title-width-level1">
-                  <Select v-model="item.convertWay" size="small">
-                    <Option
-                      v-for="item in conversionTypeOptions"
+                  <div class="table-col title-width-level1">
+                    <Select v-model="item.convertWay" size="small">
+                      <Option
+                        v-for="item in conversionTypeOptions"
+                        clearable
+                        filterable
+                        :value="item.value"
+                        :key="item.value"
+                        >{{ item.label }}</Option
+                      >
+                    </Select>
+                  </div>
+                  <div class="table-col title-width-level1">
+                    <Select
+                      v-model="item.relativeParameter"
+                      :disabled="!['context', 'context_data'].includes(item.convertWay)"
                       clearable
                       filterable
-                      :value="item.value"
-                      :key="item.value"
-                      >{{ item.label }}</Option
+                      @on-change="getRelativeValueOptions(item, sourceIndex, 'args', argIndex)"
+                      size="small"
                     >
-                  </Select>
-                </div>
-                <div class="table-col title-width-level1">
-                  <Select
-                    v-model="item.relativeParameter"
-                    :disabled="!['context', 'context_data'].includes(item.convertWay)"
-                    clearable
-                    filterable
-                    @on-change="getRelativeValueOptions(item, sourceIndex, 'args', argIndex)"
-                    size="small"
-                  >
-                    <Option v-for="item in interfaceInputParams" :value="item.id" :key="item.id">{{
-                      item.name
-                    }}</Option>
-                  </Select>
-                </div>
-                <div class="table-col title-width-level1">
-                  <Select
-                    v-model="item.relativeParameterValue"
-                    :disabled="!['context', 'context_data'].includes(item.convertWay)"
-                    @on-open-change="openRelativeParameterValue(item)"
-                    clearable
-                    filterable
-                    size="small"
-                  >
-                    <template v-if="item.relativeParameterValue && item.relativeValueOptions.length === 0">
-                      <Option :value="item.relativeParameterValue" :key="item.relativeParameterValue">{{
-                        item.relativeParameterValue
+                      <Option v-for="item in interfaceInputParams" :value="item.id" :key="item.id">{{
+                        item.name
                       }}</Option>
-                    </template>
-                    <template v-else>
-                      <Option v-for="pv in item.relativeValueOptions" :value="pv.value" :key="pv.value">{{
-                        pv.value
+                    </Select>
+                  </div>
+                  <div class="table-col title-width-level1">
+                    <Select
+                      v-model="item.relativeParameterValue"
+                      :disabled="!['context', 'context_data'].includes(item.convertWay)"
+                      @on-open-change="openRelativeParameterValue(item, 'interfaceInputParams')"
+                      clearable
+                      filterable
+                      size="small"
+                    >
+                      <template v-if="item.relativeParameterValue && item.relativeValueOptions.length === 0">
+                        <Option :value="item.relativeParameterValue" :key="item.relativeParameterValue">{{
+                          item.relativeParameterValue
+                        }}</Option>
+                      </template>
+                      <template v-else>
+                        <Option v-for="pv in item.relativeValueOptions" :value="pv.value" :key="pv.value">{{
+                          pv.value
+                        }}</Option>
+                      </template>
+                    </Select>
+                  </div>
+                  <div class="table-col title-width-level1">
+                    <Select
+                      v-model="item.source"
+                      size="small"
+                      :disabled="!['attr'].includes(item.convertWay)"
+                      clearable
+                      filterable
+                      @on-change="getSourceAttrOptions(item, sourceIndex, 'args', argIndex)"
+                    >
+                      <Option v-for="item in sourceWithFilter" :value="item.id" :key="item.id">{{ item.name }}</Option>
+                    </Select>
+                  </div>
+                  <div class="table-col title-width-level1">
+                    <Select
+                      v-model="item.relativeTfstateAttribute"
+                      :disabled="!['attr'].includes(item.convertWay)"
+                      clearable
+                      filterable
+                      size="small"
+                    >
+                      <template v-if="item.relativeTfstateAttribute && item.sourceAttr.length === 0">
+                        <Option :value="item.relativeTfstateAttribute" :key="item.relativeTfstateAttribute">{{
+                          item.relativeTfstateAttribute
+                        }}</Option>
+                      </template>
+                      <template v-else>
+                        <Option v-for="item in item.sourceAttr" :value="item.id" :key="item.id">{{ item.name }}</Option>
+                      </template>
+                    </Select>
+                  </div>
+                  <div class="table-col title-width-level1">
+                    <Select
+                      v-model="item.parameter"
+                      size="small"
+                      clearable
+                      filterable
+                      @on-change="getDefaultValueOptions(item, sourceIndex, 'args', argIndex)"
+                    >
+                      <Option v-for="item in interfaceInputParamsWithTemplate" :value="item.id" :key="item.id">{{
+                        item.name
                       }}</Option>
-                    </template>
-                  </Select>
-                </div>
-                <div class="table-col title-width-level1">
-                  <Select
-                    v-model="item.source"
-                    size="small"
-                    :disabled="!['attr'].includes(item.convertWay)"
-                    clearable
-                    filterable
-                    @on-change="getSourceAttrOptions(item, sourceIndex, 'args', argIndex)"
-                  >
-                    <Option v-for="item in sourceWithFilter" :value="item.id" :key="item.id">{{ item.name }}</Option>
-                  </Select>
-                </div>
-                <div class="table-col title-width-level1">
-                  <Select
-                    v-model="item.relativeTfstateAttribute"
-                    :disabled="!['attr'].includes(item.convertWay)"
-                    clearable
-                    filterable
-                    size="small"
-                  >
-                    <template v-if="item.relativeTfstateAttribute && item.sourceAttr.length === 0">
-                      <Option :value="item.relativeTfstateAttribute" :key="item.relativeTfstateAttribute">{{
-                        item.relativeTfstateAttribute
+                    </Select>
+                  </div>
+                  <div class="table-col title-width-level1">
+                    <Select
+                      v-model="item.defaultValue"
+                      @on-open-change="openDefaultValue(item, 'interfaceInputParamsWithTemplate')"
+                      clearable
+                      filterable
+                      size="small"
+                    >
+                      <template v-if="item.defaultValue && item.defaultValueOptions.length === 0">
+                        <Option :value="item.defaultValue" :key="item.defaultValue">{{ item.defaultValue }}</Option>
+                      </template>
+                      <template v-else>
+                        <Option v-for="item in item.defaultValueOptions" :value="item.value" :key="item.value">{{
+                          item.value
+                        }}</Option>
+                      </template>
+                    </Select>
+                  </div>
+                  <div class="table-col title-width-level1">
+                    <Button type="primary" @click="updateArg(item)" ghost size="small">{{ $t('t_save') }}</Button>
+                    <Button type="error" @click="deleteArg(source.args, item, argIndex)" ghost size="small">{{
+                      $t('t_delete')
+                    }}</Button>
+                  </div>
+                </template>
+              </div>
+            </div>
+            <div>
+              <div style="margin-top: -1px;" v-for="(item, attrIndex) in source.attrs" :key="item.id">
+                <template>
+                  <div class="table-col title-width-level1">
+                    <Input v-model="item.name" size="small" />
+                  </div>
+                  <div class="table-col title-width-level1">
+                    <Select v-model="item.type" clearable filterable size="small">
+                      <Option v-for="item in dataTypeOptions" :value="item.value" :key="item.value">{{
+                        item.label
                       }}</Option>
-                    </template>
-                    <template v-else>
-                      <Option v-for="item in item.sourceAttr" :value="item.id" :key="item.id">{{ item.name }}</Option>
-                    </template>
-                  </Select>
-                </div>
-                <div class="table-col title-width-level1">
-                  <Select
-                    v-model="item.parameter"
-                    size="small"
-                    clearable
-                    filterable
-                    @on-change="getDefaultValueOptions(item, sourceIndex, 'args', argIndex)"
-                  >
-                    <Option v-for="item in interfaceInputParamsWithTemplate" :value="item.id" :key="item.id">{{
-                      item.name
-                    }}</Option>
-                  </Select>
-                </div>
-                <div class="table-col title-width-level1">
-                  <Select
-                    v-model="item.defaultValue"
-                    @on-open-change="openDefaultValue(item)"
-                    clearable
-                    filterable
-                    size="small"
-                  >
-                    <template v-if="item.defaultValue && item.defaultValueOptions.length === 0">
-                      <Option :value="item.defaultValue" :key="item.defaultValue">{{ item.defaultValue }}</Option>
-                    </template>
-                    <template v-else>
-                      <Option v-for="item in item.defaultValueOptions" :value="item.value" :key="item.value">{{
-                        item.value
+                    </Select>
+                  </div>
+                  <div class="table-col title-width-level1">
+                    <Select v-model="item.objectName" clearable filterable size="small">
+                      <Option v-for="item in source.attrsObjetcNameOptions" :value="item.id" :key="item.id">{{
+                        item.name
                       }}</Option>
-                    </template>
-                  </Select>
-                </div>
-                <div class="table-col title-width-level1">
-                  <Button type="primary" @click="updateArg(item)" ghost size="small">{{ $t('t_save') }}</Button>
-                  <Button type="error" @click="deleteArg(source.args, item, argIndex)" ghost size="small">{{
-                    $t('t_delete')
-                  }}</Button>
-                </div>
-              </template>
+                    </Select>
+                  </div>
+                  <div class="table-col title-width-level0">
+                    <Select v-model="item.isMulti" clearable filterable size="small">
+                      <Option value="Y">Y</Option>
+                      <Option value="N">N</Option>
+                    </Select>
+                  </div>
+                  <div class="table-col title-width-level0">
+                    <Select v-model="item.isNull" clearable filterable size="small">
+                      <Option value="Y">Y</Option>
+                      <Option value="N">N</Option>
+                    </Select>
+                  </div>
+
+                  <div class="table-col title-width-level1">
+                    <Select v-model="item.convertWay" size="small">
+                      <Option
+                        v-for="item in conversionTypeOptions"
+                        clearable
+                        filterable
+                        :value="item.value"
+                        :key="item.value"
+                        >{{ item.label }}</Option
+                      >
+                    </Select>
+                  </div>
+                  <div class="table-col title-width-level1">
+                    <Select
+                      v-model="item.relativeParameter"
+                      :disabled="!['context', 'context_data'].includes(item.convertWay)"
+                      clearable
+                      filterable
+                      @on-change="getRelativeValueOptions(item, sourceIndex, 'attrs', attrIndex)"
+                      size="small"
+                    >
+                      <Option v-for="item in interfaceOutputParams" :value="item.id" :key="item.id">{{
+                        item.name
+                      }}</Option>
+                    </Select>
+                  </div>
+                  <div class="table-col title-width-level1">
+                    <Select
+                      v-model="item.relativeParameterValue"
+                      :disabled="!['context', 'context_data'].includes(item.convertWay)"
+                      @on-open-change="openRelativeParameterValue(item, 'interfaceOutputParams')"
+                      clearable
+                      filterable
+                      size="small"
+                    >
+                      <template v-if="item.relativeParameterValue && item.relativeValueOptions.length === 0">
+                        <Option :value="item.relativeParameterValue" :key="item.relativeParameterValue">{{
+                          item.relativeParameterValue
+                        }}</Option>
+                      </template>
+                      <template v-else>
+                        <Option v-for="pv in item.relativeValueOptions" :value="pv.value" :key="pv.value">{{
+                          pv.value
+                        }}</Option>
+                      </template>
+                    </Select>
+                  </div>
+                  <div class="table-col title-width-level1">
+                    <Select
+                      v-model="item.source"
+                      size="small"
+                      :disabled="!['attr'].includes(item.convertWay)"
+                      clearable
+                      filterable
+                    >
+                      <Option v-for="item in sourceWithFilter" :value="item.id" :key="item.id">{{ item.name }}</Option>
+                    </Select>
+                  </div>
+                  <div class="table-col title-width-level1">
+                    <Select v-model="item.relativeTfstateAttribute" disabled clearable filterable size="small">
+                    </Select>
+                  </div>
+                  <div class="table-col title-width-level1">
+                    <Select
+                      v-model="item.parameter"
+                      size="small"
+                      clearable
+                      filterable
+                      @on-change="getDefaultValueOptions(item, sourceIndex, 'attrs', attrIndex)"
+                    >
+                      <Option v-for="item in interfaceOutputParamsWithTemplate" :value="item.id" :key="item.id">{{
+                        item.name
+                      }}</Option>
+                    </Select>
+                  </div>
+                  <div class="table-col title-width-level1">
+                    <Select
+                      v-model="item.defaultValue"
+                      @on-open-change="openDefaultValue(item, 'interfaceOutputParamsWithTemplate')"
+                      clearable
+                      filterable
+                      size="small"
+                    >
+                      <template v-if="item.defaultValue && item.defaultValueOptions.length === 0">
+                        <Option :value="item.defaultValue" :key="item.defaultValue">{{ item.defaultValue }}</Option>
+                      </template>
+                      <template v-else>
+                        <Option v-for="item in item.defaultValueOptions" :value="item.value" :key="item.value">{{
+                          item.value
+                        }}</Option>
+                      </template>
+                    </Select>
+                  </div>
+                  <div class="table-col title-width-level1">
+                    <Button type="primary" @click="updateAttr(item)" ghost size="small">{{ $t('t_save') }}</Button>
+                    <Button type="error" @click="deleteAttr(source.attrs, item, attrIndex)" ghost size="small">{{
+                      $t('t_delete')
+                    }}</Button>
+                  </div>
+                </template>
+              </div>
             </div>
           </div>
-          <!-- <div>
-            <div style="margin-top: -1px;" v-for="item in [1, 2]" :key="item">
-              <template>
-                <div class="table-col title-width-level1">
-                  <Input size="small" />
-                </div>
-                <div class="table-col title-width-level1">
-                  <Select v-model="model1" size="small">
-                    <Option v-for="item in cityList" :value="item.value" :key="item.value">{{ item.label }}</Option>
-                  </Select>
-                </div>
-                <div class="table-col title-width-level1">
-                  <Select v-model="model1" size="small">
-                    <Option v-for="item in cityList" :value="item.value" :key="item.value">{{ item.label }}</Option>
-                  </Select>
-                </div>
-                <div class="table-col title-width-level1">
-                  <Checkbox v-model="single">Checkbox</Checkbox>
-                </div>
-                <div class="table-col title-width-level1">
-                  <Checkbox v-model="single">Checkbox</Checkbox>
-                </div>
-
-                <div class="table-col title-width-level1">
-                  <Select v-model="model1" size="small">
-                    <Option v-for="item in cityList" :value="item.value" :key="item.value">{{ item.label }}</Option>
-                  </Select>
-                </div>
-                <div class="table-col title-width-level1">
-                  <Select v-model="model1" size="small">
-                    <Option v-for="item in cityList" :value="item.value" :key="item.value">{{ item.label }}</Option>
-                  </Select>
-                </div>
-                <div class="table-col title-width-level1">
-                  <Select v-model="model1" size="small">
-                    <Option v-for="item in cityList" :value="item.value" :key="item.value">{{ item.label }}</Option>
-                  </Select>
-                </div>
-                <div class="table-col title-width-level1">
-                  <Select v-model="model1" size="small">
-                    <Option v-for="item in cityList" :value="item.value" :key="item.value">{{ item.label }}</Option>
-                  </Select>
-                </div>
-                <div class="table-col title-width-level1">
-                  <Select v-model="model1" size="small">
-                    <Option v-for="item in cityList" :value="item.value" :key="item.value">{{ item.label }}</Option>
-                  </Select>
-                </div>
-                <div class="table-col title-width-level1">
-                  <Input size="small" />
-                </div>
-                <div class="table-col title-width-level1">
-                  <Button type="primary" ghost size="small">{{ $t('t_save') }}</Button>
-                  <Button type="error" ghost size="small">{{ $t('t_delete') }}</Button>
-                </div>
-              </template>
-            </div>
-          </div> -->
         </div>
       </div>
     </div>
@@ -366,6 +445,8 @@ import {
   getSourceByfilter,
   updateArgs,
   deleteArg,
+  updateAttrs,
+  deleteAttrs,
   getSourceByProvider,
   getParamaByInterface,
   getPluginList
@@ -374,14 +455,7 @@ export default {
   name: '',
   data () {
     return {
-      single: '',
-      cityList: [
-        {
-          value: 'New York',
-          label: 'New York'
-        }
-      ],
-      model1: '',
+      MODALHEIGHT: 300,
 
       plugin: 'cvm',
       pluginOptions: [],
@@ -408,7 +482,7 @@ export default {
       interfaceInputParamsWithTemplate: [], // 供arg parameter 使用
       interfaceOutputParamsWithTemplate: [], // 供attr parameter 使用
       sourceWithFilter: [], // 关联source列表，依据provider过滤
-      emptyArgParams: {
+      emptyParams: {
         convertWay: '',
         createTime: '',
         createUser: '',
@@ -436,13 +510,14 @@ export default {
   mounted () {
     this.getPlugin()
     this.getProviderList()
+    this.MODALHEIGHT = window.innerHeight - 300
   },
   methods: {
-    addArgParams (source, type) {
-      source[type].push(JSON.parse(JSON.stringify(this.emptyArgParams)))
+    addParams (source, type) {
+      source[type].push(JSON.parse(JSON.stringify(this.emptyParams)))
     },
-    async openRelativeParameterValue (val) {
-      const find = this.interfaceInputParams.find(ip => ip.id === val.relativeParameter)
+    async openRelativeParameterValue (val, interfaceParams) {
+      const find = this[interfaceParams].find(ip => ip.id === val.relativeParameter)
       if (find && find.template) {
         const { statusCode, data } = await getTemplateValue(find.template)
         if (statusCode === 'OK') {
@@ -450,7 +525,7 @@ export default {
         }
       }
     },
-    async openDefaultValue (val) {
+    async openDefaultValue (val, interfaceParamsWithTemplate) {
       const find = this.interfaceInputParamsWithTemplate.find(ip => ip.id === val.parameter)
       if (find) {
         const { statusCode, data } = await getTemplateValue(find.template)
@@ -458,6 +533,35 @@ export default {
           val.defaultValueOptions = data
         }
       }
+    },
+    async updateAttr (item) {
+      let tmp = JSON.parse(JSON.stringify(item))
+      const { statusCode } = await updateAttrs([tmp])
+      if (statusCode === 'OK') {
+        this.$Notice.success({
+          title: 'Successful',
+          desc: 'Successful'
+        })
+      }
+    },
+    async deleteAttr (attrs, item, index) {
+      this.$Modal.confirm({
+        title: this.$t('t_confirm_delete'),
+        'z-index': 1000000,
+        loading: true,
+        onOk: async () => {
+          let res = await deleteAttrs(item.id)
+          this.$Modal.remove()
+          if (res.statusCode === 'OK') {
+            this.$Notice.success({
+              title: 'Successful',
+              desc: 'Successful'
+            })
+            attrs.splice(index, 1)
+          }
+        },
+        onCancel: () => {}
+      })
     },
     async updateArg (item) {
       let tmp = JSON.parse(JSON.stringify(item))
@@ -498,14 +602,32 @@ export default {
             this.sourceInfo[sourceIndex][type][index].defaultValueOptions = data
           }
         }
-      } else {
-        this.sourceInfo[sourceIndex][type][index].defaultValueOptions = []
+      }
+      if (type === 'attrs') {
+        const find = this.interfaceOutputParamsWithTemplate.find(ip => ip.id === val.parameter)
+        if (find) {
+          const { statusCode, data } = await getTemplateValue(find.template)
+          if (statusCode === 'OK') {
+            this.sourceInfo[sourceIndex][type][index].defaultValueOptions = data
+          }
+        }
       }
     },
     async getRelativeValueOptions (val, sourceIndex, type, index) {
       val.relativeParameterValue = ''
       if (type === 'args') {
         const find = this.interfaceInputParams.find(ip => ip.id === val.relativeParameter)
+        if (find && find.template) {
+          const { statusCode, data } = await getTemplateValue(find.template)
+          if (statusCode === 'OK') {
+            this.sourceInfo[sourceIndex][type][index].relativeValueOptions = data
+          }
+        } else {
+          this.sourceInfo[sourceIndex][type][index].relativeValueOptions = []
+        }
+      }
+      if (type === 'attrs') {
+        const find = this.interfaceOutputParams.find(ip => ip.id === val.relativeParameter)
         if (find && find.template) {
           const { statusCode, data } = await getTemplateValue(find.template)
           if (statusCode === 'OK') {

@@ -2,6 +2,7 @@ import terraformIndex from '@/pages/terraform-index'
 import conversionConfiguration from '@/pages/conversion-configuration'
 import pluginDefinition from '@/pages/plugin-definition'
 import templateData from '@/pages/template-data'
+import providerInfo from '@/pages/provider-info'
 const router = [
   {
     path: '/terraformIndex',
@@ -31,6 +32,13 @@ const router = [
         title: '插件定义',
         meta: {},
         component: pluginDefinition
+      },
+      {
+        path: 'providerInfo',
+        name: 'providerInfo',
+        title: '认证信息',
+        meta: {},
+        component: providerInfo
       }
     ]
   }

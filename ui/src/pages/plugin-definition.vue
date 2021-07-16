@@ -99,7 +99,7 @@
                 <Col span="3">
                   <FormItem :label-width="0">
                     <span>{{ $t('t_input_params') }}</span>
-                    <Button @click="addParams('input')" size="small" icon="ios-add"></Button>
+                    <Button @click="addParams('input')" type="primary" ghost size="small" icon="ios-add"></Button>
                   </FormItem>
                 </Col>
                 <Col span="20" offset="0">
@@ -163,7 +163,7 @@
                 <Col span="3">
                   <FormItem :label-width="0">
                     <span>{{ $t('t_output_params') }}</span>
-                    <Button @click="addParams('output')" size="small" icon="ios-add"></Button>
+                    <Button @click="addParams('output')" type="primary" ghost size="small" icon="ios-add"></Button>
                   </FormItem>
                 </Col>
                 <Col span="20" offset="0">
@@ -373,7 +373,6 @@ export default {
       }
     },
     async saveParams (param) {
-      console.log(param)
       const method = param.id === '' ? addParameter : editParameter
       const { statusCode } = await method([param])
       if (statusCode === 'OK') {
@@ -422,7 +421,6 @@ export default {
       this.outputObjectNameOptions = interfaceParamter.output.filter(p => p.dataType === 'object')
     },
     async getInterfaceParamter (interfaceSingleId) {
-      console.log(interfaceSingleId)
       this.currentInterface = interfaceSingleId
       const { statusCode, data } = await getParamaByInterface(interfaceSingleId)
       if (statusCode === 'OK') {

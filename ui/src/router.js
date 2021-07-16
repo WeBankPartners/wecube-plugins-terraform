@@ -37,6 +37,13 @@ export default new Router({
               title: '模板数据',
               meta: {},
               component: () => import('@/pages/template-data')
+            },
+            {
+              path: 'providerInfo',
+              name: 'providerInfo',
+              title: '认证信息',
+              meta: {},
+              component: () => import('@/pages/provider-info')
             }
           ]
         }

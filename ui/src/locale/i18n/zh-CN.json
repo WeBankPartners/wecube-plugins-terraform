@@ -30,5 +30,9 @@
   "t_related_value": "关联值",
   "t_related_attr": "关联属性",
   "t_default_value": "默认值",
-  "t_parameter": "参数"
+  "t_parameter": "参数",
+  "t_provider_info": "认证信息",
+  "t_secret_key": "秘钥",
+  "t_secret_id": "秘匙",
+  "t_version": "版本"
 }

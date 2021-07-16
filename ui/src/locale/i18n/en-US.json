@@ -30,5 +30,9 @@
   "t_related_value": "Related Value",
   "t_related_attr": "Related Attr",
   "t_default_value": "Default Value",
-  "t_parameter": "Parameter"
+  "t_parameter": "Parameter",
+  "t_provider_info": "Provider Info",
+  "t_secret_key": "Secret Key",
+  "t_secret_id": "Secret ID",
+  "t_version": "Version"
 }
