@@ -119,7 +119,24 @@ func TerraformOperation(c *gin.Context) {
 			rowData.ResultCode = "1"
 			rowData.ResultMessage = "fail"
 		}
-		rowData.Results.Outputs = append(rowData.Results.Outputs, retData)
+		// handle one input, many output
+		if v, ok := retData["_result_list"]; ok {
+			tmpData, _ := json.Marshal(v)
+			var resultList []map[string]interface{}
+			json.Unmarshal(tmpData, &resultList)
+			for i := range resultList {
+				tmpRetData := make(map[string]interface{})
+				tmpRetData["callbackParameter"] = retData["callbackParameter"]
+				tmpRetData["errorCode"] = retData["errorCode"]
+				tmpRetData["errorMessage"] = retData["errorMessage"]
+				for k, v := range resultList[i] {
+					tmpRetData[k] = v
+				}
+				rowData.Results.Outputs = append(rowData.Results.Outputs, tmpRetData)
+			}
+		} else {
+			rowData.Results.Outputs = append(rowData.Results.Outputs, retData)
+		}
 	}
 	c.JSON(http.StatusOK, rowData)
 	return

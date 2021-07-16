@@ -614,7 +614,10 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 				tfstateResult = append(tfstateResult, tmpData[i])
 			}
 		} else {
-			tmpData := tfstateFileAttributes[tfstateObjectTypeAttribute.Name].(map[string]interface{})
+			var tmpData map[string]interface{}
+			tmpMarshal, _ := json.Marshal(tfstateFileAttributes[tfstateObjectTypeAttribute.Name])
+			//tmpData := tfstateFileAttributes[tfstateObjectTypeAttribute.Name]
+			json.Unmarshal(tmpMarshal, &tmpData)
 			tfstateResult = append(tfstateResult, tmpData)
 		}
 		for i := range tfstateResult {
