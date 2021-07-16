@@ -119,9 +119,17 @@
           <div class="style-widthout-height" style="font-size: 0;margin-left:-1px">
             <div
               class="style-widthout-height"
-              :style="{ width: '120px', 'line-height': (source.args.length + source.attrs.length) * 39 + 'px' }"
+              :style="{
+                width: '120px',
+                'line-height': (source.args.length + source.attrs.length) * 39 + 'px',
+                overflow: 'hidden',
+                'text-overflow': 'ellipsis',
+                'white-space': 'nowrap'
+              }"
             >
-              {{ source.name }}
+              <span :title="source.name" class="xx">
+                {{ source.name }}
+              </span>
             </div>
             <div class="style-widthout-height" style="width:120px;vertical-align: top;border:none">
               <div class="style-widthout-height" style="font-size: 0;margin-left:-1px;border:none">
@@ -270,6 +278,8 @@
                     <Select
                       v-model="item.defaultValue"
                       @on-open-change="openDefaultValue(item, 'interfaceInputParamsWithTemplate')"
+                      allow-create
+                      ref="sss"
                       clearable
                       filterable
                       size="small"
@@ -285,7 +295,9 @@
                     </Select>
                   </div>
                   <div class="table-col title-width-level1">
-                    <Button type="primary" @click="updateArg(item)" ghost size="small">{{ $t('t_save') }}</Button>
+                    <Button type="primary" @click="updateArg(item, argIndex)" ghost size="small">{{
+                      $t('t_save')
+                    }}</Button>
                     <Button type="error" @click="deleteArg(source.args, item, argIndex)" ghost size="small">{{
                       $t('t_delete')
                     }}</Button>
@@ -451,6 +463,7 @@ import {
   getParamaByInterface,
   getPluginList
 } from '@/api/server'
+import sortedArgument from '@/pages/util/sort-array'
 export default {
   name: '',
   data () {
@@ -513,6 +526,13 @@ export default {
     this.MODALHEIGHT = window.innerHeight - 300
   },
   methods: {
+    // createOption (item, argIndex) {
+    //   const query = this.$refs.sss[argIndex].query
+    //   item.defaultValueOptions.push({
+    //     id:
+    //   })
+    //   console.log(item)
+    // },
     addParams (source, type) {
       source[type].push(JSON.parse(JSON.stringify(this.emptyParams)))
     },
@@ -527,10 +547,19 @@ export default {
     },
     async openDefaultValue (val, interfaceParamsWithTemplate) {
       const find = this.interfaceInputParamsWithTemplate.find(ip => ip.id === val.parameter)
+      console.log(find)
       if (find) {
         const { statusCode, data } = await getTemplateValue(find.template)
         if (statusCode === 'OK') {
+          const find = data.filter(d => d.value === val.defaultValue)
+          console.log(find)
+          if (find.length === 0) {
+            data.push({
+              value: val.defaultValue
+            })
+          }
           val.defaultValueOptions = data
+          console.log(val.defaultValueOptions)
         }
       }
     },
@@ -563,7 +592,13 @@ export default {
         onCancel: () => {}
       })
     },
-    async updateArg (item) {
+    async updateArg (item, index) {
+      const defaultValue = this.$refs.sss[index].query
+      console.log(defaultValue)
+      console.log(item)
+      if (defaultValue) {
+        item.defaultValue = defaultValue
+      }
       let tmp = JSON.parse(JSON.stringify(item))
       const { statusCode } = await updateArgs([tmp])
       if (statusCode === 'OK') {
@@ -669,7 +704,7 @@ export default {
       this.getInterfaceParamter()
       const arg = await getArgBySource(source.id)
       if (arg.statusCode === 'OK') {
-        const argData = this.sortedArgument(arg.data)
+        const argData = sortedArgument(arg.data)
         source.argsObjetcNameOptions = argData.filter(argSingle => argSingle.type === 'object')
         source.args = argData.map(ar => {
           ar.relativeValueOptions = []
@@ -680,7 +715,7 @@ export default {
       }
       const attr = await getAttrBySource(source.id)
       if (attr.statusCode === 'OK') {
-        const attrData = this.sortedArgument(attr.data)
+        const attrData = sortedArgument(attr.data)
         source.attrsObjetcNameOptions = attrData.filter(attrSingle => attrSingle.type === 'object')
         source.attrs = attrData.map(at => {
           at.relativeValueOptions = []
@@ -725,47 +760,6 @@ export default {
       if (statusCode === 'OK') {
         this.interfaceOptions = data
       }
-    },
-    sortedArgument (items) {
-      let level = 0
-      items.forEach(el => {
-        el.__level = level
-        el.__completed = false
-      })
-      items.forEach(el => {
-        if (el.__completed) {
-          return
-        }
-        if (!el.objectName) {
-          level += 1
-          el.__level += level
-          el.__completed = true
-          if (el.type === 'object') {
-            level = this.rSortedArgument(
-              items.filter(el2 => el2.objectName === el.id),
-              items,
-              level
-            )
-          }
-        }
-      })
-      items.sort((a, b) => a.__level - b.__level)
-      return items
-    },
-    rSortedArgument (items, allItems, level) {
-      items.forEach(el => {
-        level += 1
-        el.__level += level
-        el.__completed = true
-        if (el.type === 'object') {
-          level = this.rSortedArgument(
-            allItems.filter(el2 => el2.objectName === el.id),
-            allItems,
-            level
-          )
-        }
-      })
-      return level
     }
   }
 }
@@ -818,5 +812,10 @@ export default {
 }
 .title-width-level3 {
   width: 600px;
+}
+.xx {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

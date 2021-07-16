@@ -132,10 +132,20 @@
                     </Col>
                     <Col span="3" offset="1">
                       <FormItem :label-width="0">
-                        <Select v-model="param.objectName" filterable clearable>
-                          <Option v-for="objName in inputObjectNameOptions" :value="objName.id" :key="objName.id">{{
-                            objName.name
-                          }}</Option>
+                        <Select
+                          v-model="param.objectName"
+                          filterable
+                          clearable
+                          @on-open-change="getObjectNameOptions(param, 'input')"
+                        >
+                          <template v-if="param.objectName && param.objectNameOptions.length === 0">
+                            <Option :value="param.objectName" :key="param.objectName">{{ param.objectName }}</Option>
+                          </template>
+                          <template v-else>
+                            <Option v-for="objName in param.objectNameOptions" :value="objName.id" :key="objName.id">{{
+                              objName.name
+                            }}</Option>
+                          </template>
                         </Select>
                       </FormItem>
                     </Col>
@@ -196,10 +206,20 @@
                     </Col>
                     <Col span="3" offset="1">
                       <FormItem :label-width="0">
-                        <Select v-model="param.objectName" filterable clearable>
-                          <Option v-for="objName in outputObjectNameOptions" :value="objName.id" :key="objName.id">{{
-                            objName.name
-                          }}</Option>
+                        <Select
+                          v-model="param.objectName"
+                          filterable
+                          clearable
+                          @on-open-change="getObjectNameOptions(param, 'output')"
+                        >
+                          <template v-if="param.objectName && param.objectNameOptions.length === 0">
+                            <Option :value="param.objectName" :key="param.objectName">{{ param.objectName }}</Option>
+                          </template>
+                          <template v-else>
+                            <Option v-for="objName in param.objectNameOptions" :value="objName.id" :key="objName.id">{{
+                              objName.name
+                            }}</Option>
+                          </template>
                         </Select>
                       </FormItem>
                     </Col>
@@ -290,6 +310,7 @@ import {
   editParameter,
   addInterface
 } from '@/api/server'
+import sortedArgument from '@/pages/util/sort-array'
 export default {
   name: '',
   data () {
@@ -303,8 +324,6 @@ export default {
         { label: 'object', value: 'object' },
         { label: 'int', value: 'int' }
       ],
-      inputObjectNameOptions: [],
-      outputObjectNameOptions: [],
       newPlugin: {
         isShow: false,
         form: {
@@ -415,18 +434,26 @@ export default {
         ...tmp
       })
     },
-    getObjectNameOptions () {
-      const interfaceParamter = JSON.parse(JSON.stringify(this.interfaceParamter))
-      this.inputObjectNameOptions = interfaceParamter.input.filter(p => p.dataType === 'object')
-      this.outputObjectNameOptions = interfaceParamter.output.filter(p => p.dataType === 'object')
+    async getObjectNameOptions (item, type) {
+      const { statusCode, data } = await getParamaByInterface(this.currentInterface)
+      if (statusCode === 'OK') {
+        item.objectNameOptions = sortedArgument(
+          data.filter(d => d.type === type && d.dataType === 'object' && d.id !== item.id)
+        )
+      }
     },
     async getInterfaceParamter (interfaceSingleId) {
       this.currentInterface = interfaceSingleId
       const { statusCode, data } = await getParamaByInterface(interfaceSingleId)
       if (statusCode === 'OK') {
-        this.interfaceParamter.input = data.filter(d => d.type === 'input')
-        this.interfaceParamter.output = data.filter(d => d.type === 'output')
-        this.getObjectNameOptions()
+        this.interfaceParamter.input = sortedArgument(data.filter(d => d.type === 'input')).map(item => {
+          item.objectNameOptions = []
+          return item
+        })
+        this.interfaceParamter.output = sortedArgument(data.filter(d => d.type === 'output')).map(item => {
+          item.objectNameOptions = []
+          return item
+        })
         this.getTemplates()
       }
     },

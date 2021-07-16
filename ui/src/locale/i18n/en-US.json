@@ -34,5 +34,8 @@
   "t_provider_info": "Provider Info",
   "t_secret_key": "Secret Key",
   "t_secret_id": "Secret ID",
-  "t_version": "Version"
+  "t_version": "Version",
+  "t_region_attr_name": "Region Attr Name",
+  "t_secretKey_attr_name": "Secret Key Attr Name",
+  "t_secretId_attr_name": "Secret ID Attr Name"
 }

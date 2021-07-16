@@ -28,15 +28,15 @@
             <Option v-for="provider in newProviderInfo.providerOptions" :value="provider.id" :key="provider.id"
               >{{ provider.name
               }}<span style="float:right">
+                <Button @click="deleteProvider(provider)" icon="ios-trash" type="error" size="small"></Button>
+              </span>
+              <span style="float:right">
                 <Button
                   @click="editProvider(provider)"
                   icon="ios-create-outline"
                   style="color: #19be6b;"
                   size="small"
                 ></Button>
-              </span>
-              <span style="float:right">
-                <Button @click="deleteProvider(provider)" icon="ios-trash" type="error" size="small"></Button>
               </span>
             </Option>
           </Select>
@@ -61,6 +61,15 @@
         </FormItem>
         <FormItem :label="$t('t_version')">
           <Input type="textarea" v-model="newProvider.form.version" :rows="4" style="width:400px"></Input>
+        </FormItem>
+        <FormItem :label="$t('t_region_attr_name')">
+          <Input type="text" v-model="newProvider.form.regionAttrName" style="width:400px"></Input>
+        </FormItem>
+        <FormItem :label="$t('t_secretKey_attr_name')">
+          <Input type="text" v-model="newProvider.form.secretKeyAttrName" style="width:400px"></Input>
+        </FormItem>
+        <FormItem :label="$t('t_secretId_attr_name')">
+          <Input type="text" v-model="newProvider.form.secretIdAttrName" style="width:400px"></Input>
         </FormItem>
       </Form>
     </Modal>
