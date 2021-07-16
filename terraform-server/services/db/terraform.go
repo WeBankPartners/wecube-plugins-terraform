@@ -66,7 +66,7 @@ func DelFile(filePath string) (err error) {
 		if os.IsNotExist(err) {
 			return
 		} else if os.IsExist(err) {
-			err = os.Remove(filePath)
+			err = os.RemoveAll(filePath)
 			if err != nil {
 				err = fmt.Errorf("Delete file: %s error: %s", filePath, err.Error())
 				log.Logger.Error("Delete file error", log.String("filePath", filePath), log.Error(err))
@@ -527,39 +527,6 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 	var tfstateFileAttributes map[string]interface{}
 	tfstateFileAttributes = unmarshalTfstateFileData.Resources[0].Instances[0].Attributes
 
-	outPutArgs := make(map[string]interface{})
-	// 循环遍历每个 outPutParameterName 进行 reverseConvert 生成输出参数
-	for k, v := range outPutParameterNameMap {
-		if tfstateOutParamVal, ok := tfstateFileAttributes[k]; ok {
-			if tfstateAttr, okParam := tfstateAttrParamMap[v.Id]; okParam {
-				convertWay := tfstateAttr.ConvertWay
-				var outArgKey string
-				var outArgVal interface{}
-				switch convertWay {
-				case models.ConvertWay["Data"]:
-					outArgKey, outArgVal, err = reverseConvertData(tfstateAttr.Parameter, tfstateAttr.Source, tfstateOutParamVal)
-				case models.ConvertWay["Template"]:
-					outArgKey, outArgVal, err = reverseConvertTemplate(tfstateAttr.Parameter, providerData.Name, tfstateOutParamVal)
-				case models.ConvertWay["Context"]:
-					outArgKey, outArgVal, err = reverseConvertContext(tfstateAttr.RelativeParameter, tfstateOutParamVal)
-				case models.ConvertWay["Direct"]:
-					outArgKey, outArgVal, err = reverseConvertDirect(tfstateAttr.Parameter, tfstateOutParamVal)
-				}
-				if err != nil {
-					err = fmt.Errorf("Reverse convert parameter:%s error:%s", tfstateAttr.Parameter, err.Error())
-					log.Logger.Error("Revese convert parameter error", log.String("parameterId", tfstateAttr.Parameter), log.Error(err))
-					retOutput["errorMessage"] = err.Error()
-					return
-				}
-				outPutArgs[outArgKey] = outArgVal
-			} else {
-				outPutArgs[k] = ""
-			}
-		} else {
-			outPutArgs[k] = reqParam[k]
-		}
-	}
-
 	if action == "apply" {
 		// 记录到 resource_data table
 		resourceDataId := guid.CreateGuid()
@@ -577,6 +544,42 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 			retOutput["errorMessage"] = err.Error()
 		}
 	}
+
+	outPutArgs := make(map[string]interface{})
+	// 循环遍历每个 outPutParameterName 进行 reverseConvert 生成输出参数
+	for k, v := range outPutParameterNameMap {
+		if tfstateAttr, okParam := tfstateAttrParamMap[v.Id]; okParam {
+			if tfstateOutParamVal, ok := tfstateFileAttributes[tfstateAttr.Name]; ok {
+				convertWay := tfstateAttr.ConvertWay
+				var outArgKey string
+				var outArgVal interface{}
+				switch convertWay {
+				case models.ConvertWay["Data"]:
+					outArgKey, outArgVal, err = reverseConvertData(v, tfstateAttr.Source, tfstateOutParamVal)
+				case models.ConvertWay["Template"]:
+					outArgKey, outArgVal, err = reverseConvertTemplate(tfstateAttr.Parameter, providerData.Name, tfstateOutParamVal)
+				case models.ConvertWay["Context"]:
+					outArgKey, outArgVal, err = reverseConvertContext(tfstateAttr.RelativeParameter, tfstateOutParamVal)
+				case models.ConvertWay["Direct"]:
+					// outArgKey, outArgVal, err = reverseConvertDirect(tfstateAttr.Parameter, tfstateOutParamVal)
+					outArgKey, outArgVal, err = k, tfstateOutParamVal, nil
+				}
+				if err != nil {
+					err = fmt.Errorf("Reverse convert parameter:%s error:%s", tfstateAttr.Parameter, err.Error())
+					log.Logger.Error("Revese convert parameter error", log.String("parameterId", tfstateAttr.Parameter), log.Error(err))
+					retOutput["errorMessage"] = err.Error()
+					return
+				}
+				outPutArgs[outArgKey] = outArgVal
+			} else {
+				outPutArgs[k] = ""
+			}
+		} else {
+			outPutArgs[k] = reqParam[k]
+		}
+	}
+
+
 
 	for k, v := range outPutArgs {
 		retOutput[k] = v
@@ -1019,7 +1022,8 @@ func convertData(parameterId string, source string, reqParam map[string]interfac
 	return
 }
 
-func reverseConvertData(parameterId string, source string, tfstateVal interface{}) (argKey string, argVal string, err error) {
+func reverseConvertData(parameterData *models.ParameterTable, source string, tfstateVal interface{}) (argKey string, argVal string, err error) {
+	/*
 	sqlCmd := `SELECT * FROM parameter WHERE id=?`
 	paramArgs := []interface{}{}
 	paramArgs = append(paramArgs, parameterId)
@@ -1035,12 +1039,14 @@ func reverseConvertData(parameterId string, source string, tfstateVal interface{
 		return
 	}
 	parameterData := parameterList[0]
+	 */
 
-	sqlCmd = `SELECT * FROM resource_data WHERE source=? AND resource_asset_id=?`
-	paramArgs = []interface{}{source, tfstateVal}
+	sqlCmd := `SELECT * FROM resource_data WHERE resource=? AND resource_asset_id=?`
+	paramArgs := []interface{}{source, tfstateVal}
 	var resourceDataList []*models.ResourceDataTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataList)
 	if err != nil {
+		err = fmt.Errorf("Get resource_data by source:%s and resource_asset_id:%s error:%s", source, tfstateVal, err.Error())
 		log.Logger.Error("Get resource_data error", log.String("source", source), log.String("resource_asset_id", tfstateVal.(string)), log.Error(err))
 		return
 	}
