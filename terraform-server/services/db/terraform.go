@@ -65,17 +65,16 @@ func DelFile(filePath string) (err error) {
 	if err != nil {
 		if os.IsNotExist(err) {
 			return
-		} else if os.IsExist(err) {
-			err = os.RemoveAll(filePath)
-			if err != nil {
-				err = fmt.Errorf("Delete file: %s error: %s", filePath, err.Error())
-				log.Logger.Error("Delete file error", log.String("filePath", filePath), log.Error(err))
-			}
 		} else {
 			err = fmt.Errorf("Os stat filePath: %s error: %s", filePath, err.Error())
 			log.Logger.Error("Os stat filePath error", log.String("filePath", filePath), log.Error(err))
 			return
 		}
+	}
+	err = os.Remove(filePath)
+	if err != nil {
+		err = fmt.Errorf("Delete file: %s error: %s", filePath, err.Error())
+		log.Logger.Error("Delete file error", log.String("filePath", filePath), log.Error(err))
 	}
 	return
 }
@@ -202,7 +201,7 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 								 providerData *models.ProviderTable,
 							     providerInfo *models.ProviderInfoTable,
   							     regionData *models.ResourceDataTable,
-  							     action string, plugin string,
+  							     action string, plugin string, dirPath string,
   							     interfaceData *models.InterfaceTable) (retOutput map[string]interface{}, err error) {
 	retOutput = make(map[string]interface{})
 	retOutput["callbackParameter"] = reqParam["callbackParameter"].(string)
@@ -262,15 +261,17 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 		return
 	}
 
-	var resourceId, resourceAssetId string
+	resourceId := reqParam["id"].(string)
+	resourceAssetId := reqParam["asset_id"].(string)
+
 	tfArguments := make(map[string]interface{})
 	// 循环处理每一个 tf_argument
 	for i := range tfArgumentList {
 		convertWay := tfArgumentList[i].ConvertWay
 
 		// 查询 tfArgument 对应的 parameter
-		sqlCmd := `SELECT * FROM parameter WHERE id=?`
-		paramArgs := []interface{}{tfArgumentList[i].Parameter}
+		sqlCmd = `SELECT * FROM parameter WHERE id=?`
+		paramArgs = []interface{}{tfArgumentList[i].Parameter}
 		var parameterList []*models.ParameterTable
 		err = x.SQL(sqlCmd, paramArgs...).Find(&parameterList)
 		if err != nil {
@@ -295,9 +296,6 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 			arg, err = convertContext(tfArgumentList[i].RelativeParameter, tfArgumentList[i], reqParam)
 		case models.ConvertWay["Attr"]:
 			sourceIdList := make(map[string]bool)
-			//for i := range sourceIdList {
-			//	sourceIdList[sourceList[i].Id] = true
-			//}
 			sourceIdList[sourceData.Id] = true
 			handlingSourceIds := make(map[string]bool)
 			handlingSourceIds[tfArgumentList[i].Source] = true
@@ -307,17 +305,19 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 		}
 
 		// handle tfArgument that is not in tf.json file
-		if tfArgumentList[i].Name == sourceData.AssetIdAttribute {
-			if parameterData.Name == "id" {
-				if arg != nil {
-					resourceId = arg.(string)
+		if action == "apply" {
+			if tfArgumentList[i].Name == sourceData.AssetIdAttribute {
+				if parameterData.Name == "id" {
+					if arg != nil {
+						resourceId = arg.(string)
+					}
+				} else if parameterData.Name == "asset_id" {
+					if arg != nil {
+						resourceAssetId = arg.(string)
+					}
 				}
-			} else if parameterData.Name == "asset_id" {
-				if arg != nil {
-					resourceAssetId = arg.(string)
-				}
+				continue
 			}
-			continue
 		}
 
 		if err != nil {
@@ -353,6 +353,7 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 		resourceId = resourceAssetId
 	}
 
+	/*
 	terraformFilePath := models.Config.TerraformFilePath
 	if terraformFilePath[len(terraformFilePath)-1] != '/' {
 		terraformFilePath += "/"
@@ -363,6 +364,8 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 	}
 	dirPath := terraformFilePath + providerData.Name + "/" + regionData.ResourceAssetId + "/" + plugin + "/" +
 		reqParam["requestId"].(string) + "/" + dirPathResourceId + "/" + sourceData.Name
+
+	 */
 
 	_, err = os.Stat(dirPath)
 	if err != nil {
@@ -432,6 +435,10 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 	}
 
 	// Gen version.tf
+	terraformFilePath := models.Config.TerraformFilePath
+	if terraformFilePath[len(terraformFilePath)-1] != '/' {
+		terraformFilePath += "/"
+	}
 	if providerData.Name == "tencentcloud" {
 		versionTfFilePath := terraformFilePath + "version.tf"
 		versionTfFileContent, tmpErr := ReadFile(versionTfFilePath)
@@ -952,11 +959,22 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	// Get region data
 	regionData := resourceData
 
+	terraformFilePath := models.Config.TerraformFilePath
+	if terraformFilePath[len(terraformFilePath)-1] != '/' {
+		terraformFilePath += "/"
+	}
+	dirPathResourceId := reqParam["id"].(string)
+	if dirPathResourceId == "" {
+		dirPathResourceId = reqParam["requestSn"].(string)
+	}
+	workDirPath := terraformFilePath + providerData.Name + "/" + regionData.ResourceAssetId + "/" + plugin + "/" +
+		reqParam["requestId"].(string) + "/" + dirPathResourceId + "/" + sourceData.Name
+
 	if action == "apply" || action == "query" {
 		var retOutput map[string]interface{}
 		var tmpErr error
 		if sourceData.TerraformUsed == "Y" {
-			retOutput, tmpErr = handleTerraformApplyOrQuery(reqParam, sourceData, providerData, providerInfoData, regionData, action, plugin, interfaceData)
+			retOutput, tmpErr = handleTerraformApplyOrQuery(reqParam, sourceData, providerData, providerInfoData, regionData, action, plugin, workDirPath, interfaceData)
 		} else {
 			retOutput, tmpErr = handleApplyOrQuery(action, reqParam, sourceData)
 		}
@@ -971,8 +989,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 			rowData[k] = v
 		}
 	} else if action == "destroy" {
-		dirPath := models.Config.TerraformFilePath + reqParam["id"].(string)
-		err = TerraformDestroy(dirPath)
+		err = TerraformDestroy(workDirPath)
 		if err != nil {
 			err = fmt.Errorf("Handle TerraformDestroy error: %s", err.Error())
 			log.Logger.Error("Handle TerraformDestroy error", log.Error(err))
