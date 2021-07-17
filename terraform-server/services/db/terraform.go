@@ -1264,18 +1264,18 @@ func reverseConvertData(parameterData *models.ParameterTable, source string, tfs
 	parameterData := parameterList[0]
 	 */
 
-	sqlCmd := `SELECT * FROM resource_data WHERE resource=? AND resource_asset_id=?`
-	paramArgs := []interface{}{source, tfstateVal}
+	sqlCmd := `SELECT * FROM resource_data WHERE resource_asset_id=?`
+	paramArgs := []interface{}{tfstateVal}
 	var resourceDataList []*models.ResourceDataTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataList)
 	if err != nil {
-		err = fmt.Errorf("Get resource_data by source:%s and resource_asset_id:%s error:%s", source, tfstateVal, err.Error())
-		log.Logger.Error("Get resource_data error", log.String("source", source), log.String("resource_asset_id", tfstateVal.(string)), log.Error(err))
+		err = fmt.Errorf("Get resource_data by resource_asset_id:%s error:%s", tfstateVal, err.Error())
+		log.Logger.Error("Get resource_data error", log.String("resource_asset_id", tfstateVal.(string)), log.Error(err))
 		return
 	}
 	if len(resourceDataList) == 0 {
-		err = fmt.Errorf("Resource_data can not be found by source:%s and resource_asset_id:%s", source, tfstateVal)
-		log.Logger.Warn("Resource_data can not be found by source and resource_asset_id", log.String("source", source), log.String("value", tfstateVal.(string)), log.Error(err))
+		err = fmt.Errorf("Resource_data can not be found by resource_asset_id:%s", source, tfstateVal)
+		log.Logger.Warn("Resource_data can not be found by resource_asset_id", log.String("value", tfstateVal.(string)), log.Error(err))
 		return
 	}
 	argKey = parameterData.Name
