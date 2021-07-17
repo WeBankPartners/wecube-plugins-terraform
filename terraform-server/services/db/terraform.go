@@ -1228,17 +1228,21 @@ func convertData(parameterId string, source string, reqParam map[string]interfac
 	parameterData := parameterList[0]
 
 	sqlCmd = `SELECT * FROM resource_data WHERE resource_id=?`
-	paramArgs = []interface{}{reqParam[parameterData.Name]}
+	resource_id := ""
+	if _, ok := reqParam[parameterData.Name]; ok {
+		resource_id = reqParam[parameterData.Name].(string)
+	}
+	paramArgs = []interface{}{resource_id}
 	var resourceDataList []*models.ResourceDataTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataList)
 	if err != nil {
 		err = fmt.Errorf("Get resource_data error: %s", err.Error())
-		log.Logger.Error("Get resource_data error", log.String("source", source), log.String("resource_id", reqParam[parameterData.Name].(string)), log.Error(err))
+		log.Logger.Error("Get resource_data error", log.String("source", source), log.String("resource_id", resource_id), log.Error(err))
 		return
 	}
 	if len(resourceDataList) == 0 {
-		err = fmt.Errorf("Resource_data can not be found by source:%s and resource_id:%s", source, reqParam[parameterData.Name])
-		log.Logger.Warn("Resource_data can not be found by source and resource_id", log.String("source", source), log.String("value", reqParam[parameterData.Name].(string)), log.Error(err))
+		err = fmt.Errorf("Resource_data can not be found by resource_id:%s", resource_id)
+		log.Logger.Warn("Resource_data can not be found by resource_id", log.String("resource_id", resource_id), log.Error(err))
 		return
 	}
 	arg = resourceDataList[0].ResourceAssetId
