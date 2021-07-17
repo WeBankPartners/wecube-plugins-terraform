@@ -1200,6 +1200,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 		}
 		// TODO del item in resource_data
 		_, err = x.Exec("DELETE FROM resource_data WHERE id=?", resourceData.Id)
+		rowData["id"] = resourceData.ResourceId
 		rowData["errorCode"] = "0"
 	} else {
 		err = fmt.Errorf("Action: %s is inValid", action)
@@ -1226,8 +1227,8 @@ func convertData(parameterId string, source string, reqParam map[string]interfac
 	}
 	parameterData := parameterList[0]
 
-	sqlCmd = `SELECT * FROM resource_data WHERE resource=? AND resource_id=?`
-	paramArgs = []interface{}{source, reqParam[parameterData.Name]}
+	sqlCmd = `SELECT * FROM resource_data WHERE resource_id=?`
+	paramArgs = []interface{}{reqParam[parameterData.Name]}
 	var resourceDataList []*models.ResourceDataTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataList)
 	if err != nil {
