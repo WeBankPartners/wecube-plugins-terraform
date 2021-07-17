@@ -1249,7 +1249,7 @@ func convertData(parameterId string, source string, reqParam map[string]interfac
 	return
 }
 
-func reverseConvertData(parameterData *models.ParameterTable, source string, tfstateVal interface{}) (argKey string, argVal string, err error) {
+func reverseConvertData(parameterData *models.ParameterTable, source string, tfstateVal interface{}) (argKey string, argVal interface{}, err error) {
 	/*
 	sqlCmd := `SELECT * FROM parameter WHERE id=?`
 	paramArgs := []interface{}{}
@@ -1268,22 +1268,43 @@ func reverseConvertData(parameterData *models.ParameterTable, source string, tfs
 	parameterData := parameterList[0]
 	 */
 
-	sqlCmd := `SELECT * FROM resource_data WHERE resource_asset_id=?`
-	paramArgs := []interface{}{tfstateVal}
+	var resourceAssetIds []string
+	if parameterData.Multiple == "Y" {
+		tfstateAssetIds := tfstateVal.([]interface{})
+		for _, v := range tfstateAssetIds {
+			resourceAssetIds = append(resourceAssetIds, v.(string))
+		}
+	} else {
+		resourceAssetIds = append(resourceAssetIds, tfstateVal.(string))
+	}
+	resourceAssetIdsStr := strings.Join(resourceAssetIds, "','")
+	// sqlCmd := `SELECT * FROM resource_data WHERE resource_asset_id=?`
+	// paramArgs := []interface{}{tfstateVal}
+	sqlCmd := "SELECT * FROM resource_data WHERE resource_asset_id IN ('" + resourceAssetIdsStr + "')"
 	var resourceDataList []*models.ResourceDataTable
-	err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataList)
+	// err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataList)
+	err = x.SQL(sqlCmd).Find(&resourceDataList)
 	if err != nil {
-		err = fmt.Errorf("Get resource_data by resource_asset_id:%s error:%s", tfstateVal, err.Error())
-		log.Logger.Error("Get resource_data error", log.String("resource_asset_id", tfstateVal.(string)), log.Error(err))
+		err = fmt.Errorf("Get resource_data by resource_asset_id:%s error:%s", resourceAssetIdsStr, err.Error())
+		log.Logger.Error("Get resource_data error", log.String("resource_asset_id", resourceAssetIdsStr), log.Error(err))
 		return
 	}
 	if len(resourceDataList) == 0 {
-		err = fmt.Errorf("Resource_data can not be found by resource_asset_id:%s", source, tfstateVal)
-		log.Logger.Warn("Resource_data can not be found by resource_asset_id", log.String("value", tfstateVal.(string)), log.Error(err))
+		err = fmt.Errorf("Resource_data can not be found by resource_asset_id:%s", resourceAssetIdsStr)
+		log.Logger.Warn("Resource_data can not be found by resource_asset_id", log.String("resource_asset_id", resourceAssetIdsStr), log.Error(err))
 		return
 	}
 	argKey = parameterData.Name
-	argVal = resourceDataList[0].ResourceId
+
+	if parameterData.Multiple == "Y" {
+		tmpRes := []string{}
+		for i := range resourceDataList {
+			tmpRes = append(tmpRes, resourceDataList[i].ResourceId)
+		}
+		argVal = tmpRes
+	} else {
+		argVal = resourceDataList[0].ResourceId
+	}
 	return
 }
 
