@@ -270,6 +270,12 @@ func TerraformDestroy(dirPath string, sourceData *models.SourceTable, providerDa
 		err = fmt.Errorf("Cmd:%s run failed with %s", cmdStr, cmdErr.Error())
 		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.Error(cmdErr))
 	}
+
+	// Del provider file
+	// TODO
+	err = DelFile(providerFilePath)
+
+	//
 	return
 }
 
@@ -1193,6 +1199,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 			return
 		}
 		// TODO del item in resource_data
+		_, err = x.Exec("DELETE FROM resource_data WHERE id=?", resourceData.Id)
 		rowData["errorCode"] = "0"
 	} else {
 		err = fmt.Errorf("Action: %s is inValid", action)
