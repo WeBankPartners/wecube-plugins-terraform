@@ -171,7 +171,16 @@ func TerraformApply(dirPath string) (err error) {
 	cmd.Stderr = &stderr
 	cmdErr := cmd.Run()
 	if cmdErr != nil {
-		err = fmt.Errorf("Cmd:%s run failed with %s", cmdStr, cmdErr.Error())
+		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
+		outStr := string(stdout.Bytes())
+		errMsgIdx := strings.Index(outStr, "Error: ")
+		if errMsgIdx != -1 {
+			errStr := outStr[errMsgIdx:]
+			errMsg := strings.Split(errStr, "\n")
+			errMsg2 := strings.Split(errStr, "\t")
+			fmt.Printf("%v, %v", errMsg, errMsg2)
+		}
+		err = fmt.Errorf("Cmd:%s run failed with %s \n %s", cmdStr, cmdErr.Error(), outStr)
 		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.Error(cmdErr))
 	}
 	// TODO handle the err msg in stdout return that by err
@@ -306,7 +315,7 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 
 		convertWay := tfArgumentList[i].ConvertWay
 		var arg interface{}
-		var isDiscard bool
+		var isDiscard = false
 		switch convertWay {
 		case models.ConvertWay["Data"]:
 			// search resource_data table，get resource_asset_id by resource_id and resource(which is relative_source column in tf_argument table )
@@ -479,13 +488,21 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 	}
 
 	// Gen softlink of terraform provider file
-	targetTerraformProviderPath := dirPath + "/" + models.TerraformProviderPathDiffMap[providerData.Name] + providerData.Version + "/" + models.Config.TerraformProviderOsArch
+	// targetTerraformProviderPath := dirPath + "/" + models.TerraformProviderPathDiffMap[providerData.Name] + providerData.Version + "/" + models.Config.TerraformProviderOsArch
+	targetTerraformProviderPath := dirPath + "/" + models.TerraformProviderPathDiffMap[providerData.Name] + providerData.Version
 
 	_, err = os.Stat(targetTerraformProviderPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			terraformProviderPath := terraformFilePath + "/" + providerData.Name + "/" + providerData.Version + "/" + models.Config.TerraformProviderOsArch
-			err = os.Symlink(terraformProviderPath, targetTerraformProviderPath)
+			err = os.MkdirAll(targetTerraformProviderPath, os.ModePerm)
+			if err != nil {
+				err = fmt.Errorf("Make dir: %s error: %s", dirPath, err.Error())
+				log.Logger.Error("Make dir error", log.String("dirPath", dirPath), log.Error(err))
+				retOutput["errorMessage"] = err.Error()
+				return
+			}
+			terraformProviderPath := terraformFilePath + "providers/" + providerData.Name + "/" + providerData.Version + "/" + models.Config.TerraformProviderOsArch
+			err = os.Symlink(terraformProviderPath, targetTerraformProviderPath + "/" + models.Config.TerraformProviderOsArch)
 			if err != nil {
 				err = fmt.Errorf("Make soft link : %s error: %s", targetTerraformProviderPath, err.Error())
 				log.Logger.Error("Make soft link error", log.String("softLink", targetTerraformProviderPath), log.Error(err))
@@ -500,15 +517,36 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 		}
 	}
 
-	/*
-	// terraform import when assetId has value
-	err = TerraformImport(dirPath, address, resourceId)
+	// Gen soft link for .terraform.lock.hcl
+	targetTerraformLockHclPath := dirPath + "/.terraform.lock.hcl"
+	_, err = os.Stat(targetTerraformLockHclPath)
 	if err != nil {
-		err = fmt.Errorf("Do TerraformImport error:%s", err.Error())
-	    retOutput["errorMessage"] = err.Error()
-		return
+		if os.IsNotExist(err) {
+			terraformLockHclPath := terraformFilePath + "providers/" + providerData.Name + "/" + providerData.Version + "/.terraform.lock.hcl"
+			err = os.Symlink(terraformLockHclPath, targetTerraformLockHclPath)
+			if err != nil {
+				err = fmt.Errorf("Make soft link : %s error: %s", targetTerraformLockHclPath, err.Error())
+				log.Logger.Error("Make soft link error", log.String("softLink", targetTerraformLockHclPath), log.Error(err))
+				retOutput["errorMessage"] = err.Error()
+				return
+			}
+		} else {
+			err = fmt.Errorf("Os stat dir: %s error: %s", targetTerraformLockHclPath, err.Error())
+			log.Logger.Error("Os stat dir error", log.String("targetTerraformLockHclPath", targetTerraformLockHclPath), log.Error(err))
+			retOutput["errorMessage"] = err.Error()
+			return
+		}
 	}
-	*/
+
+	if resourceAssetId != "" && action == "apply" {
+		// terraform import when assetId has value
+		err = TerraformImport(dirPath, sourceData.Name+"."+resourceId, resourceAssetId)
+		if err != nil {
+			err = fmt.Errorf("Do TerraformImport error:%s", err.Error())
+			retOutput["errorMessage"] = err.Error()
+			return
+		}
+	}
 
 	// terraform init
 	err = TerraformInit(dirPath)
@@ -970,13 +1008,21 @@ func handleDestroy(workDirPath string,
 		}
 
 		// Gen softlink of terraform provider file
-		targetTerraformProviderPath := workDirPath + "/" + models.TerraformProviderPathDiffMap[providerData.Name] + providerData.Version + "/" + models.Config.TerraformProviderOsArch
+		// targetTerraformProviderPath := workDirPath + "/" + models.TerraformProviderPathDiffMap[providerData.Name] + providerData.Version + "/" + models.Config.TerraformProviderOsArch
+		targetTerraformProviderPath := workDirPath + "/" + models.TerraformProviderPathDiffMap[providerData.Name] + providerData.Version
 
 		_, err = os.Stat(targetTerraformProviderPath)
 		if err != nil {
 			if os.IsNotExist(err) {
-				terraformProviderPath := terraformFilePath + "/" + providerData.Name + "/" + providerData.Version + "/" + models.Config.TerraformProviderOsArch
-				err = os.Symlink(terraformProviderPath, targetTerraformProviderPath)
+				err = os.MkdirAll(targetTerraformProviderPath, os.ModePerm)
+				if err != nil {
+					err = fmt.Errorf("Make dir: %s error: %s", workDirPath, err.Error())
+					log.Logger.Error("Make dir error", log.String("dirPath", workDirPath), log.Error(err))
+					rowData["errorMessage"] = err.Error()
+					return
+				}
+				terraformProviderPath := terraformFilePath + "providers/" + providerData.Name + "/" + providerData.Version + "/" + models.Config.TerraformProviderOsArch
+				err = os.Symlink(terraformProviderPath, targetTerraformProviderPath + "/" + models.Config.TerraformProviderOsArch)
 				if err != nil {
 					err = fmt.Errorf("Make soft link : %s error: %s", targetTerraformProviderPath, err.Error())
 					log.Logger.Error("Make soft link error", log.String("softLink", targetTerraformProviderPath), log.Error(err))
@@ -986,6 +1032,26 @@ func handleDestroy(workDirPath string,
 			} else {
 				err = fmt.Errorf("Os stat dir: %s error: %s", targetTerraformProviderPath, err.Error())
 				log.Logger.Error("Os stat dir error", log.String("targetTerraformProviderPath", targetTerraformProviderPath), log.Error(err))
+				rowData["errorMessage"] = err.Error()
+				return
+			}
+		}
+		// Gen soft link for .terraform.lock.hcl
+		targetTerraformLockHclPath := workDirPath + "/.terraform.lock.hcl"
+		_, err = os.Stat(targetTerraformLockHclPath)
+		if err != nil {
+			if os.IsNotExist(err) {
+				terraformLockHclPath := terraformFilePath + "providers/" + providerData.Name + "/" + providerData.Version + "/.terraform.lock.hcl"
+				err = os.Symlink(terraformLockHclPath, targetTerraformLockHclPath)
+				if err != nil {
+					err = fmt.Errorf("Make soft link : %s error: %s", targetTerraformLockHclPath, err.Error())
+					log.Logger.Error("Make soft link error", log.String("softLink", targetTerraformLockHclPath), log.Error(err))
+					rowData["errorMessage"] = err.Error()
+					return
+				}
+			} else {
+				err = fmt.Errorf("Os stat dir: %s error: %s", targetTerraformLockHclPath, err.Error())
+				log.Logger.Error("Os stat dir error", log.String("targetTerraformLockHclPath", targetTerraformLockHclPath), log.Error(err))
 				rowData["errorMessage"] = err.Error()
 				return
 			}
