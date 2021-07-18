@@ -174,92 +174,11 @@ func TerraformApply(dirPath string) (err error) {
 		err = fmt.Errorf("Cmd:%s run failed with %s", cmdStr, cmdErr.Error())
 		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.Error(cmdErr))
 	}
+	// TODO handle the err msg in stdout return that by err
 	return
 }
 
-func TerraformDestroy(dirPath string, sourceData *models.SourceTable, providerData *models.ProviderTable, providerInfo *models.ProviderInfoTable, regionData *models.ResourceDataTable, resourceAssetId string) (err error) {
-	sourceName := sourceData.Name
-	// Gen .tf 文件, 然后执行 terraform import cmd
-	uuid := "_" + guid.CreateGuid()
-	tfFilePath := dirPath + "/" + sourceName + ".tf"
-	tfFileContent := "resource " + sourceName + " " + uuid + " {}"
-
-	_, err = os.Stat(dirPath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			err = os.MkdirAll(dirPath, os.ModePerm)
-			if err != nil {
-				err = fmt.Errorf("Make dir: %s error: %s", dirPath, err.Error())
-				log.Logger.Error("Make dir error", log.String("dirPath", dirPath), log.Error(err))
-				//retOutput["errorMessage"] = err.Error()
-				return
-			}
-		} else {
-			err = fmt.Errorf("Os stat dir: %s error: %s", dirPath, err.Error())
-			log.Logger.Error("Os stat dir error", log.String("dirPath", dirPath), log.Error(err))
-			// retOutput["errorMessage"] = err.Error()
-			return
-		}
-	}
-
-	// Gen provider.tf.json
-	providerFileData := make(map[string]map[string]map[string]interface{})
-	providerFileData["provider"] = make(map[string]map[string]interface{})
-	providerFileData["provider"][providerData.Name] = make(map[string]interface{})
-	providerFileData["provider"][providerData.Name][providerData.SecretIdAttrName] = providerInfo.SecretId
-	providerFileData["provider"][providerData.Name][providerData.SecretKeyAttrName] = providerInfo.SecretKey
-	providerFileData["provider"][providerData.Name][providerData.RegionAttrName] = regionData.ResourceAssetId
-
-	providerFileContent, err := json.Marshal(providerFileData)
-	if err != nil {
-		err = fmt.Errorf("Marshal providerFileData error: %s", err.Error())
-		log.Logger.Error("Marshal providerFileData error", log.Error(err))
-		return
-	}
-	providerFilePath := dirPath + "/provider.tf.json"
-	err = GenFile(providerFileContent, providerFilePath)
-	if err != nil {
-		err = fmt.Errorf("Gen providerFile: %s error: %s", providerFilePath, err.Error())
-		log.Logger.Error("Gen providerFile error", log.String("providerFilePath", providerFilePath), log.Error(err))
-		return
-	}
-
-	// Gen version.tf
-	terraformFilePath := models.Config.TerraformFilePath
-	if terraformFilePath[len(terraformFilePath)-1] != '/' {
-		terraformFilePath += "/"
-	}
-	if providerData.Name == "tencentcloud" {
-		versionTfFilePath := terraformFilePath + "version.tf"
-		versionTfFileContent, tmpErr := ReadFile(versionTfFilePath)
-		if tmpErr != nil {
-			err = fmt.Errorf("Read versionTfFile: %s error: %s", versionTfFilePath, tmpErr.Error())
-			log.Logger.Error("Read versionTfFile error", log.String("versionTfFilePath", versionTfFilePath), log.Error(err))
-			return
-		}
-
-		genVersionTfFilePath := dirPath + "/version.tf"
-		err = GenFile(versionTfFileContent, genVersionTfFilePath)
-		if err != nil {
-			err = fmt.Errorf("Gen versionTfFile: %s error: %s", genVersionTfFilePath, err.Error())
-			log.Logger.Error("Gen versionTfFile error", log.String("genVersionTfFilePath", genVersionTfFilePath), log.Error(err))
-			return
-		}
-	}
-
-	GenFile([]byte(tfFileContent), tfFilePath)
-	err = TerraformInit(dirPath)
-	if err != nil {
-		return
-	}
-	err = TerraformImport(dirPath, sourceName+"."+uuid, resourceAssetId)
-	if err != nil {
-		return
-	}
-
-	// clear tf file
-	os.Truncate(tfFilePath, 0)
-
+func TerraformDestroy(dirPath string) (err error) {
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " destroy -auto-approve"
 	cmd := exec.Command("/bin/bash", "-c", cmdStr)
 	var stdout, stderr bytes.Buffer
@@ -270,12 +189,6 @@ func TerraformDestroy(dirPath string, sourceData *models.SourceTable, providerDa
 		err = fmt.Errorf("Cmd:%s run failed with %s", cmdStr, cmdErr.Error())
 		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.Error(cmdErr))
 	}
-
-	// Del provider file
-	// TODO
-	err = DelFile(providerFilePath)
-
-	//
 	return
 }
 
@@ -364,39 +277,46 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 	tfArguments := make(map[string]interface{})
 	// 循环处理每一个 tf_argument
 	for i := range tfArgumentList {
-		convertWay := tfArgumentList[i].ConvertWay
-
+		if tfArgumentList[i].Parameter == "" {
+			tfArguments[tfArgumentList[i].Name] = tfArgumentList[i].DefaultValue
+			continue
+		}
 		// 查询 tfArgument 对应的 parameter
 		sqlCmd = `SELECT * FROM parameter WHERE id=?`
 		paramArgs = []interface{}{tfArgumentList[i].Parameter}
 		var parameterList []*models.ParameterTable
 		err = x.SQL(sqlCmd, paramArgs...).Find(&parameterList)
 		if err != nil {
-			err = fmt.Errorf("Get Parameter data error:%s", err.Error())
-			log.Logger.Error("Get parameter data error", log.String("parameterId", tfArgumentList[i].Parameter), log.Error(err))
+			err = fmt.Errorf("Get Parameter data by id:%s error:%s", tfArgumentList[i].Parameter, err.Error())
+			log.Logger.Error("Get parameter data by id error", log.String("id", tfArgumentList[i].Parameter), log.Error(err))
+			retOutput["errorMessage"] = err.Error()
 			return
 		}
 		if len(parameterList) == 0 {
-			err = fmt.Errorf("Parameter can not be found by id:%s", tfArgumentList[i].Parameter)
-			log.Logger.Warn("Parameter can not be found by id", log.String("id", tfArgumentList[i].Parameter), log.Error(err))
+			err = fmt.Errorf("Parameter data can not be found by id:%s", tfArgumentList[i].Parameter)
+			log.Logger.Warn("Parameter data can not be found by id", log.String("id", tfArgumentList[i].Parameter), log.Error(err))
+			retOutput["errorMessage"] = err.Error()
 			return
 		}
 		parameterData := parameterList[0]
 
+		if _, ok := reqParam[parameterData.Name]; !ok {
+			continue
+		}
+
+		convertWay := tfArgumentList[i].ConvertWay
 		var arg interface{}
 		switch convertWay {
 		case models.ConvertWay["Data"]:
-			arg, err = convertData(tfArgumentList[i].Parameter, tfArgumentList[i].Source, reqParam)
+			// search resource_data table，get resource_asset_id by resource_id and resource(which is relative_source column in tf_argument table )
+			arg, err = convertData(parameterData, tfArgumentList[i].RelativeSource, reqParam)
 		case models.ConvertWay["Template"]:
 			arg, err = convertTemplate(tfArgumentList[i].Parameter, providerData.Name, reqParam)
 		case models.ConvertWay["Context"]:
 			arg, err = convertContext(tfArgumentList[i].RelativeParameter, tfArgumentList[i], reqParam)
 		case models.ConvertWay["Attr"]:
-			sourceIdList := make(map[string]bool)
-			sourceIdList[sourceData.Id] = true
-			handlingSourceIds := make(map[string]bool)
-			handlingSourceIds[tfArgumentList[i].Source] = true
-			arg, err = convertAttr(tfArgumentList[i].RelativeTfstateAttribute, sourceIdList, handlingSourceIds, providerData.Name, reqParam)
+			// search resouce_data table by relative_source and 输入的值, 获取 tfstat_file 字段内容,找到relative_tfstate_attribute id(search tfstate_attribute table) 对应的 name, 获取其在 tfstate_file 中的值
+			arg, err = convertAttr(parameterData, tfArgumentList[i], reqParam)
 		case models.ConvertWay["Direct"]:
 			arg, err = convertDirect(tfArgumentList[i].Parameter, tfArgumentList[i].DefaultValue, reqParam)
 		}
@@ -430,7 +350,7 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 			return
 		}
 		tfArguments[tfArgumentList[i].Name] = arg
-		if convertWay == "direct" && arg.(string) == "null" {
+		if arg != nil && convertWay == "direct" && parameterData.DataType == "string" && arg.(string) == "null" {
 			delete(tfArguments, tfArgumentList[i].Name)
 		}
 		if parameterData.DataType == "object" || parameterData.DataType == "object_str" {
@@ -788,8 +708,8 @@ func RegionApply(reqParam map[string]interface{}, interfaceData *models.Interfac
 	var providerInfoList []*models.ProviderInfoTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&providerInfoList)
 	if err != nil {
-		err = fmt.Errorf("Get providerInfo error:%s", err.Error())
-		log.Logger.Error("Get providerInfo error", log.String("providerInfoId", providerInfoId), log.Error(err))
+		err = fmt.Errorf("Get providerInfo by id:%s error:%s", providerInfoId, err.Error())
+		log.Logger.Error("Get providerInfo by id error", log.String("id", providerInfoId), log.Error(err))
 		rowData["errorMessage"] = err.Error()
 		return
 	}
@@ -800,24 +720,6 @@ func RegionApply(reqParam map[string]interface{}, interfaceData *models.Interfac
 		return
 	}
 	providerInfoData := providerInfoList[0]
-	/*
-	providerSecretId, decodeErr := cipher.AesDePassword(models.Config.Auth.PasswordSeed, providerInfoData.SecretId)
-	if decodeErr != nil {
-		err = fmt.Errorf("Try to decode secretId fail: %s", decodeErr.Error())
-		log.Logger.Error("Try to decode secretId fail", log.Error(decodeErr))
-		rowData["errorMessage"] = err.Error()
-		return
-	}
-	providerSecretKey, decodeErr := cipher.AesDePassword(models.Config.Auth.PasswordSeed, providerInfoData.SecretKey)
-	if decodeErr != nil {
-		err = fmt.Errorf("Try to decode secretId fail: %s", decodeErr.Error())
-		log.Logger.Error("Try to decode secretKey fail", log.Error(decodeErr))
-		rowData["errorMessage"] = err.Error()
-		return
-	}
-	*/
-	// providerSecretId := providerInfoData.SecretId
-	// providerSecretKey := providerInfoData.SecretKey
 
 	// Get provider data
 	sqlCmd = `SELECT * FROM provider WHERE id=?`
@@ -825,8 +727,8 @@ func RegionApply(reqParam map[string]interface{}, interfaceData *models.Interfac
 	var providerList []*models.ProviderTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&providerList)
 	if err != nil {
-		err = fmt.Errorf("Get provider error:%s", err.Error())
-		log.Logger.Error("Get provider error", log.String("providerId", providerInfoData.Provider), log.Error(err))
+		err = fmt.Errorf("Get provider by id:%s error:%s", providerInfoData.Provider, err.Error())
+		log.Logger.Error("Get provider by id error", log.String("id", providerInfoData.Provider), log.Error(err))
 		rowData["errorMessage"] = err.Error()
 		return
 	}
@@ -837,43 +739,7 @@ func RegionApply(reqParam map[string]interface{}, interfaceData *models.Interfac
 		return
 	}
 	providerData := providerList[0]
-	/*
-	regionProviderInfo := models.RegionProviderData{}
-	regionProviderInfo.ProviderInfoId = providerInfoId
-	regionProviderInfo.ProviderName = providerData.Name
-	regionProviderInfo.ProviderVersion = providerData.Version
-	regionProviderInfo.SecretId = providerSecretId
-	regionProviderInfo.SecretKey = providerSecretKey
-	regionProviderInfo.SecretIdAttrName = providerData.SecretIdAttrName
-	regionProviderInfo.SecretKeyAttrName = providerData.SecretKeyAttrName
-	regionProviderInfo.RegionAttrName = providerData.RegionAttrName
 
-	regionProviderInfoByte, err := json.Marshal(regionProviderInfo)
-	if err != nil {
-		err = fmt.Errorf("Try to marshal regionProviderInfo fail: %s", err.Error())
-		log.Logger.Error("Try to marshal regionProviderInfo fail", log.Error(err))
-		rowData["errorMessage"] = err.Error()
-		return
-	}
-	providerTfContent := string(regionProviderInfoByte)
-	*/
-	/*
-	providerTfContent := "provider + \"" + providerData.Name + "\" {"
-	providerTfContent += providerData.SecretIdAttrName + " = \"" + providerSecretId + "\","
-	providerTfContent += providerData.SecretKeyAttrName + " = \"" + providerSecretKey + "\","
-	providerTfContent += providerData.RegionAttrName + " = \"" + reqParam["asset_id"].(string)
-	providerTfContent += "}"
-	 */
-
-	/*
-	enCodeproviderTfContent, encodeErr := cipher.AesEnPassword(models.Config.Auth.PasswordSeed, providerTfContent)
-	if encodeErr != nil {
-		err = fmt.Errorf("Try to encode enCodeproviderTfContent fail,%s ", encodeErr.Error())
-		log.Logger.Error("Try to encode enCodeproviderTfContent fail", log.Error(err))
-		rowData["errorMessage"] = err.Error()
-		return
-	}
-	*/
 	enCodeproviderTfContent := ""
 
 	// get source data by interfaceId and providerId
@@ -968,6 +834,157 @@ func handleApplyOrQuery(action string, reqParam map[string]interface{}, sourceDa
 	return
 }
 
+func handleDestroy(workDirPath string,
+	               sourceData *models.SourceTable,
+	               providerData *models.ProviderTable,
+	               providerInfo *models.ProviderInfoTable,
+	               regionData *models.ResourceDataTable,
+	               reqParam map[string]interface{}) (rowData map[string]interface{}, err error) {
+	rowData = make(map[string]interface{})
+	rowData["callbackParameter"] = reqParam["callbackParameter"].(string)
+	rowData["errorCode"] = "1"
+	rowData["errorMessage"] = ""
+
+	// Get resource_asset_id by resourceId
+	resourceId := reqParam["id"].(string)
+	sqlCmd := `SELECT * FROM resource_data WHERE resource_id=?`
+	paramArgs := []interface{}{resourceId}
+	var resourceDataInfoList []*models.ResourceDataTable
+	err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataInfoList)
+	if err != nil {
+		err = fmt.Errorf("Get resourceDataInfo by resource_id:%s error:%s", resourceId, err.Error())
+		log.Logger.Error("Get resourceDataInfo by resource_id error", log.String("resource_id", resourceId), log.Error(err))
+		rowData["errorMessage"] = err.Error()
+		return
+	}
+	if len(resourceDataInfoList) == 0 {
+		err = fmt.Errorf("ResourceDataInfo can not be found by resource_id:%s", resourceId)
+		log.Logger.Warn("ResourceDataInfo can not be found by resource_id", log.String("resource_id", resourceId), log.Error(err))
+		rowData["errorMessage"] = err.Error()
+		return
+	}
+	resourceData := resourceDataInfoList[0]
+	rowData["id"] = resourceId
+
+	if sourceData.TerraformUsed == "Y" {
+		_, err = os.Stat(workDirPath)
+		if err != nil {
+			if os.IsNotExist(err) {
+				err = os.MkdirAll(workDirPath, os.ModePerm)
+				if err != nil {
+					err = fmt.Errorf("Make dir: %s error: %s", workDirPath, err.Error())
+					log.Logger.Error("Make dir error", log.String("workDirPath", workDirPath), log.Error(err))
+					rowData["errorMessage"] = err.Error()
+					return
+				}
+			} else {
+				err = fmt.Errorf("Os stat dir: %s error: %s", workDirPath, err.Error())
+				log.Logger.Error("Os stat dir error", log.String("workDirPath", workDirPath), log.Error(err))
+				rowData["errorMessage"] = err.Error()
+				return
+			}
+		}
+
+		// Gen provider.tf.json
+		providerFileData := make(map[string]map[string]map[string]interface{})
+		providerFileData["provider"] = make(map[string]map[string]interface{})
+		providerFileData["provider"][providerData.Name] = make(map[string]interface{})
+		providerFileData["provider"][providerData.Name][providerData.SecretIdAttrName] = providerInfo.SecretId
+		providerFileData["provider"][providerData.Name][providerData.SecretKeyAttrName] = providerInfo.SecretKey
+		providerFileData["provider"][providerData.Name][providerData.RegionAttrName] = regionData.ResourceAssetId
+
+		providerFileContent, tmpErr := json.Marshal(providerFileData)
+		if tmpErr != nil {
+			err = fmt.Errorf("Marshal providerFileData error: %s", tmpErr.Error())
+			log.Logger.Error("Marshal providerFileData error", log.Error(err))
+			return
+		}
+		providerFilePath := workDirPath + "/provider.tf.json"
+		err = GenFile(providerFileContent, providerFilePath)
+		if err != nil {
+			err = fmt.Errorf("Gen providerFile: %s error: %s", providerFilePath, err.Error())
+			log.Logger.Error("Gen providerFile error", log.String("providerFilePath", providerFilePath), log.Error(err))
+			return
+		}
+
+		// Gen version.tf
+		terraformFilePath := models.Config.TerraformFilePath
+		if terraformFilePath[len(terraformFilePath)-1] != '/' {
+			terraformFilePath += "/"
+		}
+		if providerData.Name == "tencentcloud" {
+			versionTfFilePath := terraformFilePath + "version.tf"
+			versionTfFileContent, tmpErr := ReadFile(versionTfFilePath)
+			if tmpErr != nil {
+				err = fmt.Errorf("Read versionTfFile: %s error: %s", versionTfFilePath, tmpErr.Error())
+				log.Logger.Error("Read versionTfFile error", log.String("versionTfFilePath", versionTfFilePath), log.Error(err))
+				return
+			}
+
+			genVersionTfFilePath := workDirPath + "/version.tf"
+			err = GenFile(versionTfFileContent, genVersionTfFilePath)
+			if err != nil {
+				err = fmt.Errorf("Gen versionTfFile: %s error: %s", genVersionTfFilePath, err.Error())
+				log.Logger.Error("Gen versionTfFile error", log.String("genVersionTfFilePath", genVersionTfFilePath), log.Error(err))
+				return
+			}
+		}
+
+		sourceName := sourceData.Name
+		// Gen .tf 文件, 然后执行 terraform import cmd
+		uuid := "_" + guid.CreateGuid()
+		tfFilePath := workDirPath + "/" + sourceName + ".tf"
+		tfFileContent := "resource " + sourceName + " " + uuid + " {}"
+
+		GenFile([]byte(tfFileContent), tfFilePath)
+		err = TerraformInit(workDirPath)
+		if err != nil {
+			err = fmt.Errorf("Do TerraformInit error:%s", err.Error())
+			log.Logger.Error("Do TerraformInit error", log.Error(err))
+			rowData["errorMessage"] = err.Error()
+			return
+		}
+		resourceAssetId := resourceData.ResourceAssetId
+		err = TerraformImport(workDirPath, sourceName+"."+uuid, resourceAssetId)
+		if err != nil {
+			err = fmt.Errorf("Do TerraformImport error:%s", err.Error())
+			log.Logger.Error("Do TerraformImport error", log.Error(err))
+			rowData["errorMessage"] = err.Error()
+			return
+		}
+
+		// clear tf file
+		os.Truncate(tfFilePath, 0)
+
+		err = TerraformDestroy(workDirPath)
+		if err != nil {
+			err = fmt.Errorf("Do TerraformDestroy error: %s", err.Error())
+			log.Logger.Error("Do TerraformDestroy error", log.Error(err))
+			rowData["errorMessage"] = err.Error()
+			return
+		}
+
+		// Del provider file
+		err = DelFile(providerFilePath)
+		if err != nil {
+			err = fmt.Errorf("Do delete provider file error: %s", err.Error())
+			log.Logger.Error("Do delete provider file error", log.Error(err))
+			rowData["errorMessage"] = err.Error()
+		}
+	}
+
+	// delet resource_data item
+	_, err = x.Exec("DELETE FROM resource_data WHERE id=?", resourceData.Id)
+	if err != nil {
+		err = fmt.Errorf("Delete resource data by id:%s error: %s", resourceData.Id, err.Error())
+		log.Logger.Error("Delete resource data by id error", log.String("id", resourceData.Id), log.Error(err))
+		rowData["errorMessage"] = err.Error()
+	}
+
+	rowData["errorCode"] = "0"
+	return
+}
+
 func TerraformOperation(plugin string, action string, reqParam map[string]interface{}) (rowData map[string]interface{}, err error) {
 	rowData = make(map[string]interface{})
 	rowData["callbackParameter"] = reqParam["callbackParameter"].(string)
@@ -992,7 +1009,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	var interfaceInfoList []*models.InterfaceTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&interfaceInfoList)
 	if err != nil {
-		err = fmt.Errorf("Get interfaceInfo error:%s", err.Error())
+		err = fmt.Errorf("Get interfaceInfo by plugin:%s and name:%s error:%s", plugin, action, err.Error())
 		log.Logger.Error("Get interfaceInfo error", log.String("plugin", plugin), log.String("name", action), log.Error(err))
 		rowData["errorMessage"] = err.Error()
 		return
@@ -1012,7 +1029,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 
 	// Get regionInfo by regionId
 	regionId := reqParam["region_id"].(string)
-	sqlCmd = `SELECT * FROM resource_data WHERE region_id=?`
+	sqlCmd = `SELECT * FROM resource_data WHERE resource_id=?`
 	paramArgs = []interface{}{regionId}
 	var resourceDataInfoList []*models.ResourceDataTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataInfoList)
@@ -1028,42 +1045,17 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 		rowData["errorMessage"] = err.Error()
 		return
 	}
-	resourceData := resourceDataInfoList[0]
-	/*
-	decodeProviderInfoStr, decodeErr := cipher.AesDePassword(models.Config.Auth.PasswordSeed, resourceData.TfFile)
-	if decodeErr != nil {
-		err = fmt.Errorf("Try to decode resourceData tfFile fail: %s", decodeErr.Error())
-		log.Logger.Error("Try to decode resourceData tfFile fail", log.Error(decodeErr))
-		rowData["errorMessage"] = err.Error()
-		return
-	}
-
-	var regionProviderData models.RegionProviderData
-	err = json.Unmarshal([]byte(decodeProviderInfoStr), &regionProviderData)
-	if err != nil {
-		err = fmt.Errorf("Unmarshal decodeProviderInfoStr fail: %s", err.Error())
-		log.Logger.Error("Unmarshal decodeProviderInfoStr fail", log.Error(err))
-		rowData["errorMessage"] = err.Error()
-		return
-	}
-	*/
-	/*
-	providerInfoData := models.ProviderInfoTable{Id: regionProviderData.ProviderInfoId, SecretId: regionProviderData.SecretId, SecretKey: regionProviderData.SecretKey}
-	providerData := models.ProviderTable{Name:regionProviderData.ProviderName, Version: regionProviderData.ProviderVersion,
-		SecretIdAttrName: regionProviderData.SecretIdAttrName, SecretKeyAttrName: regionProviderData.SecretKeyAttrName,
-		RegionAttrName: regionProviderData.RegionAttrName}
-	*/
+	regionData := resourceDataInfoList[0]
 
 	// Get providerInfo data
-	// providerInfoId := regionProviderData.ProviderInfoId
 	providerInfoId := reqParam["provider_info"].(string)
 	sqlCmd = `SELECT * FROM provider_info WHERE id=?`
 	paramArgs = []interface{}{providerInfoId}
 	var providerInfoList []*models.ProviderInfoTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&providerInfoList)
 	if err != nil {
-		err = fmt.Errorf("Get providerInfo error:%s", err.Error())
-		log.Logger.Error("Get providerInfo error", log.String("providerInfoId", providerInfoId), log.Error(err))
+		err = fmt.Errorf("Get providerInfo by id:%s error:%s", providerInfoId, err.Error())
+		log.Logger.Error("Get providerInfo by id error", log.String("id", providerInfoId), log.Error(err))
 		rowData["errorMessage"] = err.Error()
 		return
 	}
@@ -1083,7 +1075,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	}
 	providerSecretKey, decodeErr := cipher.AesDePassword(models.Config.Auth.PasswordSeed, providerInfoData.SecretKey)
 	if decodeErr != nil {
-		err = fmt.Errorf("Try to decode secretId fail: %s", decodeErr.Error())
+		err = fmt.Errorf("Try to decode secretKey fail: %s", decodeErr.Error())
 		log.Logger.Error("Try to decode secretKey fail", log.Error(decodeErr))
 		rowData["errorMessage"] = err.Error()
 		return
@@ -1098,8 +1090,8 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	var providerList []*models.ProviderTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&providerList)
 	if err != nil {
-		err = fmt.Errorf("Get provider error:%s", err.Error())
-		log.Logger.Error("Get provider error", log.String("providerId", providerId), log.Error(err))
+		err = fmt.Errorf("Get provider by id:%s error:%s", providerId, err.Error())
+		log.Logger.Error("Get provider by id error", log.String("id", providerId), log.Error(err))
 		rowData["errorMessage"] = err.Error()
 		return
 	}
@@ -1110,29 +1102,25 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 		return
 	}
 	providerData := providerList[0]
-	// providerVersion := providerList[0].Version
 
-	// Get source list by interfaceId and provider
+	// Get sourceData by interface and provider
 	sqlCmd = `SELECT * FROM source WHERE interface=? AND provider=?`
 	paramArgs = []interface{}{interfaceData.Id, providerData.Id}
 	var sourceList []*models.SourceTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&sourceList)
 	if err != nil {
-		err = fmt.Errorf("Get source list by interface:%s and provider:%s error:%s", interfaceData.Id, providerData.Id, err.Error())
-		log.Logger.Error("Get source list by interface and provider error", log.Error(err))
+		err = fmt.Errorf("Get source data by interface:%s and provider:%s error:%s", interfaceData.Id, providerData.Id, err.Error())
+		log.Logger.Error("Get source data by interface and provider error", log.String("interface", interfaceData.Id), log.String("provider", providerData.Id), log.Error(err))
 		rowData["errorMessage"] = err.Error()
 		return
 	}
 	if len(sourceList) == 0 {
-		err = fmt.Errorf("Source list can not be found by interface:%s and provider:%s", interfaceData.Id, providerData.Id)
-		log.Logger.Warn("Source list can not be found by interface and provider", log.String("interface", interfaceData.Id), log.String("provider", providerData.Id), log.Error(err))
+		err = fmt.Errorf("Source data can not be found by interface:%s and provider:%s", interfaceData.Id, providerData.Id)
+		log.Logger.Warn("Source data can not be found by interface and provider", log.String("interface", interfaceData.Id), log.String("provider", providerData.Id), log.Error(err))
 		rowData["errorMessage"] = err.Error()
 		return
 	}
 	sourceData := sourceList[0]
-
-	// Get region data
-	regionData := resourceData
 
 	terraformFilePath := models.Config.TerraformFilePath
 	if terraformFilePath[len(terraformFilePath)-1] != '/' {
@@ -1144,12 +1132,6 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	}
 	workDirPath := terraformFilePath + providerData.Name + "/" + regionData.ResourceAssetId + "/" + plugin + "/" +
 		reqParam["requestId"].(string) + "/" + dirPathResourceId + "/" + sourceData.Name
-
-	//workDirPath := terraformFilePath + providerData.Name + "/" + regionData.ResourceAssetId + "/" + plugin + "/" +
-	//	reqParam["requestId"].(string) + "/" + dirPathResourceId
-	//if action != "destroy" {
-	//	workDirPath += "/" + sourceData.Name
-	//}
 
 	if action == "apply" || action == "query" {
 		var retOutput map[string]interface{}
@@ -1171,36 +1153,16 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 			rowData[k] = v
 		}
 	} else if action == "destroy" {
-		// init version
-		// Get resource_asset_id by resourceId
-		resourceId := reqParam["id"].(string)
-		sqlCmd = `SELECT * FROM resource_data WHERE resource_id=?`
-		paramArgs = []interface{}{resourceId}
-		var resourceDataInfoList []*models.ResourceDataTable
-		err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataInfoList)
-		if err != nil {
-			err = fmt.Errorf("Get resourceDataInfo by resource_id:%s error:%s", resourceId, err.Error())
-			log.Logger.Error("Get resourceDataInfo by resource_id error", log.String("resource_id", resourceId), log.Error(err))
+		retOutput, tmpErr := handleDestroy(workDirPath, sourceData, providerData, providerInfoData, regionData, reqParam)
+		if tmpErr != nil {
+			err = fmt.Errorf("Handle Destroy error: %s", tmpErr.Error())
+			log.Logger.Error("Handle Destroy error", log.Error(err))
 			rowData["errorMessage"] = err.Error()
 			return
 		}
-		if len(resourceDataInfoList) == 0 {
-			err = fmt.Errorf("ResourceDataInfo can not be found by resource_id:%s", resourceId)
-			log.Logger.Warn("ResourceDataInfo can not be found by resource_id", log.String("resource_id", resourceId), log.Error(err))
-			rowData["errorMessage"] = err.Error()
-			return
+		for k, v := range retOutput {
+			rowData[k] = v
 		}
-		resourceData := resourceDataInfoList[0]
-		err = TerraformDestroy(workDirPath, sourceData, providerData, providerInfoData, regionData, resourceData.ResourceAssetId)
-		if err != nil {
-			err = fmt.Errorf("Handle TerraformDestroy error: %s", err.Error())
-			log.Logger.Error("Handle TerraformDestroy error", log.Error(err))
-			rowData["errorMessage"] = err.Error()
-			return
-		}
-		// TODO del item in resource_data
-		_, err = x.Exec("DELETE FROM resource_data WHERE id=?", resourceData.Id)
-		rowData["id"] = resourceData.ResourceId
 		rowData["errorCode"] = "0"
 	} else {
 		err = fmt.Errorf("Action: %s is inValid", action)
@@ -1210,64 +1172,49 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	return
 }
 
-func convertData(parameterId string, source string, reqParam map[string]interface{}) (arg interface{}, err error) {
-	sqlCmd := `SELECT * FROM parameter WHERE id=?`
-	paramArgs := []interface{}{}
-	paramArgs = append(paramArgs, parameterId)
-	var parameterList []*models.ParameterTable
-	err = x.SQL(sqlCmd, paramArgs...).Find(&parameterList)
-	if err != nil {
-		log.Logger.Error("Get parameter data error", log.String("parameterId", parameterId), log.Error(err))
+func convertData(parameterData *models.ParameterTable, relativeSourceId string, reqParam map[string]interface{}) (arg interface{}, err error) {
+	if _, ok := reqParam[parameterData.Name]; !ok {
 		return
 	}
-	if len(parameterList) == 0 {
-		err = fmt.Errorf("Parameter can not be found by id:%s", parameterId)
-		log.Logger.Warn("Parameter can not be found by id", log.String("id", parameterId), log.Error(err))
-		return
+	var resourceIdList []string
+	if parameterData.Multiple == "Y" {
+		reqParamResourceIds := reqParam[parameterData.Name].([]interface{})
+		for _, v := range reqParamResourceIds {
+			resourceIdList = append(resourceIdList, v.(string))
+		}
+	} else {
+		resourceIdList = append(resourceIdList, reqParam[parameterData.Name].(string))
 	}
-	parameterData := parameterList[0]
 
-	sqlCmd = `SELECT * FROM resource_data WHERE resource_id=?`
-	resource_id := ""
-	if _, ok := reqParam[parameterData.Name]; ok {
-		resource_id = reqParam[parameterData.Name].(string)
-	}
-	paramArgs = []interface{}{resource_id}
+	resourceIdsStr := strings.Join(resourceIdList, "','")
+	sqlCmd := "SELECT * FROM resource_data WHERE resource=? AND resource_id IN ('" + resourceIdsStr + "')"
 	var resourceDataList []*models.ResourceDataTable
+	paramArgs := []interface{}{relativeSourceId}
 	err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataList)
 	if err != nil {
-		err = fmt.Errorf("Get resource_data error: %s", err.Error())
-		log.Logger.Error("Get resource_data error", log.String("source", source), log.String("resource_id", resource_id), log.Error(err))
+		err = fmt.Errorf("Get resource data by resource:%s and resource_id:%s error: %s", relativeSourceId, resourceIdsStr, err.Error())
+		log.Logger.Error("Get resource data by resource and resource_id error", log.String("resource", relativeSourceId), log.String("resource_id", resourceIdsStr), log.Error(err))
 		return
 	}
 	if len(resourceDataList) == 0 {
-		err = fmt.Errorf("Resource_data can not be found by resource_id:%s", resource_id)
-		log.Logger.Warn("Resource_data can not be found by resource_id", log.String("resource_id", resource_id), log.Error(err))
+		err = fmt.Errorf("Resource_data can not be found by resource:%s and resource_id:%s", relativeSourceId, resourceIdsStr)
+		log.Logger.Warn("Resource_data can not be found by resource and resource_id", log.String("resource", relativeSourceId), log.String("resource_id", resourceIdsStr), log.Error(err))
 		return
 	}
-	arg = resourceDataList[0].ResourceAssetId
+
+	if parameterData.Multiple == "Y" {
+		tmpRes := []string{}
+		for i := range resourceDataList {
+			tmpRes = append(tmpRes, resourceDataList[i].ResourceAssetId)
+		}
+		arg = tmpRes
+	} else {
+		arg = resourceDataList[0].ResourceAssetId
+	}
 	return
 }
 
-func reverseConvertData(parameterData *models.ParameterTable, source string, tfstateVal interface{}) (argKey string, argVal interface{}, err error) {
-	/*
-	sqlCmd := `SELECT * FROM parameter WHERE id=?`
-	paramArgs := []interface{}{}
-	paramArgs = append(paramArgs, parameterId)
-	var parameterList []*models.ParameterTable
-	err = x.SQL(sqlCmd, paramArgs...).Find(&parameterList)
-	if err != nil {
-		log.Logger.Error("Get parameter data error", log.String("parameterId", parameterId), log.Error(err))
-		return
-	}
-	if len(parameterList) == 0 {
-		err = fmt.Errorf("Parameter can not be found by id:%s", parameterId)
-		log.Logger.Warn("Parameter can not be found by id", log.String("id", parameterId), log.Error(err))
-		return
-	}
-	parameterData := parameterList[0]
-	 */
-
+func reverseConvertData(parameterData *models.ParameterTable, relativeSourceId string, tfstateVal interface{}) (argKey string, argVal interface{}, err error) {
 	var resourceAssetIds []string
 	if parameterData.Multiple == "Y" {
 		tfstateAssetIds := tfstateVal.([]interface{})
@@ -1278,20 +1225,18 @@ func reverseConvertData(parameterData *models.ParameterTable, source string, tfs
 		resourceAssetIds = append(resourceAssetIds, tfstateVal.(string))
 	}
 	resourceAssetIdsStr := strings.Join(resourceAssetIds, "','")
-	// sqlCmd := `SELECT * FROM resource_data WHERE resource_asset_id=?`
-	// paramArgs := []interface{}{tfstateVal}
-	sqlCmd := "SELECT * FROM resource_data WHERE resource_asset_id IN ('" + resourceAssetIdsStr + "')"
+	sqlCmd := "SELECT * FROM resource_data WHERE resource=? AND resource_asset_id IN ('" + resourceAssetIdsStr + "')"
+	paramArgs := []interface{}{relativeSourceId}
 	var resourceDataList []*models.ResourceDataTable
-	// err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataList)
-	err = x.SQL(sqlCmd).Find(&resourceDataList)
+	err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataList)
 	if err != nil {
-		err = fmt.Errorf("Get resource_data by resource_asset_id:%s error:%s", resourceAssetIdsStr, err.Error())
-		log.Logger.Error("Get resource_data error", log.String("resource_asset_id", resourceAssetIdsStr), log.Error(err))
+		err = fmt.Errorf("Get resource data by resource:%s and resource_asset_id:%s error:%s", relativeSourceId, resourceAssetIdsStr, err.Error())
+		log.Logger.Error("Get resource data by resource and resource_asset_id error", log.String("resource", relativeSourceId), log.String("resource_asset_id", resourceAssetIdsStr), log.Error(err))
 		return
 	}
 	if len(resourceDataList) == 0 {
-		err = fmt.Errorf("Resource_data can not be found by resource_asset_id:%s", resourceAssetIdsStr)
-		log.Logger.Warn("Resource_data can not be found by resource_asset_id", log.String("resource_asset_id", resourceAssetIdsStr), log.Error(err))
+		err = fmt.Errorf("Resource data can not be found by resource:%s and resource_asset_id:%s", relativeSourceId, resourceAssetIdsStr)
+		log.Logger.Warn("Resource data can not be found by resource and resource_asset_id", log.String("resource", relativeSourceId), log.String("resource_asset_id", resourceAssetIdsStr), log.Error(err))
 		return
 	}
 	argKey = parameterData.Name
@@ -1396,6 +1341,77 @@ func reverseConvertTemplate(parameterId string, providerName string, tfstateVal 
 	return
 }
 
+func convertAttr(parameterData *models.ParameterTable, tfArgumentData *models.TfArgumentTable, reqParam map[string]interface{}) (arg interface{}, err error) {
+	relativeResourceIds := []string{}
+	if parameterData.Multiple == "Y" {
+		tmpData := reqParam[parameterData.Name].([]interface{})
+		for i := range tmpData {
+			relativeResourceIds = append(relativeResourceIds, tmpData[i].(string))
+		}
+	} else {
+		relativeResourceIds = append(relativeResourceIds, reqParam[parameterData.Name].(string))
+	}
+
+	sqlCmd := `SELECT * FROM tfstate_attribute WHERE id=?`
+	paramArgs := []interface{}{tfArgumentData.RelativeTfstateAttribute}
+	var tfstateAttirbuteList []*models.TfstateAttributeTable
+	err = x.SQL(sqlCmd, paramArgs...).Find(&tfstateAttirbuteList)
+	if err != nil {
+		err = fmt.Errorf("Get tfstateAttribute data by id:%s error: %s", tfArgumentData.RelativeTfstateAttribute, err.Error())
+		log.Logger.Error("Get tfstateAttribute data by id error", log.String("id", tfArgumentData.RelativeTfstateAttribute), log.Error(err))
+		return
+	}
+	if len(tfstateAttirbuteList) == 0 {
+		err = fmt.Errorf("TfstateAttribute data can not be found by id:%s", tfArgumentData.RelativeTfstateAttribute)
+		log.Logger.Warn("TfstateAttribute data can not be found by id", log.String("id", tfArgumentData.RelativeTfstateAttribute), log.Error(err))
+		return
+	}
+	tfstateAttirbuteData := tfstateAttirbuteList[0]
+
+	result := []interface{}{}
+	for i := range relativeResourceIds {
+		sqlCmd := `SELECT * FROM resource_data WHERE resource=? AND resource_id=?`
+		paramArgs := []interface{}{tfArgumentData.RelativeSource, relativeResourceIds[i]}
+		var resourceDataList []*models.ResourceDataTable
+		err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataList)
+		if err != nil {
+			err = fmt.Errorf("Get resource data by source:%s and resource_id:%s error: %s", tfArgumentData.RelativeSource, relativeResourceIds[i], err.Error())
+			log.Logger.Error("Get resource data by source and resource_id error", log.String("source", tfArgumentData.RelativeSource), log.String("resource_id", relativeResourceIds[i]), log.Error(err))
+			return
+		}
+		if len(resourceDataList) == 0 {
+			err = fmt.Errorf("ResourceData can not be found by source:%s and resource_id:%s", tfArgumentData.RelativeSource, relativeResourceIds[i])
+			log.Logger.Warn("ResourceData can not be found by source and resource_id", log.String("source", tfArgumentData.RelativeSource), log.String("resource_id", relativeResourceIds[i]), log.Error(err))
+			return
+		}
+		resourceData := resourceDataList[0]
+
+		tfstateFileData := resourceData.TfStateFile
+		var unmarshalTfstateFileData models.TfstateFileData
+		err = json.Unmarshal([]byte(tfstateFileData), &unmarshalTfstateFileData)
+		if err != nil {
+			err = fmt.Errorf("Unmarshal tfstate file data error:%s", err.Error())
+			log.Logger.Error("Unmarshal tfstate file data error", log.Error(err))
+			return
+		}
+		var tfstateFileAttributes map[string]interface{}
+		tfstateFileAttributes = unmarshalTfstateFileData.Resources[0].Instances[0].Attributes
+		result = append(result, tfstateFileAttributes[tfstateAttirbuteData.Name])
+	}
+
+	if parameterData.Multiple == "Y" {
+		tmpRes := []string{}
+		for i := range result {
+			tmpRes = append(tmpRes, result[i].(string))
+		}
+		arg = tmpRes
+	} else {
+		arg = result[0].(string)
+	}
+	return
+}
+
+/*
 func convertAttr(tfstateAttributeId string, sourceIdList map[string]bool, handlingSourceIds map[string]bool, providerName string, reqParam map[string]interface{}) (tfArguments map[string]interface{}, err error) {
 	sqlCmd := `SELECT * FROM tfstate_attribute WHERE id=?`
 	paramArgs := []interface{}{}
@@ -1468,6 +1484,7 @@ func convertAttr(tfstateAttributeId string, sourceIdList map[string]bool, handli
 	}
 	return
 }
+ */
 
 func convertContext(parameterId string, tfArgument *models.TfArgumentTable, reqParam map[string]interface{}) (arg interface{}, err error) {
 	sqlCmd := `SELECT * FROM parameter WHERE id=?`
@@ -1527,9 +1544,14 @@ func convertDirect(parameterId string, defaultValue string, reqParam map[string]
 		return
 	}
 	parameterData := parameterList[0]
-	if reqParam[parameterData.Name] == "null" {
+	reqArg := reqParam[parameterData.Name]
+	if reqArg == nil {
+		return
+	}
+
+	if parameterData.DataType == "string" && reqArg.(string) == "null" {
 		arg = "null"
-	} else if reqParam[parameterData.Name] == "" || reqParam[parameterData.Name] == "0" || reqParam[parameterData.Name] == "[]" {
+	} else if parameterData.DataType == "string" && reqArg.(string) == "" || parameterData.DataType == "int" && reqArg.(float64) == 0 {
 		arg = defaultValue
 	} else {
 		arg = reqParam[parameterData.Name]
