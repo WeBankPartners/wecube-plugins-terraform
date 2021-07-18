@@ -36,11 +36,12 @@
       </Row>
     </div>
     <!-- 配置区 -->
-    <div style="margin-top: 36px; text-align: center;width:1800px;overflow:auto">
+    <div style="margin-top: 36px; text-align: center;width:1800px;overflow:auto;max-height:500px">
       <header>
         <div style="font-size: 0">
           <div class="table-title title-width-level2">
             source
+            <Button @click="addSource" type="primary" ghost size="small" icon="ios-add"></Button>
           </div>
           <div class="table-title title-width-level1">
             {{ $t('t_name') }}
@@ -110,7 +111,7 @@
           </div>
         </div>
       </header>
-      <div :style="{ 'max-height': MODALHEIGHT + 'px', overflow: 'auto' }">
+      <div>
         <div
           v-for="(source, sourceIndex) in sourceInfo"
           :key="source.id"
@@ -132,7 +133,7 @@
               </span>
             </div>
             <div class="style-widthout-height" style="width:120px;vertical-align: top;border:none">
-              <div class="style-widthout-height" style="font-size: 0;margin-left:-1px;border:none">
+              <div class="style-widthout-height" style="font-size: 0;margin-left:0px;border:none">
                 <div
                   class="style-widthout-height"
                   :style="{ width: '120px', 'line-height': source.args.length * 39 + 'px' }"
@@ -150,7 +151,7 @@
               </div>
             </div>
           </div>
-          <div style="display:inline-block;vertical-align: top;margin-top:1px;margin-letf:-1px;">
+          <div style="display:inline-block;vertical-align: top;margin-top:1px;margin-left:-1px;">
             <div>
               <div style="margin-top: -1px;" v-for="(item, argIndex) in source.args" :key="item.id">
                 <template>
@@ -233,7 +234,7 @@
                   </div>
                   <div class="table-col title-width-level1">
                     <Select
-                      v-model="item.source"
+                      v-model="item.relativeSource"
                       size="small"
                       :disabled="!['attr'].includes(item.convertWay)"
                       clearable
@@ -387,7 +388,7 @@
                   </div>
                   <div class="table-col title-width-level1">
                     <Select
-                      v-model="item.source"
+                      v-model="item.relativeSource"
                       size="small"
                       :disabled="!['attr'].includes(item.convertWay)"
                       clearable
@@ -444,12 +445,28 @@
         </div>
       </div>
     </div>
+    <Modal
+      v-model="newSource.isShow"
+      :title="$t('t_add') + $t('t_source')"
+      @on-ok="confirmSource"
+      @on-cancel="confirmProvider.isShow = false"
+    >
+      <Form inline :label-width="80">
+        <FormItem :label="$t('t_name')">
+          <Input type="text" v-model="newSource.form.name" style="width:400px"></Input>
+        </FormItem>
+        <FormItem label="resourceAssetIdAttribute">
+          <Input type="text" v-model="newSource.form.resourceAssetIdAttribute" style="width:400px"></Input>
+        </FormItem>
+      </Form>
+    </Modal>
   </div>
 </template>
 
 <script>
 import {
   getInterfaceByPlugin,
+  addSource,
   getProviderList,
   getArgBySource,
   getTemplateValue,
@@ -517,6 +534,16 @@ export default {
         type: '',
         updateTime: '',
         updateUser: ''
+      },
+      newSource: {
+        isShow: false,
+        isAdd: true,
+        form: {
+          name: '',
+          plugin: '',
+          provider: '',
+          resourceAssetIdAttribute: ''
+        }
       }
     }
   },
@@ -533,6 +560,28 @@ export default {
     //   })
     //   console.log(item)
     // },
+    addSource () {
+      this.newSource = {
+        isShow: true,
+        form: {
+          name: '',
+          plugin: this.pluginOptions.find(p => p.id === this.plugin).name,
+          interface: this.currentInterface,
+          provider: this.providerList.find(p => p.id === this.currentProvider).name,
+          resourceAssetIdAttribute: ''
+        }
+      }
+    },
+    async confirmSource () {
+      const { statusCode } = await addSource([this.newSource.form])
+      if (statusCode === 'OK') {
+        this.$Notice.success({
+          title: 'Successful',
+          desc: 'Successful'
+        })
+        this.getSource()
+      }
+    },
     addParams (source, type) {
       source[type].push(JSON.parse(JSON.stringify(this.emptyParams)))
     },
@@ -547,19 +596,16 @@ export default {
     },
     async openDefaultValue (val, interfaceParamsWithTemplate) {
       const find = this.interfaceInputParamsWithTemplate.find(ip => ip.id === val.parameter)
-      console.log(find)
       if (find) {
         const { statusCode, data } = await getTemplateValue(find.template)
         if (statusCode === 'OK') {
           const find = data.filter(d => d.value === val.defaultValue)
-          console.log(find)
           if (find.length === 0) {
             data.push({
               value: val.defaultValue
             })
           }
           val.defaultValueOptions = data
-          console.log(val.defaultValueOptions)
         }
       }
     },
@@ -594,8 +640,6 @@ export default {
     },
     async updateArg (item, index) {
       const defaultValue = this.$refs.sss[index].query
-      console.log(defaultValue)
-      console.log(item)
       if (defaultValue) {
         item.defaultValue = defaultValue
       }
@@ -704,25 +748,43 @@ export default {
       this.getInterfaceParamter()
       const arg = await getArgBySource(source.id)
       if (arg.statusCode === 'OK') {
-        const argData = sortedArgument(arg.data)
-        source.argsObjetcNameOptions = argData.filter(argSingle => argSingle.type === 'object')
-        source.args = argData.map(ar => {
-          ar.relativeValueOptions = []
-          ar.defaultValueOptions = []
-          ar.sourceAttr = []
-          return ar
-        })
+        if (arg.data.length === 0) {
+          let tmp = JSON.parse(JSON.stringify(this.emptyParams))
+          tmp.source = source.id
+          tmp.relativeValueOptions = []
+          tmp.defaultValueOptions = []
+          tmp.sourceAttr = []
+          source.args.push(tmp)
+        } else {
+          const argData = sortedArgument(arg.data)
+          source.argsObjetcNameOptions = argData.filter(argSingle => argSingle.type === 'object')
+          source.args = argData.map(ar => {
+            ar.relativeValueOptions = []
+            ar.defaultValueOptions = []
+            ar.sourceAttr = []
+            return ar
+          })
+        }
       }
       const attr = await getAttrBySource(source.id)
       if (attr.statusCode === 'OK') {
-        const attrData = sortedArgument(attr.data)
-        source.attrsObjetcNameOptions = attrData.filter(attrSingle => attrSingle.type === 'object')
-        source.attrs = attrData.map(at => {
-          at.relativeValueOptions = []
-          at.defaultValueOptions = []
-          at.sourceAttr = []
-          return at
-        })
+        if (attr.data.length === 0) {
+          let tmp = JSON.parse(JSON.stringify(this.emptyParams))
+          tmp.source = source.id
+          tmp.relativeValueOptions = []
+          tmp.defaultValueOptions = []
+          tmp.sourceAttr = []
+          source.attrs.push(tmp)
+        } else {
+          const attrData = sortedArgument(attr.data)
+          source.attrsObjetcNameOptions = attrData.filter(attrSingle => attrSingle.type === 'object')
+          source.attrs = attrData.map(at => {
+            at.relativeValueOptions = []
+            at.defaultValueOptions = []
+            at.sourceAttr = []
+            return at
+          })
+        }
       }
     },
     async getSourceByProvider () {

@@ -37,5 +37,6 @@
   "t_version": "版本",
   "t_region_attr_name": "地域属性名称",
   "t_secretKey_attr_name": "秘钥Key属性名称",
-  "t_secretId_attr_name": "秘钥Id属性名称"
+  "t_secretId_attr_name": "秘钥Id属性名称",
+  "t_source": "资源"
 }

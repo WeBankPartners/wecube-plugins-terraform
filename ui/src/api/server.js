@@ -35,6 +35,7 @@ export const deleteParameter = id => req.delete(`/parameters?ids=${id}`)
 
 export const getSourceByfilter = (interfaceId, providerId) =>
   req.get(`/sources?interfaceId=${interfaceId}&providerId=${providerId}`)
+export const addSource = data => req.post(`/sources`, data)
 export const getSourceByProvider = providerId => req.get(`/sources?providerId=${providerId}`)
 export const getArgBySource = sourceId => req.get(`/tf_arguments?sourceId=${sourceId}`)
 export const updateArgs = data => req.post(`/tf_arguments`, data)
