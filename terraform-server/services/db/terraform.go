@@ -311,14 +311,14 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 			// search resource_data table，get resource_asset_id by resource_id and resource(which is relative_source column in tf_argument table )
 			arg, err = convertData(parameterData, tfArgumentList[i].RelativeSource, reqParam)
 		case models.ConvertWay["Template"]:
-			arg, err = convertTemplate(tfArgumentList[i].Parameter, providerData.Name, reqParam)
-		case models.ConvertWay["Context"]:
+			arg, err = convertTemplate(parameterData, providerData, reqParam)
+		case models.ConvertWay["ContextData"]:
 			arg, err = convertContext(tfArgumentList[i].RelativeParameter, tfArgumentList[i], reqParam)
 		case models.ConvertWay["Attr"]:
 			// search resouce_data table by relative_source and 输入的值, 获取 tfstat_file 字段内容,找到relative_tfstate_attribute id(search tfstate_attribute table) 对应的 name, 获取其在 tfstate_file 中的值
 			arg, err = convertAttr(parameterData, tfArgumentList[i], reqParam)
 		case models.ConvertWay["Direct"]:
-			arg, err = convertDirect(tfArgumentList[i].Parameter, tfArgumentList[i].DefaultValue, reqParam)
+			arg, err = convertDirect(parameterData, tfArgumentList[i].DefaultValue, reqParam)
 		}
 
 		// handle tfArgument that is not in tf.json file
@@ -454,7 +454,7 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 		terraformFilePath += "/"
 	}
 	if providerData.Name == "tencentcloud" {
-		versionTfFilePath := terraformFilePath + "version.tf"
+		versionTfFilePath := terraformFilePath + "versiontf/" + providerData.Name + "/version.tf"
 		versionTfFileContent, tmpErr := ReadFile(versionTfFilePath)
 		if tmpErr != nil {
 			err = fmt.Errorf("Read versionTfFile: %s error: %s", versionTfFilePath, tmpErr.Error())
@@ -473,8 +473,30 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 		}
 	}
 
+	// Gen softlink of terraform provider file
+	targetTerraformProviderPath := dirPath + "/" + models.TerraformProviderPathDiffMap[providerData.Name] + providerData.Version + "/" + models.Config.TerraformProviderOsArch
+
+	_, err = os.Stat(targetTerraformProviderPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			terraformProviderPath := terraformFilePath + "/" + providerData.Name + "/" + providerData.Version + "/" + models.Config.TerraformProviderOsArch
+			err = os.Symlink(terraformProviderPath, targetTerraformProviderPath)
+			if err != nil {
+				err = fmt.Errorf("Make soft link : %s error: %s", targetTerraformProviderPath, err.Error())
+				log.Logger.Error("Make soft link error", log.String("softLink", targetTerraformProviderPath), log.Error(err))
+				retOutput["errorMessage"] = err.Error()
+				return
+			}
+		} else {
+			err = fmt.Errorf("Os stat dir: %s error: %s", targetTerraformProviderPath, err.Error())
+			log.Logger.Error("Os stat dir error", log.String("targetTerraformProviderPath", targetTerraformProviderPath), log.Error(err))
+			retOutput["errorMessage"] = err.Error()
+			return
+		}
+	}
+
 	/*
-	// terraform import
+	// terraform import when assetId has value
 	err = TerraformImport(dirPath, address, resourceId)
 	if err != nil {
 		err = fmt.Errorf("Do TerraformImport error:%s", err.Error())
@@ -584,8 +606,8 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 					case models.ConvertWay["Data"]:
 						outArgKey, outArgVal, err = reverseConvertData(v, tfstateAttr.Source, tfstateOutParamVal)
 					case models.ConvertWay["Template"]:
-						outArgKey, outArgVal, err = reverseConvertTemplate(tfstateAttr.Parameter, providerData.Name, tfstateOutParamVal)
-					case models.ConvertWay["Context"]:
+						outArgKey, outArgVal, err = reverseConvertTemplate(v, providerData, tfstateOutParamVal)
+					case models.ConvertWay["ContextData"]:
 						outArgKey, outArgVal, err = reverseConvertContext(tfstateAttr.RelativeParameter, tfstateOutParamVal)
 					case models.ConvertWay["Direct"]:
 						// outArgKey, outArgVal, err = reverseConvertDirect(tfstateAttr.Parameter, tfstateOutParamVal)
@@ -642,8 +664,8 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 						case models.ConvertWay["Data"]:
 							outArgKey, outArgVal, err = reverseConvertData(v, tfstateAttr.Source, tfstateOutParamVal)
 						case models.ConvertWay["Template"]:
-							outArgKey, outArgVal, err = reverseConvertTemplate(tfstateAttr.Parameter, providerData.Name, tfstateOutParamVal)
-						case models.ConvertWay["Context"]:
+							outArgKey, outArgVal, err = reverseConvertTemplate(v, providerData, tfstateOutParamVal)
+						case models.ConvertWay["ContextData"]:
 							outArgKey, outArgVal, err = reverseConvertContext(tfstateAttr.RelativeParameter, tfstateOutParamVal)
 						case models.ConvertWay["Direct"]:
 							// outArgKey, outArgVal, err = reverseConvertDirect(tfstateAttr.Parameter, tfstateOutParamVal)
@@ -913,7 +935,7 @@ func handleDestroy(workDirPath string,
 			terraformFilePath += "/"
 		}
 		if providerData.Name == "tencentcloud" {
-			versionTfFilePath := terraformFilePath + "version.tf"
+			versionTfFilePath := terraformFilePath + "versiontf/" + providerData.Name + "/version.tf"
 			versionTfFileContent, tmpErr := ReadFile(versionTfFilePath)
 			if tmpErr != nil {
 				err = fmt.Errorf("Read versionTfFile: %s error: %s", versionTfFilePath, tmpErr.Error())
@@ -926,6 +948,28 @@ func handleDestroy(workDirPath string,
 			if err != nil {
 				err = fmt.Errorf("Gen versionTfFile: %s error: %s", genVersionTfFilePath, err.Error())
 				log.Logger.Error("Gen versionTfFile error", log.String("genVersionTfFilePath", genVersionTfFilePath), log.Error(err))
+				return
+			}
+		}
+
+		// Gen softlink of terraform provider file
+		targetTerraformProviderPath := workDirPath + "/" + models.TerraformProviderPathDiffMap[providerData.Name] + providerData.Version + "/" + models.Config.TerraformProviderOsArch
+
+		_, err = os.Stat(targetTerraformProviderPath)
+		if err != nil {
+			if os.IsNotExist(err) {
+				terraformProviderPath := terraformFilePath + "/" + providerData.Name + "/" + providerData.Version + "/" + models.Config.TerraformProviderOsArch
+				err = os.Symlink(terraformProviderPath, targetTerraformProviderPath)
+				if err != nil {
+					err = fmt.Errorf("Make soft link : %s error: %s", targetTerraformProviderPath, err.Error())
+					log.Logger.Error("Make soft link error", log.String("softLink", targetTerraformProviderPath), log.Error(err))
+					rowData["errorMessage"] = err.Error()
+					return
+				}
+			} else {
+				err = fmt.Errorf("Os stat dir: %s error: %s", targetTerraformProviderPath, err.Error())
+				log.Logger.Error("Os stat dir error", log.String("targetTerraformProviderPath", targetTerraformProviderPath), log.Error(err))
+				rowData["errorMessage"] = err.Error()
 				return
 			}
 		}
@@ -1253,86 +1297,56 @@ func reverseConvertData(parameterData *models.ParameterTable, relativeSourceId s
 	return
 }
 
-func convertTemplate(parameterId string, providerName string, reqParam map[string]interface{}) (arg interface{}, err error) {
-	sqlCmd := `SELECT * FROM parameter WHERE id=?`
-	paramArgs := []interface{}{}
-	paramArgs = append(paramArgs, parameterId)
-	var parameterList []*models.ParameterTable
-	err = x.SQL(sqlCmd, paramArgs...).Find(&parameterList)
-	if err != nil {
-		log.Logger.Error("Get parameter data error", log.String("parameterId", parameterId), log.Error(err))
-		return
-	}
-	if len(parameterList) == 0 {
-		err = fmt.Errorf("Parameter can not be found by id:%s", parameterId)
-		log.Logger.Warn("Parameter can not be found by id", log.String("id", parameterId), log.Error(err))
-		return
-	}
-	parameterData := parameterList[0]
-
-	sqlCmd = `SELECT * FROM template_value WHERE template=? AND value=?`
-	paramArgs = []interface{}{}
-	paramArgs = append(paramArgs, parameterData.Template)
-	paramArgs = append(paramArgs, reqParam[parameterData.Name])
+func convertTemplate(parameterData *models.ParameterTable, providerData *models.ProviderTable, reqParam map[string]interface{}) (arg interface{}, err error) {
+	sqlCmd := `SELECT * FROM template_value WHERE template=? AND value=?`
+	templateId := parameterData.Template
+	paramVal := reqParam[parameterData.Name].(string)
+	paramArgs := []interface{}{templateId, paramVal}
 	var templateValueList []*models.TemplateValueTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&templateValueList)
 	if err != nil {
-		log.Logger.Error("Get tempalte_value data error", log.String("template", parameterData.Template), log.Error(err))
+		err = fmt.Errorf("Get template_value data by template:%s and value:%s error:%s", templateId, paramVal)
+		log.Logger.Error("Get tempalte_value data by template and value error", log.String("template", templateId), log.String("value", paramVal), log.Error(err))
 		return
 	}
 	if len(templateValueList) == 0 {
-		err = fmt.Errorf("Template_value can not be found by template:%s and value:%s", parameterData.Template, reqParam[parameterData.Name])
-		log.Logger.Warn("Template_value can not be found by template and value", log.String("template", parameterData.Template), log.String("value", reqParam[parameterData.Name].(string)), log.Error(err))
+		err = fmt.Errorf("Template_value can not be found by template:%s and value:%s", templateId, paramVal)
+		log.Logger.Warn("Template_value can not be found by template and value", log.String("template", templateId), log.String("value", paramVal), log.Error(err))
 		return
 	}
 	templateValueData := templateValueList[0]
 
 	sqlCmd = `SELECT * FROM provider_template_value WHERE template_value=? AND provider=?`
-	paramArgs = []interface{}{}
-	paramArgs = append(paramArgs, templateValueData.Id, providerName)
+	paramArgs = []interface{}{templateValueData.Id, providerData.Id}
 	var providerTemplateValueList []*models.ProviderTemplateValueTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&providerTemplateValueList)
 	if err != nil {
-		log.Logger.Error("Get provider_tempalte_value data error", log.String("template_value", templateValueData.Id), log.String("provider", providerName), log.Error(err))
+		err = fmt.Errorf("Get provider_template_value data by template_value:%s and provider:%s error:%s", templateValueData.Id, providerData.Id)
+		log.Logger.Error("Get provider_tempalte_value data by template_value and provider error", log.String("template_value", templateValueData.Id), log.String("provider", providerData.Id), log.Error(err))
 		return
 	}
 	if len(providerTemplateValueList) == 0 {
-		err = fmt.Errorf("Provider_template_value can not be found by template_value:%s and provider:%s", parameterData.Template)
-		log.Logger.Warn("Provider_template_value can not be found by template_value and provider", log.String("template_value", templateValueData.Id), log.String("provider", providerName), log.Error(err))
+		err = fmt.Errorf("Provider_template_value can not be found by template_value:%s and provider:%s", templateValueData.Id, providerData.Id)
+		log.Logger.Warn("Provider_template_value can not be found by template_value and provider", log.String("template_value", templateValueData.Id), log.String("provider", providerData.Id), log.Error(err))
 		return
 	}
 	arg = providerTemplateValueList[0].Value
 	return
 }
 
-func reverseConvertTemplate(parameterId string, providerName string, tfstateVal interface{}) (argKey string, argVal string, err error) {
-	sqlCmd := `SELECT * FROM parameter WHERE id=?`
-	paramArgs := []interface{}{}
-	paramArgs = append(paramArgs, parameterId)
-	var parameterList []*models.ParameterTable
-	err = x.SQL(sqlCmd, paramArgs...).Find(&parameterList)
-	if err != nil {
-		log.Logger.Error("Get parameter data error", log.String("parameterId", parameterId), log.Error(err))
-		return
-	}
-	if len(parameterList) == 0 {
-		err = fmt.Errorf("Parameter can not be found by id:%s", parameterId)
-		log.Logger.Warn("Parameter can not be found by id", log.String("id", parameterId), log.Error(err))
-		return
-	}
-	parameterData := parameterList[0]
-
-	sqlCmd = `SELECT t1.* FROM template_value AS t1 LEFT JOIN provider_template_value AS t2 ON t1.id=t2.template_value WHERE t2.provider=? AND t2.value=?`
-	paramArgs = []interface{}{providerName, tfstateVal}
+func reverseConvertTemplate(parameterData *models.ParameterTable, providerData *models.ProviderTable, tfstateVal interface{}) (argKey string, argVal string, err error) {
+	sqlCmd := `SELECT t1.* FROM template_value AS t1 LEFT JOIN provider_template_value AS t2 ON t1.id=t2.template_value WHERE t2.provider=? AND t2.value=?`
+	paramArgs := []interface{}{providerData.Id, tfstateVal}
 	var templateValueList []*models.TemplateValueTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&templateValueList)
 	if err != nil {
-		log.Logger.Error("Get tempalte_value data error", log.String("provider", providerName), log.String("tfstateVal", tfstateVal.(string)), log.Error(err))
+		err = fmt.Errorf("Get template_value data by provider:%s and tfstateValue:%s error:%s", providerData.Id, tfstateVal)
+		log.Logger.Error("Get tempalte_value data by provider and tfstateValue error", log.String("provider", providerData.Id), log.String("tfstateValue", tfstateVal.(string)), log.Error(err))
 		return
 	}
 	if len(templateValueList) == 0 {
-		err = fmt.Errorf("Template_value can not be found by provider:%s and tfstateValue:%s", providerName, tfstateVal)
-		log.Logger.Warn("Template_value can not be found by provider and tfstateValue", log.String("provider", providerName), log.String("tfstateValue", tfstateVal.(string)), log.Error(err))
+		err = fmt.Errorf("Template_value can not be found by provider:%s and tfstateValue:%s", providerData.Id, tfstateVal)
+		log.Logger.Warn("Template_value can not be found by provider and tfstateValue", log.String("provider", providerData.Id), log.String("tfstateValue", tfstateVal.(string)), log.Error(err))
 		return
 	}
 	templateValueData := templateValueList[0]
@@ -1411,81 +1425,6 @@ func convertAttr(parameterData *models.ParameterTable, tfArgumentData *models.Tf
 	return
 }
 
-/*
-func convertAttr(tfstateAttributeId string, sourceIdList map[string]bool, handlingSourceIds map[string]bool, providerName string, reqParam map[string]interface{}) (tfArguments map[string]interface{}, err error) {
-	sqlCmd := `SELECT * FROM tfstate_attribute WHERE id=?`
-	paramArgs := []interface{}{}
-	paramArgs = append(paramArgs, tfstateAttributeId)
-	var tfStateAttributeList []*models.TfstateAttributeTable
-	err = x.SQL(sqlCmd, paramArgs...).Find(&tfStateAttributeList)
-	if err != nil {
-		log.Logger.Error("Get tfstate_attribute data error", log.String("id", tfstateAttributeId), log.Error(err))
-		return
-	}
-	if len(tfStateAttributeList) == 0 {
-		err = fmt.Errorf("Tfstate_attribute can not be found by id:%s", tfstateAttributeId)
-		log.Logger.Warn("Tfstate_attribute can not be found by id", log.String("id", tfstateAttributeId), log.Error(err))
-		return
-	}
-
-	tfStateAttributeData := tfStateAttributeList[0]
-	if _, ok := sourceIdList[tfStateAttributeData.Source]; !ok {
-		err = fmt.Errorf("Tfstate_attribute's source:%s is config error", tfStateAttributeData.Source)
-		log.Logger.Error("Tfstate_attribute's source is config error", log.String("tfstate_attribute_source", tfStateAttributeData.Source), log.Error(err))
-		return
-	}
-	if _, ok := handlingSourceIds[tfStateAttributeData.Source]; !ok {
-		err = fmt.Errorf("Tfstate_attribute's source:%s is config error, dead loop", tfStateAttributeData.Source)
-		log.Logger.Error("Tfstate_attribute's source is config error, dead loop", log.String("tfstate_attribute_source", tfStateAttributeData.Source), log.Error(err))
-		return
-	}
-
-	sqlCmd = "SELECT * FROM tf_argument WHERE source=?"
-	var tfArgumentList []*models.TfArgumentTable
-	paramArgs = []interface{}{}
-	paramArgs = append(paramArgs, tfStateAttributeData.Source)
-	err = x.SQL(sqlCmd, paramArgs...).Find(&tfArgumentList)
-	if err != nil {
-		log.Logger.Error("Get tf_argument list error", log.Error(err))
-		return
-	}
-	if len(tfArgumentList) == 0 {
-		err = fmt.Errorf("Tf_argument list can not be found by tfstate_attribute source:%s", tfStateAttributeData.Source)
-		log.Logger.Warn("Tf_argument list can not be found by tfstate_attribute source", log.String("tfstate_attribute_source", tfStateAttributeData.Source), log.Error(err))
-		return
-	}
-
-	tfArguments = make(map[string]interface{})
-	// 循环处理每一个 tf_argument
-	for i := range tfArgumentList {
-		convertWay := tfArgumentList[i].ConvertWay
-		var arg interface{}
-		switch convertWay {
-		case models.ConvertWay["Data"]:
-			arg, err = convertData(tfArgumentList[i].Parameter, tfArgumentList[i].Source, reqParam)
-		case models.ConvertWay["Template"]:
-			arg, err = convertTemplate(tfArgumentList[i].Parameter, providerName, reqParam)
-		case models.ConvertWay["Context"]:
-			arg, err = convertContext(tfArgumentList[i].RelativeParameter, tfArgumentList[i], reqParam)
-		case models.ConvertWay["Attr"]:
-			handlingSourceIds[tfArgumentList[i].Source] = true
-			arg, err = convertAttr(tfArgumentList[i].RelativeTfstateAttribute, sourceIdList, handlingSourceIds, providerName, reqParam)
-		case models.ConvertWay["Direct"]:
-			arg, err = convertDirect(tfArgumentList[i].Parameter, tfArgumentList[i].DefaultValue, reqParam)
-		}
-		if err != nil {
-			log.Logger.Error("Convert parameter:%s error", log.String("parameterId", tfArgumentList[i].Parameter), log.Error(err))
-			return
-		}
-		tfArguments[tfArgumentList[i].Name] = arg
-		if convertWay == "default" && arg.(string) == "null" {
-			delete(tfArguments, tfArgumentList[i].Name)
-		}
-	}
-	return
-}
- */
-
 func convertContext(parameterId string, tfArgument *models.TfArgumentTable, reqParam map[string]interface{}) (arg interface{}, err error) {
 	sqlCmd := `SELECT * FROM parameter WHERE id=?`
 	paramArgs := []interface{}{}
@@ -1528,22 +1467,7 @@ func reverseConvertContext(parameterId string, tfstateVal interface{}) (argKey s
 	return
 }
 
-func convertDirect(parameterId string, defaultValue string, reqParam map[string]interface{}) (arg interface{}, err error) {
-	sqlCmd := `SELECT * FROM parameter WHERE id=?`
-	paramArgs := []interface{}{}
-	paramArgs = append(paramArgs, parameterId)
-	var parameterList []*models.ParameterTable
-	err = x.SQL(sqlCmd, paramArgs...).Find(&parameterList)
-	if err != nil {
-		log.Logger.Error("Get parameter data error", log.String("parameterId", parameterId), log.Error(err))
-		return
-	}
-	if len(parameterList) == 0 {
-		err = fmt.Errorf("Parameter can not be found by id:%s", parameterId)
-		log.Logger.Warn("Parameter can not be found by id", log.String("id", parameterId), log.Error(err))
-		return
-	}
-	parameterData := parameterList[0]
+func convertDirect(parameterData *models.ParameterTable, defaultValue string, reqParam map[string]interface{}) (arg interface{}, err error) {
 	reqArg := reqParam[parameterData.Name]
 	if reqArg == nil {
 		return

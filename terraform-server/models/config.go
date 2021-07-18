@@ -69,6 +69,7 @@ type GlobalConfig struct {
 	DefaultReportObjAttr []*DefaultReportObjAttrConfig `json:"default_report_obj_attr"`
 	TerraformFilePath    string                        `json:"terraform_file_path"`
 	TerraformCmdPath     string                        `json:"terraform_cmd_path"`
+	TerraformProviderOsArch	string                     `json:"terraform_provider_os_arch"`
 	// default json
 }
 

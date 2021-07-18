@@ -35,5 +35,6 @@
     "password_seed": ""
   },
   "terraform_file_path": "/data/terraform/",
-  "terraform_cmd_path": "/usr/local/bin/terraform"
+  "terraform_cmd_path": "/usr/local/bin/terraform",
+  "terraform_provider_os_arch": "linux_amd64"
 }
