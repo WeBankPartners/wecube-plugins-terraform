@@ -306,6 +306,7 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 
 		convertWay := tfArgumentList[i].ConvertWay
 		var arg interface{}
+		var isDiscard bool
 		switch convertWay {
 		case models.ConvertWay["Data"]:
 			// search resource_data table，get resource_asset_id by resource_id and resource(which is relative_source column in tf_argument table )
@@ -313,12 +314,16 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 		case models.ConvertWay["Template"]:
 			arg, err = convertTemplate(parameterData, providerData, reqParam)
 		case models.ConvertWay["ContextData"]:
-			arg, err = convertContext(tfArgumentList[i].RelativeParameter, tfArgumentList[i], reqParam)
+			arg, isDiscard, err = convertContextData(parameterData, tfArgumentList[i], reqParam)
 		case models.ConvertWay["Attr"]:
 			// search resouce_data table by relative_source and 输入的值, 获取 tfstat_file 字段内容,找到relative_tfstate_attribute id(search tfstate_attribute table) 对应的 name, 获取其在 tfstate_file 中的值
 			arg, err = convertAttr(parameterData, tfArgumentList[i], reqParam)
 		case models.ConvertWay["Direct"]:
 			arg, err = convertDirect(parameterData, tfArgumentList[i].DefaultValue, reqParam)
+		}
+
+		if isDiscard {
+			continue
 		}
 
 		// handle tfArgument that is not in tf.json file
@@ -602,16 +607,22 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 					convertWay := tfstateAttr.ConvertWay
 					var outArgKey string
 					var outArgVal interface{}
+					var isDiscard = false
 					switch convertWay {
 					case models.ConvertWay["Data"]:
 						outArgKey, outArgVal, err = reverseConvertData(v, tfstateAttr.Source, tfstateOutParamVal)
 					case models.ConvertWay["Template"]:
 						outArgKey, outArgVal, err = reverseConvertTemplate(v, providerData, tfstateOutParamVal)
+					case models.ConvertWay["Attr"]:
+						outArgKey, outArgVal, err = reverseConvertAttr(v, tfstateAttr, tfstateOutParamVal)
 					case models.ConvertWay["ContextData"]:
-						outArgKey, outArgVal, err = reverseConvertContext(tfstateAttr.RelativeParameter, tfstateOutParamVal)
+						outArgKey, outArgVal, isDiscard, err = reverseConvertContextData(v, tfstateAttr, tfstateOutParamVal, tfstateFileAttributes)
 					case models.ConvertWay["Direct"]:
 						// outArgKey, outArgVal, err = reverseConvertDirect(tfstateAttr.Parameter, tfstateOutParamVal)
 						outArgKey, outArgVal, err = k, tfstateOutParamVal, nil
+					}
+					if isDiscard {
+						continue
 					}
 					if err != nil {
 						err = fmt.Errorf("Reverse convert parameter:%s error:%s", tfstateAttr.Parameter, err.Error())
@@ -660,16 +671,22 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 						convertWay := tfstateAttr.ConvertWay
 						var outArgKey string
 						var outArgVal interface{}
+						var isDiscard = false
 						switch convertWay {
 						case models.ConvertWay["Data"]:
 							outArgKey, outArgVal, err = reverseConvertData(v, tfstateAttr.Source, tfstateOutParamVal)
 						case models.ConvertWay["Template"]:
 							outArgKey, outArgVal, err = reverseConvertTemplate(v, providerData, tfstateOutParamVal)
+						case models.ConvertWay["Attr"]:
+							outArgKey, outArgVal, err = reverseConvertAttr(v, tfstateAttr, tfstateOutParamVal)
 						case models.ConvertWay["ContextData"]:
-							outArgKey, outArgVal, err = reverseConvertContext(tfstateAttr.RelativeParameter, tfstateOutParamVal)
+							outArgKey, outArgVal, isDiscard, err = reverseConvertContextData(v, tfstateAttr, tfstateOutParamVal, tfstateResult[i])
 						case models.ConvertWay["Direct"]:
 							// outArgKey, outArgVal, err = reverseConvertDirect(tfstateAttr.Parameter, tfstateOutParamVal)
 							outArgKey, outArgVal, err = k, tfstateOutParamVal, nil
+						}
+						if isDiscard {
+							continue
 						}
 
 						if action == "query" {
@@ -1425,45 +1442,140 @@ func convertAttr(parameterData *models.ParameterTable, tfArgumentData *models.Tf
 	return
 }
 
-func convertContext(parameterId string, tfArgument *models.TfArgumentTable, reqParam map[string]interface{}) (arg interface{}, err error) {
-	sqlCmd := `SELECT * FROM parameter WHERE id=?`
-	paramArgs := []interface{}{}
-	paramArgs = append(paramArgs, parameterId)
-	var parameterList []*models.ParameterTable
-	err = x.SQL(sqlCmd, paramArgs...).Find(&parameterList)
+func reverseConvertAttr(parameterData *models.ParameterTable, tfstateAttributeData *models.TfstateAttributeTable, tfstateVal interface{}) (argKey string, argVal interface{}, err error) {
+	relativeAssetVals := []string{}
+	if parameterData.Multiple == "Y" {
+		tmpData := tfstateVal.([]interface{})
+		for i := range tmpData {
+			relativeAssetVals = append(relativeAssetVals, tmpData[i].(string))
+		}
+	} else {
+		relativeAssetVals = append(relativeAssetVals, tfstateVal.(string))
+	}
+
+	relativeAssetValMap := make(map[string]bool)
+	for _, v := range relativeAssetVals {
+		relativeAssetValMap[v] = true
+	}
+
+	sqlCmd := `SELECT * FROM tfstate_attribute WHERE id=?`
+	paramArgs := []interface{}{tfstateAttributeData.RelativeTfstateAttribute}
+	var tfstateAttirbuteList []*models.TfstateAttributeTable
+	err = x.SQL(sqlCmd, paramArgs...).Find(&tfstateAttirbuteList)
 	if err != nil {
-		log.Logger.Error("Get parameter data error", log.String("parameterId", parameterId), log.Error(err))
+		err = fmt.Errorf("Get tfstateAttribute data by id:%s error: %s", tfstateAttributeData.RelativeTfstateAttribute, err.Error())
+		log.Logger.Error("Get tfstateAttribute data by id error", log.String("id", tfstateAttributeData.RelativeTfstateAttribute), log.Error(err))
 		return
 	}
-	if len(parameterList) == 0 {
-		err = fmt.Errorf("Parameter can not be found by id:%s", parameterId)
-		log.Logger.Warn("Parameter can not be found by id", log.String("id", parameterId), log.Error(err))
+	if len(tfstateAttirbuteList) == 0 {
+		err = fmt.Errorf("TfstateAttribute data can not be found by id:%s", tfstateAttributeData.RelativeTfstateAttribute)
+		log.Logger.Warn("TfstateAttribute data can not be found by id", log.String("id", tfstateAttributeData.RelativeTfstateAttribute), log.Error(err))
 		return
 	}
-	parameterData := parameterList[0]
-	if reqParam[parameterData.Name] == tfArgument.RelativeParameterValue {
-		arg = reqParam[parameterData.Name]
+	relativeTfstateAttirbuteData := tfstateAttirbuteList[0]
+
+	result := []interface{}{}
+	sqlCmd = `SELECT * FROM resource_data WHERE resource=?`
+	paramArgs = []interface{}{tfstateAttributeData.RelativeSource}
+	var resourceDataList []*models.ResourceDataTable
+	err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataList)
+	if err != nil {
+		err = fmt.Errorf("Get resource data by source:%s error: %s", tfstateAttributeData.RelativeSource, err.Error())
+		log.Logger.Error("Get resource data by source error", log.String("source", tfstateAttributeData.RelativeSource), log.Error(err))
+		return
+	}
+	if len(resourceDataList) == 0 {
+		err = fmt.Errorf("ResourceData can not be found by source:%s", tfstateAttributeData.RelativeSource)
+		log.Logger.Warn("ResourceData can not be found by source", log.String("source", tfstateAttributeData.RelativeSource), log.Error(err))
+		return
+	}
+
+	for _, resourceData := range resourceDataList {
+		tfstateFileData := resourceData.TfStateFile
+		var unmarshalTfstateFileData models.TfstateFileData
+		err = json.Unmarshal([]byte(tfstateFileData), &unmarshalTfstateFileData)
+		if err != nil {
+			err = fmt.Errorf("Unmarshal tfstate file data error:%s", err.Error())
+			log.Logger.Error("Unmarshal tfstate file data error", log.Error(err))
+			continue
+		}
+		var tfstateFileAttributes map[string]interface{}
+		tfstateFileAttributes = unmarshalTfstateFileData.Resources[0].Instances[0].Attributes
+		if _, ok := relativeAssetValMap[tfstateFileAttributes[relativeTfstateAttirbuteData.Name].(string)]; ok {
+			result = append(result, resourceData.ResourceId)
+			delete(relativeAssetValMap, tfstateFileAttributes[relativeTfstateAttirbuteData.Name].(string))
+		}
+	}
+
+	argKey = parameterData.Name
+	if parameterData.Multiple == "Y" {
+		tmpRes := []string{}
+		for i := range result {
+			tmpRes = append(tmpRes, result[i].(string))
+		}
+		argVal = tmpRes
+	} else {
+		argVal = result[0]
 	}
 	return
 }
 
-func reverseConvertContext(parameterId string, tfstateVal interface{}) (argKey string, argVal interface{}, err error) {
+func convertContextData(parameterData *models.ParameterTable, tfArgumentData *models.TfArgumentTable, reqParam map[string]interface{}) (arg interface{}, isDiscard bool, err error) {
+	isDiscard = false
+
+	// Get relative parameter
 	sqlCmd := `SELECT * FROM parameter WHERE id=?`
-	paramArgs := []interface{}{parameterId}
+	relativeParameterId := tfArgumentData.RelativeParameter
+	paramArgs := []interface{}{relativeParameterId}
 	var parameterList []*models.ParameterTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&parameterList)
 	if err != nil {
-		log.Logger.Error("Get parameter data error", log.String("parameterId", parameterId), log.Error(err))
+		err = fmt.Errorf("Get parameter data by id:%s error:%s", relativeParameterId)
+		log.Logger.Error("Get parameter data by id error", log.String("id", relativeParameterId), log.Error(err))
 		return
 	}
 	if len(parameterList) == 0 {
-		err = fmt.Errorf("Parameter can not be found by id:%s", parameterId)
-		log.Logger.Warn("Parameter can not be found by id", log.String("id", parameterId), log.Error(err))
+		err = fmt.Errorf("Parameter can not be found by id:%s", relativeParameterId)
+		log.Logger.Warn("Parameter can not be found by id", log.String("id", relativeParameterId), log.Error(err))
 		return
 	}
-	parameterData := parameterList[0]
-	argKey = parameterData.Name
-	argVal = tfstateVal
+	relativeParameterData := parameterList[0]
+	if reqParam[relativeParameterData.Name].(string) == tfArgumentData.RelativeParameterValue {
+		arg, err = convertData(parameterData, tfArgumentData.RelativeSource, reqParam)
+	} else {
+		isDiscard = true
+	}
+	return
+}
+
+func reverseConvertContextData(parameterData *models.ParameterTable,
+							   tfstateAttributeData *models.TfstateAttributeTable,
+							   tfstateVal interface{},
+    						   tfstateFileAttributes map[string]interface{}) (argKey string, argVal interface{}, isDiscard bool, err error) {
+	isDiscard = false
+
+	// Get relative parameter
+	sqlCmd := `SELECT * FROM parameter WHERE id=?`
+	relativeParameterId := tfstateAttributeData.RelativeParameter
+	paramArgs := []interface{}{relativeParameterId}
+	var parameterList []*models.ParameterTable
+	err = x.SQL(sqlCmd, paramArgs...).Find(&parameterList)
+	if err != nil {
+		err = fmt.Errorf("Get parameter data by id:%s error:%s", relativeParameterId)
+		log.Logger.Error("Get parameter data by id error", log.String("id", relativeParameterId), log.Error(err))
+		return
+	}
+	if len(parameterList) == 0 {
+		err = fmt.Errorf("Parameter can not be found by id:%s", relativeParameterId)
+		log.Logger.Warn("Parameter can not be found by id", log.String("id", relativeParameterId), log.Error(err))
+		return
+	}
+	relativeParameterData := parameterList[0]
+	if tfstateFileAttributes[relativeParameterData.Name].(string) == tfstateAttributeData.RelativeParameterValue {
+		argKey, argVal, err = reverseConvertData(parameterData, tfstateAttributeData.RelativeSource, tfstateVal)
+	} else {
+		isDiscard = true
+	}
 	return
 }
 
