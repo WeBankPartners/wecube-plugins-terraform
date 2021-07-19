@@ -15,6 +15,7 @@ type TfstateAttributeTable struct {
 	RelativeTfstateAttribute string `json:"relativeTfstateAttribute" xorm:"relative_tfstate_attribute"`
 	RelativeParameter        string `json:"relativeParameter" xorm:"relative_parameter"`
 	RelativeParameterValue   string `json:"relativeParameterValue" xorm:"relative_parameter_value"`
+	FunctionDefine           string `json:"functionDefine" xorm:"function_define"`
 	CreateTime               string `json:"createTime" xorm:"create_time"`
 	CreateUser               string `json:"createUser" xorm:"create_user"`
 	UpdateTime               string `json:"updateTime" xorm:"update_time"`

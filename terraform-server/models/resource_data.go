@@ -36,3 +36,8 @@ type TfstateFileResources struct {
 type TfstateFileAttributes struct {
 	Attributes map[string]interface{} `json:"attributes"`
 }
+
+type SortTfstateAttributes struct {
+	TfstateAttr *TfstateAttributeTable `json:"tfstateAttr"`
+	Point       int                    `json:"point"`
+}
