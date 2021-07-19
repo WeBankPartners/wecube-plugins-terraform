@@ -610,7 +610,7 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 	sortTfstateAttributesList := []*models.SortTfstateAttributes{}
 	sortTfstateAttrParamMap := make(map[string]*models.SortTfstateAttributes)
 	for i := range tfstateAttributeList {
-		curSortTfstateAttr := &models.SortTfstateAttributes{TfstateAttr: tfstateAttributeList[i], Point: 0}
+		curSortTfstateAttr := &models.SortTfstateAttributes{TfstateAttr: tfstateAttributeList[i], Point: 1000, IsExist: false}
 		sortTfstateAttributesList = append(sortTfstateAttributesList, curSortTfstateAttr)
 		sortTfstateAttrParamMap[tfstateAttributeList[i].Parameter] = curSortTfstateAttr
 	}
@@ -618,7 +618,16 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 	for _, v := range sortTfstateAttributesList {
 		relativeParam := v.TfstateAttr.RelativeParameter
 		if relativeParam != "" {
-			sortTfstateAttrParamMap[relativeParam].Point = 1 + v.Point
+			maxPoint := sortTfstateAttrParamMap[relativeParam].Point
+			if v.Point > maxPoint {
+				maxPoint = v.Point
+			}
+			if sortTfstateAttrParamMap[relativeParam].IsExist {
+				sortTfstateAttrParamMap[relativeParam].Point = maxPoint + 1
+			} else {
+				sortTfstateAttrParamMap[relativeParam].Point = maxPoint + 10
+			}
+			sortTfstateAttrParamMap[relativeParam].IsExist = true
 		}
 	}
 
@@ -1967,7 +1976,7 @@ func handleReverseConvert(outPutParameterNameMap map[string]*models.ParameterTab
 	                      parentObjectName string,
 	                      tfstateAttributeList []*models.TfstateAttributeTable) (outPutArgs map[string]interface{}, err error) {
 	outPutArgs = make(map[string]interface{})
-
+	curLevelResult := make(map[string]interface{})
 	// outPutParam 不在 tfstateFile 返回结果中的字段，用输入传进来的值
 	//for k, v := range outPutParameterNameMap {
 	//	if _, okParam := tfstateAttrParamMap[v.Id]; !okParam {
@@ -2021,13 +2030,13 @@ func handleReverseConvert(outPutParameterNameMap map[string]*models.ParameterTab
 					var isDiscard = false
 					switch convertWay {
 					case models.ConvertWay["Data"]:
-						outArgKey, outArgVal, err = reverseConvertData(curParamData, tfstateAttr.Source, tfstateOutParamVal)
+						outArgKey, outArgVal, err = reverseConvertData(curParamData, tfstateAttr.RelativeSource, tfstateOutParamVal)
 					case models.ConvertWay["Template"]:
 						outArgKey, outArgVal, err = reverseConvertTemplate(curParamData, providerData, tfstateOutParamVal)
 					case models.ConvertWay["Attr"]:
 						outArgKey, outArgVal, err = reverseConvertAttr(curParamData, tfstateAttr, tfstateOutParamVal)
 					case models.ConvertWay["ContextData"]:
-						outArgKey, outArgVal, isDiscard, err = reverseConvertContextData(curParamData, tfstateAttr, tfstateOutParamVal, outPutArgs)
+						outArgKey, outArgVal, isDiscard, err = reverseConvertContextData(curParamData, tfstateAttr, tfstateOutParamVal, curLevelResult)
 					case models.ConvertWay["Direct"]:
 						// outArgKey, outArgVal, err = reverseConvertDirect(tfstateAttr.Parameter, tfstateOutParamVal)
 						outArgKey, outArgVal, err = curParamData.Name, tfstateOutParamVal, nil
@@ -2051,6 +2060,7 @@ func handleReverseConvert(outPutParameterNameMap map[string]*models.ParameterTab
 						return
 					}
 					outPutArgs[outArgKey] = outArgVal
+					curLevelResult[outArgKey] = outArgVal
 				} else {
 					outPutArgs[curParamData.Name] = ""
 				}

@@ -40,4 +40,5 @@ type TfstateFileAttributes struct {
 type SortTfstateAttributes struct {
 	TfstateAttr *TfstateAttributeTable `json:"tfstateAttr"`
 	Point       int                    `json:"point"`
+	IsExist     bool                   `json:"isExist"`
 }
