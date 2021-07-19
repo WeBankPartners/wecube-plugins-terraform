@@ -48,14 +48,7 @@
         <div style="font-size: 0">
           <div class="table-title title-width-level2">
             source
-            <Button
-              @click="addSource"
-              type="success"
-              ghost
-              size="small"
-              style="color: #19be6b;"
-              icon="ios-add"
-            ></Button>
+            <Button @click="addSource" type="primary" ghost size="small" icon="ios-add"></Button>
           </div>
           <div class="table-title title-width-level1">
             {{ $t('t_name') }}
@@ -153,28 +146,14 @@
                   :style="{ width: '120px', 'line-height': source.args.length * 39 + 'px' }"
                 >
                   Arg
-                  <Button
-                    @click="addParams(source, 'args')"
-                    type="success"
-                    ghost
-                    size="small"
-                    style="color: #19be6b;"
-                    icon="ios-add"
-                  ></Button>
+                  <Button @click="addParams(source, 'args')" type="primary" ghost size="small" icon="ios-add"></Button>
                 </div>
                 <div
                   class="style-widthout-height"
                   :style="{ width: '120px', 'line-height': source.attrs.length * 39 + 'px' }"
                 >
                   Attr
-                  <Button
-                    @click="addParams(source, 'attrs')"
-                    type="success"
-                    ghost
-                    size="small"
-                    style="color: #19be6b;"
-                    icon="ios-add"
-                  ></Button>
+                  <Button @click="addParams(source, 'attrs')" type="primary" ghost size="small" icon="ios-add"></Button>
                 </div>
               </div>
             </div>

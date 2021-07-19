@@ -44,6 +44,20 @@ export default new Router({
               title: '认证信息',
               meta: {},
               component: () => import('@/pages/provider-info')
+            },
+            {
+              path: 'provider',
+              name: 'provider',
+              title: '云厂商',
+              meta: {},
+              component: () => import('@/pages/provider')
+            },
+            {
+              path: 'importAndExport',
+              name: 'importAndExport',
+              title: '导入导出',
+              meta: {},
+              component: () => import('@/pages/import-export')
             }
           ]
         }

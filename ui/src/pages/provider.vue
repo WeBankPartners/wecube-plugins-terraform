@@ -6,32 +6,31 @@
       </FormItem>
       <FormItem>
         <Button type="primary" @click="getTableData" style="margin-left: 24px">{{ $t('t_search') }}</Button>
-        <Button @click="addProviderInfo" type="success" style="margin-left: 24px">{{ $t('t_add') }}</Button>
+        <Button @click="addProvider" style="margin-left: 24px" type="success">{{ $t('t_add') }}</Button>
       </FormItem>
     </Form>
     <Table border :columns="tableColumns" :data="tableData"></Table>
     <Modal
-      v-model="newProviderInfo.isShow"
-      :title="newProviderInfo.isAdd ? $t('t_add') : $t('t_edit') + $t('t_provider_info')"
-      @on-ok="confirmProviderInfo"
-      @on-cancel="confirmProviderInfo.isShow = false"
+      v-model="newProvider.isShow"
+      :title="newProvider.isAdd ? $t('t_add') : $t('t_edit') + $t('t_provider')"
+      @on-ok="confirmProvider"
+      @on-cancel="confirmProvider.isShow = false"
     >
       <Form inline :label-width="80">
         <FormItem :label="$t('t_name')">
-          <Input type="text" v-model="newProviderInfo.form.name" style="width:400px"></Input>
+          <Input type="text" v-model="newProvider.form.name" style="width:400px"></Input>
         </FormItem>
-        <FormItem :label="$t('t_provider')">
-          <Select v-model="newProviderInfo.form.provider" ref="selectProvider" style="width:400px">
-            <Option v-for="provider in newProviderInfo.providerOptions" :value="provider.id" :key="provider.id"
-              >{{ provider.name }}
-            </Option>
-          </Select>
+        <FormItem :label="$t('t_version')">
+          <Input type="text" v-model="newProvider.form.version" :rows="4" style="width:400px"></Input>
         </FormItem>
-        <FormItem :label="$t('t_secret_key')">
-          <Input type="textarea" v-model="newProviderInfo.form.secretKey" :rows="4" style="width:400px"></Input>
+        <FormItem :label="$t('t_region_attr_name')">
+          <Input type="text" v-model="newProvider.form.regionAttrName" style="width:400px"></Input>
         </FormItem>
-        <FormItem :label="$t('t_secret_id')">
-          <Input type="textarea" v-model="newProviderInfo.form.secretId" :rows="4" style="width:400px"></Input>
+        <FormItem :label="$t('t_secretKey_attr_name')">
+          <Input type="text" v-model="newProvider.form.secretKeyAttrName" style="width:400px"></Input>
+        </FormItem>
+        <FormItem :label="$t('t_secretId_attr_name')">
+          <Input type="text" v-model="newProvider.form.secretIdAttrName" style="width:400px"></Input>
         </FormItem>
       </Form>
     </Modal>
@@ -39,26 +38,26 @@
 </template>
 
 <script>
-import { getProviderInfo, getProviders, addProviderInfo, editProviderInfo, deleteProviderInfo } from '@/api/server'
+import { getProviders, addProvider, deleteProvider, editProvider } from '@/api/server'
 export default {
   name: '',
   data () {
     return {
       name: '',
-      newProviderInfo: {
+      newProvider: {
         isShow: false,
         isAdd: true,
-        providerOptions: [],
         form: {
           createTime: '',
           createUser: '',
           id: '',
           name: '',
-          provider: '',
-          secretId: '',
-          secretKey: '',
+          regionAttrName: '',
+          secretIdAttrName: '',
+          secretKeyAttrName: '',
           updateTime: '',
-          updateUser: ''
+          updateUser: '',
+          version: ''
         }
       },
       emptyForm: {
@@ -66,11 +65,12 @@ export default {
         createUser: '',
         id: '',
         name: '',
-        provider: '',
-        secretId: '',
-        secretKey: '',
+        regionAttrName: '',
+        secretIdAttrName: '',
+        secretKeyAttrName: '',
         updateTime: '',
-        updateUser: ''
+        updateUser: '',
+        version: ''
       },
       tableColumns: [
         {
@@ -78,16 +78,20 @@ export default {
           key: 'name'
         },
         {
-          title: this.$t('t_provider'),
-          key: 'provider'
+          title: this.$t('t_version'),
+          key: 'version'
         },
         {
-          title: this.$t('t_secret_key'),
-          key: 'secretKey'
+          title: this.$t('t_region_attr_name'),
+          key: 'regionAttrName'
         },
         {
-          title: this.$t('t_secret_id'),
-          key: 'secretId'
+          title: this.$t('t_secretId_attr_name'),
+          key: 'secretIdAttrName'
+        },
+        {
+          title: this.$t('t_secretKey_attr_name'),
+          key: 'secretKeyAttrName'
         },
         {
           title: this.$t('t_action'),
@@ -108,7 +112,7 @@ export default {
                   },
                   on: {
                     click: () => {
-                      this.edit(params.row)
+                      this.editProvider(params.row)
                     }
                   }
                 },
@@ -123,7 +127,7 @@ export default {
                   },
                   on: {
                     click: () => {
-                      this.remove(params.row)
+                      this.deleteProvider(params.row)
                     }
                   }
                 },
@@ -140,21 +144,20 @@ export default {
     this.getTableData()
   },
   methods: {
-    edit (item) {
-      this.newProviderInfo.form = {
+    editProvider (item) {
+      this.newProvider.form = {
         ...item
       }
-      this.newProviderInfo.isAdd = false
-      this.getProvider()
-      this.newProviderInfo.isShow = true
+      this.newProvider.isAdd = false
+      this.newProvider.isShow = true
     },
-    remove (item) {
+    deleteProvider (item) {
       this.$Modal.confirm({
         title: this.$t('t_confirm_delete'),
         'z-index': 1000000,
         loading: true,
         onOk: async () => {
-          let res = await deleteProviderInfo(item.id)
+          let res = await deleteProvider(item.id)
           this.$Modal.remove()
           if (res.statusCode === 'OK') {
             this.$Notice.success({
@@ -167,32 +170,25 @@ export default {
         onCancel: () => {}
       })
     },
-    addProviderInfo () {
-      this.newProviderInfo.isAdd = true
-      this.newProviderInfo.form = JSON.parse(JSON.stringify(this.emptyForm))
-      this.getProvider()
-      this.newProviderInfo.isShow = true
+    addProvider () {
+      this.newProvider.isAdd = true
+      this.newProvider.form = JSON.parse(JSON.stringify(this.emptyForm))
+      this.newProvider.isShow = true
     },
-    async confirmProviderInfo () {
-      const method = this.newProviderInfo.isAdd ? addProviderInfo : editProviderInfo
-      const { statusCode } = await method([this.newProviderInfo.form])
+    async confirmProvider () {
+      const method = this.newProvider.isAdd ? addProvider : editProvider
+      const { statusCode } = await method([this.newProvider.form])
       if (statusCode === 'OK') {
         this.$Notice.success({
           title: 'Successful',
           desc: 'Successful'
         })
         this.getTableData()
-        this.newProviderInfo.isShow = false
-      }
-    },
-    async getProvider () {
-      const { statusCode, data } = await getProviders()
-      if (statusCode === 'OK') {
-        this.newProviderInfo.providerOptions = data
+        this.confirmProvider.isShow = false
       }
     },
     async getTableData () {
-      const { statusCode, data } = await getProviderInfo(this.name)
+      const { statusCode, data } = await getProviders()
       if (statusCode === 'OK') {
         this.tableData = data
       }

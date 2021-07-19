@@ -39,5 +39,6 @@
   "t_secretKey_attr_name": "秘钥Key属性名称",
   "t_secretId_attr_name": "秘钥Id属性名称",
   "t_source": "资源",
-  "t_resource_asset_id_Attribute": "资源ID属性"
+  "t_resource_asset_id_Attribute": "资源ID属性",
+  "t_import_export": "导入&导出"
 }

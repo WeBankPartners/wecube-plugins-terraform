@@ -182,14 +182,12 @@ export default {
       return res
     },
     async saveTemplateValue (templateValue, tIndex, tvIndex) {
-      console.log(templateValue)
       const params = {
         id: templateValue.id,
         value: templateValue.value,
         template: templateValue.template,
         createTime: templateValue.createTime
       }
-      console.log(params)
       const { statusCode, data } = await createTemplateValue([params])
       if (statusCode === 'OK') {
         this.pluginTemplates[tIndex].templateValue[tvIndex].id = data[0].id

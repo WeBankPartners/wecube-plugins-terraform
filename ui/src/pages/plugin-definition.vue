@@ -32,7 +32,7 @@
                   v-for="(interfaceSingle, index) in plugin.interfaces"
                   :name="interfaceSingle.id"
                   :key="index"
-                  style="padding: 5px 32px 5px 32px;"
+                  style="padding: 5px 32px 5px 64px;"
                 >
                   <span
                     style="display: inline-block;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-size: 15px; font-weight:400"

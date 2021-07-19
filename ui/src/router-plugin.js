@@ -3,6 +3,8 @@ import conversionConfiguration from '@/pages/conversion-configuration'
 import pluginDefinition from '@/pages/plugin-definition'
 import templateData from '@/pages/template-data'
 import providerInfo from '@/pages/provider-info'
+import provider from '@/pages/provider'
+import importAndExport from '@/pages/import-export'
 const router = [
   {
     path: '/terraformIndex',
@@ -39,6 +41,20 @@ const router = [
         title: '认证信息',
         meta: {},
         component: providerInfo
+      },
+      {
+        path: 'provider',
+        name: 'provider',
+        title: '云厂商',
+        meta: {},
+        component: provider
+      },
+      {
+        path: 'importAndExport',
+        name: 'importAndExport',
+        title: '导入导出',
+        meta: {},
+        component: importAndExport
       }
     ]
   }
