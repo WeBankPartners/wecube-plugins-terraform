@@ -38,5 +38,6 @@
   "t_region_attr_name": "Region Attr Name",
   "t_secretKey_attr_name": "Secret Key Attr Name",
   "t_secretId_attr_name": "Secret ID Attr Name",
-  "t_source": "Source"
+  "t_source": "Source",
+  "t_resource_asset_id_Attribute": "Resource Asset Id Attribute"
 }

@@ -5,7 +5,14 @@
       <Row>
         <Col span="5">
           <span>{{ $t('t_plugin') }}</span>
-          <Select v-model="plugin" clearable filterable style="width:200px">
+          <Select
+            v-model="plugin"
+            clearable
+            @on-clear="currentInterface = ''"
+            @on-change="currentInterface = ''"
+            filterable
+            style="width:200px"
+          >
             <Option v-for="item in pluginOptions" :value="item.id" :key="item.id">{{ item.name }}</Option>
           </Select>
         </Col>
@@ -263,7 +270,6 @@
                       @on-clear="item.relativeSource = ''"
                       filterable
                       @on-open-change="getSourceByProvider(item)"
-                      @on-change="getSourceAttrOptions(item, sourceIndex, 'args', argIndex)"
                     >
                       <template v-if="item.relativeSource && item.sourceWithFilter.length === 0">
                         <Option :value="item.relativeSource" :key="item.relativeSource">{{
@@ -283,6 +289,7 @@
                       :disabled="!['attr'].includes(item.convertWay)"
                       clearable
                       @on-clear="item.relativeTfstateAttribute = ''"
+                      @on-open-change="getSourceAttrOptions(item, 'args')"
                       filterable
                       size="small"
                     >
@@ -506,6 +513,8 @@
                       v-model="item.defaultValue"
                       @on-open-change="openDefaultValue(item, 'interfaceOutputParamsWithTemplate')"
                       clearable
+                      allow-create
+                      @on-create="createDefaultValueOptions(item, $event)"
                       @on-clear="item.defaultValue = ''"
                       filterable
                       size="small"
@@ -537,13 +546,13 @@
       v-model="newSource.isShow"
       :title="$t('t_add') + $t('t_source')"
       @on-ok="confirmSource"
-      @on-cancel="confirmProvider.isShow = false"
+      @on-cancel="newSource.isShow = false"
     >
       <Form inline :label-width="80">
         <FormItem :label="$t('t_name')">
           <Input type="text" v-model="newSource.form.name" style="width:400px"></Input>
         </FormItem>
-        <FormItem label="resourceAssetIdAttribute">
+        <FormItem :label="$t('t_resource_asset_id_Attribute')">
           <Input type="text" v-model="newSource.form.resourceAssetIdAttribute" style="width:400px"></Input>
         </FormItem>
       </Form>
@@ -811,15 +820,15 @@ export default {
         }
       }
     },
-    async getSourceAttrOptions (val, sourceIndex, type, index) {
-      val.relativeTfstateAttribute = ''
+    async getSourceAttrOptions (item, type) {
+      item.relativeTfstateAttribute = ''
       if (type === 'args') {
-        const { statusCode, data } = await getAttrBySource(val.source)
+        const { statusCode, data } = await getAttrBySource(item.source)
         if (statusCode === 'OK') {
-          this.sourceInfo[sourceIndex][type][index].sourceAttr = data
+          item.sourceAttr = data
         }
       } else {
-        this.sourceInfo[sourceIndex][type][index].sourceAttr = []
+        item.sourceAttr = []
       }
     },
     async getSource () {
