@@ -60,7 +60,7 @@
           <Input type="text" v-model="newProvider.form.name" style="width:400px"></Input>
         </FormItem>
         <FormItem :label="$t('t_version')">
-          <Input type="textarea" v-model="newProvider.form.version" :rows="4" style="width:400px"></Input>
+          <Input type="text" v-model="newProvider.form.version" :rows="4" style="width:400px"></Input>
         </FormItem>
         <FormItem :label="$t('t_region_attr_name')">
           <Input type="text" v-model="newProvider.form.regionAttrName" style="width:400px"></Input>

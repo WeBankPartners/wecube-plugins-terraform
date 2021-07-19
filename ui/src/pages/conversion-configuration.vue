@@ -159,27 +159,39 @@
                     <Input v-model="item.name" size="small" />
                   </div>
                   <div class="table-col title-width-level1">
-                    <Select v-model="item.type" clearable filterable size="small">
+                    <Select v-model="item.type" clearable filterable @on-clear="item.type = ''" size="small">
                       <Option v-for="item in dataTypeOptions" :value="item.value" :key="item.value">{{
                         item.label
                       }}</Option>
                     </Select>
                   </div>
                   <div class="table-col title-width-level1">
-                    <Select v-model="item.objectName" clearable filterable size="small">
-                      <Option v-for="item in source.argsObjetcNameOptions" :value="item.id" :key="item.id">{{
-                        item.name
-                      }}</Option>
+                    <Select
+                      v-model="item.objectName"
+                      @on-clear="item.objectName = ''"
+                      clearable
+                      filterable
+                      size="small"
+                      @on-open-change="getArgsObjetcNameOptions(source, item)"
+                    >
+                      <template v-if="item.objectName && item.argsObjetcNameOptions.length === 0">
+                        <Option :value="item.objectName" :key="item.objectName">{{ item.objectName }}</Option>
+                      </template>
+                      <template v-else>
+                        <Option v-for="item in item.argsObjetcNameOptions" :value="item.id" :key="item.id">{{
+                          item.name
+                        }}</Option>
+                      </template>
                     </Select>
                   </div>
                   <div class="table-col title-width-level0">
-                    <Select v-model="item.isMulti" clearable filterable size="small">
+                    <Select v-model="item.isMulti" @on-clear="item.isMulti = ''" clearable filterable size="small">
                       <Option value="Y">Y</Option>
                       <Option value="N">N</Option>
                     </Select>
                   </div>
                   <div class="table-col title-width-level0">
-                    <Select v-model="item.isNull" clearable filterable size="small">
+                    <Select v-model="item.isNull" @on-clear="item.isNull = ''" clearable filterable size="small">
                       <Option value="Y">Y</Option>
                       <Option value="N">N</Option>
                     </Select>
@@ -202,13 +214,22 @@
                       v-model="item.relativeParameter"
                       :disabled="!['context', 'context_data'].includes(item.convertWay)"
                       clearable
+                      @on-clear="item.relativeParameter = ''"
                       filterable
+                      @on-open-change="getInterfaceParamter(item)"
                       @on-change="getRelativeValueOptions(item, sourceIndex, 'args', argIndex)"
                       size="small"
                     >
-                      <Option v-for="item in interfaceInputParams" :value="item.id" :key="item.id">{{
-                        item.name
-                      }}</Option>
+                      <template v-if="item.relativeParameter && item.interfaceInputParams.length === 0">
+                        <Option :value="item.relativeParameter" :key="item.relativeParameter">{{
+                          item.relativeParameter
+                        }}</Option>
+                      </template>
+                      <template v-else>
+                        <Option v-for="item in item.interfaceInputParams" :value="item.id" :key="item.id">{{
+                          item.name
+                        }}</Option>
+                      </template>
                     </Select>
                   </div>
                   <div class="table-col title-width-level1">
@@ -217,6 +238,7 @@
                       :disabled="!['context', 'context_data'].includes(item.convertWay)"
                       @on-open-change="openRelativeParameterValue(item, 'interfaceInputParams')"
                       clearable
+                      @on-clear="item.relativeParameterValue = ''"
                       filterable
                       size="small"
                     >
@@ -236,12 +258,23 @@
                     <Select
                       v-model="item.relativeSource"
                       size="small"
-                      :disabled="!['attr'].includes(item.convertWay)"
+                      :disabled="!['attr', 'data', 'context_data'].includes(item.convertWay)"
                       clearable
+                      @on-clear="item.relativeSource = ''"
                       filterable
+                      @on-open-change="getSourceByProvider(item)"
                       @on-change="getSourceAttrOptions(item, sourceIndex, 'args', argIndex)"
                     >
-                      <Option v-for="item in sourceWithFilter" :value="item.id" :key="item.id">{{ item.name }}</Option>
+                      <template v-if="item.relativeSource && item.sourceWithFilter.length === 0">
+                        <Option :value="item.relativeSource" :key="item.relativeSource">{{
+                          item.relativeSource
+                        }}</Option>
+                      </template>
+                      <template v-else>
+                        <Option v-for="item in item.sourceWithFilter" :value="item.id" :key="item.id"
+                          >{{ item.name }} ({{ item.interface }})</Option
+                        >
+                      </template>
                     </Select>
                   </div>
                   <div class="table-col title-width-level1">
@@ -249,6 +282,7 @@
                       v-model="item.relativeTfstateAttribute"
                       :disabled="!['attr'].includes(item.convertWay)"
                       clearable
+                      @on-clear="item.relativeTfstateAttribute = ''"
                       filterable
                       size="small"
                     >
@@ -258,7 +292,9 @@
                         }}</Option>
                       </template>
                       <template v-else>
-                        <Option v-for="item in item.sourceAttr" :value="item.id" :key="item.id">{{ item.name }}</Option>
+                        <Option v-for="item in item.sourceAttr" :value="item.id" :key="item.id"
+                          >{{ item.name }} ({{ item.parameter }})</Option
+                        >
                       </template>
                     </Select>
                   </div>
@@ -267,12 +303,18 @@
                       v-model="item.parameter"
                       size="small"
                       clearable
+                      @on-clear="item.parameter = ''"
                       filterable
-                      @on-change="getDefaultValueOptions(item, sourceIndex, 'args', argIndex)"
+                      @on-open-change="getInterfaceParamsWithTemplate(item)"
                     >
-                      <Option v-for="item in interfaceInputParamsWithTemplate" :value="item.id" :key="item.id">{{
-                        item.name
-                      }}</Option>
+                      <template v-if="item.parameter && item.interfaceInputParamsWithTemplate.length === 0">
+                        <Option :value="item.parameter" :key="item.parameter">{{ item.parameter }}</Option>
+                      </template>
+                      <template v-else>
+                        <Option v-for="item in item.interfaceInputParamsWithTemplate" :value="item.id" :key="item.id">{{
+                          item.name
+                        }}</Option>
+                      </template>
                     </Select>
                   </div>
                   <div class="table-col title-width-level1">
@@ -280,8 +322,10 @@
                       v-model="item.defaultValue"
                       @on-open-change="openDefaultValue(item, 'interfaceInputParamsWithTemplate')"
                       allow-create
+                      @on-create="createDefaultValueOptions(item, $event)"
                       ref="sss"
                       clearable
+                      @on-clear="item.defaultValue = ''"
                       filterable
                       size="small"
                     >
@@ -313,27 +357,39 @@
                     <Input v-model="item.name" size="small" />
                   </div>
                   <div class="table-col title-width-level1">
-                    <Select v-model="item.type" clearable filterable size="small">
+                    <Select v-model="item.type" @on-clear="item.type = ''" clearable filterable size="small">
                       <Option v-for="item in dataTypeOptions" :value="item.value" :key="item.value">{{
                         item.label
                       }}</Option>
                     </Select>
                   </div>
                   <div class="table-col title-width-level1">
-                    <Select v-model="item.objectName" clearable filterable size="small">
-                      <Option v-for="item in source.attrsObjetcNameOptions" :value="item.id" :key="item.id">{{
-                        item.name
-                      }}</Option>
+                    <Select
+                      v-model="item.objectName"
+                      @on-clear="item.objectName = ''"
+                      clearable
+                      filterable
+                      size="small"
+                      @on-open-change="getAttrsObjetcNameOptions(source, item)"
+                    >
+                      <template v-if="item.objectName && item.attrsObjetcNameOptions.length === 0">
+                        <Option :value="item.objectName" :key="item.objectName">{{ item.objectName }}</Option>
+                      </template>
+                      <template v-else>
+                        <Option v-for="item in item.attrsObjetcNameOptions" :value="item.id" :key="item.id">{{
+                          item.name
+                        }}</Option>
+                      </template>
                     </Select>
                   </div>
                   <div class="table-col title-width-level0">
-                    <Select v-model="item.isMulti" clearable filterable size="small">
+                    <Select v-model="item.isMulti" @on-clear="item.isMulti = ''" clearable filterable size="small">
                       <Option value="Y">Y</Option>
                       <Option value="N">N</Option>
                     </Select>
                   </div>
                   <div class="table-col title-width-level0">
-                    <Select v-model="item.isNull" clearable filterable size="small">
+                    <Select v-model="item.isNull" @on-clear="item.isNull = ''" clearable filterable size="small">
                       <Option value="Y">Y</Option>
                       <Option value="N">N</Option>
                     </Select>
@@ -344,6 +400,7 @@
                       <Option
                         v-for="item in conversionTypeOptions"
                         clearable
+                        @on-clear="item.convertWay = ''"
                         filterable
                         :value="item.value"
                         :key="item.value"
@@ -355,14 +412,23 @@
                     <Select
                       v-model="item.relativeParameter"
                       :disabled="!['context', 'context_data'].includes(item.convertWay)"
+                      @on-open-change="getInterfaceParamter(item)"
                       clearable
+                      @on-clear="item.relativeParameter = ''"
                       filterable
                       @on-change="getRelativeValueOptions(item, sourceIndex, 'attrs', attrIndex)"
                       size="small"
                     >
-                      <Option v-for="item in interfaceOutputParams" :value="item.id" :key="item.id">{{
-                        item.name
-                      }}</Option>
+                      <template v-if="item.relativeParameter && item.interfaceOutputParams.length === 0">
+                        <Option :value="item.relativeParameter" :key="item.relativeParameter">{{
+                          item.relativeParameter
+                        }}</Option>
+                      </template>
+                      <template v-else>
+                        <Option v-for="item in item.interfaceOutputParams" :value="item.id" :key="item.id">{{
+                          item.name
+                        }}</Option>
+                      </template>
                     </Select>
                   </div>
                   <div class="table-col title-width-level1">
@@ -371,6 +437,7 @@
                       :disabled="!['context', 'context_data'].includes(item.convertWay)"
                       @on-open-change="openRelativeParameterValue(item, 'interfaceOutputParams')"
                       clearable
+                      @on-clear="item.relativeParameterValue = ''"
                       filterable
                       size="small"
                     >
@@ -390,11 +457,22 @@
                     <Select
                       v-model="item.relativeSource"
                       size="small"
-                      :disabled="!['attr'].includes(item.convertWay)"
+                      :disabled="!['attr', 'data', 'context_data'].includes(item.convertWay)"
+                      @on-open-change="getSourceByProvider(item)"
                       clearable
+                      @on-clear="item.relativeSource = ''"
                       filterable
                     >
-                      <Option v-for="item in sourceWithFilter" :value="item.id" :key="item.id">{{ item.name }}</Option>
+                      <template v-if="item.relativeSource && item.sourceWithFilter.length === 0">
+                        <Option :value="item.relativeSource" :key="item.relativeSource">{{
+                          item.relativeSource
+                        }}</Option>
+                      </template>
+                      <template v-else>
+                        <Option v-for="item in item.sourceWithFilter" :value="item.id" :key="item.id"
+                          >{{ item.name }} ({{ item.interface }})</Option
+                        >
+                      </template>
                     </Select>
                   </div>
                   <div class="table-col title-width-level1">
@@ -406,12 +484,21 @@
                       v-model="item.parameter"
                       size="small"
                       clearable
+                      @on-clear="item.parameter = ''"
                       filterable
-                      @on-change="getDefaultValueOptions(item, sourceIndex, 'attrs', attrIndex)"
+                      @on-open-change="getInterfaceParamsWithTemplate(item)"
                     >
-                      <Option v-for="item in interfaceOutputParamsWithTemplate" :value="item.id" :key="item.id">{{
-                        item.name
-                      }}</Option>
+                      <template v-if="item.parameter && item.interfaceOutputParamsWithTemplate.length === 0">
+                        <Option :value="item.parameter" :key="item.parameter">{{ item.parameter }}</Option>
+                      </template>
+                      <template v-else>
+                        <Option
+                          v-for="item in item.interfaceOutputParamsWithTemplate"
+                          :value="item.id"
+                          :key="item.id"
+                          >{{ item.name }}</Option
+                        >
+                      </template>
                     </Select>
                   </div>
                   <div class="table-col title-width-level1">
@@ -419,6 +506,7 @@
                       v-model="item.defaultValue"
                       @on-open-change="openDefaultValue(item, 'interfaceOutputParamsWithTemplate')"
                       clearable
+                      @on-clear="item.defaultValue = ''"
                       filterable
                       size="small"
                     >
@@ -553,13 +641,11 @@ export default {
     this.MODALHEIGHT = window.innerHeight - 300
   },
   methods: {
-    // createOption (item, argIndex) {
-    //   const query = this.$refs.sss[argIndex].query
-    //   item.defaultValueOptions.push({
-    //     id:
-    //   })
-    //   console.log(item)
-    // },
+    createDefaultValueOptions (item, el) {
+      item.defaultValueOptions.push({
+        value: el
+      })
+    },
     addSource () {
       this.newSource = {
         isShow: true,
@@ -594,18 +680,19 @@ export default {
         }
       }
     },
-    async openDefaultValue (val, interfaceParamsWithTemplate) {
-      const find = this.interfaceInputParamsWithTemplate.find(ip => ip.id === val.parameter)
+    async openDefaultValue (item, interfaceParamsWithTemplate) {
+      await this.getInterfaceParamsWithTemplate(item)
+      const find = item[interfaceParamsWithTemplate].find(ip => ip.id === item.parameter)
       if (find) {
         const { statusCode, data } = await getTemplateValue(find.template)
         if (statusCode === 'OK') {
-          const find = data.filter(d => d.value === val.defaultValue)
+          const find = data.filter(d => d.value === item.defaultValue)
           if (find.length === 0) {
             data.push({
-              value: val.defaultValue
+              value: item.defaultValue
             })
           }
-          val.defaultValueOptions = data
+          item.defaultValueOptions = data
         }
       }
     },
@@ -671,31 +758,38 @@ export default {
         onCancel: () => {}
       })
     },
-    async getDefaultValueOptions (val, sourceIndex, type, index) {
-      val.defaultValue = ''
-      if (type === 'args') {
-        const find = this.interfaceInputParamsWithTemplate.find(ip => ip.id === val.parameter)
-        if (find) {
-          const { statusCode, data } = await getTemplateValue(find.template)
-          if (statusCode === 'OK') {
-            this.sourceInfo[sourceIndex][type][index].defaultValueOptions = data
-          }
-        }
-      }
-      if (type === 'attrs') {
-        const find = this.interfaceOutputParamsWithTemplate.find(ip => ip.id === val.parameter)
-        if (find) {
-          const { statusCode, data } = await getTemplateValue(find.template)
-          if (statusCode === 'OK') {
-            this.sourceInfo[sourceIndex][type][index].defaultValueOptions = data
-          }
-        }
+    async getInterfaceParamsWithTemplate (item) {
+      const { statusCode, data } = await getParamaByInterface(this.currentInterface)
+      if (statusCode === 'OK') {
+        item.interfaceInputParamsWithTemplate = data.filter(d => d.type === 'input').filter(d => d.template !== '')
+        item.interfaceOutputParamsWithTemplate = data.filter(d => d.type === 'output').filter(d => d.template !== '')
       }
     },
-    async getRelativeValueOptions (val, sourceIndex, type, index) {
-      val.relativeParameterValue = ''
+    // async getDefaultValueOptions (item, type) {
+    //   item.defaultValue = ''
+    //   if (type === 'args') {
+    //     const find = item.interfaceInputParamsWithTemplate.find(ip => ip.id === item.parameter)
+    //     if (find) {
+    //       const { statusCode, data } = await getTemplateValue(find.template)
+    //       if (statusCode === 'OK') {
+    //         item.defaultValueOptions = data
+    //       }
+    //     }
+    //   }
+    //   if (type === 'attrs') {
+    //     const find = item.interfaceOutputParamsWithTemplate.find(ip => ip.id === item.parameter)
+    //     if (find) {
+    //       const { statusCode, data } = await getTemplateValue(find.template)
+    //       if (statusCode === 'OK') {
+    //         item.defaultValueOptions = data
+    //       }
+    //     }
+    //   }
+    // },
+    async getRelativeValueOptions (item, sourceIndex, type, index) {
+      item.relativeParameterValue = ''
       if (type === 'args') {
-        const find = this.interfaceInputParams.find(ip => ip.id === val.relativeParameter)
+        const find = item.interfaceInputParams.find(ip => ip.id === item.relativeParameter)
         if (find && find.template) {
           const { statusCode, data } = await getTemplateValue(find.template)
           if (statusCode === 'OK') {
@@ -706,7 +800,7 @@ export default {
         }
       }
       if (type === 'attrs') {
-        const find = this.interfaceOutputParams.find(ip => ip.id === val.relativeParameter)
+        const find = item.interfaceOutputParams.find(ip => ip.id === item.relativeParameter)
         if (find && find.template) {
           const { statusCode, data } = await getTemplateValue(find.template)
           if (statusCode === 'OK') {
@@ -731,8 +825,6 @@ export default {
     async getSource () {
       const { statusCode, data } = await getSourceByfilter(this.currentInterface, this.currentProvider)
       if (statusCode === 'OK') {
-        this.getInterfaceParamter()
-        this.getSourceByProvider()
         this.sourceInfo = data.map(d => {
           d.args = []
           d.attrs = []
@@ -744,23 +836,52 @@ export default {
         })
       }
     },
+    async getInterfaceParamter (item) {
+      const { statusCode, data } = await getParamaByInterface(this.currentInterface)
+      if (statusCode === 'OK') {
+        item.interfaceInputParams = data.filter(d => d.type === 'input')
+        item.interfaceOutputParams = data.filter(d => d.type === 'output')
+      }
+    },
+    async getArgsObjetcNameOptions (source, item) {
+      const arg = await getArgBySource(source.id)
+      if (arg.statusCode === 'OK') {
+        const argData = sortedArgument(arg.data)
+        item.argsObjetcNameOptions = argData.filter(argSingle => argSingle.type === 'object')
+      }
+    },
+    async getAttrsObjetcNameOptions (source, item) {
+      const attr = await getAttrBySource(source.id)
+      if (attr.statusCode === 'OK') {
+        const attrData = sortedArgument(attr.data)
+        item.attrsObjetcNameOptions = attrData.filter(attrSingle => attrSingle.type === 'object')
+      }
+    },
     async getSourceParams (source) {
-      this.getInterfaceParamter()
       const arg = await getArgBySource(source.id)
       if (arg.statusCode === 'OK') {
         if (arg.data.length === 0) {
           let tmp = JSON.parse(JSON.stringify(this.emptyParams))
           tmp.source = source.id
+          tmp.sourceWithFilter = []
+          tmp.interfaceInputParams = []
+          tmp.argsObjetcNameOptions = []
           tmp.relativeValueOptions = []
           tmp.defaultValueOptions = []
+          tmp.interfaceInputParamsWithTemplate = []
+          tmp.interfaceOutputParamsWithTemplate = []
           tmp.sourceAttr = []
           source.args.push(tmp)
         } else {
           const argData = sortedArgument(arg.data)
-          source.argsObjetcNameOptions = argData.filter(argSingle => argSingle.type === 'object')
           source.args = argData.map(ar => {
+            ar.sourceWithFilter = []
+            ar.interfaceInputParams = []
+            ar.argsObjetcNameOptions = []
             ar.relativeValueOptions = []
             ar.defaultValueOptions = []
+            ar.interfaceInputParamsWithTemplate = []
+            ar.interfaceOutputParamsWithTemplate = []
             ar.sourceAttr = []
             return ar
           })
@@ -771,36 +892,37 @@ export default {
         if (attr.data.length === 0) {
           let tmp = JSON.parse(JSON.stringify(this.emptyParams))
           tmp.source = source.id
+          tmp.sourceWithFilter = []
+          tmp.interfaceOutputParams = []
+          tmp.attrsObjetcNameOptions = []
           tmp.relativeValueOptions = []
           tmp.defaultValueOptions = []
+          tmp.interfaceInputParamsWithTemplate = []
+          tmp.interfaceOutputParamsWithTemplate = []
           tmp.sourceAttr = []
           source.attrs.push(tmp)
         } else {
           const attrData = sortedArgument(attr.data)
           source.attrsObjetcNameOptions = attrData.filter(attrSingle => attrSingle.type === 'object')
           source.attrs = attrData.map(at => {
+            at.sourceWithFilter = []
+            at.interfaceOutputParams = []
+            at.attrsObjetcNameOptions = []
             at.relativeValueOptions = []
             at.defaultValueOptions = []
+            at.interfaceInputParamsWithTemplate = []
+            at.interfaceOutputParamsWithTemplate = []
             at.sourceAttr = []
             return at
           })
         }
       }
     },
-    async getSourceByProvider () {
-      this.sourceWithFilter = []
+    async getSourceByProvider (item) {
+      item.sourceWithFilter = []
       const { statusCode, data } = await getSourceByProvider(this.currentProvider)
       if (statusCode === 'OK') {
-        this.sourceWithFilter = data
-      }
-    },
-    async getInterfaceParamter () {
-      const { statusCode, data } = await getParamaByInterface(this.currentInterface)
-      if (statusCode === 'OK') {
-        this.interfaceInputParams = data.filter(d => d.type === 'input')
-        this.interfaceOutputParams = data.filter(d => d.type === 'output')
-        this.interfaceInputParamsWithTemplate = this.interfaceInputParams.filter(d => d.template !== '')
-        this.interfaceOutputParamsWithTemplate = this.interfaceOutputParams.filter(d => d.template !== '')
+        item.sourceWithFilter = data
       }
     },
     async getProviderList () {
