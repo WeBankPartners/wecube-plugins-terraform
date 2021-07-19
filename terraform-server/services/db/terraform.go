@@ -228,6 +228,21 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 	retOutput["errorCode"] = "1"
 	retOutput["errorMessage"] = ""
 
+	if plugin == "az" {
+		retData, tmpErr := handleAzQuery(reqParam, dirPath, providerData, providerInfo, regionData, sourceData)
+		if tmpErr != nil {
+			err = fmt.Errorf("Handle Az query error:%s", tmpErr.Error())
+			log.Logger.Warn("Handle Az query error", log.Error(err))
+			retOutput["errorMessage"] = err.Error()
+			return
+		}
+		for k, v := range retData {
+			retOutput[k] = v
+		}
+		retOutput["errorCode"] = "0"
+		return
+	}
+
 	// Get tf_argument_list by sourceId
 	sourceIdStr := sourceData.Id
 	sqlCmd := "SELECT * FROM tf_argument WHERE source IN ('" + sourceIdStr + "')"
@@ -835,6 +850,182 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 	}
 
 	retOutput["errorCode"] = "0"
+	return
+}
+
+func handleAzQuery(reqParam map[string]interface{},
+                   workDirPath string,
+			       providerData *models.ProviderTable,
+			       providerInfo *models.ProviderInfoTable,
+			       regionData *models.ResourceDataTable,
+			       sourceData *models.SourceTable) (rowData map[string]interface{}, err error) {
+	rowData = make(map[string]interface{})
+	_, err = os.Stat(workDirPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			err = os.MkdirAll(workDirPath, os.ModePerm)
+			if err != nil {
+				err = fmt.Errorf("Make dir: %s error: %s", workDirPath, err.Error())
+				log.Logger.Error("Make dir error", log.String("workDirPath", workDirPath), log.Error(err))
+				rowData["errorMessage"] = err.Error()
+				return
+			}
+		} else {
+			err = fmt.Errorf("Os stat dir: %s error: %s", workDirPath, err.Error())
+			log.Logger.Error("Os stat dir error", log.String("workDirPath", workDirPath), log.Error(err))
+			rowData["errorMessage"] = err.Error()
+			return
+		}
+	}
+
+	// Gen provider.tf.json
+	providerFileData := make(map[string]map[string]map[string]interface{})
+	providerFileData["provider"] = make(map[string]map[string]interface{})
+	providerFileData["provider"][providerData.Name] = make(map[string]interface{})
+	providerFileData["provider"][providerData.Name][providerData.SecretIdAttrName] = providerInfo.SecretId
+	providerFileData["provider"][providerData.Name][providerData.SecretKeyAttrName] = providerInfo.SecretKey
+	providerFileData["provider"][providerData.Name][providerData.RegionAttrName] = regionData.ResourceAssetId
+
+	providerFileContent, tmpErr := json.Marshal(providerFileData)
+	if tmpErr != nil {
+		err = fmt.Errorf("Marshal providerFileData error: %s", tmpErr.Error())
+		log.Logger.Error("Marshal providerFileData error", log.Error(err))
+		return
+	}
+	providerFilePath := workDirPath + "/provider.tf.json"
+	err = GenFile(providerFileContent, providerFilePath)
+	if err != nil {
+		err = fmt.Errorf("Gen providerFile: %s error: %s", providerFilePath, err.Error())
+		log.Logger.Error("Gen providerFile error", log.String("providerFilePath", providerFilePath), log.Error(err))
+		return
+	}
+
+	// Gen version.tf
+	terraformFilePath := models.Config.TerraformFilePath
+	if terraformFilePath[len(terraformFilePath)-1] != '/' {
+		terraformFilePath += "/"
+	}
+	if providerData.Name == "tencentcloud" {
+		versionTfFilePath := terraformFilePath + "versiontf/" + providerData.Name + "/version.tf"
+		versionTfFileContent, tmpErr := ReadFile(versionTfFilePath)
+		if tmpErr != nil {
+			err = fmt.Errorf("Read versionTfFile: %s error: %s", versionTfFilePath, tmpErr.Error())
+			log.Logger.Error("Read versionTfFile error", log.String("versionTfFilePath", versionTfFilePath), log.Error(err))
+			return
+		}
+
+		genVersionTfFilePath := workDirPath + "/version.tf"
+		err = GenFile(versionTfFileContent, genVersionTfFilePath)
+		if err != nil {
+			err = fmt.Errorf("Gen versionTfFile: %s error: %s", genVersionTfFilePath, err.Error())
+			log.Logger.Error("Gen versionTfFile error", log.String("genVersionTfFilePath", genVersionTfFilePath), log.Error(err))
+			return
+		}
+	}
+
+	// Gen softlink of terraform provider file
+	// targetTerraformProviderPath := workDirPath + "/" + models.TerraformProviderPathDiffMap[providerData.Name] + providerData.Version + "/" + models.Config.TerraformProviderOsArch
+	targetTerraformProviderPath := workDirPath + "/" + models.TerraformProviderPathDiffMap[providerData.Name] + providerData.Version
+
+	_, err = os.Stat(targetTerraformProviderPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			err = os.MkdirAll(targetTerraformProviderPath, os.ModePerm)
+			if err != nil {
+				err = fmt.Errorf("Make dir: %s error: %s", workDirPath, err.Error())
+				log.Logger.Error("Make dir error", log.String("dirPath", workDirPath), log.Error(err))
+				rowData["errorMessage"] = err.Error()
+				return
+			}
+			terraformProviderPath := terraformFilePath + "providers/" + providerData.Name + "/" + providerData.Version + "/" + models.Config.TerraformProviderOsArch
+			err = os.Symlink(terraformProviderPath, targetTerraformProviderPath + "/" + models.Config.TerraformProviderOsArch)
+			if err != nil {
+				err = fmt.Errorf("Make soft link : %s error: %s", targetTerraformProviderPath, err.Error())
+				log.Logger.Error("Make soft link error", log.String("softLink", targetTerraformProviderPath), log.Error(err))
+				rowData["errorMessage"] = err.Error()
+				return
+			}
+		} else {
+			err = fmt.Errorf("Os stat dir: %s error: %s", targetTerraformProviderPath, err.Error())
+			log.Logger.Error("Os stat dir error", log.String("targetTerraformProviderPath", targetTerraformProviderPath), log.Error(err))
+			rowData["errorMessage"] = err.Error()
+			return
+		}
+	}
+	// Gen soft link for .terraform.lock.hcl
+	targetTerraformLockHclPath := workDirPath + "/.terraform.lock.hcl"
+	_, err = os.Stat(targetTerraformLockHclPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			terraformLockHclPath := terraformFilePath + "providers/" + providerData.Name + "/" + providerData.Version + "/.terraform.lock.hcl"
+			err = os.Symlink(terraformLockHclPath, targetTerraformLockHclPath)
+			if err != nil {
+				err = fmt.Errorf("Make soft link : %s error: %s", targetTerraformLockHclPath, err.Error())
+				log.Logger.Error("Make soft link error", log.String("softLink", targetTerraformLockHclPath), log.Error(err))
+				rowData["errorMessage"] = err.Error()
+				return
+			}
+		} else {
+			err = fmt.Errorf("Os stat dir: %s error: %s", targetTerraformLockHclPath, err.Error())
+			log.Logger.Error("Os stat dir error", log.String("targetTerraformLockHclPath", targetTerraformLockHclPath), log.Error(err))
+			rowData["errorMessage"] = err.Error()
+			return
+		}
+	}
+
+	sourceName := sourceData.Name
+	// Gen .tf 文件, 然后执行 terraform import cmd
+	uuid := "_" + guid.CreateGuid()
+	tfFilePath := workDirPath + "/" + sourceName + ".tf"
+	tfFileContent := "data " + sourceName + " " + uuid + " {}"
+
+	GenFile([]byte(tfFileContent), tfFilePath)
+	err = TerraformInit(workDirPath)
+	if err != nil {
+		err = fmt.Errorf("Do TerraformInit error:%s", err.Error())
+		log.Logger.Error("Do TerraformInit error", log.Error(err))
+		rowData["errorMessage"] = err.Error()
+		return
+	}
+
+	err = TerraformApply(workDirPath)
+	if err != nil {
+		err = fmt.Errorf("Do TerraformApply error:%s", err.Error())
+		log.Logger.Error("Do TerraformApply error", log.Error(err))
+		rowData["errorMessage"] = err.Error()
+		return
+	}
+
+	// Read terraform.tfstate 文件
+	var tfstateFilePath string
+	tfstateFilePath = workDirPath + "/terraform.tfstate"
+	tfstateFileData, err := ReadFile(tfstateFilePath)
+	if err != nil {
+		err = fmt.Errorf("Read tfstate file error:%s", err.Error())
+		log.Logger.Error("Read tfstate file error", log.Error(err))
+		rowData["errorMessage"] = err.Error()
+		return
+	}
+	//tfstateFileContentStr := string(tfstateFileData)
+	var unmarshalTfstateFileData models.TfstateFileData
+	err = json.Unmarshal(tfstateFileData, &unmarshalTfstateFileData)
+	if err != nil {
+		err = fmt.Errorf("Unmarshal tfstate file data error:%s", err.Error())
+		log.Logger.Error("Unmarshal tfstate file data error", log.Error(err))
+		rowData["errorMessage"] = err.Error()
+		return
+	}
+	var tfstateFileAttributes map[string]interface{}
+	tfstateFileAttributes = unmarshalTfstateFileData.Resources[0].Instances[0].Attributes
+	rowData["az"] = tfstateFileAttributes["zones"]
+
+	// Del provider file
+	err = DelFile(providerFilePath)
+	if err != nil {
+		err = fmt.Errorf("Do delete provider file error: %s", err.Error())
+		log.Logger.Error("Do delete provider file error", log.Error(err))
+		rowData["errorMessage"] = err.Error()
+	}
 	return
 }
 
