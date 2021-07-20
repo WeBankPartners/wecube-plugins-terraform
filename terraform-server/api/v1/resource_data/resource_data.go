@@ -120,7 +120,7 @@ func TerraformOperation(c *gin.Context) {
 			rowData.ResultMessage = "fail"
 		}
 		// handle one input, many output
-		if v, ok := retData["_result_list"]; ok {
+		if v, ok := retData[models.TerraformOutPutPrefix]; ok {
 			tmpData, _ := json.Marshal(v)
 			var resultList []map[string]interface{}
 			json.Unmarshal(tmpData, &resultList)

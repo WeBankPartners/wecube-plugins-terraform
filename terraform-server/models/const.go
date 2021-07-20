@@ -14,6 +14,7 @@ const (
 	SystemRole          = "SUB_SYSTEM"
 	PlatformUser        = "SYS_PLATFORM"
 	PasswordDisplay     = "****"
+	TerraformOutPutPrefix  = "$_result_list$"
 )
 
 var (
