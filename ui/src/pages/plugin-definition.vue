@@ -130,7 +130,7 @@
                           <Button type="success" style="width:100%" @click="addTemplate" size="small">
                             <Icon type="ios-add" size="24"></Icon>
                           </Button>
-                          <Option v-for="template in templateOptions" :value="template.name" :key="template.name">{{
+                          <Option v-for="template in templateOptions" :value="template.id" :key="template.id">{{
                             template.name
                           }}</Option>
                         </Select>
@@ -204,7 +204,7 @@
                           <Button type="success" style="width:100%" @click="addTemplate" size="small">
                             <Icon type="ios-add" size="24"></Icon>
                           </Button>
-                          <Option v-for="template in templateOptions" :value="template.name" :key="template.name">{{
+                          <Option v-for="template in templateOptions" :value="template.id" :key="template.id">{{
                             template.name
                           }}</Option>
                         </Select>
@@ -433,8 +433,12 @@ export default {
       }
     },
     addTemplate () {
-      this.$refs.inputSelect.visible = false
-      this.$refs.outputSelect.visible = false
+      if (this.$refs.inputSelect) {
+        this.$refs.inputSelect.visible = false
+      }
+      if (this.$refs.outputSelect) {
+        this.$refs.outputSelect.visible = false
+      }
       this.newTemplate = {
         isShow: true,
         form: {
@@ -512,7 +516,7 @@ export default {
     async getPluginInterface (pluginName) {
       let plugin = this.pluginOptions.find(plugin => plugin.name === pluginName[0])
       if (plugin) {
-        const { statusCode, data } = await getInterfaceByPlugin(pluginName[0])
+        const { statusCode, data } = await getInterfaceByPlugin(plugin.id)
         if (statusCode === 'OK') {
           plugin.interfaces = data
         }
@@ -524,7 +528,7 @@ export default {
         isAdd: true,
         form: {
           name: '',
-          plugin: plugin.name,
+          plugin: plugin.id,
           description: ''
         }
       }
@@ -537,7 +541,8 @@ export default {
           title: 'Successful',
           desc: 'Successful'
         })
-        this.getPluginInterface([this.newInterface.form.plugin])
+        let plugin = this.pluginOptions.find(plugin => plugin.id === this.newInterface.form.plugin)
+        this.getPluginInterface([plugin.name])
       }
     },
     editPlugin (plugin) {

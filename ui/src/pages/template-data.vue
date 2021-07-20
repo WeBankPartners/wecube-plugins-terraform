@@ -149,8 +149,18 @@ export default {
       }
     },
     async getTemplateValue (template) {
-      const { statusCode, data } = await getTemplateValue(template.id)
+      let { statusCode, data } = await getTemplateValue(template.id)
       if (statusCode === 'OK') {
+        if (data.length === 0) {
+          data = [
+            {
+              id: '',
+              template: template.id,
+              providerTemplateValueInfo: this.buildEmptyProvider(),
+              value: ''
+            }
+          ]
+        }
         template.templateValue = this.beautyTemplate(data)
       }
     },
@@ -169,7 +179,7 @@ export default {
       const newTemplate = {
         id: '',
         providerTemplateValueInfo: this.buildEmptyProvider(),
-        template: template.name,
+        template: template.id,
         value: ''
       }
       this.pluginTemplates[index].templateValue.push(newTemplate)
@@ -194,9 +204,10 @@ export default {
         this.pluginTemplates[tIndex].templateValue[tvIndex].value = data[0].value
         let providerValue = []
         this.provider.forEach(p => {
+          const find = this.providerList.find(pro => pro.name === p)
           providerValue.push({
             value: templateValue.providerTemplateValueInfo[p].value,
-            provider: p,
+            provider: find.id,
             templateValue: data[0].id
           })
         })

@@ -681,9 +681,9 @@ export default {
         isShow: true,
         form: {
           name: '',
-          plugin: this.pluginOptions.find(p => p.id === this.plugin).name,
+          plugin: this.plugin,
           interface: this.currentInterface,
-          provider: this.providerList.find(p => p.id === this.currentProvider).name,
+          provider: this.currentProvider,
           resourceAssetIdAttribute: ''
         }
       }
@@ -699,7 +699,9 @@ export default {
       }
     },
     addParams (source, type) {
-      source[type].push(JSON.parse(JSON.stringify(this.emptyParams)))
+      let tmp = JSON.parse(JSON.stringify(this.emptyParams))
+      tmp.source = tmp.id
+      source[type].push(tmp)
     },
     async openRelativeParameterValue (val, interfaceParams) {
       const find = this[interfaceParams].find(ip => ip.id === val.relativeParameter)
