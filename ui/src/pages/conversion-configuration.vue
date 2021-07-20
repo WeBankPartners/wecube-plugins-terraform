@@ -625,11 +625,6 @@ export default {
         { label: 'attr', value: 'attr' },
         { label: 'direct', value: 'direct' }
       ],
-      interfaceInputParams: [],
-      interfaceOutputParams: [],
-      interfaceInputParamsWithTemplate: [], // 供arg parameter 使用
-      interfaceOutputParamsWithTemplate: [], // 供attr parameter 使用
-      sourceWithFilter: [], // 关联source列表，依据provider过滤
       emptyParams: {
         convertWay: '',
         createTime: '',
@@ -646,11 +641,16 @@ export default {
         relativeParameterValue: '',
         relativeSource: '',
         relativeTfstateAttribute: '',
+        argsObjetcNameOptions: [],
+        attrsObjetcNameOptions: [],
+        interfaceInputParams: [],
+        interfaceOutputParams: [],
+        sourceWithFilter: [],
         relativeValueOptions: [],
+        sourceAttr: [],
         interfaceInputParamsWithTemplate: [],
         interfaceOutputParamsWithTemplate: [],
         source: '',
-        sourceAttr: [],
         type: '',
         updateTime: '',
         updateUser: ''
@@ -702,6 +702,7 @@ export default {
     },
     addParams (source, type) {
       let tmp = JSON.parse(JSON.stringify(this.emptyParams))
+      tmp.source = source.id
       source[type].push(tmp)
     },
     async openRelativeParameterValue (val, interfaceParams) {

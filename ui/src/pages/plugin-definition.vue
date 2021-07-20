@@ -376,6 +376,7 @@ export default {
         multiple: 'N',
         name: '',
         objectName: '',
+        objectNameOptions: [],
         template: '',
         type: '',
         updateTime: '',
@@ -502,11 +503,17 @@ export default {
       this.currentInterface = interfaceSingleId
       const { statusCode, data } = await getParamaByInterface(interfaceSingleId)
       if (statusCode === 'OK') {
-        this.interfaceParamter.input = sortedArgument(data.filter(d => d.type === 'input')).map(item => {
+        this.interfaceParamter.input = sortedArgument(
+          data.filter(d => d.type === 'input'),
+          'dataType'
+        ).map(item => {
           item.objectNameOptions = []
           return item
         })
-        this.interfaceParamter.output = sortedArgument(data.filter(d => d.type === 'output')).map(item => {
+        this.interfaceParamter.output = sortedArgument(
+          data.filter(d => d.type === 'output'),
+          'dataType'
+        ).map(item => {
           item.objectNameOptions = []
           return item
         })

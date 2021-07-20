@@ -1,4 +1,4 @@
-export default function sortedArgument (items) {
+export default function sortedArgument (items, type = 'type') {
   let level = 0
   items.forEach(el => {
     el.__level = level
@@ -12,11 +12,12 @@ export default function sortedArgument (items) {
       level += 1
       el.__level += level
       el.__completed = true
-      if (el.type === 'object') {
+      if (el[type] === 'object') {
         level = rSortedArgument(
           items.filter(el2 => el2.objectName === el.id),
           items,
-          level
+          level,
+          type
         )
       }
     }
@@ -24,16 +25,17 @@ export default function sortedArgument (items) {
   items.sort((a, b) => a.__level - b.__level)
   return items
 }
-function rSortedArgument (items, allItems, level) {
+function rSortedArgument (items, allItems, level, type) {
   items.forEach(el => {
     level += 1
     el.__level += level
     el.__completed = true
-    if (el.type === 'object') {
+    if (el[type] === 'object') {
       level = this.rSortedArgument(
         allItems.filter(el2 => el2.objectName === el.id),
         allItems,
-        level
+        level,
+        type
       )
     }
   })
