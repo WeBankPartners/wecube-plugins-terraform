@@ -181,7 +181,7 @@
           </div>
           <div style="display:inline-block;vertical-align: top;margin-top:1px;margin-left:-1px;">
             <div>
-              <div style="margin-top: -1px;" v-for="(item, argIndex) in source.args" :key="item.id">
+              <div style="margin-top: -1px;" v-for="(item, argIndex) in source.args" :key="argIndex">
                 <template>
                   <div class="table-col title-width-level1">
                     <Input v-model="item.name" size="small" />
@@ -379,7 +379,7 @@
               </div>
             </div>
             <div>
-              <div style="margin-top: -1px;" v-for="(item, attrIndex) in source.attrs" :key="item.id">
+              <div style="margin-top: -1px;" v-for="(item, attrIndex) in source.attrs" :key="attrIndex">
                 <template>
                   <div class="table-col title-width-level1">
                     <Input v-model="item.name" size="small" />
@@ -647,6 +647,8 @@ export default {
         relativeSource: '',
         relativeTfstateAttribute: '',
         relativeValueOptions: [],
+        interfaceInputParamsWithTemplate: [],
+        interfaceOutputParamsWithTemplate: [],
         source: '',
         sourceAttr: [],
         type: '',
@@ -700,7 +702,6 @@ export default {
     },
     addParams (source, type) {
       let tmp = JSON.parse(JSON.stringify(this.emptyParams))
-      tmp.source = tmp.id
       source[type].push(tmp)
     },
     async openRelativeParameterValue (val, interfaceParams) {
@@ -797,27 +798,6 @@ export default {
         item.interfaceOutputParamsWithTemplate = data.filter(d => d.type === 'output').filter(d => d.template !== '')
       }
     },
-    // async getDefaultValueOptions (item, type) {
-    //   item.defaultValue = ''
-    //   if (type === 'args') {
-    //     const find = item.interfaceInputParamsWithTemplate.find(ip => ip.id === item.parameter)
-    //     if (find) {
-    //       const { statusCode, data } = await getTemplateValue(find.template)
-    //       if (statusCode === 'OK') {
-    //         item.defaultValueOptions = data
-    //       }
-    //     }
-    //   }
-    //   if (type === 'attrs') {
-    //     const find = item.interfaceOutputParamsWithTemplate.find(ip => ip.id === item.parameter)
-    //     if (find) {
-    //       const { statusCode, data } = await getTemplateValue(find.template)
-    //       if (statusCode === 'OK') {
-    //         item.defaultValueOptions = data
-    //       }
-    //     }
-    //   }
-    // },
     async getRelativeValueOptions (item, sourceIndex, type, index) {
       item.relativeParameterValue = ''
       if (type === 'args') {
