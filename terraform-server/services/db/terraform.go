@@ -700,134 +700,49 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 											   action,
 											   parentObjectName,
 			                                   orderTfstateAttrList)
-		// 循环遍历每个 outPutParameterName 进行 reverseConvert 生成输出参数
-		/*
-		for k, v := range outPutParameterNameMap {
-			if tfstateAttr, okParam := tfstateAttrParamMap[v.Id]; okParam {
-				if tfstateOutParamVal, ok := tfstateFileAttributes[tfstateAttr.Name]; ok {
-					convertWay := tfstateAttr.ConvertWay
-					var outArgKey string
-					var outArgVal interface{}
-					var isDiscard = false
-					switch convertWay {
-					case models.ConvertWay["Data"]:
-						outArgKey, outArgVal, err = reverseConvertData(v, tfstateAttr.Source, tfstateOutParamVal)
-					case models.ConvertWay["Template"]:
-						outArgKey, outArgVal, err = reverseConvertTemplate(v, providerData, tfstateOutParamVal)
-					case models.ConvertWay["Attr"]:
-						outArgKey, outArgVal, err = reverseConvertAttr(v, tfstateAttr, tfstateOutParamVal)
-					case models.ConvertWay["ContextData"]:
-						outArgKey, outArgVal, isDiscard, err = reverseConvertContextData(v, tfstateAttr, tfstateOutParamVal, tfstateFileAttributes)
-					case models.ConvertWay["Direct"]:
-						// outArgKey, outArgVal, err = reverseConvertDirect(tfstateAttr.Parameter, tfstateOutParamVal)
-						outArgKey, outArgVal, err = k, tfstateOutParamVal, nil
-					}
-					if isDiscard {
-						continue
-					}
-					if err != nil {
-						err = fmt.Errorf("Reverse convert parameter:%s error:%s", tfstateAttr.Parameter, err.Error())
-						log.Logger.Error("Revese convert parameter error", log.String("parameterId", tfstateAttr.Parameter), log.Error(err))
-						retOutput["errorMessage"] = err.Error()
-						return
-					}
-					outPutArgs[outArgKey] = outArgVal
-				} else {
-					outPutArgs[k] = ""
-				}
-			} else {
-				outPutArgs[k] = reqParam[k]
-			}
-		}
-		 */
 		if err != nil {
 			err = fmt.Errorf("Handle reverse convert error:%s", err.Error())
 			log.Logger.Error("Handle revese convert  error", log.Error(err))
 			retOutput["errorMessage"] = err.Error()
 			return
 		}
-		for k, v := range outPutArgs {
-			retOutput[k] = v
+
+		outPutResultList := []map[string]interface{}{}
+		// flat outPutParam data
+		flatOutPutArgs, _ := handleFlatOutPutParam(outPutArgs)
+		for i := range flatOutPutArgs {
+			// outPutParam 不在 tfstateFile 返回结果中的字段，用输入传进来的值
+			for k, v := range outPutParameterNameMap {
+				if _, okParam := tfstateAttrParamMap[v.Id]; !okParam {
+					flatOutPutArgs[i][k] = reqParam[k]
+				}
+			}
+			outPutResultList = append(outPutResultList, flatOutPutArgs[i])
 		}
+		retOutput["_result_list"] = outPutResultList
+		//for k, v := range outPutArgs {
+		//	retOutput[k] = v
+		//}
 	} else {
 		// 处理结果字段为 object 的情况
-		//retOutput["##result_list"] = []interface{}
 		outPutResultList := []map[string]interface{}{}
 		var tfstateResult []map[string]interface{}
 		if tfstateObjectTypeAttribute.IsMulti == "Y" {
-			// var result []map[string]interface{}
 			var tmpData []map[string]interface{}
 			tmpMarshal, _ := json.Marshal(tfstateFileAttributes[tfstateObjectTypeAttribute.Name])
 			json.Unmarshal(tmpMarshal, &tmpData)
-			//tmpData := tfstateFileAttributes[tfstateObjectTypeAttribute.Name].([]map[string]interface{})
 			for i := range tmpData {
 				tfstateResult = append(tfstateResult, tmpData[i])
 			}
 		} else {
 			var tmpData map[string]interface{}
 			tmpMarshal, _ := json.Marshal(tfstateFileAttributes[tfstateObjectTypeAttribute.Name])
-			//tmpData := tfstateFileAttributes[tfstateObjectTypeAttribute.Name]
 			json.Unmarshal(tmpMarshal, &tmpData)
 			tfstateResult = append(tfstateResult, tmpData)
 		}
 		for i := range tfstateResult {
 			var outPutArgs map[string]interface{}
 			parentObjectName := tfstateObjectTypeAttribute.Id
-			/*
-			// 循环遍历每个 outPutParameterName 进行 reverseConvert 生成输出参数
-			for k, v := range outPutParameterNameMap {
-				if tfstateAttr, okParam := tfstateAttrParamMap[v.Id]; okParam {
-					if tfstateOutParamVal, ok := tfstateResult[i][tfstateAttr.Name]; ok {
-						convertWay := tfstateAttr.ConvertWay
-						var outArgKey string
-						var outArgVal interface{}
-						var isDiscard = false
-						switch convertWay {
-						case models.ConvertWay["Data"]:
-							outArgKey, outArgVal, err = reverseConvertData(v, tfstateAttr.Source, tfstateOutParamVal)
-						case models.ConvertWay["Template"]:
-							outArgKey, outArgVal, err = reverseConvertTemplate(v, providerData, tfstateOutParamVal)
-						case models.ConvertWay["Attr"]:
-							outArgKey, outArgVal, err = reverseConvertAttr(v, tfstateAttr, tfstateOutParamVal)
-						case models.ConvertWay["ContextData"]:
-							outArgKey, outArgVal, isDiscard, err = reverseConvertContextData(v, tfstateAttr, tfstateOutParamVal, tfstateResult[i])
-						case models.ConvertWay["Direct"]:
-							// outArgKey, outArgVal, err = reverseConvertDirect(tfstateAttr.Parameter, tfstateOutParamVal)
-							outArgKey, outArgVal, err = k, tfstateOutParamVal, nil
-						}
-						if isDiscard {
-							continue
-						}
-
-						if action == "query" {
-							if outArgVal == nil || outArgVal == "" {
-								// continue
-								err = nil
-							}
-							if outArgKey == "" {
-								continue
-							}
-						}
-
-						if err != nil {
-							err = fmt.Errorf("Reverse convert parameter:%s error:%s", tfstateAttr.Parameter, err.Error())
-							log.Logger.Error("Revese convert parameter error", log.String("parameterId", tfstateAttr.Parameter), log.Error(err))
-							retOutput["errorMessage"] = err.Error()
-							return
-						}
-						outPutArgs[outArgKey] = outArgVal
-					} else {
-						outPutArgs[k] = ""
-					}
-				} else {
-					outPutArgs[k] = reqParam[k]
-				}
-			}
-			//for k, v := range outPutArgs {
-			//	retOutput[k] = v
-			//}
-			 */
-
 			outPutArgs, err = handleReverseConvert(outPutParameterNameMap,
 												   outPutParameterIdMap,
 				                                   tfstateAttrParamMap,
@@ -844,7 +759,20 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 				retOutput["errorMessage"] = err.Error()
 				return
 			}
-			outPutResultList = append(outPutResultList, outPutArgs)
+
+			// flat outPutParam data
+			flatOutPutArgs, _ := handleFlatOutPutParam(outPutArgs)
+
+			for i := range flatOutPutArgs {
+				// outPutParam 不在 tfstateFile 返回结果中的字段，用输入传进来的值
+				for k, v := range outPutParameterNameMap {
+					if _, okParam := tfstateAttrParamMap[v.Id]; !okParam {
+						flatOutPutArgs[i][k] = reqParam[k]
+					}
+				}
+				outPutResultList = append(outPutResultList, flatOutPutArgs[i])
+			}
+			// outPutResultList = append(outPutResultList, outPutArgs)
 			retOutput["_result_list"] = outPutResultList
 		}
 	}
@@ -859,6 +787,37 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 	}
 
 	retOutput["errorCode"] = "0"
+	return
+}
+
+func handleFlatOutPutParam(outPutArgs map[string]interface{}) (retOutPutArgs []map[string]interface{}, err error) {
+	flatParams := make(map[string]interface{})
+	for k := range outPutArgs {
+		if k != "_result_list" {
+			flatParams[k] = outPutArgs[k]
+		}
+	}
+	hasResultList := false
+	for k, v := range outPutArgs {
+		if k == "_result_list" {
+			hasResultList = true
+			var tmpData []map[string]interface{}
+			tmpMarshal, _ := json.Marshal(v)
+			json.Unmarshal(tmpMarshal, &tmpData)
+			for i := range tmpData {
+				ret, _ := handleFlatOutPutParam(tmpData[i])
+				for j := range ret {
+					for fp := range flatParams {
+						ret[j][fp] = flatParams[fp]
+					}
+					retOutPutArgs = append(retOutPutArgs, ret[j])
+				}
+			}
+		}
+	}
+	if !hasResultList {
+		retOutPutArgs = append(retOutPutArgs, flatParams)
+	}
 	return
 }
 
@@ -1607,13 +1566,14 @@ func convertData(parameterData *models.ParameterTable, relativeSourceId string, 
 	return
 }
 
-func reverseConvertData(parameterData *models.ParameterTable, relativeSourceId string, tfstateVal interface{}) (argKey string, argVal interface{}, err error) {
+func reverseConvertData(parameterData *models.ParameterTable, tfstateAttributeData *models.TfstateAttributeTable, tfstateVal interface{}) (argKey string, argVal interface{}, err error) {
 	if tfstateVal == nil {
 		argKey = parameterData.Name
 		return
 	}
+	relativeSourceId := tfstateAttributeData.RelativeSource
 	var resourceAssetIds []string
-	if parameterData.Multiple == "Y" {
+	if tfstateAttributeData.IsMulti == "Y" {
 		tfstateAssetIds := tfstateVal.([]interface{})
 		for _, v := range tfstateAssetIds {
 			resourceAssetIds = append(resourceAssetIds, v.(string))
@@ -1638,7 +1598,7 @@ func reverseConvertData(parameterData *models.ParameterTable, relativeSourceId s
 	}
 	argKey = parameterData.Name
 
-	if parameterData.Multiple == "Y" {
+	if tfstateAttributeData.IsMulti == "Y" {
 		tmpRes := []string{}
 		for i := range resourceDataList {
 			tmpRes = append(tmpRes, resourceDataList[i].ResourceId)
@@ -1788,7 +1748,7 @@ func reverseConvertAttr(parameterData *models.ParameterTable, tfstateAttributeDa
 		return
 	}
 	relativeAssetVals := []string{}
-	if parameterData.Multiple == "Y" {
+	if tfstateAttributeData.IsMulti == "Y" {
 		tmpData := tfstateVal.([]interface{})
 		for i := range tmpData {
 			relativeAssetVals = append(relativeAssetVals, tmpData[i].(string))
@@ -1852,7 +1812,7 @@ func reverseConvertAttr(parameterData *models.ParameterTable, tfstateAttributeDa
 	}
 
 	argKey = parameterData.Name
-	if parameterData.Multiple == "Y" {
+	if tfstateAttributeData.IsMulti == "Y" {
 		tmpRes := []string{}
 		for i := range result {
 			tmpRes = append(tmpRes, result[i].(string))
@@ -1923,7 +1883,7 @@ func reverseConvertContextData(parameterData *models.ParameterTable,
 		return
 	}
 	if outPutArgs[relativeParameterData.Name].(string) == tfstateAttributeData.RelativeParameterValue {
-		argKey, argVal, err = reverseConvertData(parameterData, tfstateAttributeData.RelativeSource, tfstateVal)
+		argKey, argVal, err = reverseConvertData(parameterData, tfstateAttributeData, tfstateVal)
 	} else {
 		isDiscard = true
 	}
@@ -1977,12 +1937,7 @@ func handleReverseConvert(outPutParameterNameMap map[string]*models.ParameterTab
 	                      tfstateAttributeList []*models.TfstateAttributeTable) (outPutArgs map[string]interface{}, err error) {
 	outPutArgs = make(map[string]interface{})
 	curLevelResult := make(map[string]interface{})
-	// outPutParam 不在 tfstateFile 返回结果中的字段，用输入传进来的值
-	//for k, v := range outPutParameterNameMap {
-	//	if _, okParam := tfstateAttrParamMap[v.Id]; !okParam {
-	//		outPutArgs[k] = reqParam[k]
-	//	}
-	//}
+
 
 	// 循环遍历每个 tfstateAttribute 进行 reverseConvert 生成输出参数
 	for _, tfstateAttr := range tfstateAttributeList {
@@ -2030,7 +1985,7 @@ func handleReverseConvert(outPutParameterNameMap map[string]*models.ParameterTab
 					var isDiscard = false
 					switch convertWay {
 					case models.ConvertWay["Data"]:
-						outArgKey, outArgVal, err = reverseConvertData(curParamData, tfstateAttr.RelativeSource, tfstateOutParamVal)
+						outArgKey, outArgVal, err = reverseConvertData(curParamData, tfstateAttr, tfstateOutParamVal)
 					case models.ConvertWay["Template"]:
 						outArgKey, outArgVal, err = reverseConvertTemplate(curParamData, providerData, tfstateOutParamVal)
 					case models.ConvertWay["Attr"]:
