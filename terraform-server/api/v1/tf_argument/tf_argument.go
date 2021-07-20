@@ -20,7 +20,7 @@ func TfArgumentList(c *gin.Context) {
 		middleware.ReturnServerHandleError(c, err)
 	} else {
 		if len(rowData) == 0 {
-			rowData = []*models.TfArgumentTable{}
+			rowData = []*models.TfArgumentQuery{}
 		}
 		middleware.ReturnData(c, rowData)
 	}

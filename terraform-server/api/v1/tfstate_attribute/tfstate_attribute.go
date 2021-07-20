@@ -20,7 +20,7 @@ func TfstateAttributeList(c *gin.Context) {
 		middleware.ReturnServerHandleError(c, err)
 	} else {
 		if len(rowData) == 0 {
-			rowData = []*models.TfstateAttributeTable{}
+			rowData = []*models.TfstateAttributeQuery{}
 		}
 		middleware.ReturnData(c, rowData)
 	}

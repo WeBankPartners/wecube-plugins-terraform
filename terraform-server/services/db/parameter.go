@@ -9,14 +9,22 @@ import (
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/models"
 )
 
-func ParameterList(paramsMap map[string]interface{}) (rowData []*models.ParameterTable, err error) {
-	sqlCmd := "SELECT * FROM parameter WHERE 1=1"
+func ParameterList(paramsMap map[string]interface{}) (rowData []*models.ParameterQuery, err error) {
+	// sqlCmd := "SELECT * FROM parameter WHERE 1=1"
+	// paramArgs := []interface{}{}
+	//for k, v := range paramsMap {
+	//	sqlCmd += " AND " + k + "=?"
+	//	paramArgs = append(paramArgs, v)
+	//}
+	//sqlCmd += " ORDER BY create_time DESC"
+
+	sqlCmd := "SELECT t1.*, t2.name AS object_name_title FROM parameter t1 LEFT JOIN parameter t2 ON t1.object_name=t2.id WHERE 1=1"
 	paramArgs := []interface{}{}
 	for k, v := range paramsMap {
-		sqlCmd += " AND " + k + "=?"
+		sqlCmd += " AND " + "t1." + k + "=?"
 		paramArgs = append(paramArgs, v)
 	}
-	sqlCmd += " ORDER BY create_time DESC"
+	sqlCmd += " ORDER BY t1.id DESC"
 	err = x.SQL(sqlCmd, paramArgs...).Find(&rowData)
 	if err != nil {
 		log.Logger.Error("Get parameter list error", log.Error(err))

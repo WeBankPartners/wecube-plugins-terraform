@@ -20,7 +20,7 @@ func ParameterList(c *gin.Context) {
 		middleware.ReturnServerHandleError(c, err)
 	} else {
 		if len(rowData) == 0 {
-			rowData = []*models.ParameterTable{}
+			rowData = []*models.ParameterQuery{}
 		}
 		middleware.ReturnData(c, rowData)
 	}
