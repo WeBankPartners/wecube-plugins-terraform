@@ -43,7 +43,40 @@ func InterfaceBatchCreate(user string, param []*models.InterfaceTable) (rowData 
 			return
 		}
 		actions = append(actions, action)
+
+		// Auto insert system parameters
+		systemParams := make(map[string]map[string][]string)
+		systemParams["apply"] = make(map[string][]string)
+		systemParams["query"] = make(map[string][]string)
+		systemParams["destroy"] = make(map[string][]string)
+
+		systemParams["apply"]["input"] = []string{"id", "asset_id", "region_id", "provider_info"}
+		systemParams["query"]["input"] = []string{"id", "asset_id", "region_id", "provider_info"}
+		systemParams["destroy"]["input"] = []string{"id", "region_id", "provider_info"}
+
+		systemParams["apply"]["output"] = []string{"id", "asset_id"}
+		systemParams["query"]["output"] = []string{"id", "asset_id"}
+		systemParams["destroy"]["output"] = []string{"id"}
+
+		// 当 transNullStr 的 key 表示的字段为空时，表示需要将其插入 null
+		transNullStr := make(map[string]string)
+		transNullStr["template"] = "true"
+		transNullStr["object_name"] = "true"
+		paramTableName := "parameter"
+		for paramType, _ := range systemParams[rowData[i].Name] {
+			for _, paramName := range systemParams[rowData[i].Name][paramType] {
+				paramId := guid.CreateGuid()
+				paramData := &models.ParameterTable{Id: paramId, Name: paramName, Type: paramType, Multiple: "N", Interface: rowData[i].Id, DataType: "string", Source: "system", CreateUser: user, CreateTime: createTime, UpdateTime: createTime}
+				action, tmpErr := GetInsertTableExecAction(paramTableName, *paramData, transNullStr)
+				if tmpErr != nil {
+					err = fmt.Errorf("Try to create parameter fail,%s ", tmpErr.Error())
+					return
+				}
+				actions = append(actions, action)
+			}
+		}
 	}
+
 
 	err = transaction(actions)
 	if err != nil {

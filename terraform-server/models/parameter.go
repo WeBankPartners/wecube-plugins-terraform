@@ -9,6 +9,7 @@ type ParameterTable struct {
 	Template   string `json:"template" xorm:"template"`
 	DataType   string `json:"dataType" xorm:"datatype"`
 	ObjectName string `json:"objectName" xorm:"object_name"`
+	Source     string `json:"source" xorm:"source"`
 	CreateTime string `json:"createTime" xorm:"create_time"`
 	CreateUser string `json:"createUser" xorm:"create_user"`
 	UpdateTime string `json:"updateTime" xorm:"update_time"`
