@@ -28,6 +28,7 @@ export const editInterface = data => req.put(`/interfaces`, data)
 export const getParamaByInterface = interfaceId => req.get(`/parameters?interface=${interfaceId}`)
 
 export const addPlugin = data => req.post(`/plugins`, data)
+export const deletePlugin = id => req.delete(`/plugins?ids=${id}`)
 export const editPlugin = data => req.put(`/plugins`, data)
 export const addParameter = data => req.post(`/parameters`, data)
 export const editParameter = data => req.put(`/parameters`, data)

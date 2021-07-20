@@ -2,6 +2,9 @@
   <div class="">
     <Row>
       <Col span="5" style="border-right: 1px solid #e8eaec;">
+        <Button type="success" @click="addPlugin" ghost size="small" style="margin-left:24px;width: 85%;">{{
+          $t('t_add')
+        }}</Button>
         <div style="height: calc(100vh - 180px);overflow-y:auto;">
           <div style="">
             <Menu
@@ -25,6 +28,9 @@
                         style="color: #19be6b;"
                         type="ios-create-outline"
                       />
+                    </Tooltip>
+                    <Tooltip :content="$t('t_delete')" :delay="1000">
+                      <Icon @click.stop.prevent="deletePlugin(plugin)" style="color: #ed4014;" type="md-trash" />
                     </Tooltip>
                   </div>
                 </template>
@@ -266,7 +272,7 @@
     </Modal>
     <Modal
       v-model="newPlugin.isShow"
-      :title="$t('t_add') + $t('t_plugin')"
+      :title="newPlugin.isAdd ? $t('t_add') : $t('t_edit') + $t('t_plugin')"
       @on-ok="confirmPlugin"
       @on-cancel="newPlugin.isShow = false"
     >
@@ -276,6 +282,22 @@
         </FormItem>
       </Form>
     </Modal>
+    <Modal
+      v-model="newInterface.isShow"
+      :title="newInterface.isAdd ? $t('t_add') : $t('t_edit') + $t('t_interface')"
+      @on-ok="confirmInterface"
+      @on-cancel="newInterface.isShow = false"
+    >
+      <Form inline :label-width="80">
+        <FormItem :label="$t('t_name')">
+          <Input type="text" v-model="newInterface.form.name" style="width:300px"></Input>
+        </FormItem>
+        <FormItem :label="$t('t_description')">
+          <Input type="text" v-model="newInterface.form.description" style="width:300px"></Input>
+        </FormItem>
+      </Form>
+    </Modal>
+
     <Modal
       v-model="newInterface.isShow"
       :title="newInterface.isShow.isAdd ? $t('t_add') : $t('t_edit') + $t('t_interface')"
@@ -302,6 +324,7 @@ import {
   editInterface,
   deleteInterface,
   getParamaByInterface,
+  deletePlugin,
   addPlugin,
   editPlugin,
   addParameter,
@@ -326,6 +349,7 @@ export default {
       ],
       newPlugin: {
         isShow: false,
+        isAdd: false,
         form: {
           name: ''
         }
@@ -370,6 +394,34 @@ export default {
     this.getPlugin()
   },
   methods: {
+    deletePlugin (item) {
+      this.$Modal.confirm({
+        title: this.$t('t_confirm_delete'),
+        'z-index': 1000000,
+        loading: true,
+        onOk: async () => {
+          let res = await deletePlugin(item.id)
+          this.$Modal.remove()
+          if (res.statusCode === 'OK') {
+            this.$Notice.success({
+              title: 'Successful',
+              desc: 'Successful'
+            })
+            this.getPlugin()
+          }
+        },
+        onCancel: () => {}
+      })
+    },
+    addPlugin () {
+      this.newPlugin = {
+        isShow: true,
+        isAdd: true,
+        form: {
+          name: ''
+        }
+      }
+    },
     async confirmAddTemplate () {
       const { statusCode } = await createTemplate([this.newTemplate.form])
       if (statusCode === 'OK') {

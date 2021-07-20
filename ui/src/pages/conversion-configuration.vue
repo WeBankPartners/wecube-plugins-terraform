@@ -605,11 +605,11 @@ export default {
     return {
       MODALHEIGHT: 300,
 
-      plugin: 'cvm',
+      plugin: '',
       pluginOptions: [],
-      currentInterface: 'cvm__apply',
+      currentInterface: '',
       interfaceOptions: [],
-      currentProvider: 'tencentcloud',
+      currentProvider: '',
       providerList: [],
       sourceInfo: [],
       dataTypeOptions: [
