@@ -42,3 +42,15 @@ type SortTfstateAttributes struct {
 	Point       int                    `json:"point"`
 	IsExist     bool                   `json:"isExist"`
 }
+
+type FunctionDefine struct {
+	Function string              `json:"function"`
+	Args     *FunctionDefineArgs `json:"function"`
+	Return   string              `json:"return"`
+}
+
+type FunctionDefineArgs struct {
+	SplitChar   []string `json:"splitchar"`
+	ReplaceChar []string `json:"replacechar"`
+	RegxExpr    []string `json:"regxExpr"`
+}

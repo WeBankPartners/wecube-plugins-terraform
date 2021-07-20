@@ -345,6 +345,12 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 			arg, err = convertAttr(parameterData, tfArgumentList[i], reqParam)
 		case models.ConvertWay["Direct"]:
 			arg, err = convertDirect(parameterData, tfArgumentList[i].DefaultValue, reqParam)
+		case models.ConvertWay["Function"]:
+			arg, err = convertFunction(parameterData, tfArgumentList[i], reqParam)
+		default:
+			err = fmt.Errorf("The convertWay:%s of tfArgument:%s is invalid", convertWay, tfArgumentList[i].Name)
+			log.Logger.Error("The convertWay of tfArgument is invalid", log.String("convertWay", convertWay), log.String("tfArgument", tfArgumentList[i].Name), log.Error(err))
+			return
 		}
 
 		if isDiscard {
@@ -1347,12 +1353,15 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	rowData["errorCode"] = "1"
 	rowData["errorMessage"] = ""
 
+	/*
 	defer func(){
 		if r := recover(); r != nil {
 			err = fmt.Errorf("TerraformOperation error: %v", r)
 			rowData["errorMessage"] = err.Error()
 		}
 	}()
+
+	 */
 
 	// Get interface by plugin and action
 	var actionName string
@@ -1910,6 +1919,52 @@ func convertDirect(parameterData *models.ParameterTable, defaultValue string, re
 	return
 }
 
+func convertFunction(parameterData *models.ParameterTable, tfArgumentData *models.TfArgumentTable, reqParam map[string]interface{}) (arg interface{}, err error) {
+	return
+}
+
+func reverseConvertFunction(parameterData *models.ParameterTable, tfstateAttributeData *models.TfstateAttributeTable, tfstateVal interface{}) (argKey string, argVal interface{}, err error) {
+	if tfstateVal == nil {
+		argKey = parameterData.Name
+		return
+	}
+	functionDefine := tfstateAttributeData.FunctionDefine
+	var functionDefineData models.FunctionDefine
+	json.Unmarshal([]byte(functionDefine), &functionDefineData)
+
+	tfstateValStr := tfstateVal.(string)
+	resultIdx := -1
+	if functionDefineData.Return != "result" {
+		idxStrStart := strings.Index(functionDefineData.Return, "[")
+		idxStrEnd := strings.Index(functionDefineData.Return, "]")
+		if idxStrStart == -1 || idxStrEnd == -1 || idxStrStart >= idxStrEnd {
+			argKey = parameterData.Name
+			err = fmt.Errorf("The function_define return_value: %s of tfstateAttribute:%s config error", functionDefine, tfstateAttributeData.Name)
+			log.Logger.Error("The function_define return_value of tfstateAttribute config error", log.String("function_define", functionDefine), log.String("tfstateAttribute", tfstateAttributeData.Name), log.Error(err))
+			return
+		}
+		resultIdx, _ = strconv.Atoi(functionDefineData.Return[idxStrStart+1:idxStrEnd])
+		fmt.Printf("%v", resultIdx)
+	}
+	result := [][]string{}
+	if functionDefineData.Function == models.FunctionConvertFunctionDefineName["Split"] {
+		splitChars := functionDefineData.Args.SplitChar
+		for i := range splitChars {
+			curResult := strings.Split(tfstateValStr, splitChars[i])
+			result = append(result, curResult)
+		}
+	} else if functionDefineData.Function == models.FunctionConvertFunctionDefineName["Replace"] {
+
+	} else if functionDefineData.Function == models.FunctionConvertFunctionDefineName["Regx"] {
+
+	} else {
+		err = fmt.Errorf("The function_define:%s of tfstateAttribute:%s config error", functionDefine, tfstateAttributeData.Name)
+		log.Logger.Error("The function_define of tfstateAttribute config error", log.String("function_define", functionDefine), log.String("tfstateAttribute", tfstateAttributeData.Name), log.Error(err))
+		return
+	}
+	return
+}
+
 func reverseConvertDirect(parameterId string, tfstateVal interface{}) (argKey string, argVal interface{}, err error) {
 	sqlCmd := `SELECT * FROM parameter WHERE id=?`
 	paramArgs := []interface{}{parameterId}
@@ -1948,7 +2003,7 @@ func handleReverseConvert(outPutParameterNameMap map[string]*models.ParameterTab
 	for _, tfstateAttr := range tfstateAttributeList {
 		if tfstateAttr.ObjectName == parentObjectName {
 			// handle current level tfstateAttribute
-			if tfstateAttr.ConvertWay == "" && tfstateAttr.Type == "object" {
+			if tfstateAttr.Type == "object" {
 				// go into next level
 				var curTfstateFileAttributes []interface{}
 				var curAttributesRet []interface{}
@@ -1981,8 +2036,12 @@ func handleReverseConvert(outPutParameterNameMap map[string]*models.ParameterTab
 					}
 					curAttributesRet = append(curAttributesRet, ret)
 				}
-				*paramCnt += 1
-				outPutArgs[models.TerraformOutPutPrefix+strconv.Itoa(*paramCnt)] = curAttributesRet
+				if tfstateAttr.ConvertWay == "" {
+					*paramCnt += 1
+					outPutArgs[models.TerraformOutPutPrefix+strconv.Itoa(*paramCnt)] = curAttributesRet
+				} else {
+					outPutArgs[outPutParameterIdMap[tfstateAttr.Parameter].Name] = curAttributesRet
+				}
 			} else {
 				curParamData := outPutParameterIdMap[tfstateAttr.Parameter]
 				if tfstateOutParamVal, ok := tfstateFileAttributes[tfstateAttr.Name]; ok {
@@ -2002,6 +2061,12 @@ func handleReverseConvert(outPutParameterNameMap map[string]*models.ParameterTab
 					case models.ConvertWay["Direct"]:
 						// outArgKey, outArgVal, err = reverseConvertDirect(tfstateAttr.Parameter, tfstateOutParamVal)
 						outArgKey, outArgVal, err = curParamData.Name, tfstateOutParamVal, nil
+					case models.ConvertWay["Function"]:
+						outArgKey, outArgVal, err = reverseConvertFunction(curParamData, tfstateAttr, tfstateOutParamVal)
+					default:
+						err = fmt.Errorf("The convertWay:%s of tfstateAttribute:%s is invalid", convertWay, tfstateAttr.Name)
+						log.Logger.Error("The convertWay of tfstateAttribute is invalid", log.String("convertWay", convertWay), log.String("tfstateAttribute", tfstateAttr.Name), log.Error(err))
+						return
 					}
 					if isDiscard {
 						continue
