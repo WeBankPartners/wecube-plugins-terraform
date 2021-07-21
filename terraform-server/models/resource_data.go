@@ -45,12 +45,12 @@ type SortTfstateAttributes struct {
 
 type FunctionDefine struct {
 	Function string              `json:"function"`
-	Args     *FunctionDefineArgs `json:"function"`
+	Args     *FunctionDefineArgs `json:"args"`
 	Return   string              `json:"return"`
 }
 
 type FunctionDefineArgs struct {
-	SplitChar   []string `json:"splitchar"`
-	ReplaceChar []string `json:"replacechar"`
-	RegxExpr    []string `json:"regxExpr"`
+	SplitChar  []string            `json:"splitChar"`
+	ReplaceVal []map[string]string `json:"replaceVal"`
+	RegExp     []string            `json:"regExp"`
 }

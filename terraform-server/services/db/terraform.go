@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -217,12 +218,12 @@ func TerraformInit(dirPath string) (err error) {
 }
 
 func handleTerraformApplyOrQuery(reqParam map[string]interface{},
- 								 sourceData *models.SourceTable,
-								 providerData *models.ProviderTable,
-							     providerInfo *models.ProviderInfoTable,
-  							     regionData *models.ResourceDataTable,
-  							     action string, plugin string, dirPath string,
-  							     interfaceData *models.InterfaceTable) (retOutput map[string]interface{}, err error) {
+	sourceData *models.SourceTable,
+	providerData *models.ProviderTable,
+	providerInfo *models.ProviderInfoTable,
+	regionData *models.ResourceDataTable,
+	action string, plugin string, dirPath string,
+	interfaceData *models.InterfaceTable) (retOutput map[string]interface{}, err error) {
 	retOutput = make(map[string]interface{})
 	retOutput["callbackParameter"] = reqParam["callbackParameter"].(string)
 	retOutput["errorCode"] = "1"
@@ -392,7 +393,7 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 		if parameterData.DataType == "object" || parameterData.DataType == "object_str" {
 			var tmpVal map[string]interface{}
 			err = json.Unmarshal([]byte(arg.(string)), &tmpVal)
-			tfArguments[tfArgumentList[i].Name]	= tmpVal
+			tfArguments[tfArgumentList[i].Name] = tmpVal
 			if err != nil {
 				err = fmt.Errorf("Unmarshal arg error:%s", err.Error())
 				log.Logger.Error("Unmarshal arg error", log.Error(err))
@@ -524,7 +525,7 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 				return
 			}
 			terraformProviderPath := terraformFilePath + "providers/" + providerData.Name + "/" + providerData.Version + "/" + models.Config.TerraformProviderOsArch
-			err = os.Symlink(terraformProviderPath, targetTerraformProviderPath + "/" + models.Config.TerraformProviderOsArch)
+			err = os.Symlink(terraformProviderPath, targetTerraformProviderPath+"/"+models.Config.TerraformProviderOsArch)
 			if err != nil {
 				err = fmt.Errorf("Make soft link : %s error: %s", targetTerraformProviderPath, err.Error())
 				log.Logger.Error("Make soft link error", log.String("softLink", targetTerraformProviderPath), log.Error(err))
@@ -560,6 +561,17 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 		}
 	}
 
+	// test
+	///*
+	// terraform init
+	err = TerraformInit(dirPath)
+	if err != nil {
+		err = fmt.Errorf("Do TerraformInit error:%s", err.Error())
+		log.Logger.Error("Do TerraformInit error", log.Error(err))
+		retOutput["errorMessage"] = err.Error()
+		return
+	}
+
 	if resourceAssetId != "" && action == "apply" {
 		// terraform import when assetId has value
 		err = TerraformImport(dirPath, sourceData.Name+"."+resourceId, resourceAssetId)
@@ -570,27 +582,18 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 		}
 	}
 
-	// terraform init
-	err = TerraformInit(dirPath)
-	if err != nil {
-		err = fmt.Errorf("Do TerraformInit error:%s", err.Error())
-		log.Logger.Error("Do TerraformInit error", log.Error(err))
-		retOutput["errorMessage"] = err.Error()
-		return
-	}
-
 	// terraform plan
 	destroyCnt, err := TerraformPlan(dirPath)
 	if err != nil {
 		err = fmt.Errorf("Do TerraformPlan error:%s", err.Error())
 		log.Logger.Error("Do TerraformPlan error", log.Error(err))
-	    retOutput["errorMessage"] = err.Error()
+		retOutput["errorMessage"] = err.Error()
 		return
 	}
 	if destroyCnt > 0 && reqParam["confirmToken"] != "Y" {
 		// 二次确认
 		destroyCntStr := strconv.Itoa(destroyCnt)
-	    retOutput["errorMessage"] = destroyCntStr + "resource(s) will be destroy, please confirm again!"
+		retOutput["errorMessage"] = destroyCntStr + "resource(s) will be destroy, please confirm again!"
 		return
 	}
 
@@ -599,18 +602,22 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 	if err != nil {
 		err = fmt.Errorf("Do TerraformApply error:%s", err.Error())
 		log.Logger.Error("Do TerraformApply error", log.Error(err))
-	    retOutput["errorMessage"] = err.Error()
+		retOutput["errorMessage"] = err.Error()
 		return
 	}
 
+	//*/
+
 	var tfstateObjectTypeAttribute *models.TfstateAttributeTable
 	tfstateAttrParamMap := make(map[string]*models.TfstateAttributeTable)
+	tfstateAttrNameMap := make(map[string]*models.TfstateAttributeTable)
 	for _, v := range tfstateAttributeList {
 		if v.Parameter == "" && v.ObjectName == "" {
 			tfstateObjectTypeAttribute = v
 		} else {
 			tfstateAttrParamMap[v.Parameter] = v
 		}
+		tfstateAttrNameMap[v.Name] = v
 	}
 
 	sortTfstateAttributesList := []*models.SortTfstateAttributes{}
@@ -661,7 +668,7 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 	if err != nil {
 		err = fmt.Errorf("Read tfstate file error:%s", err.Error())
 		log.Logger.Error("Read tfstate file error", log.Error(err))
-	    retOutput["errorMessage"] = err.Error()
+		retOutput["errorMessage"] = err.Error()
 		return
 	}
 	tfstateFileContentStr := string(tfstateFileData)
@@ -670,7 +677,7 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 	if err != nil {
 		err = fmt.Errorf("Unmarshal tfstate file data error:%s", err.Error())
 		log.Logger.Error("Unmarshal tfstate file data error", log.Error(err))
-	    retOutput["errorMessage"] = err.Error()
+		retOutput["errorMessage"] = err.Error()
 		return
 	}
 	var tfstateFileAttributes map[string]interface{}
@@ -699,15 +706,16 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 		parentObjectName := ""
 		paramCnt := 0
 		outPutArgs, err = handleReverseConvert(outPutParameterNameMap,
-											   outPutParameterIdMap,
-											   tfstateAttrParamMap,
-											   reqParam,
-			 							       providerData,
-											   tfstateFileAttributes,
-											   action,
-											   parentObjectName,
-			                                   orderTfstateAttrList,
-			                                   &paramCnt)
+			outPutParameterIdMap,
+			tfstateAttrParamMap,
+			tfstateAttrNameMap,
+			reqParam,
+			providerData,
+			tfstateFileAttributes,
+			action,
+			parentObjectName,
+			orderTfstateAttrList,
+			&paramCnt)
 		if err != nil {
 			err = fmt.Errorf("Handle reverse convert error:%s", err.Error())
 			log.Logger.Error("Handle revese convert  error", log.Error(err))
@@ -718,15 +726,30 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 		outPutResultList := []map[string]interface{}{}
 		// flat outPutParam data
 		flatOutPutArgs, _ := handleFlatOutPutParam(outPutArgs)
-		for i := range flatOutPutArgs {
-			// outPutParam 不在 tfstateFile 返回结果中的字段，用输入传进来的值
+
+		// 将数组类型的值进行一一映射
+		// mapOutPutArgs, _ := handleSliceMapOutPutParam(flatOutPutArgs)
+
+		// outPutParam 不在 tfstateFile 返回结果中的字段，用输入传进来的值
+			for i := range flatOutPutArgs {
+				for k, v := range outPutParameterNameMap {
+					if _, okParam := tfstateAttrParamMap[v.Id]; !okParam {
+						flatOutPutArgs[i][k] = reqParam[k]
+					}
+				}
+				outPutResultList = append(outPutResultList, flatOutPutArgs[i])
+			}
+		/*
+		for i := range mapOutPutArgs {
 			for k, v := range outPutParameterNameMap {
 				if _, okParam := tfstateAttrParamMap[v.Id]; !okParam {
-					flatOutPutArgs[i][k] = reqParam[k]
+					mapOutPutArgs[i][k] = reqParam[k]
 				}
 			}
-			outPutResultList = append(outPutResultList, flatOutPutArgs[i])
+			outPutResultList = append(outPutResultList, mapOutPutArgs[i])
 		}
+
+		 */
 		retOutput[models.TerraformOutPutPrefix] = outPutResultList
 		//for k, v := range outPutArgs {
 		//	retOutput[k] = v
@@ -753,15 +776,16 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 			parentObjectName := tfstateObjectTypeAttribute.Id
 			paramCnt := 0
 			outPutArgs, err = handleReverseConvert(outPutParameterNameMap,
-												   outPutParameterIdMap,
-				                                   tfstateAttrParamMap,
-				                                   reqParam,
-				                                   providerData,
-				                                   tfstateResult[i],
-				                                   action,
-				                                   parentObjectName,
-				                                   orderTfstateAttrList,
-				                                   &paramCnt)
+				outPutParameterIdMap,
+				tfstateAttrParamMap,
+				tfstateAttrNameMap,
+				reqParam,
+				providerData,
+				tfstateResult[i],
+				action,
+				parentObjectName,
+				orderTfstateAttrList,
+				&paramCnt)
 
 			if err != nil {
 				err = fmt.Errorf("Handle reverse convert error:%s", err.Error())
@@ -831,12 +855,50 @@ func handleFlatOutPutParam(outPutArgs map[string]interface{}) (retOutPutArgs []m
 	return
 }
 
+func handleSliceMapOutPutParam(outPutArgs []map[string]interface{}) (retOutPutArgs []map[string]interface{}, err error) {
+	retOutPutArgs = outPutArgs
+	/*
+		for _, retArg := range outPutArgs {
+			sliceKeys := make(map[string]interface{})
+			nonSliceKeys := make(map[string]interface{})
+			cnt := 0
+			for k, v := range retArg {
+				if _, ok := v.([]interface{}); ok {
+					sliceKeys[k] = v
+					cnt = len(v.([]interface{}))
+				} else {
+					nonSliceKeys[k] = v
+				}
+				retResult := []map[string]interface{}{}
+				for i := 0; i < cnt; i++ {
+					curResult := make(map[string]interface{})
+					hasSliceVal := false
+					for k1, v1 := range sliceKeys.([]interface{}) {
+						curResult[k1] = v1
+						if _, ok := v1.([]interface{}); ok {
+							hasSliceVal = true
+						}
+					}
+					for k1, v1 := range nonSliceKeys {
+						curResult[k1] = v1
+					}
+					if hasSliceVal {
+						tmpRet :=
+					}
+				}
+			}
+		}
+
+	*/
+	return
+}
+
 func handleAzQuery(reqParam map[string]interface{},
-                   workDirPath string,
-			       providerData *models.ProviderTable,
-			       providerInfo *models.ProviderInfoTable,
-			       regionData *models.ResourceDataTable,
-			       sourceData *models.SourceTable) (rowData map[string]interface{}, err error) {
+	workDirPath string,
+	providerData *models.ProviderTable,
+	providerInfo *models.ProviderInfoTable,
+	regionData *models.ResourceDataTable,
+	sourceData *models.SourceTable) (rowData map[string]interface{}, err error) {
 	rowData = make(map[string]interface{})
 	_, err = os.Stat(workDirPath)
 	if err != nil {
@@ -916,7 +978,7 @@ func handleAzQuery(reqParam map[string]interface{},
 				return
 			}
 			terraformProviderPath := terraformFilePath + "providers/" + providerData.Name + "/" + providerData.Version + "/" + models.Config.TerraformProviderOsArch
-			err = os.Symlink(terraformProviderPath, targetTerraformProviderPath + "/" + models.Config.TerraformProviderOsArch)
+			err = os.Symlink(terraformProviderPath, targetTerraformProviderPath+"/"+models.Config.TerraformProviderOsArch)
 			if err != nil {
 				err = fmt.Errorf("Make soft link : %s error: %s", targetTerraformProviderPath, err.Error())
 				log.Logger.Error("Make soft link error", log.String("softLink", targetTerraformProviderPath), log.Error(err))
@@ -1147,11 +1209,11 @@ func handleApplyOrQuery(action string, reqParam map[string]interface{}, sourceDa
 }
 
 func handleDestroy(workDirPath string,
-	               sourceData *models.SourceTable,
-	               providerData *models.ProviderTable,
-	               providerInfo *models.ProviderInfoTable,
-	               regionData *models.ResourceDataTable,
-	               reqParam map[string]interface{}) (rowData map[string]interface{}, err error) {
+	sourceData *models.SourceTable,
+	providerData *models.ProviderTable,
+	providerInfo *models.ProviderInfoTable,
+	regionData *models.ResourceDataTable,
+	reqParam map[string]interface{}) (rowData map[string]interface{}, err error) {
 	rowData = make(map[string]interface{})
 	rowData["callbackParameter"] = reqParam["callbackParameter"].(string)
 	rowData["errorCode"] = "1"
@@ -1257,7 +1319,7 @@ func handleDestroy(workDirPath string,
 					return
 				}
 				terraformProviderPath := terraformFilePath + "providers/" + providerData.Name + "/" + providerData.Version + "/" + models.Config.TerraformProviderOsArch
-				err = os.Symlink(terraformProviderPath, targetTerraformProviderPath + "/" + models.Config.TerraformProviderOsArch)
+				err = os.Symlink(terraformProviderPath, targetTerraformProviderPath+"/"+models.Config.TerraformProviderOsArch)
 				if err != nil {
 					err = fmt.Errorf("Make soft link : %s error: %s", targetTerraformProviderPath, err.Error())
 					log.Logger.Error("Make soft link error", log.String("softLink", targetTerraformProviderPath), log.Error(err))
@@ -1353,15 +1415,12 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	rowData["errorCode"] = "1"
 	rowData["errorMessage"] = ""
 
-	/*
-	defer func(){
+	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("TerraformOperation error: %v", r)
 			rowData["errorMessage"] = err.Error()
 		}
 	}()
-
-	 */
 
 	// Get interface by plugin and action
 	var actionName string
@@ -1580,8 +1639,8 @@ func convertData(parameterData *models.ParameterTable, relativeSourceId string, 
 }
 
 func reverseConvertData(parameterData *models.ParameterTable, tfstateAttributeData *models.TfstateAttributeTable, tfstateVal interface{}) (argKey string, argVal interface{}, err error) {
+	argKey = parameterData.Name
 	if tfstateVal == nil {
-		argKey = parameterData.Name
 		return
 	}
 	relativeSourceId := tfstateAttributeData.RelativeSource
@@ -1661,8 +1720,8 @@ func convertTemplate(parameterData *models.ParameterTable, providerData *models.
 }
 
 func reverseConvertTemplate(parameterData *models.ParameterTable, providerData *models.ProviderTable, tfstateVal interface{}) (argKey string, argVal string, err error) {
+	argKey = parameterData.Name
 	if tfstateVal == nil {
-		argKey = parameterData.Name
 		return
 	}
 	sqlCmd := `SELECT t1.* FROM template_value AS t1 LEFT JOIN provider_template_value AS t2 ON t1.id=t2.template_value WHERE t2.provider=? AND t2.value=?`
@@ -1756,8 +1815,8 @@ func convertAttr(parameterData *models.ParameterTable, tfArgumentData *models.Tf
 }
 
 func reverseConvertAttr(parameterData *models.ParameterTable, tfstateAttributeData *models.TfstateAttributeTable, tfstateVal interface{}) (argKey string, argVal interface{}, err error) {
+	argKey = parameterData.Name
 	if tfstateVal == nil {
-		argKey = parameterData.Name
 		return
 	}
 	relativeAssetVals := []string{}
@@ -1866,11 +1925,12 @@ func convertContextData(parameterData *models.ParameterTable, tfArgumentData *mo
 }
 
 func reverseConvertContextData(parameterData *models.ParameterTable,
-							   tfstateAttributeData *models.TfstateAttributeTable,
-							   tfstateVal interface{},
-	                           outPutArgs map[string]interface{}) (argKey string, argVal interface{}, isDiscard bool, err error) {
+	tfstateAttributeData *models.TfstateAttributeTable,
+	tfstateVal interface{},
+	outPutArgs map[string]interface{}) (argKey string, argVal interface{}, isDiscard bool, err error) {
+
+	argKey = parameterData.Name
 	if tfstateVal == nil {
-		argKey = parameterData.Name
 		return
 	}
 	isDiscard = false
@@ -1924,80 +1984,137 @@ func convertFunction(parameterData *models.ParameterTable, tfArgumentData *model
 }
 
 func reverseConvertFunction(parameterData *models.ParameterTable, tfstateAttributeData *models.TfstateAttributeTable, tfstateVal interface{}) (argKey string, argVal interface{}, err error) {
+	argKey = parameterData.Name
 	if tfstateVal == nil {
-		argKey = parameterData.Name
 		return
 	}
 	functionDefine := tfstateAttributeData.FunctionDefine
 	var functionDefineData models.FunctionDefine
 	json.Unmarshal([]byte(functionDefine), &functionDefineData)
 
-	tfstateValStr := tfstateVal.(string)
 	resultIdx := -1
 	if functionDefineData.Return != "result" {
 		idxStrStart := strings.Index(functionDefineData.Return, "[")
 		idxStrEnd := strings.Index(functionDefineData.Return, "]")
 		if idxStrStart == -1 || idxStrEnd == -1 || idxStrStart >= idxStrEnd {
 			argKey = parameterData.Name
-			err = fmt.Errorf("The function_define return_value: %s of tfstateAttribute:%s config error", functionDefine, tfstateAttributeData.Name)
-			log.Logger.Error("The function_define return_value of tfstateAttribute config error", log.String("function_define", functionDefine), log.String("tfstateAttribute", tfstateAttributeData.Name), log.Error(err))
+			err = fmt.Errorf("The function_define return_value: %s of tfstateAttribute:%s config error", functionDefineData.Return, tfstateAttributeData.Name)
+			log.Logger.Error("The function_define return_value of tfstateAttribute config error", log.String("return_value", functionDefineData.Return), log.String("tfstateAttribute", tfstateAttributeData.Name), log.Error(err))
 			return
 		}
-		resultIdx, _ = strconv.Atoi(functionDefineData.Return[idxStrStart+1:idxStrEnd])
-		fmt.Printf("%v", resultIdx)
+		resultIdx, _ = strconv.Atoi(functionDefineData.Return[idxStrStart+1 : idxStrEnd])
 	}
-	result := [][]string{}
+
+	handleTfstateVals := []string{}
+	if tfstateAttributeData.IsMulti == "Y" {
+		tmpData := tfstateVal.([]interface{})
+		for i := range tmpData {
+			handleTfstateVals = append(handleTfstateVals, tmpData[i].(string))
+		}
+	} else {
+		handleTfstateVals = append(handleTfstateVals, tfstateVal.(string))
+	}
+	var result []interface{}
 	if functionDefineData.Function == models.FunctionConvertFunctionDefineName["Split"] {
-		splitChars := functionDefineData.Args.SplitChar
-		for i := range splitChars {
-			curResult := strings.Split(tfstateValStr, splitChars[i])
-			result = append(result, curResult)
+		for _, tfstateValStr := range handleTfstateVals {
+			splitResult := [][]string{}
+			splitChars := functionDefineData.Args.SplitChar
+			for i := range splitChars {
+				curResult := strings.Split(tfstateValStr, splitChars[i])
+				if len(curResult) < 2 || curResult[1] == "" {
+					curResult = append(curResult, curResult[0])
+				}
+				splitResult = append(splitResult, curResult)
+			}
+			if resultIdx == -1 {
+				result = append(result, splitResult[0])
+			} else {
+				result = append(result, splitResult[0][resultIdx])
+			}
 		}
 	} else if functionDefineData.Function == models.FunctionConvertFunctionDefineName["Replace"] {
-
+		for _, tfstateValStr := range handleTfstateVals {
+			replaceResult := []string{}
+			replaceVals := functionDefineData.Args.ReplaceVal
+			for i := range replaceVals {
+				for old, new := range replaceVals[i] {
+					curResult := strings.Replace(tfstateValStr, old, new, -1)
+					replaceResult = append(replaceResult, curResult)
+				}
+			}
+			if resultIdx == -1 {
+				result = append(result, replaceResult[0])
+			} else {
+				result = append(result, replaceResult[0][resultIdx])
+			}
+		}
 	} else if functionDefineData.Function == models.FunctionConvertFunctionDefineName["Regx"] {
-
+		for _, tfstateValStr := range handleTfstateVals {
+			regxResult := [][]string{}
+			regExprs := functionDefineData.Args.RegExp
+			for i := range regExprs {
+				regExp := regexp.MustCompile(regExprs[i])
+				curResult := regExp.FindStringSubmatch(tfstateValStr)
+				// the first one is the original str
+				curResult = curResult[1:]
+				regxResult = append(regxResult, curResult)
+			}
+			if resultIdx == -1 {
+				result = append(result, regxResult[0])
+			} else {
+				result = append(result, regxResult[0][resultIdx])
+			}
+		}
 	} else {
 		err = fmt.Errorf("The function_define:%s of tfstateAttribute:%s config error", functionDefine, tfstateAttributeData.Name)
 		log.Logger.Error("The function_define of tfstateAttribute config error", log.String("function_define", functionDefine), log.String("tfstateAttribute", tfstateAttributeData.Name), log.Error(err))
 		return
 	}
+	argKey = parameterData.Name
+	if tfstateAttributeData.IsMulti == "Y" {
+		tmpRes := []string{}
+		for i := range result {
+			tmpRes = append(tmpRes, result[i].(string))
+		}
+		argVal = tmpRes
+	} else {
+		argVal = result[0]
+	}
 	return
 }
 
-func reverseConvertDirect(parameterId string, tfstateVal interface{}) (argKey string, argVal interface{}, err error) {
-	sqlCmd := `SELECT * FROM parameter WHERE id=?`
-	paramArgs := []interface{}{parameterId}
-	var parameterList []*models.ParameterTable
-	err = x.SQL(sqlCmd, paramArgs...).Find(&parameterList)
-	if err != nil {
-		log.Logger.Error("Get parameter data error", log.String("parameterId", parameterId), log.Error(err))
-		return
-	}
-	if len(parameterList) == 0 {
-		err = fmt.Errorf("Parameter can not be found by id:%s", parameterId)
-		log.Logger.Warn("Parameter can not be found by id", log.String("id", parameterId), log.Error(err))
-		return
-	}
-	parameterData := parameterList[0]
+func reverseConvertDirect(parameterData *models.ParameterTable, tfstateAttributeData *models.TfstateAttributeTable, tfstateVal interface{}) (argKey string, argVal interface{}, err error) {
 	argKey = parameterData.Name
-	argVal = tfstateVal
+	if tfstateVal == nil {
+		return
+	}
+	if tfstateAttributeData.IsMulti == "Y" {
+		tmpRes := []interface{}{}
+		result := tfstateVal.([]interface{})
+		for i := range result {
+			tmpRes = append(tmpRes, result[i])
+		}
+		argVal = tmpRes
+	} else {
+		argVal = tfstateVal
+	}
 	return
 }
 
 func handleReverseConvert(outPutParameterNameMap map[string]*models.ParameterTable,
-						  outPutParameterIdMap map[string]*models.ParameterTable,
-	                      tfstateAttrParamMap map[string]*models.TfstateAttributeTable,
-	                      reqParam map[string]interface{},
-	                      providerData *models.ProviderTable,
-						  tfstateFileAttributes map[string]interface{},
-						  action string,
-	                      parentObjectName string,
-	                      tfstateAttributeList []*models.TfstateAttributeTable,
-	                      paramCnt *int) (outPutArgs map[string]interface{}, err error) {
+	outPutParameterIdMap map[string]*models.ParameterTable,
+	tfstateAttrParamMap map[string]*models.TfstateAttributeTable,
+	tfstateAttrNameMap map[string]*models.TfstateAttributeTable,
+	reqParam map[string]interface{},
+	providerData *models.ProviderTable,
+	tfstateFileAttributes map[string]interface{},
+	action string,
+	parentObjectName string,
+	tfstateAttributeList []*models.TfstateAttributeTable,
+	paramCnt *int) (outPutArgs map[string]interface{}, err error) {
+
 	outPutArgs = make(map[string]interface{})
 	curLevelResult := make(map[string]interface{})
-
 
 	// 循环遍历每个 tfstateAttribute 进行 reverseConvert 生成输出参数
 	for _, tfstateAttr := range tfstateAttributeList {
@@ -2020,15 +2137,16 @@ func handleReverseConvert(outPutParameterNameMap map[string]*models.ParameterTab
 					tmpMarshal, _ := json.Marshal(curTfstateFileAttributes[i])
 					json.Unmarshal(tmpMarshal, &tmpCurTfstateFileAttributes)
 					ret, tmpErr := handleReverseConvert(outPutParameterNameMap,
-														outPutParameterIdMap,
-						                                tfstateAttrParamMap,
-						                                reqParam,
-						                                providerData,
-						                                tmpCurTfstateFileAttributes,
-						                                action,
-						                                tfstateAttr.Id,
-						                                tfstateAttributeList,
-						                                paramCnt)
+						outPutParameterIdMap,
+						tfstateAttrParamMap,
+						tfstateAttrNameMap,
+						reqParam,
+						providerData,
+						tmpCurTfstateFileAttributes,
+						action,
+						tfstateAttr.Id,
+						tfstateAttributeList,
+						paramCnt)
 					if tmpErr != nil {
 						err = fmt.Errorf("Reverse convert tfstateAttr:%s error:%s", tfstateAttr.Name, err.Error())
 						log.Logger.Error("Revese convert tfstateAttr error", log.String("tfstateAttr", tfstateAttr.Name), log.Error(err))
@@ -2036,12 +2154,16 @@ func handleReverseConvert(outPutParameterNameMap map[string]*models.ParameterTab
 					}
 					curAttributesRet = append(curAttributesRet, ret)
 				}
-				if tfstateAttr.ConvertWay == "" {
-					*paramCnt += 1
-					outPutArgs[models.TerraformOutPutPrefix+strconv.Itoa(*paramCnt)] = curAttributesRet
-				} else {
-					outPutArgs[outPutParameterIdMap[tfstateAttr.Parameter].Name] = curAttributesRet
-				}
+				/*
+					if tfstateAttr.ConvertWay == "" {
+						*paramCnt += 1
+						outPutArgs[models.TerraformOutPutPrefix+strconv.Itoa(*paramCnt)] = curAttributesRet
+					} else {
+						outPutArgs[outPutParameterIdMap[tfstateAttr.Parameter].Name] = curAttributesRet
+					}
+				*/
+				*paramCnt += 1
+				outPutArgs[models.TerraformOutPutPrefix+strconv.Itoa(*paramCnt)] = curAttributesRet
 			} else {
 				curParamData := outPutParameterIdMap[tfstateAttr.Parameter]
 				if tfstateOutParamVal, ok := tfstateFileAttributes[tfstateAttr.Name]; ok {
@@ -2053,13 +2175,16 @@ func handleReverseConvert(outPutParameterNameMap map[string]*models.ParameterTab
 					case models.ConvertWay["Data"]:
 						outArgKey, outArgVal, err = reverseConvertData(curParamData, tfstateAttr, tfstateOutParamVal)
 					case models.ConvertWay["Template"]:
+						if tfstateAttr.DefaultValue != "" {
+							tfstateOutParamVal = tfstateAttr.DefaultValue
+						}
 						outArgKey, outArgVal, err = reverseConvertTemplate(curParamData, providerData, tfstateOutParamVal)
 					case models.ConvertWay["Attr"]:
 						outArgKey, outArgVal, err = reverseConvertAttr(curParamData, tfstateAttr, tfstateOutParamVal)
 					case models.ConvertWay["ContextData"]:
 						outArgKey, outArgVal, isDiscard, err = reverseConvertContextData(curParamData, tfstateAttr, tfstateOutParamVal, curLevelResult)
 					case models.ConvertWay["Direct"]:
-						// outArgKey, outArgVal, err = reverseConvertDirect(tfstateAttr.Parameter, tfstateOutParamVal)
+						// outArgKey, outArgVal, err = reverseConvertDirect(curParamData, tfstateAttr, tfstateOutParamVal)
 						outArgKey, outArgVal, err = curParamData.Name, tfstateOutParamVal, nil
 					case models.ConvertWay["Function"]:
 						outArgKey, outArgVal, err = reverseConvertFunction(curParamData, tfstateAttr, tfstateOutParamVal)
@@ -2086,7 +2211,20 @@ func handleReverseConvert(outPutParameterNameMap map[string]*models.ParameterTab
 						log.Logger.Error("Revese convert parameter error", log.String("parameterId", tfstateAttr.Parameter), log.Error(err))
 						return
 					}
-					outPutArgs[outArgKey] = outArgVal
+					// merger the tfstateAttributeVal if they have the same name
+					if _, ok := outPutArgs[outArgKey]; ok {
+						if _, ok := outPutArgs[outArgKey].([]interface{}); ok {
+							tmpData := outPutArgs[outArgKey].([]interface{})
+							tmpData = append(tmpData, outArgVal)
+							outPutArgs[outArgKey] = tmpData
+						} else {
+							tmpData := []interface{}{outPutArgs[outArgKey]}
+							tmpData = append(tmpData, outArgVal)
+							outPutArgs[outArgKey] = tmpData
+						}
+					} else {
+						outPutArgs[outArgKey] = outArgVal
+					}
 					curLevelResult[outArgKey] = outArgVal
 				} else {
 					outPutArgs[curParamData.Name] = ""
