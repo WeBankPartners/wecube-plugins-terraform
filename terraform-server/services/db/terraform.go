@@ -572,7 +572,7 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 		return
 	}
 
-	if resourceAssetId != "" && action == "apply" {
+	if resourceAssetId != "" && action == "apply" && plugin != "security_rule" {
 		// terraform import when assetId has value
 		err = TerraformImport(dirPath, sourceData.Name+"."+resourceId, resourceAssetId)
 		if err != nil {
@@ -605,7 +605,6 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 		retOutput["errorMessage"] = err.Error()
 		return
 	}
-
 	//*/
 
 	var tfstateObjectTypeAttribute *models.TfstateAttributeTable
@@ -723,23 +722,26 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 			return
 		}
 
+		// handle outPutArgs
+		outPutResultList, _ := handleOutPutArgs(outPutArgs, outPutParameterNameMap, tfstateAttrParamMap, reqParam)
+		/*
 		outPutResultList := []map[string]interface{}{}
 		// flat outPutParam data
 		flatOutPutArgs, _ := handleFlatOutPutParam(outPutArgs)
 
+		// delete the item that id is nil or nil []interface{}
+		tmpOutPutResultList := []map[string]interface{}{}
+		for i := range flatOutPutArgs {
+			if isResultIdValid(flatOutPutArgs[i]["id"]) == false {
+				continue
+			}
+			tmpOutPutResultList = append(tmpOutPutResultList, flatOutPutArgs[i])
+		}
+
 		// 将数组类型的值进行一一映射
-		// mapOutPutArgs, _ := handleSliceMapOutPutParam(flatOutPutArgs)
+		mapOutPutArgs, _ := handleSliceMapOutPutParam(tmpOutPutResultList)
 
 		// outPutParam 不在 tfstateFile 返回结果中的字段，用输入传进来的值
-			for i := range flatOutPutArgs {
-				for k, v := range outPutParameterNameMap {
-					if _, okParam := tfstateAttrParamMap[v.Id]; !okParam {
-						flatOutPutArgs[i][k] = reqParam[k]
-					}
-				}
-				outPutResultList = append(outPutResultList, flatOutPutArgs[i])
-			}
-		/*
 		for i := range mapOutPutArgs {
 			for k, v := range outPutParameterNameMap {
 				if _, okParam := tfstateAttrParamMap[v.Id]; !okParam {
@@ -751,12 +753,8 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 
 		 */
 		retOutput[models.TerraformOutPutPrefix] = outPutResultList
-		//for k, v := range outPutArgs {
-		//	retOutput[k] = v
-		//}
 	} else {
 		// 处理结果字段为 object 的情况
-		outPutResultList := []map[string]interface{}{}
 		var tfstateResult []map[string]interface{}
 		if tfstateObjectTypeAttribute.IsMulti == "Y" {
 			var tmpData []map[string]interface{}
@@ -771,6 +769,7 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 			json.Unmarshal(tmpMarshal, &tmpData)
 			tfstateResult = append(tfstateResult, tmpData)
 		}
+		outPutResultList := []map[string]interface{}{}
 		for i := range tfstateResult {
 			var outPutArgs map[string]interface{}
 			parentObjectName := tfstateObjectTypeAttribute.Id
@@ -794,6 +793,10 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 				return
 			}
 
+			// handle outPutArgs
+			tmpOutPutResult, _ := handleOutPutArgs(outPutArgs, outPutParameterNameMap, tfstateAttrParamMap, reqParam)
+			/*
+			outPutResultList := []map[string]interface{}{}
 			// flat outPutParam data
 			flatOutPutArgs, _ := handleFlatOutPutParam(outPutArgs)
 
@@ -806,9 +809,11 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 				}
 				outPutResultList = append(outPutResultList, flatOutPutArgs[i])
 			}
-			// outPutResultList = append(outPutResultList, outPutArgs)
-			retOutput[models.TerraformOutPutPrefix] = outPutResultList
+			 */
+			outPutResultList = append(outPutResultList, tmpOutPutResult...)
+			//retOutput[models.TerraformOutPutPrefix] = outPutResultList
 		}
+		retOutput[models.TerraformOutPutPrefix] = outPutResultList
 	}
 
 	// delete provider.tf.json
@@ -822,6 +827,56 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 
 	retOutput["errorCode"] = "0"
 	return
+}
+
+func handleOutPutArgs(outPutArgs map[string]interface{},
+					  outPutParameterNameMap map[string]*models.ParameterTable,
+					  tfstateAttrParamMap map[string]*models.TfstateAttributeTable,
+					  reqParam map[string]interface{}) (outPutResultList []map[string]interface{}, err error) {
+	outPutResultList = []map[string]interface{}{}
+	// flat outPutParam data
+	flatOutPutArgs, _ := handleFlatOutPutParam(outPutArgs)
+
+	// delete the item that id is nil or nil []interface{}
+	tmpOutPutResultList := []map[string]interface{}{}
+	for i := range flatOutPutArgs {
+		if isResultIdValid(flatOutPutArgs[i]["id"]) == false {
+			continue
+		}
+		tmpOutPutResultList = append(tmpOutPutResultList, flatOutPutArgs[i])
+	}
+
+	// 将数组类型的值进行一一映射
+	mapOutPutArgs, _ := handleSliceMapOutPutParam(tmpOutPutResultList)
+
+	// outPutParam 不在 tfstateFile 返回结果中的字段，用输入传进来的值
+	for i := range mapOutPutArgs {
+		for k, v := range outPutParameterNameMap {
+			if _, okParam := tfstateAttrParamMap[v.Id]; !okParam {
+				mapOutPutArgs[i][k] = reqParam[k]
+			}
+		}
+		outPutResultList = append(outPutResultList, mapOutPutArgs[i])
+	}
+	return
+}
+
+func isResultIdValid(outPutIdVal interface{}) bool {
+	if outPutIdVal == nil {
+		return false
+	}
+	if _, ok := outPutIdVal.([]interface{}); ok {
+		tmpVal := outPutIdVal.([]interface{})
+		if len(tmpVal) == 0 {
+			return false
+		}
+		for i := range tmpVal {
+			if isResultIdValid(tmpVal[i]) == false {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 func handleFlatOutPutParam(outPutArgs map[string]interface{}) (retOutPutArgs []map[string]interface{}, err error) {
@@ -856,40 +911,46 @@ func handleFlatOutPutParam(outPutArgs map[string]interface{}) (retOutPutArgs []m
 }
 
 func handleSliceMapOutPutParam(outPutArgs []map[string]interface{}) (retOutPutArgs []map[string]interface{}, err error) {
-	retOutPutArgs = outPutArgs
-	/*
-		for _, retArg := range outPutArgs {
-			sliceKeys := make(map[string]interface{})
-			nonSliceKeys := make(map[string]interface{})
-			cnt := 0
-			for k, v := range retArg {
-				if _, ok := v.([]interface{}); ok {
-					sliceKeys[k] = v
-					cnt = len(v.([]interface{}))
-				} else {
-					nonSliceKeys[k] = v
-				}
-				retResult := []map[string]interface{}{}
-				for i := 0; i < cnt; i++ {
-					curResult := make(map[string]interface{})
-					hasSliceVal := false
-					for k1, v1 := range sliceKeys.([]interface{}) {
-						curResult[k1] = v1
-						if _, ok := v1.([]interface{}); ok {
-							hasSliceVal = true
-						}
-					}
-					for k1, v1 := range nonSliceKeys {
-						curResult[k1] = v1
-					}
-					if hasSliceVal {
-						tmpRet :=
-					}
-				}
+	for _, retArg := range outPutArgs {
+		sliceKeys := make(map[string]interface{})
+		nonSliceKeys := make(map[string]interface{})
+
+		cnt := 0
+		for k, v := range retArg {
+			if _, ok := v.([]interface{}); ok /*&& len(v.([]interface{})) > 0*/ {
+				sliceKeys[k] = v
+				cnt = len(v.([]interface{}))
+			} else {
+				nonSliceKeys[k] = v
 			}
 		}
 
-	*/
+		if cnt == 0 {
+			retOutPutArgs = append(retOutPutArgs, nonSliceKeys)
+			continue
+		}
+
+		for i := 0; i < cnt; i++ {
+			curResult := make(map[string]interface{})
+			hasSliceVal := false
+			for k1, v1 := range sliceKeys {
+				curResult[k1] = v1.([]interface{})[i]
+				if _, ok := curResult[k1].([]interface{}); ok /*&& len(curResult[k1].([]interface{})) > 0*/ {
+					hasSliceVal = true
+				}
+			}
+			for k1, v1 := range nonSliceKeys {
+				curResult[k1] = v1
+			}
+			if hasSliceVal {
+				tmpInput := []map[string]interface{}{curResult}
+				tmpRet, _ := handleSliceMapOutPutParam(tmpInput)
+				retOutPutArgs = append(retOutPutArgs, tmpRet...)
+			} else {
+				retOutPutArgs = append(retOutPutArgs, curResult)
+			}
+		}
+	}
 	return
 }
 
@@ -1213,7 +1274,8 @@ func handleDestroy(workDirPath string,
 	providerData *models.ProviderTable,
 	providerInfo *models.ProviderInfoTable,
 	regionData *models.ResourceDataTable,
-	reqParam map[string]interface{}) (rowData map[string]interface{}, err error) {
+	reqParam map[string]interface{},
+	plugin string) (rowData map[string]interface{}, err error) {
 	rowData = make(map[string]interface{})
 	rowData["callbackParameter"] = reqParam["callbackParameter"].(string)
 	rowData["errorCode"] = "1"
@@ -1369,12 +1431,14 @@ func handleDestroy(workDirPath string,
 			return
 		}
 		resourceAssetId := resourceData.ResourceAssetId
-		err = TerraformImport(workDirPath, sourceName+"."+uuid, resourceAssetId)
-		if err != nil {
-			err = fmt.Errorf("Do TerraformImport error:%s", err.Error())
-			log.Logger.Error("Do TerraformImport error", log.Error(err))
-			rowData["errorMessage"] = err.Error()
-			return
+		if plugin != "security_rule" {
+			err = TerraformImport(workDirPath, sourceName+"."+uuid, resourceAssetId)
+			if err != nil {
+				err = fmt.Errorf("Do TerraformImport error:%s", err.Error())
+				log.Logger.Error("Do TerraformImport error", log.Error(err))
+				rowData["errorMessage"] = err.Error()
+				return
+			}
 		}
 
 		// clear tf file
@@ -1577,7 +1641,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 			rowData[k] = v
 		}
 	} else if action == "destroy" {
-		retOutput, tmpErr := handleDestroy(workDirPath, sourceData, providerData, providerInfoData, regionData, reqParam)
+		retOutput, tmpErr := handleDestroy(workDirPath, sourceData, providerData, providerInfoData, regionData, reqParam, plugin)
 		if tmpErr != nil {
 			err = fmt.Errorf("Handle Destroy error: %s", tmpErr.Error())
 			log.Logger.Error("Handle Destroy error", log.Error(err))
