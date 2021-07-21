@@ -144,6 +144,22 @@
             >
               <span :title="source.name" class="xx">
                 {{ source.name }}
+                <Button
+                  @click="editSource(source)"
+                  type="info"
+                  ghost
+                  size="small"
+                  style="color: #19be6b;"
+                  icon="ios-create-outline"
+                ></Button>
+                <Button
+                  @click="deleteSource(source, sourceIndex)"
+                  type="error"
+                  ghost
+                  size="small"
+                  style="color: #ed4014;"
+                  icon="md-trash"
+                ></Button>
               </span>
             </div>
             <div class="style-widthout-height" style="width:120px;vertical-align: top;border:none">
@@ -565,7 +581,7 @@
     </div>
     <Modal
       v-model="newSource.isShow"
-      :title="$t('t_add') + $t('t_source')"
+      :title="(newSource.isAdd ? $t('t_add') : $t('t_add')) + $t('t_source')"
       @on-ok="confirmSource"
       @on-cancel="newSource.isShow = false"
     >
@@ -574,7 +590,7 @@
           <Input type="text" v-model="newSource.form.name" style="width:400px"></Input>
         </FormItem>
         <FormItem :label="$t('t_resource_asset_id_Attribute')">
-          <Input type="text" v-model="newSource.form.resourceAssetIdAttribute" style="width:400px"></Input>
+          <Input type="text" v-model="newSource.form.assetIdAttribute" style="width:400px"></Input>
         </FormItem>
       </Form>
     </Modal>
@@ -585,6 +601,8 @@
 import {
   getInterfaceByPlugin,
   addSource,
+  editSource,
+  deleteSource,
   getProviderList,
   getArgBySource,
   getTemplateValue,
@@ -605,11 +623,11 @@ export default {
     return {
       MODALHEIGHT: 300,
 
-      plugin: '',
+      plugin: 'cvm',
       pluginOptions: [],
-      currentInterface: '',
+      currentInterface: 'cvm__apply',
       interfaceOptions: [],
-      currentProvider: '',
+      currentProvider: 'tencentcloud',
       providerList: [],
       sourceInfo: [],
       dataTypeOptions: [
@@ -662,7 +680,7 @@ export default {
           name: '',
           plugin: '',
           provider: '',
-          resourceAssetIdAttribute: ''
+          assetIdAttribute: ''
         }
       }
     }
@@ -678,9 +696,39 @@ export default {
         value: el
       })
     },
+    editSource (source) {
+      console.log(source)
+      this.newSource = {
+        isShow: true,
+        isAdd: false,
+        form: {
+          ...source
+        }
+      }
+    },
+    deleteSource (source, index) {
+      this.$Modal.confirm({
+        title: this.$t('t_confirm_delete'),
+        'z-index': 1000000,
+        loading: true,
+        onOk: async () => {
+          let res = await deleteSource(source.id)
+          this.$Modal.remove()
+          if (res.statusCode === 'OK') {
+            this.$Notice.success({
+              title: 'Successful',
+              desc: 'Successful'
+            })
+            this.sourceInfo.splice(index, 1)
+          }
+        },
+        onCancel: () => {}
+      })
+    },
     addSource () {
       this.newSource = {
         isShow: true,
+        isAdd: true,
         form: {
           name: '',
           plugin: this.plugin,
@@ -691,7 +739,8 @@ export default {
       }
     },
     async confirmSource () {
-      const { statusCode } = await addSource([this.newSource.form])
+      const method = this.newSource.isAdd ? addSource : editSource
+      const { statusCode } = await method([this.newSource.form])
       if (statusCode === 'OK') {
         this.$Notice.success({
           title: 'Successful',

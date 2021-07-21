@@ -112,12 +112,18 @@
                   <Row v-for="(param, index) in interfaceParamter['input']" :key="index">
                     <Col span="4">
                       <FormItem :label-width="0">
-                        <Input v-model="param.name" />
+                        <Input v-model="param.name" :disabled="param.source === 'system'" />
                       </FormItem>
                     </Col>
                     <Col span="4" offset="1">
                       <FormItem :label-width="0">
-                        <Select v-model="param.dataType" filterable clearable style="width: 80%">
+                        <Select
+                          v-model="param.dataType"
+                          filterable
+                          clearable
+                          style="width: 80%"
+                          :disabled="param.source === 'system'"
+                        >
                           <Option v-for="dt in dataTypeOptions" :value="dt.value" :key="dt.value">{{
                             dt.label
                           }}</Option>
@@ -126,13 +132,26 @@
                     </Col>
                     <Col span="4" offset="0">
                       <FormItem :label-width="0">
-                        <Select v-model="param.template" ref="inputSelect" filterable clearable>
+                        <Select
+                          v-model="param.template"
+                          ref="inputSelect"
+                          filterable
+                          clearable
+                          :disabled="param.source === 'system'"
+                        >
                           <Button type="success" style="width:100%" @click="addTemplate" size="small">
                             <Icon type="ios-add" size="24"></Icon>
                           </Button>
-                          <Option v-for="template in templateOptions" :value="template.id" :key="template.id">{{
-                            template.name
-                          }}</Option>
+                          <Option v-for="template in templateOptions" :value="template.id" :key="template.id"
+                            >{{ template.name
+                            }}<span style="float:right">
+                              <Button
+                                @click.stop.prevent="deleteTemplate(param)"
+                                icon="ios-trash"
+                                type="error"
+                                size="small"
+                              ></Button> </span
+                          ></Option>
                         </Select>
                       </FormItem>
                     </Col>
@@ -142,6 +161,7 @@
                           v-model="param.objectName"
                           filterable
                           clearable
+                          :disabled="param.source === 'system'"
                           @on-open-change="getObjectNameOptions(param, 'input')"
                         >
                           <template v-if="param.objectName && param.objectNameOptions.length === 0">
@@ -156,19 +176,30 @@
                       </FormItem>
                     </Col>
                     <Col span="2" offset="1">
-                      <Select v-model="param.multiple" filterable>
+                      <Select v-model="param.multiple" filterable :disabled="param.source === 'system'">
                         <Option value="Y">Y</Option>
                         <Option value="N">N</Option>
                       </Select>
                     </Col>
                     <Col span="3" offset="1">
                       <FormItem :label-width="0">
-                        <Button type="primary" ghost @click="saveParams(param)" size="small">
+                        <Button
+                          type="primary"
+                          ghost
+                          @click="saveParams(param)"
+                          size="small"
+                          :disabled="param.source === 'system'"
+                        >
                           {{ $t('t_save') }}
                         </Button>
-                        <Button type="error" ghost size="small" @click="deleteParams(param)">{{
-                          $t('t_delete')
-                        }}</Button>
+                        <Button
+                          type="error"
+                          ghost
+                          size="small"
+                          @click="deleteParams(param)"
+                          :disabled="param.source === 'system'"
+                          >{{ $t('t_delete') }}</Button
+                        >
                       </FormItem>
                     </Col>
                   </Row>
@@ -186,12 +217,18 @@
                   <Row v-for="(param, index) in interfaceParamter['output']" :key="index">
                     <Col span="4">
                       <FormItem :label-width="0">
-                        <Input v-model="param.name" style="width:100%" />
+                        <Input v-model="param.name" style="width:100%" :disabled="param.source === 'system'" />
                       </FormItem>
                     </Col>
                     <Col span="4" offset="1">
                       <FormItem :label-width="0">
-                        <Select v-model="param.dataType" filterable clearable style="width: 80%">
+                        <Select
+                          v-model="param.dataType"
+                          filterable
+                          clearable
+                          style="width: 80%"
+                          :disabled="param.source === 'system'"
+                        >
                           <Option v-for="dt in dataTypeOptions" :value="dt.value" :key="dt.value">{{
                             dt.label
                           }}</Option>
@@ -200,13 +237,26 @@
                     </Col>
                     <Col span="4" offset="0">
                       <FormItem :label-width="0">
-                        <Select v-model="param.template" ref="outputSelect" filterable clearable>
+                        <Select
+                          v-model="param.template"
+                          ref="outputSelect"
+                          filterable
+                          clearable
+                          :disabled="param.source === 'system'"
+                        >
                           <Button type="success" style="width:100%" @click="addTemplate" size="small">
                             <Icon type="ios-add" size="24"></Icon>
                           </Button>
-                          <Option v-for="template in templateOptions" :value="template.id" :key="template.id">{{
-                            template.name
-                          }}</Option>
+                          <Option v-for="template in templateOptions" :value="template.id" :key="template.id"
+                            >{{ template.name
+                            }}<span style="float:right">
+                              <Button
+                                @click.stop.prevent="deleteTemplate(template)"
+                                icon="ios-trash"
+                                type="error"
+                                size="small"
+                              ></Button> </span
+                          ></Option>
                         </Select>
                       </FormItem>
                     </Col>
@@ -216,6 +266,7 @@
                           v-model="param.objectName"
                           filterable
                           clearable
+                          :disabled="param.source === 'system'"
                           @on-open-change="getObjectNameOptions(param, 'output')"
                         >
                           <template v-if="param.objectName && param.objectNameOptions.length === 0">
@@ -231,7 +282,7 @@
                     </Col>
                     <Col span="2" offset="1">
                       <FormItem :label-width="0">
-                        <Select v-model="param.multiple" filterable>
+                        <Select v-model="param.multiple" filterable :disabled="param.source === 'system'">
                           <Option value="Y">Y</Option>
                           <Option value="N">N</Option>
                         </Select>
@@ -239,10 +290,21 @@
                     </Col>
                     <Col span="3" offset="1">
                       <FormItem :label-width="0">
-                        <Button type="primary" ghost @click="saveParams(param)" size="small">
+                        <Button
+                          type="primary"
+                          ghost
+                          @click="saveParams(param)"
+                          size="small"
+                          :disabled="param.source === 'system'"
+                        >
                           {{ $t('t_save') }}
                         </Button>
-                        <Button type="error" ghost size="small" @click="deleteParams(param)"
+                        <Button
+                          type="error"
+                          ghost
+                          size="small"
+                          @click="deleteParams(param)"
+                          :disabled="param.source === 'system'"
                           >{{ $t('t_delete') }}
                         </Button>
                       </FormItem>
@@ -261,12 +323,12 @@
       @on-ok="confirmAddTemplate"
       @on-cancel="newTemplate.isShow = false"
     >
-      <Form inline>
+      <Form inline :label-width="80">
         <FormItem :label="$t('t_name')">
-          <Input type="text" v-model="newTemplate.form.name"></Input>
+          <Input type="text" v-model="newTemplate.form.name" style="width:400px"></Input>
         </FormItem>
         <FormItem :label="$t('t_description')">
-          <Input type="password" v-model="newTemplate.form.description"></Input>
+          <Input type="password" v-model="newTemplate.form.description" style="width:400px"></Input>
         </FormItem>
       </Form>
     </Modal>
@@ -278,38 +340,26 @@
     >
       <Form inline :label-width="80">
         <FormItem :label="$t('t_name')">
-          <Input type="text" v-model="newPlugin.form.name" style="width:300px"></Input>
+          <Input type="text" v-model="newPlugin.form.name" style="width:400px"></Input>
         </FormItem>
       </Form>
     </Modal>
     <Modal
       v-model="newInterface.isShow"
-      :title="newInterface.isAdd ? $t('t_add') : $t('t_edit') + $t('t_interface')"
+      :title="(newInterface.isAdd ? $t('t_add') : $t('t_edit')) + $t('t_plugin')"
       @on-ok="confirmInterface"
       @on-cancel="newInterface.isShow = false"
     >
       <Form inline :label-width="80">
         <FormItem :label="$t('t_name')">
-          <Input type="text" v-model="newInterface.form.name" style="width:300px"></Input>
+          <Select v-model="newInterface.form.name" filterable style="width:400px">
+            <Option value="query">query</Option>
+            <Option value="apply">apply</Option>
+            <Option value="destroy">destroy</Option>
+          </Select>
         </FormItem>
         <FormItem :label="$t('t_description')">
-          <Input type="text" v-model="newInterface.form.description" style="width:300px"></Input>
-        </FormItem>
-      </Form>
-    </Modal>
-
-    <Modal
-      v-model="newInterface.isShow"
-      :title="newInterface.isShow.isAdd ? $t('t_add') : $t('t_edit') + $t('t_interface')"
-      @on-ok="confirmInterface"
-      @on-cancel="newInterface.isShow = false"
-    >
-      <Form inline :label-width="80">
-        <FormItem :label="$t('t_name')">
-          <Input type="text" v-model="newInterface.form.name" style="width:300px"></Input>
-        </FormItem>
-        <FormItem :label="$t('t_description')">
-          <Input type="text" v-model="newInterface.form.description" style="width:300px"></Input>
+          <Input type="text" v-model="newInterface.form.description" style="width:400px"></Input>
         </FormItem>
       </Form>
     </Modal>
@@ -331,6 +381,7 @@ import {
   deleteParameter,
   createTemplate,
   editParameter,
+  deleteTemplate,
   addInterface
 } from '@/api/server'
 import sortedArgument from '@/pages/util/sort-array'
@@ -433,12 +484,45 @@ export default {
         this.getTemplates()
       }
     },
-    addTemplate () {
+    deleteTemplate (item) {
       if (this.$refs.inputSelect) {
-        this.$refs.inputSelect.visible = false
+        this.$refs.inputSelect.forEach(item => {
+          item.visible = false
+        })
       }
       if (this.$refs.outputSelect) {
-        this.$refs.outputSelect.visible = false
+        this.$refs.outputSelect.forEach(item => {
+          item.visible = false
+        })
+      }
+      this.$Modal.confirm({
+        title: this.$t('t_confirm_delete'),
+        'z-index': 1000000,
+        loading: true,
+        onOk: async () => {
+          let res = await deleteTemplate(item.id)
+          this.$Modal.remove()
+          if (res.statusCode === 'OK') {
+            this.$Notice.success({
+              title: 'Successful',
+              desc: 'Successful'
+            })
+            this.getTemplates()
+          }
+        },
+        onCancel: () => {}
+      })
+    },
+    addTemplate () {
+      if (this.$refs.inputSelect) {
+        this.$refs.inputSelect.forEach(item => {
+          item.visible = false
+        })
+      }
+      if (this.$refs.outputSelect) {
+        this.$refs.outputSelect.forEach(item => {
+          item.visible = false
+        })
       }
       this.newTemplate = {
         isShow: true,
@@ -618,7 +702,7 @@ export default {
 <style scoped lang="scss"></style>
 <style lang="scss">
 .modal-paramsContainer {
-  height: calc(100vh - 300px);
+  height: calc(100vh - 400px);
   .modal-interfaceContainers {
     overflow: auto;
     height: calc(100vh - 160px);
