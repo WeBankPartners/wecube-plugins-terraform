@@ -540,6 +540,8 @@ export default {
           title: 'Successful',
           desc: 'Successful'
         })
+        let tmp = data[0]
+        tmp.objectNameOptions = []
         this.interfaceParamter[type][index] = data[0]
       }
     },
@@ -572,9 +574,11 @@ export default {
       let tmp = JSON.parse(JSON.stringify(this.emptyParamter))
       tmp.interface = this.currentInterface
       tmp.type = type
+      console.log(tmp)
       this.interfaceParamter[type].push({
         ...tmp
       })
+      console.log(this.interfaceParamter[type])
     },
     async getObjectNameOptions (item, type) {
       const { statusCode, data } = await getParamaByInterface(this.currentInterface)
