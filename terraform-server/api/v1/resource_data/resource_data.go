@@ -198,13 +198,31 @@ func TerraformOperationDebug (c *gin.Context) {
 		params[i]["requestSn"] = strconv.Itoa(i + 1)
 		params[i][models.ResourceDataDebug] = true
 
-
 		retData, err := db.TerraformOperation(plugin, action, params[i])
 		if err != nil {
 			rowData.ResultCode = "1"
 			rowData.ResultMessage = "fail"
 		}
+
+		// get file data
+		tf_json_old := params[i][models.ResourceDataDebug+"oldTfFile"]
+		tf_json_new := params[i][models.ResourceDataDebug+"newTfFile"]
+		tf_state_old := params[i][models.ResourceDataDebug+"oldTfStateFile"]
+		tf_state_new := params[i][models.ResourceDataDebug+"newTfStateFile"]
+		tf_state_import := params[i][models.ResourceDataDebug+"importTfFile"]
+		plan_message := params[i][models.ResourceDataDebug+"planFile"]
+		sourceName := params[i][models.ResourceDataDebug+"sourceName"]
+
+		delete(params[i], models.ResourceDataDebug+"oldTfFile")
+		delete(params[i], models.ResourceDataDebug+"newTfFile")
+		delete(params[i], models.ResourceDataDebug+"oldTfStateFile")
+		delete(params[i], models.ResourceDataDebug+"newTfStateFile")
+		delete(params[i], models.ResourceDataDebug+"importTfFile")
+		delete(params[i], models.ResourceDataDebug+"planFile")
+		delete(params[i], models.ResourceDataDebug+"sourceName")
+
 		// handle one input, many output
+		curResultOutputs := []map[string]interface{}{}
 		if v, ok := retData[models.TerraformOutPutPrefix]; ok {
 			tmpData, _ := json.Marshal(v)
 			var resultList []map[string]interface{}
@@ -217,11 +235,24 @@ func TerraformOperationDebug (c *gin.Context) {
 				for k, v := range resultList[i] {
 					tmpRetData[k] = v
 				}
-				rowData.Results.Outputs = append(rowData.Results.Outputs, tmpRetData)
+				curResultOutputs = append(curResultOutputs, tmpRetData)
+				//rowData.Results.Outputs = append(rowData.Results.Outputs, tmpRetData)
 			}
 		} else {
-			rowData.Results.Outputs = append(rowData.Results.Outputs, retData)
+			curResultOutputs = append(curResultOutputs, retData)
+			//rowData.Results.Outputs = append(rowData.Results.Outputs, retData)
 		}
+		curCombineResult := make(map[string]interface{})
+		curCombineResult["result_data"] = curResultOutputs
+		curCombineResult["sourc_name"] = sourceName
+		curCombineResult["tf_json_old"] = tf_json_old
+		curCombineResult["tf_json_new"] = tf_json_new
+		curCombineResult["tf_state_old"] = tf_state_old
+		curCombineResult["tf_state_new"] = tf_state_new
+		curCombineResult["tf_state_import"] = tf_state_import
+		curCombineResult["plan_message"] = plan_message
+
+		rowData.Results.Outputs = append(rowData.Results.Outputs, curCombineResult)
 	}
 	c.JSON(http.StatusOK, rowData)
 	return

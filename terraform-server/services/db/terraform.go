@@ -767,6 +767,7 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 	if _, ok := reqParam[models.ResourceDataDebug]; ok {
 		reqParam[models.ResourceDataDebug+"newTfFile"] = tfFileContentStr
 		reqParam[models.ResourceDataDebug+"newTfStateFile"] = tfstateFileContentStr
+		reqParam[models.ResourceDataDebug+"sourceName"] = sourceData.Name
 	}
 
 	if action == "apply" {
@@ -990,13 +991,17 @@ func handleOutPutArgs(outPutArgs map[string]interface{},
 	mapOutPutArgs, _ := handleSliceMapOutPutParam(tmpOutPutResultList)
 
 	// outPutParam 不在 tfstateFile 返回结果中的字段，用输入传进来的值
-	for i := range mapOutPutArgs {
-		for k, v := range outPutParameterNameMap {
-			if _, okParam := tfstateAttrParamMap[v.Id]; !okParam {
-				mapOutPutArgs[i][k] = reqParam[k]
+	if _, ok := reqParam[models.ResourceDataDebug]; !ok {
+		for i := range mapOutPutArgs {
+			for k, v := range outPutParameterNameMap {
+				if _, okParam := tfstateAttrParamMap[v.Id]; !okParam {
+					mapOutPutArgs[i][k] = reqParam[k]
+				}
 			}
+			outPutResultList = append(outPutResultList, mapOutPutArgs[i])
 		}
-		outPutResultList = append(outPutResultList, mapOutPutArgs[i])
+	} else {
+		outPutResultList = append(outPutResultList, mapOutPutArgs...)
 	}
 	return
 }
@@ -1342,8 +1347,15 @@ func RegionApply(reqParam map[string]interface{}, interfaceData *models.Interfac
 	resourceAssetId := reqParam["asset_id"].(string)
 	createUser := reqParam["operator_user"].(string)
 
-	_, err = x.Exec("INSERT INTO resource_data(id,resource,resource_id,resource_asset_id,tf_file,region_id,create_time,create_user,update_time) VALUE (?,?,?,?,?,?,?,?,?)",
-		uuid, sourceData.Id, resourceId, resourceAssetId, enCodeproviderTfContent, resourceId, createTime, createUser, createTime)
+
+	if _, ok := reqParam[models.ResourceDataDebug]; ok {
+		_, err = x.Exec("INSERT INTO resource_data_debug(id,resource,resource_id,resource_asset_id,tf_file,region_id,create_time,create_user,update_time) VALUE (?,?,?,?,?,?,?,?,?)",
+			uuid, sourceData.Id, resourceId, resourceAssetId, enCodeproviderTfContent, resourceId, createTime, createUser, createTime)
+	} else {
+		_, err = x.Exec("INSERT INTO resource_data(id,resource,resource_id,resource_asset_id,tf_file,region_id,create_time,create_user,update_time) VALUE (?,?,?,?,?,?,?,?,?)",
+			uuid, sourceData.Id, resourceId, resourceAssetId, enCodeproviderTfContent, resourceId, createTime, createUser, createTime)
+	}
+
 	if err != nil {
 		err = fmt.Errorf("Try to create resource_data fail,%s ", err.Error())
 		log.Logger.Error("Try to create resource_data fail", log.Error(err))
@@ -1371,8 +1383,14 @@ func handleApplyOrQuery(action string, reqParam map[string]interface{}, sourceDa
 		createUser := reqParam["operator_user"].(string)
 		regionId := reqParam["region_id"].(string)
 
-		_, err = x.Exec("INSERT INTO resource_data(id,resource,resource_id,resource_asset_id,region_id,create_time,create_user,update_time) VALUE (?,?,?,?,?,?,?,?)",
-			uuid, sourceData.Id, resourceId, resourceAssetId, regionId, createTime, createUser, createTime)
+		if _, ok := reqParam[models.ResourceDataDebug]; ok {
+			_, err = x.Exec("INSERT INTO resource_data_debug(id,resource,resource_id,resource_asset_id,region_id,create_time,create_user,update_time) VALUE (?,?,?,?,?,?,?,?)",
+				uuid, sourceData.Id, resourceId, resourceAssetId, regionId, createTime, createUser, createTime)
+		} else {
+			_, err = x.Exec("INSERT INTO resource_data(id,resource,resource_id,resource_asset_id,region_id,create_time,create_user,update_time) VALUE (?,?,?,?,?,?,?,?)",
+				uuid, sourceData.Id, resourceId, resourceAssetId, regionId, createTime, createUser, createTime)
+		}
+
 		if err != nil {
 			err = fmt.Errorf("Try to create resource_data fail,%s ", err.Error())
 			log.Logger.Error("Try to create resource_data fail", log.Error(err))
@@ -1385,6 +1403,11 @@ func handleApplyOrQuery(action string, reqParam map[string]interface{}, sourceDa
 	} else if action == "query" {
 		resourceId := reqParam["id"].(string)
 		sqlCmd := `SELECT * FROM resource_data WHERE resource_id=?`
+
+		if _, ok := reqParam[models.ResourceDataDebug]; ok {
+			sqlCmd = `SELECT * FROM resource_data_debug WHERE resource_id=?`
+		}
+
 		paramArgs := []interface{}{resourceId}
 		var resourceDataList []*models.ResourceDataTable
 		err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataList)
@@ -1424,6 +1447,11 @@ func handleDestroy(workDirPath string,
 	// Get resource_asset_id by resourceId
 	resourceId := reqParam["id"].(string)
 	sqlCmd := `SELECT * FROM resource_data WHERE resource_id=?`
+
+	if _, ok := reqParam[models.ResourceDataDebug]; ok {
+		sqlCmd = `SELECT * FROM resource_data_debug WHERE resource_id=?`
+	}
+
 	paramArgs := []interface{}{resourceId}
 	var resourceDataInfoList []*models.ResourceDataTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataInfoList)
@@ -1602,7 +1630,11 @@ func handleDestroy(workDirPath string,
 	}
 
 	// delet resource_data item
-	_, err = x.Exec("DELETE FROM resource_data WHERE id=?", resourceData.Id)
+	if _, ok := reqParam[models.ResourceDataDebug]; ok {
+		_, err = x.Exec("DELETE FROM resource_data_debug WHERE id=?", resourceData.Id)
+	} else {
+		_, err = x.Exec("DELETE FROM resource_data WHERE id=?", resourceData.Id)
+	}
 	if err != nil {
 		err = fmt.Errorf("Delete resource data by id:%s error: %s", resourceData.Id, err.Error())
 		log.Logger.Error("Delete resource data by id error", log.String("id", resourceData.Id), log.Error(err))
@@ -1658,6 +1690,11 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	// Get regionInfo by regionId
 	regionId := reqParam["region_id"].(string)
 	sqlCmd = `SELECT * FROM resource_data WHERE resource_id=?`
+
+	if _, ok := reqParam[models.ResourceDataDebug]; ok {
+		sqlCmd = `SELECT * FROM resource_data_debug WHERE resource_id=?`
+	}
+
 	paramArgs = []interface{}{regionId}
 	var resourceDataInfoList []*models.ResourceDataTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataInfoList)
@@ -1816,6 +1853,10 @@ func convertData(parameterData *models.ParameterTable, relativeSourceId string, 
 
 	resourceIdsStr := strings.Join(resourceIdList, "','")
 	sqlCmd := "SELECT * FROM resource_data WHERE resource=? AND resource_id IN ('" + resourceIdsStr + "')"
+
+	if _, ok := reqParam[models.ResourceDataDebug]; ok {
+		sqlCmd = "SELECT * FROM resource_data_debug WHERE resource=? AND resource_id IN ('" + resourceIdsStr + "')"
+	}
 	var resourceDataList []*models.ResourceDataTable
 	paramArgs := []interface{}{relativeSourceId}
 	err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataList)
@@ -1842,7 +1883,7 @@ func convertData(parameterData *models.ParameterTable, relativeSourceId string, 
 	return
 }
 
-func reverseConvertData(parameterData *models.ParameterTable, tfstateAttributeData *models.TfstateAttributeTable, tfstateVal interface{}) (argKey string, argVal interface{}, err error) {
+func reverseConvertData(parameterData *models.ParameterTable, tfstateAttributeData *models.TfstateAttributeTable, tfstateVal interface{}, reqParam map[string]interface{}) (argKey string, argVal interface{}, err error) {
 	argKey = parameterData.Name
 	if tfstateVal == nil {
 		return
@@ -1859,6 +1900,11 @@ func reverseConvertData(parameterData *models.ParameterTable, tfstateAttributeDa
 	}
 	resourceAssetIdsStr := strings.Join(resourceAssetIds, "','")
 	sqlCmd := "SELECT * FROM resource_data WHERE resource=? AND resource_asset_id IN ('" + resourceAssetIdsStr + "')"
+
+	if _, ok := reqParam[models.ResourceDataDebug]; ok {
+		sqlCmd = "SELECT * FROM resource_data_debug WHERE resource=? AND resource_asset_id IN ('" + resourceAssetIdsStr + "')"
+	}
+
 	paramArgs := []interface{}{relativeSourceId}
 	var resourceDataList []*models.ResourceDataTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataList)
@@ -1978,6 +2024,11 @@ func convertAttr(parameterData *models.ParameterTable, tfArgumentData *models.Tf
 	result := []interface{}{}
 	for i := range relativeResourceIds {
 		sqlCmd := `SELECT * FROM resource_data WHERE resource=? AND resource_id=?`
+
+		if _, ok := reqParam[models.ResourceDataDebug]; ok {
+			sqlCmd = `SELECT * FROM resource_data_debug WHERE resource=? AND resource_id=?`
+		}
+
 		paramArgs := []interface{}{tfArgumentData.RelativeSource, relativeResourceIds[i]}
 		var resourceDataList []*models.ResourceDataTable
 		err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataList)
@@ -2018,7 +2069,7 @@ func convertAttr(parameterData *models.ParameterTable, tfArgumentData *models.Tf
 	return
 }
 
-func reverseConvertAttr(parameterData *models.ParameterTable, tfstateAttributeData *models.TfstateAttributeTable, tfstateVal interface{}) (argKey string, argVal interface{}, err error) {
+func reverseConvertAttr(parameterData *models.ParameterTable, tfstateAttributeData *models.TfstateAttributeTable, tfstateVal interface{}, reqParam map[string]interface{}) (argKey string, argVal interface{}, err error) {
 	argKey = parameterData.Name
 	if tfstateVal == nil {
 		return
@@ -2056,6 +2107,11 @@ func reverseConvertAttr(parameterData *models.ParameterTable, tfstateAttributeDa
 
 	result := []interface{}{}
 	sqlCmd = `SELECT * FROM resource_data WHERE resource=?`
+
+	if _, ok := reqParam[models.ResourceDataDebug]; ok {
+		sqlCmd = `SELECT * FROM resource_data_debug WHERE resource=?`
+	}
+
 	paramArgs = []interface{}{tfstateAttributeData.RelativeSource}
 	var resourceDataList []*models.ResourceDataTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataList)
@@ -2131,7 +2187,8 @@ func convertContextData(parameterData *models.ParameterTable, tfArgumentData *mo
 func reverseConvertContextData(parameterData *models.ParameterTable,
 	tfstateAttributeData *models.TfstateAttributeTable,
 	tfstateVal interface{},
-	outPutArgs map[string]interface{}) (argKey string, argVal interface{}, isDiscard bool, err error) {
+	outPutArgs map[string]interface{},
+	reqParam map[string]interface{}) (argKey string, argVal interface{}, isDiscard bool, err error) {
 
 	argKey = parameterData.Name
 	if tfstateVal == nil {
@@ -2160,7 +2217,7 @@ func reverseConvertContextData(parameterData *models.ParameterTable,
 		return
 	}
 	if outPutArgs[relativeParameterData.Name].(string) == tfstateAttributeData.RelativeParameterValue {
-		argKey, argVal, err = reverseConvertData(parameterData, tfstateAttributeData, tfstateVal)
+		argKey, argVal, err = reverseConvertData(parameterData, tfstateAttributeData, tfstateVal, reqParam)
 	} else {
 		isDiscard = true
 	}
@@ -2377,16 +2434,16 @@ func handleReverseConvert(outPutParameterNameMap map[string]*models.ParameterTab
 					var isDiscard = false
 					switch convertWay {
 					case models.ConvertWay["Data"]:
-						outArgKey, outArgVal, err = reverseConvertData(curParamData, tfstateAttr, tfstateOutParamVal)
+						outArgKey, outArgVal, err = reverseConvertData(curParamData, tfstateAttr, tfstateOutParamVal, reqParam)
 					case models.ConvertWay["Template"]:
 						if tfstateAttr.DefaultValue != "" {
 							tfstateOutParamVal = tfstateAttr.DefaultValue
 						}
 						outArgKey, outArgVal, err = reverseConvertTemplate(curParamData, providerData, tfstateOutParamVal)
 					case models.ConvertWay["Attr"]:
-						outArgKey, outArgVal, err = reverseConvertAttr(curParamData, tfstateAttr, tfstateOutParamVal)
+						outArgKey, outArgVal, err = reverseConvertAttr(curParamData, tfstateAttr, tfstateOutParamVal, reqParam)
 					case models.ConvertWay["ContextData"]:
-						outArgKey, outArgVal, isDiscard, err = reverseConvertContextData(curParamData, tfstateAttr, tfstateOutParamVal, curLevelResult)
+						outArgKey, outArgVal, isDiscard, err = reverseConvertContextData(curParamData, tfstateAttr, tfstateOutParamVal, curLevelResult, reqParam)
 					case models.ConvertWay["Direct"]:
 						// outArgKey, outArgVal, err = reverseConvertDirect(curParamData, tfstateAttr, tfstateOutParamVal)
 						outArgKey, outArgVal, err = curParamData.Name, tfstateOutParamVal, nil
