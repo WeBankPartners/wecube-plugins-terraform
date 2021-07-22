@@ -244,13 +244,19 @@ func TerraformOperationDebug (c *gin.Context) {
 		}
 		curCombineResult := make(map[string]interface{})
 		curCombineResult["result_data"] = curResultOutputs
-		curCombineResult["sourc_name"] = sourceName
-		curCombineResult["tf_json_old"] = tf_json_old
-		curCombineResult["tf_json_new"] = tf_json_new
-		curCombineResult["tf_state_old"] = tf_state_old
-		curCombineResult["tf_state_new"] = tf_state_new
-		curCombineResult["tf_state_import"] = tf_state_import
-		curCombineResult["plan_message"] = plan_message
+
+		tmpCurCombineResult := make(map[string]interface{})
+		tmpCurCombineResult["sourc_name"] = sourceName
+		tmpCurCombineResult["tf_json_old"] = tf_json_old
+		tmpCurCombineResult["tf_json_new"] = tf_json_new
+		tmpCurCombineResult["tf_state_old"] = tf_state_old
+		tmpCurCombineResult["tf_state_new"] = tf_state_new
+		tmpCurCombineResult["tf_state_import"] = tf_state_import
+		tmpCurCombineResult["plan_message"] = plan_message
+
+		tmpSlice := []interface{}{}
+		tmpSlice = append(tmpSlice, tmpCurCombineResult)
+		curCombineResult["resource_results"] = tmpSlice
 
 		rowData.Results.Outputs = append(rowData.Results.Outputs, curCombineResult)
 	}
