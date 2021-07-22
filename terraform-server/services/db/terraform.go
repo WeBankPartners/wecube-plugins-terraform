@@ -89,8 +89,20 @@ func TerraformImport(dirPath, address, resourceAssetId string) (err error) {
 	cmd.Stderr = &stderr
 	cmdErr := cmd.Run()
 	if cmdErr != nil {
-		err = fmt.Errorf("Cmd:%s run failed with %s", cmdStr, cmdErr.Error())
-		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.Error(cmdErr))
+		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
+		outPutStr := string(stderr.Bytes())
+		errorMsgRegx := regexp.MustCompile(`Error: ([\S\ ]*)`)
+		errorMsg := errorMsgRegx.FindStringSubmatch(outPutStr)
+		errMsg := "Error:"
+		for i := 1; i < len(errorMsg); i++ {
+			errMsg += " "
+			errMsg += errorMsg[i]
+		}
+		colorsCharRegx := regexp.MustCompile(`\[\d+m`)
+		outPutErrMsg := colorsCharRegx.ReplaceAllLiteralString(errMsg, "")
+		err = fmt.Errorf("Cmd:%s run failed: %s, ErrorMsg: %s", cmdStr, cmdErr.Error(), outPutErrMsg)
+		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.String("Error: ", outPutErrMsg), log.Error(cmdErr))
+		return
 	}
 	return
 }
@@ -104,8 +116,19 @@ func TerraformPlan(dirPath string) (destroyCnt int, err error) {
 	cmd.Stderr = &stderr
 	cmdErr := cmd.Run()
 	if cmdErr != nil {
-		err = fmt.Errorf("Cmd:%s run failed with %s", cmdStr, cmdErr.Error())
-		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.Error(cmdErr))
+		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
+		outPutStr := string(stderr.Bytes())
+		errorMsgRegx := regexp.MustCompile(`Error: ([\S\ ]*)`)
+		errorMsg := errorMsgRegx.FindStringSubmatch(outPutStr)
+		errMsg := "Error:"
+		for i := 1; i < len(errorMsg); i++ {
+			errMsg += " "
+			errMsg += errorMsg[i]
+		}
+		colorsCharRegx := regexp.MustCompile(`\[\d+m`)
+		outPutErrMsg := colorsCharRegx.ReplaceAllLiteralString(errMsg, "")
+		err = fmt.Errorf("Cmd:%s run failed: %s, ErrorMsg: %s", cmdStr, cmdErr.Error(), outPutErrMsg)
+		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.String("Error: ", outPutErrMsg), log.Error(cmdErr))
 		return
 	}
 	// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
@@ -174,18 +197,20 @@ func TerraformApply(dirPath string) (err error) {
 	cmdErr := cmd.Run()
 	if cmdErr != nil {
 		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
-		outStr := string(stdout.Bytes())
-		errMsgIdx := strings.Index(outStr, "Error: ")
-		if errMsgIdx != -1 {
-			errStr := outStr[errMsgIdx:]
-			errMsg := strings.Split(errStr, "\n")
-			errMsg2 := strings.Split(errStr, "\t")
-			fmt.Printf("%v, %v", errMsg, errMsg2)
+		outPutStr := string(stderr.Bytes())
+		errorMsgRegx := regexp.MustCompile(`Error: ([\S\ ]*)`)
+		errorMsg := errorMsgRegx.FindStringSubmatch(outPutStr)
+		errMsg := "Error:"
+		for i := 1; i < len(errorMsg); i++ {
+			errMsg += " "
+			errMsg += errorMsg[i]
 		}
-		err = fmt.Errorf("Cmd:%s run failed with %s \n %s", cmdStr, cmdErr.Error(), outStr)
-		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.Error(cmdErr))
+		colorsCharRegx := regexp.MustCompile(`\[\d+m`)
+		outPutErrMsg := colorsCharRegx.ReplaceAllLiteralString(errMsg, "")
+		err = fmt.Errorf("Cmd:%s run failed: %s, ErrorMsg: %s", cmdStr, cmdErr.Error(), outPutErrMsg)
+		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.String("Error: ", outPutErrMsg), log.Error(cmdErr))
+		return
 	}
-	// TODO handle the err msg in stdout return that by err
 	return
 }
 
@@ -197,8 +222,20 @@ func TerraformDestroy(dirPath string) (err error) {
 	cmd.Stderr = &stderr
 	cmdErr := cmd.Run()
 	if cmdErr != nil {
-		err = fmt.Errorf("Cmd:%s run failed with %s", cmdStr, cmdErr.Error())
-		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.Error(cmdErr))
+		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
+		outPutStr := string(stderr.Bytes())
+		errorMsgRegx := regexp.MustCompile(`Error: ([\S\ ]*)`)
+		errorMsg := errorMsgRegx.FindStringSubmatch(outPutStr)
+		errMsg := "Error:"
+		for i := 1; i < len(errorMsg); i++ {
+			errMsg += " "
+			errMsg += errorMsg[i]
+		}
+		colorsCharRegx := regexp.MustCompile(`\[\d+m`)
+		outPutErrMsg := colorsCharRegx.ReplaceAllLiteralString(errMsg, "")
+		err = fmt.Errorf("Cmd:%s run failed: %s, ErrorMsg: %s", cmdStr, cmdErr.Error(), outPutErrMsg)
+		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.String("Error: ", outPutErrMsg), log.Error(cmdErr))
+		return
 	}
 	return
 }
@@ -211,8 +248,20 @@ func TerraformInit(dirPath string) (err error) {
 	cmd.Stderr = &stderr
 	cmdErr := cmd.Run()
 	if cmdErr != nil {
-		err = fmt.Errorf("Cmd:%s run failed with %s", cmdStr, cmdErr.Error())
-		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.Error(cmdErr))
+		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
+		outPutStr := string(stderr.Bytes())
+		errorMsgRegx := regexp.MustCompile(`Error: ([\S\ ]*)`)
+		errorMsg := errorMsgRegx.FindStringSubmatch(outPutStr)
+		errMsg := "Error:"
+		for i := 1; i < len(errorMsg); i++ {
+			errMsg += " "
+			errMsg += errorMsg[i]
+		}
+		colorsCharRegx := regexp.MustCompile(`\[\d+m`)
+		outPutErrMsg := colorsCharRegx.ReplaceAllLiteralString(errMsg, "")
+		err = fmt.Errorf("Cmd:%s run failed: %s, ErrorMsg: %s", cmdStr, cmdErr.Error(), outPutErrMsg)
+		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.String("Error: ", outPutErrMsg), log.Error(cmdErr))
+		return
 	}
 	return
 }
