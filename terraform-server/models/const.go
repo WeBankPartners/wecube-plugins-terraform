@@ -15,6 +15,7 @@ const (
 	PlatformUser        = "SYS_PLATFORM"
 	PasswordDisplay     = "****"
 	TerraformOutPutPrefix  = "$_result_list$"
+	ParameterSourceDefault = "custom"
 )
 
 var (

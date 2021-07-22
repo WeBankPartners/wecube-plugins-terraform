@@ -40,7 +40,7 @@ func ParameterBatchCreate(user string, param []*models.ParameterTable) (rowData 
 	for i := range param {
 		id := guid.CreateGuid()
 		data := &models.ParameterTable{Id: id, Name: param[i].Name, Type: param[i].Type, Multiple: param[i].Multiple,
-			Interface: param[i].Interface, Template: param[i].Template, DataType: param[i].DataType, ObjectName: param[i].ObjectName, CreateUser: user, CreateTime: createTime, UpdateTime: createTime}
+			Interface: param[i].Interface, Template: param[i].Template, DataType: param[i].DataType, ObjectName: param[i].ObjectName, Source: models.ParameterSourceDefault, CreateUser: user, CreateTime: createTime, UpdateUser: user, UpdateTime: createTime}
 		rowData = append(rowData, data)
 	}
 
@@ -92,6 +92,7 @@ func ParameterBatchUpdate(user string, param []*models.ParameterTable) (err erro
 	transNullStr := make(map[string]string)
 	transNullStr["template"] = "true"
 	transNullStr["object_name"] = "true"
+	transNullStr["source"] = "true"
 
 	for i := range param {
 		param[i].UpdateTime = updateTime
@@ -122,7 +123,7 @@ func ParameterBatchCreateUpdate(user string, param []*models.ParameterTable) (ro
 		var data *models.ParameterTable
 		if param[i].Id == "" {
 			parameterId = guid.CreateGuid()
-			data = &models.ParameterTable{Id: parameterId, Name: param[i].Name, Type: param[i].Type, Multiple: param[i].Multiple, Interface: param[i].Interface, Template: param[i].Template, DataType: param[i].DataType, ObjectName: param[i].ObjectName, CreateUser: user, CreateTime: createTime, UpdateTime: createTime}
+			data = &models.ParameterTable{Id: parameterId, Name: param[i].Name, Type: param[i].Type, Multiple: param[i].Multiple, Interface: param[i].Interface, Template: param[i].Template, DataType: param[i].DataType, ObjectName: param[i].ObjectName, Source: models.ParameterSourceDefault, CreateUser: user, CreateTime: createTime, UpdateUser: user, UpdateTime: createTime}
 		} else {
 			updateDataIds[param[i].Id] = true
 			parameterId = param[i].Id
