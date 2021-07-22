@@ -186,7 +186,7 @@
                         <Button
                           type="primary"
                           ghost
-                          @click="saveParams(param)"
+                          @click="saveParams(param, 'input', index)"
                           size="small"
                           :disabled="param.source === 'system'"
                         >
@@ -293,7 +293,7 @@
                         <Button
                           type="primary"
                           ghost
-                          @click="saveParams(param)"
+                          @click="saveParams(param, 'output', index)"
                           size="small"
                           :disabled="param.source === 'system'"
                         >
@@ -532,14 +532,15 @@ export default {
         }
       }
     },
-    async saveParams (param) {
+    async saveParams (param, type, index) {
       const method = param.id === '' ? addParameter : editParameter
-      const { statusCode } = await method([param])
+      const { statusCode, data } = await method([param])
       if (statusCode === 'OK') {
         this.$Notice.success({
           title: 'Successful',
           desc: 'Successful'
         })
+        this.interfaceParamter[type][index] = data[0]
       }
     },
     deleteParams (param) {

@@ -31,7 +31,7 @@ function rSortedArgument (items, allItems, level, type) {
     el.__level += level
     el.__completed = true
     if (el[type] === 'object') {
-      level = this.rSortedArgument(
+      level = rSortedArgument(
         allItems.filter(el2 => el2.objectName === el.id),
         allItems,
         level,
