@@ -76,39 +76,44 @@
             <div style="line-height:40px">
               {{ $t('t_conversion') }}
             </div>
-            <div style="font-size: 0;margin-top: -2px;">
+            <div style="font-size: 0;margin-top: -2px;margin-left:1px">
               <div
                 class="table-title title-width-level1"
-                style="line-height: 40px;
-    vertical-align: bottom;"
+                style="height: 40px;
+    line-height: 40px;
+    vertical-align: text-bottom;"
               >
                 {{ $t('t_conversion_type') }}
               </div>
               <div
                 class="table-title title-width-level1"
-                style="line-height: 40px;
-    vertical-align: bottom;"
+                style="height: 40px;
+    line-height: 40px;
+    vertical-align: text-bottom;"
               >
                 {{ $t('t_related_params') }}
               </div>
               <div
                 class="table-title title-width-level1"
-                style="line-height: 40px;
-    vertical-align: bottom;"
+                style="height: 40px;
+    line-height: 40px;
+    vertical-align: text-bottom;"
               >
                 {{ $t('t_related_value') }}
               </div>
               <div
                 class="table-title title-width-level1"
-                style="line-height: 40px;
-    vertical-align: bottom;"
+                style="height: 40px;
+    line-height: 40px;
+    vertical-align: text-bottom;"
               >
                 关联source
               </div>
               <div
                 class="table-title title-width-level1"
-                style="line-height: 40px;
-    vertical-align: bottom;"
+                style="height: 40px;
+    line-height: 40px;
+    vertical-align: text-bottom;"
               >
                 {{ $t('t_related_attr') }}
               </div>
@@ -125,7 +130,7 @@
           </div>
         </div>
       </header>
-      <div>
+      <div style="margin-left: 5px">
         <div
           v-for="(source, sourceIndex) in sourceInfo"
           :key="source.id"
@@ -166,7 +171,7 @@
               <div class="style-widthout-height" style="font-size: 0;margin-left:0px;border:none">
                 <div
                   class="style-widthout-height"
-                  :style="{ width: '120px', 'line-height': source.args.length * 39 + 'px' }"
+                  :style="{ width: '120px', 'line-height': source.args.length * 39 + 'px', border: 'none' }"
                 >
                   Arg
                   <Button
@@ -180,7 +185,7 @@
                 </div>
                 <div
                   class="style-widthout-height"
-                  :style="{ width: '120px', 'line-height': source.attrs.length * 39 + 'px' }"
+                  :style="{ width: '120px', 'line-height': source.attrs.length * 39 + 'px', border: 'none' }"
                 >
                   Attr
                   <Button
@@ -199,7 +204,7 @@
             <div>
               <div style="margin-top: -1px;" v-for="(item, argIndex) in source.args" :key="argIndex">
                 <template>
-                  <div class="table-col title-width-level1">
+                  <div class="table-col title-width-level1" style="margin-left: 1px">
                     <Input v-model="item.name" size="small" />
                   </div>
                   <div class="table-col title-width-level1">
@@ -241,7 +246,7 @@
                     </Select>
                   </div>
 
-                  <div class="table-col title-width-level1">
+                  <div class="table-col title-width-level1" style="margin-letf: 2px">
                     <Select v-model="item.convertWay" size="small">
                       <Option
                         v-for="item in conversionTypeOptions"
@@ -342,7 +347,7 @@
                       </template>
                     </Select>
                   </div>
-                  <div class="table-col title-width-level1">
+                  <div class="table-col title-width-level1" style="margin-left: 2px">
                     <Select
                       v-model="item.parameter"
                       size="small"
@@ -397,7 +402,7 @@
             <div>
               <div style="margin-top: -1px;" v-for="(item, attrIndex) in source.attrs" :key="attrIndex">
                 <template>
-                  <div class="table-col title-width-level1">
+                  <div class="table-col title-width-level1" style="margin-left: 0px">
                     <Input v-model="item.name" size="small" />
                   </div>
                   <div class="table-col title-width-level1">
@@ -523,7 +528,7 @@
                     <Select v-model="item.relativeTfstateAttribute" disabled clearable filterable size="small">
                     </Select>
                   </div>
-                  <div class="table-col title-width-level1">
+                  <div class="table-col title-width-level1" style="margin-left: 0px;">
                     <Select
                       v-model="item.parameter"
                       size="small"
@@ -623,11 +628,11 @@ export default {
     return {
       MODALHEIGHT: 300,
 
-      plugin: 'cvm',
+      plugin: '',
       pluginOptions: [],
-      currentInterface: 'cvm__apply',
+      currentInterface: '',
       interfaceOptions: [],
-      currentProvider: 'tencentcloud',
+      currentProvider: '',
       providerList: [],
       sourceInfo: [],
       dataTypeOptions: [
