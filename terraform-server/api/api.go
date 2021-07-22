@@ -7,14 +7,13 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/api/v1/resource_data"
-
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/api/middleware"
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/api/v1/interfaces"
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/api/v1/log_operation"
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/api/v1/parameter"
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/api/v1/plugin"
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/api/v1/provider"
+	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/api/v1/resource_data"
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/api/v1/source"
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/api/v1/template"
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/api/v1/tf_argument"
@@ -107,6 +106,9 @@ func init() {
 		&handlerFuncObj{Url: "/resource_datas", Method: "DELETE", HandlerFunc: resource_data.ResourceDataBatchDelete, LogOperation: true},
 		&handlerFuncObj{Url: "/resource_datas", Method: "PUT", HandlerFunc: resource_data.ResourceDataBatchUpdate, LogOperation: true},
 
+		// for resource_data_debug
+		&handlerFuncObj{Url: "/resource_data_debugs", Method: "GET", HandlerFunc: resource_data.ResourceDataDebugList},
+
 		// &handlerFuncObj{Url: "/terraform/:plugin/:action", Method: "POST", HandlerFunc: resource_data.TerraformOperation, LogOperation: true},
 	)
 }
@@ -118,9 +120,9 @@ func InitHttpServer() {
 		// reflect ui resource
 		r.LoadHTMLGlob("public/*.html")
 		r.Static(fmt.Sprintf("%s/js", urlPrefix), "public/js")
-		r.Static(fmt.Sprintf("%s/css", urlPrefix),"public/css")
-		r.Static(fmt.Sprintf("%s/img", urlPrefix),"public/img")
-		r.Static(fmt.Sprintf("%s/fonts", urlPrefix),"public/fonts")
+		r.Static(fmt.Sprintf("%s/css", urlPrefix), "public/css")
+		r.Static(fmt.Sprintf("%s/img", urlPrefix), "public/img")
+		r.Static(fmt.Sprintf("%s/fonts", urlPrefix), "public/fonts")
 		r.GET(fmt.Sprintf("%s/", urlPrefix), func(c *gin.Context) {
 			c.HTML(http.StatusOK, "index.html", gin.H{})
 		})
@@ -180,7 +182,7 @@ func InitHttpServer() {
 		r.POST(urlPrefix+"/plugin/ci-data/attr-value", middleware.AuthCorePluginToken(), ci.PluginCiDataAttrValueHandle, ci.HandleOperationLog)
 	*/
 	// r.POST(urlPrefix + "/api/v1/:plugin/:action", middleware.AuthCoreRequestToken(), resource_data.TerraformOperation, log_operation.HandleOperationLog)
-	r.POST(urlPrefix + "/api/v1/terraform/:plugin/:action", resource_data.TerraformOperation, log_operation.HandleOperationLog)
+	r.POST(urlPrefix+"/api/v1/terraform/:plugin/:action", resource_data.TerraformOperation, log_operation.HandleOperationLog)
 	r.Run(":" + models.Config.HttpServer.Port)
 }
 

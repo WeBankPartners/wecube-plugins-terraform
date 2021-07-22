@@ -141,3 +141,21 @@ func TerraformOperation(c *gin.Context) {
 	c.JSON(http.StatusOK, rowData)
 	return
 }
+
+// for resource_data_debug
+func ResourceDataDebugList (c *gin.Context) {
+	ids := c.Query("ids")
+	trimIds := strings.Trim(ids, ",")
+	queryIds := strings.Split(trimIds, ",")
+	queryIdsStr := strings.Join(queryIds, "','")
+	rowData, err := db.ResourceDataDebugList(queryIdsStr)
+	if err != nil {
+		middleware.ReturnServerHandleError(c, err)
+	} else {
+		if len(rowData) == 0 {
+			rowData = []*models.ResourceDataTable{}
+		}
+		middleware.ReturnData(c, rowData)
+	}
+	return
+}

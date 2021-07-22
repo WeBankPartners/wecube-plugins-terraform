@@ -90,3 +90,16 @@ func ResourceDataBatchUpdate(user string, param []*models.ResourceDataTable) (er
 	}
 	return
 }
+
+func ResourceDataDebugList(ids string) (rowData []*models.ResourceDataTable, err error) {
+	sqlCmd := "SELECT * FROM resource_data_debug WHERE 1=1"
+	if ids != "" {
+		sqlCmd += " id IN ('" + ids + "')"
+	}
+	sqlCmd += " ORDER BY id DESC"
+	err = x.SQL(sqlCmd).Find(&rowData)
+	if err != nil {
+		log.Logger.Error("Get resource_data_debug list error", log.Error(err))
+	}
+	return
+}
