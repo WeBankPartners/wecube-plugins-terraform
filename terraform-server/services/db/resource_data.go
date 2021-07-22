@@ -91,12 +91,12 @@ func ResourceDataBatchUpdate(user string, param []*models.ResourceDataTable) (er
 	return
 }
 
-func ResourceDataDebugList(ids string) (rowData []*models.ResourceDataTable, err error) {
-	sqlCmd := "SELECT * FROM resource_data_debug WHERE 1=1"
+func ResourceDataDebugList(ids string) (rowData []*models.ResourceDataQuery, err error) {
+	sqlCmd := "SELECT t1.*,t2.name AS resource_title FROM resource_data_debug t1 LEFT JOIN source t2 ON t1.resource=t2.id WHERE 1=1"
 	if ids != "" {
-		sqlCmd += " id IN ('" + ids + "')"
+		sqlCmd += " AND t1.id IN ('" + ids + "')"
 	}
-	sqlCmd += " ORDER BY id DESC"
+	sqlCmd += " ORDER BY t1.id DESC"
 	err = x.SQL(sqlCmd).Find(&rowData)
 	if err != nil {
 		log.Logger.Error("Get resource_data_debug list error", log.Error(err))

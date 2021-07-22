@@ -153,9 +153,76 @@ func ResourceDataDebugList (c *gin.Context) {
 		middleware.ReturnServerHandleError(c, err)
 	} else {
 		if len(rowData) == 0 {
-			rowData = []*models.ResourceDataTable{}
+			rowData = []*models.ResourceDataQuery{}
 		}
 		middleware.ReturnData(c, rowData)
 	}
+	return
+}
+
+func TerraformOperationDebug (c *gin.Context) {
+	plugin := c.Param("plugin")
+	action := c.Param("action")
+
+	if plugin == "" {
+		middleware.ReturnParamValidateError(c, fmt.Errorf("Url param plugin can not be empty "))
+		return
+	}
+
+	if action == "" {
+		middleware.ReturnParamValidateError(c, fmt.Errorf("Url param action can not be empty "))
+		return
+	}
+
+	var err error
+	bodyData, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		middleware.ReturnServerHandleError(c, err)
+	}
+
+	var request_param map[string]interface{}
+	err = json.Unmarshal(bodyData, &request_param)
+	inputs := request_param["inputs"]
+	p := reflect.ValueOf(inputs)
+	params := []map[string]interface{}{}
+	for i := 0; i < p.Len(); i++ {
+		params = append(params, p.Index(i).Interface().(map[string]interface{}))
+	}
+
+	rowData := models.PluginInterfaceResultObj{}
+	rowData.ResultCode = "0"
+	rowData.ResultMessage = "success"
+	for i := range params {
+		params[i]["operator_user"] = request_param["operator"]
+		params[i]["requestId"] = request_param["requestId"]
+		params[i]["requestSn"] = strconv.Itoa(i + 1)
+		params[i][models.ResourceDataDebug] = true
+
+
+		retData, err := db.TerraformOperation(plugin, action, params[i])
+		if err != nil {
+			rowData.ResultCode = "1"
+			rowData.ResultMessage = "fail"
+		}
+		// handle one input, many output
+		if v, ok := retData[models.TerraformOutPutPrefix]; ok {
+			tmpData, _ := json.Marshal(v)
+			var resultList []map[string]interface{}
+			json.Unmarshal(tmpData, &resultList)
+			for i := range resultList {
+				tmpRetData := make(map[string]interface{})
+				tmpRetData["callbackParameter"] = retData["callbackParameter"]
+				tmpRetData["errorCode"] = retData["errorCode"]
+				tmpRetData["errorMessage"] = retData["errorMessage"]
+				for k, v := range resultList[i] {
+					tmpRetData[k] = v
+				}
+				rowData.Results.Outputs = append(rowData.Results.Outputs, tmpRetData)
+			}
+		} else {
+			rowData.Results.Outputs = append(rowData.Results.Outputs, retData)
+		}
+	}
+	c.JSON(http.StatusOK, rowData)
 	return
 }

@@ -108,6 +108,7 @@ func init() {
 
 		// for resource_data_debug
 		&handlerFuncObj{Url: "/resource_data_debugs", Method: "GET", HandlerFunc: resource_data.ResourceDataDebugList},
+		&handlerFuncObj{Url: "/terraform_debug/:plugin/:action", Method: "POST", HandlerFunc: resource_data.TerraformOperationDebug, LogOperation: true},
 
 		// &handlerFuncObj{Url: "/terraform/:plugin/:action", Method: "POST", HandlerFunc: resource_data.TerraformOperation, LogOperation: true},
 	)

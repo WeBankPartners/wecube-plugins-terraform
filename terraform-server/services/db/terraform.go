@@ -621,13 +621,31 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 		return
 	}
 
-	if resourceAssetId != "" && action == "apply" && plugin != "security_rule" {
-		// terraform import when assetId has value
+	canDoImport := true
+	if providerData.Name == "tencentcloud" && plugin == "security_rule" {
+		canDoImport = false
+	}
+
+	if resourceAssetId != "" && action == "apply" && canDoImport == true {
+		// terraform import when assetId has value in apply
 		err = TerraformImport(dirPath, sourceData.Name+"."+resourceId, resourceAssetId)
 		if err != nil {
 			err = fmt.Errorf("Do TerraformImport error:%s", err.Error())
 			retOutput["errorMessage"] = err.Error()
 			return
+		}
+		if _, ok := reqParam[models.ResourceDataDebug]; ok {
+			// resource_data debug mode, get the terraform.state file after terraform import
+			tfstateFilePath := dirPath + "/terraform.tfstate"
+			tfstateFileData, tmpErr := ReadFile(tfstateFilePath)
+			if tmpErr != nil {
+				err = fmt.Errorf("Read import_tfstate file error:%s", tmpErr.Error())
+				log.Logger.Error("Read import_tfstate file error", log.Error(err))
+				retOutput["errorMessage"] = err.Error()
+				return
+			}
+			tfstateFileContentStr := string(tfstateFileData)
+			reqParam[models.ResourceDataDebug+"importTfFile"] = tfstateFileContentStr
 		}
 	}
 
@@ -639,6 +657,21 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 		retOutput["errorMessage"] = err.Error()
 		return
 	}
+
+	if _, ok := reqParam[models.ResourceDataDebug]; ok {
+		// resource_data debug mode, get the plan file after terraform plan
+		planFilePath := dirPath + "/planfile"
+		planFileData, tmpErr := ReadFile(planFilePath)
+		if tmpErr != nil {
+			err = fmt.Errorf("Read plan file error:%s", tmpErr.Error())
+			log.Logger.Error("Read plan file error", log.Error(err))
+			retOutput["errorMessage"] = err.Error()
+			return
+		}
+		planFileContentStr := string(planFileData)
+		reqParam[models.ResourceDataDebug+"planFile"] = planFileContentStr
+	}
+
 	if destroyCnt > 0 && reqParam["confirmToken"] != "Y" {
 		// 二次确认
 		destroyCntStr := strconv.Itoa(destroyCnt)
@@ -731,6 +764,11 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 	var tfstateFileAttributes map[string]interface{}
 	tfstateFileAttributes = unmarshalTfstateFileData.Resources[0].Instances[0].Attributes
 
+	if _, ok := reqParam[models.ResourceDataDebug]; ok {
+		reqParam[models.ResourceDataDebug+"newTfFile"] = tfFileContentStr
+		reqParam[models.ResourceDataDebug+"newTfStateFile"] = tfstateFileContentStr
+	}
+
 	if action == "apply" {
 		// 记录到 resource_data table
 		resourceDataId := guid.CreateGuid()
@@ -740,8 +778,61 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 		createTime := time.Now().Format(models.DateTimeFormat)
 		createUser := reqParam["operator_user"].(string)
 
-		_, err = x.Exec("INSERT INTO resource_data(id,resource,resource_id,resource_asset_id,tf_file,tf_state_file,region_id,create_time,create_user,update_time) VALUE (?,?,?,?,?,?,?,?,?,?)",
-			resourceDataId, resourceDataSourceId, resourceDataResourceId, resourceDataResourceAssetId, tfFileContentStr, tfstateFileContentStr, regionData.RegionId, createTime, createUser, createTime)
+		if _, ok := reqParam[models.ResourceDataDebug]; ok {
+			// get resource_data_debug table
+			sqlCmd = "SELECT * FROM resource_data_debug WHERE resource=? AND resource_id=?"
+			var oldResourceDataDebugList []*models.ResourceDataTable
+			paramArgs := []interface{}{resourceDataSourceId, resourceDataResourceId}
+			err = x.SQL(sqlCmd, paramArgs...).Find(&oldResourceDataDebugList)
+			if err != nil {
+				err = fmt.Errorf("Get old_resource data_debug by resource:%s and resource_id:%s error: %s", resourceDataSourceId, resourceDataResourceId, err.Error())
+				log.Logger.Error("Get old_resource_data_debug by resource and resource_id error", log.String("resource", resourceDataSourceId), log.String("resource_id", resourceDataResourceId), log.Error(err))
+				retOutput["errorMessage"] = err.Error()
+			}
+			if len(oldResourceDataDebugList) == 0 {
+				reqParam[models.ResourceDataDebug+"oldTfFile"] = ""
+				reqParam[models.ResourceDataDebug+"oldTfStateFile"] = ""
+			} else {
+				reqParam[models.ResourceDataDebug+"oldTfFile"] = oldResourceDataDebugList[0].TfFile
+				reqParam[models.ResourceDataDebug+"oldTfStateFile"] = oldResourceDataDebugList[0].TfStateFile
+			}
+
+			if len(oldResourceDataDebugList) == 0 {
+				// insert into resource_data_debug
+				_, err = x.Exec("INSERT INTO resource_data_debug(id,resource,resource_id,resource_asset_id,tf_file,tf_state_file,region_id,create_time,create_user,update_time,update_user) VALUE (?,?,?,?,?,?,?,?,?,?,?)",
+					resourceDataId, resourceDataSourceId, resourceDataResourceId, resourceDataResourceAssetId, tfFileContentStr, tfstateFileContentStr, regionData.RegionId, createTime, createUser, createTime, createUser)
+			} else {
+				// update the oldResourceDataDebug item
+				tmpId := oldResourceDataDebugList[0].Id
+				tmpTfFile := tfFileContentStr
+				tmpTfStateFile := tfstateFileContentStr
+				_, err = x.Exec("UPDATE resource_data_debug SET tf_file=?,tf_state_file=?,update_time=?,update_user=? WHERE id=?",
+					tmpTfFile, tmpTfStateFile, createTime, createUser, tmpId)
+			}
+		} else {
+			// get resource_data table
+			sqlCmd = "SELECT * FROM resource_data WHERE resource=? AND resource_id=?"
+			var oldResourceDataList []*models.ResourceDataTable
+			paramArgs := []interface{}{resourceDataSourceId, resourceDataResourceId}
+			err = x.SQL(sqlCmd, paramArgs...).Find(&oldResourceDataList)
+			if err != nil {
+				err = fmt.Errorf("Get old_resource data by resource:%s and resource_id:%s error: %s", resourceDataSourceId, resourceDataResourceId, err.Error())
+				log.Logger.Error("Get old_resource_data by resource and resource_id error", log.String("resource", resourceDataSourceId), log.String("resource_id", resourceDataResourceId), log.Error(err))
+				retOutput["errorMessage"] = err.Error()
+			}
+			if len(oldResourceDataList) == 0 {
+				_, err = x.Exec("INSERT INTO resource_data(id,resource,resource_id,resource_asset_id,tf_file,tf_state_file,region_id,create_time,create_user,update_time,update_user) VALUE (?,?,?,?,?,?,?,?,?,?,?)",
+					resourceDataId, resourceDataSourceId, resourceDataResourceId, resourceDataResourceAssetId, tfFileContentStr, tfstateFileContentStr, regionData.RegionId, createTime, createUser, createTime, createUser)
+			} else {
+				// update the oldResourceDataDebug item
+				tmpId := oldResourceDataList[0].Id
+				tmpTfFile := tfFileContentStr
+				tmpTfStateFile := tfstateFileContentStr
+				_, err = x.Exec("UPDATE resource_data SET tf_file=?,tf_state_file=?,update_time=?,update_user=? WHERE id=?",
+					tmpTfFile, tmpTfStateFile, createTime, createUser, tmpId)
+			}
+		}
+
 		if err != nil {
 			err = fmt.Errorf("Try to create resource_data fail,%s ", err.Error())
 			log.Logger.Error("Try to create resource_data fail", log.Error(err))
@@ -1480,7 +1571,7 @@ func handleDestroy(workDirPath string,
 			return
 		}
 		resourceAssetId := resourceData.ResourceAssetId
-		if plugin != "security_rule" {
+		if !(plugin == "security_rule" && providerData.Name == "tencentcloud") {
 			err = TerraformImport(workDirPath, sourceName+"."+uuid, resourceAssetId)
 			if err != nil {
 				err = fmt.Errorf("Do TerraformImport error:%s", err.Error())
