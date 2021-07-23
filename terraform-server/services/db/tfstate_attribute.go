@@ -50,6 +50,8 @@ func TfstateAttributeBatchCreate(user string, param []*models.TfstateAttributeTa
 	transNullStr["relative_tfstate_attribute"] = "true"
 	transNullStr["relative_parameter"] = "true"
 	transNullStr["relative_parameter_value"] = "true"
+	transNullStr["source"] = "true"
+	transNullStr["parameter"] = "true"
 
 	for i := range param {
 		id := guid.CreateGuid()
@@ -106,6 +108,8 @@ func TfstateAttributeBatchUpdate(user string, param []*models.TfstateAttributeTa
 	transNullStr["relative_tfstate_attribute"] = "true"
 	transNullStr["relative_parameter"] = "true"
 	transNullStr["relative_parameter_value"] = "true"
+	transNullStr["source"] = "true"
+	transNullStr["parameter"] = "true"
 
 	for i := range param {
 		param[i].UpdateTime = updateTime
@@ -157,6 +161,8 @@ func TfstateAttributeBatchCreateUpdate(user string, param []*models.TfstateAttri
 	transNullStr["relative_tfstate_attribute"] = "true"
 	transNullStr["relative_parameter"] = "true"
 	transNullStr["relative_parameter_value"] = "true"
+	transNullStr["source"] = "true"
+	transNullStr["parameter"] = "true"
 
 	var tmpErr error
 	for i := range rowData {
