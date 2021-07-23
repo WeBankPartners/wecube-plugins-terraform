@@ -39,6 +39,18 @@
   "t_secretKey_attr_name": "秘钥Key属性名称",
   "t_secretId_attr_name": "秘钥Id属性名称",
   "t_source": "资源",
-  "t_resource_asset_id_Attribute": "资源ID属性",
-  "t_import_export": "导入&导出"
+  "t_resource_asset_id_Attribute": "资产ID属性",
+  "t_import_export": "导入&导出",
+  "t_debugger_data": "调试数据",
+  "t_debugger_request": "调试请求",
+  "t_detail": "详情",
+  "t_request_body": "请求报文",
+  "t_region": "区域",
+  "t_resource": "资源",
+  "t_resource_asset_id": "资产ID",
+  "t_resource_id": "资源ID",
+  "t_tf_file": "tf 文件",
+  "t_tf_state_file": "tf state文件",
+  "debugger": "发起调试",
+  "debugger_result": "调试结果"
 }

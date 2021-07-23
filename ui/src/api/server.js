@@ -56,3 +56,7 @@ export const getProviderInfo = name => req.get(`/provider_infos?name=${name}`)
 export const addProviderInfo = data => req.post(`/provider_infos`, data)
 export const editProviderInfo = data => req.put(`/provider_infos`, data)
 export const deleteProviderInfo = id => req.delete(`/provider_infos?ids=${id}`)
+
+export const getDebugInfo = () => req.get(`/resource_data_debugs`)
+
+export const debuggerRequest = (plugin, action, data) => req.post(`/terraform_debug/${plugin}/${action}`, data)

@@ -60,6 +60,30 @@ export default new Router({
               component: () => import('@/pages/import-export')
             }
           ]
+        },
+        {
+          path: '/debuggerIndex',
+          name: 'debuggerIndex',
+          component: () => import('@/pages/debugger/debugger-index'),
+          params: {},
+          redirect: '/debuggerIndex/debuggerData',
+          props: true,
+          children: [
+            {
+              path: 'debuggerData',
+              name: 'debuggerData',
+              title: '调试数据',
+              meta: {},
+              component: () => import('@/pages/debugger/debugger-data')
+            },
+            {
+              path: 'debuggerRequest',
+              name: 'debuggerRequest',
+              title: '调试请求',
+              meta: {},
+              component: () => import('@/pages/debugger/debugger-request')
+            }
+          ]
         }
       ]
     }
