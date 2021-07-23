@@ -111,3 +111,10 @@ type PluginInterfaceResultOutputObj struct {
 	ErrorMessage      string `json:"errorMessage"`
 	CallbackParameter string `json:"callbackParameter"`
 }
+
+type PluginInterfaceResultObjDebug struct {
+	StatusCode    string                      `json:"statusCode"`
+	ResultCode    string                      `json:"resultCode"`
+	ResultMessage string                      `json:"resultMessage"`
+	Results       PluginInterfaceResultOutput `json:"results"`
+}

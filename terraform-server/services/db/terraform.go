@@ -594,7 +594,7 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 	_, err = os.Stat(targetTerraformLockHclPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			terraformLockHclPath := terraformFilePath + "providers/" + providerData.Name + "/" + providerData.Version + "/.terraform.lock.hcl"
+			terraformLockHclPath := terraformFilePath + "providers/" + providerData.Name + "/" + providerData.Version + "/" + models.Config.TerraformProviderOsArch + "_hcl" + "/.terraform.lock.hcl"
 			err = os.Symlink(terraformLockHclPath, targetTerraformLockHclPath)
 			if err != nil {
 				err = fmt.Errorf("Make soft link : %s error: %s", targetTerraformLockHclPath, err.Error())
@@ -1203,7 +1203,7 @@ func handleAzQuery(reqParam map[string]interface{},
 	_, err = os.Stat(targetTerraformLockHclPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			terraformLockHclPath := terraformFilePath + "providers/" + providerData.Name + "/" + providerData.Version + "/.terraform.lock.hcl"
+			terraformLockHclPath := terraformFilePath + "providers/" + providerData.Name + "/" + providerData.Version + "/" + models.Config.TerraformProviderOsArch + "_hcl" + "/.terraform.lock.hcl"
 			err = os.Symlink(terraformLockHclPath, targetTerraformLockHclPath)
 			if err != nil {
 				err = fmt.Errorf("Make soft link : %s error: %s", targetTerraformLockHclPath, err.Error())
@@ -1568,7 +1568,7 @@ func handleDestroy(workDirPath string,
 		_, err = os.Stat(targetTerraformLockHclPath)
 		if err != nil {
 			if os.IsNotExist(err) {
-				terraformLockHclPath := terraformFilePath + "providers/" + providerData.Name + "/" + providerData.Version + "/.terraform.lock.hcl"
+				terraformLockHclPath := terraformFilePath + "providers/" + providerData.Name + "/" + providerData.Version + "/" + models.Config.TerraformProviderOsArch + "_hcl" + "/.terraform.lock.hcl"
 				err = os.Symlink(terraformLockHclPath, targetTerraformLockHclPath)
 				if err != nil {
 					err = fmt.Errorf("Make soft link : %s error: %s", targetTerraformLockHclPath, err.Error())

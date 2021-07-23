@@ -189,7 +189,8 @@ func TerraformOperationDebug (c *gin.Context) {
 		params = append(params, p.Index(i).Interface().(map[string]interface{}))
 	}
 
-	rowData := models.PluginInterfaceResultObj{}
+	rowData := models.PluginInterfaceResultObjDebug{}
+	rowData.StatusCode = "OK"
 	rowData.ResultCode = "0"
 	rowData.ResultMessage = "success"
 	for i := range params {
