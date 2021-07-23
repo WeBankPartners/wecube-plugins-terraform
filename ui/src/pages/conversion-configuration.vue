@@ -715,7 +715,6 @@ export default {
       })
     },
     editSource (source) {
-      console.log(source)
       this.newSource = {
         isShow: true,
         isAdd: false,
@@ -779,12 +778,14 @@ export default {
         if (statusCode === 'OK') {
           val.relativeValueOptions = data
         }
+      } else {
+        val.relativeValueOptions = []
       }
     },
     async openDefaultValue (item, interfaceParamsWithTemplate) {
       await this.getInterfaceParamsWithTemplate(item)
       const find = item[interfaceParamsWithTemplate].find(ip => ip.id === item.parameter)
-      if (find) {
+      if (find && find.template) {
         const { statusCode, data } = await getTemplateValue(find.template)
         if (statusCode === 'OK') {
           const find = data.filter(d => d.value === item.defaultValue)
@@ -795,6 +796,8 @@ export default {
           }
           item.defaultValueOptions = data
         }
+      } else {
+        item.defaultValueOptions = []
       }
     },
     async updateAttr (item) {
