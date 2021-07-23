@@ -41,7 +41,6 @@
             type="primary"
             >{{ $t('debugger') }}</Button
           >
-          <Button @click="test">{{ $t('debugger') }}</Button>
         </Col>
       </Row>
     </div>
@@ -57,7 +56,7 @@
     <Modal v-model="dataDetail.isShow" :title="$t('t_detail')" footer-hide>
       <div
         style="overflow: auto;
-    max-height: 400px;"
+    max-height: 500px;"
       >
         <pre>{{ dataDetail.data }}</pre>
       </div>
@@ -90,7 +89,8 @@ export default {
         },
         {
           title: 'sourc_name',
-          key: 'sourc_name'
+          key: 'sourc_name',
+          width: 200
         },
         {
           title: 'tf_json',
@@ -121,7 +121,8 @@ export default {
         },
         {
           title: 'tf_state',
-          key: 'tf_state'
+          key: 'tf_state',
+          width: 200
         }
       ],
       destoryApplyTableColums: [
@@ -132,7 +133,8 @@ export default {
         },
         {
           title: 'sourc_name',
-          key: 'sourc_name'
+          key: 'sourc_name',
+          width: 200
         },
         {
           title: 'tf_json_old',
@@ -189,16 +191,90 @@ export default {
           }
         },
         {
+          title: 'tf_state_old',
+          key: 'tf_state_old',
+          width: 200
+        },
+        {
           title: 'tf_state_new',
-          key: 'tf_state_new'
+          key: 'tf_state_new',
+          width: 200,
+          render: (h, params) => {
+            console.log(params.row)
+            return (
+              <div>
+                <div style="display:inline-block;width: 130px;overflow: hidden;text-overflow:ellipsis;white-space: nowrap">
+                  {params.row.tf_state_new}
+                </div>
+                {params.row.tf_state_new !== '' && (
+                  <Button
+                    onClick={() => {
+                      this.showInfo(params.row.tf_state_new)
+                    }}
+                    style="vertical-align: top;"
+                    icon="ios-search"
+                    type="primary"
+                    ghost
+                    size="small"
+                  ></Button>
+                )}
+              </div>
+            )
+          }
         },
         {
           title: 'tf_state_import',
-          key: 'tf_state_import'
+          key: 'tf_state_import',
+          width: 200,
+          render: (h, params) => {
+            console.log(params.row)
+            return (
+              <div>
+                <div style="display:inline-block;width: 130px;overflow: hidden;text-overflow:ellipsis;white-space: nowrap">
+                  {params.row.tf_state_import}
+                </div>
+                {params.row.tf_state_import !== '' && (
+                  <Button
+                    onClick={() => {
+                      this.showInfo(params.row.tf_state_import)
+                    }}
+                    style="vertical-align: top;"
+                    icon="ios-search"
+                    type="primary"
+                    ghost
+                    size="small"
+                  ></Button>
+                )}
+              </div>
+            )
+          }
         },
         {
           title: 'plan_message',
-          key: 'plan_message'
+          key: 'plan_message',
+          width: 200,
+          render: (h, params) => {
+            console.log(params.row)
+            return (
+              <div>
+                <div style="display:inline-block;width: 130px;overflow: hidden;text-overflow:ellipsis;white-space: nowrap">
+                  {params.row.plan_message}
+                </div>
+                {params.row.plan_message !== '' && (
+                  <Button
+                    onClick={() => {
+                      this.showInfo(params.row.plan_message)
+                    }}
+                    style="vertical-align: top;"
+                    icon="ios-search"
+                    type="primary"
+                    ghost
+                    size="small"
+                  ></Button>
+                )}
+              </div>
+            )
+          }
         }
       ],
       tableData: [],
@@ -210,8 +286,10 @@ export default {
   },
   methods: {
     showInfo (data) {
+      this.dataDetail.data = ''
       this.dataDetail.isShow = true
-      this.dataDetail.data = JSON.parse(data)
+      const isJson = data.startsWith('{') && data.endsWith('}')
+      this.dataDetail.data = isJson ? JSON.parse(data) : data
     },
     clearInterface () {
       this.currentInterface = ''
@@ -226,123 +304,30 @@ export default {
       this.result = {}
       this.showResult = false
     },
-    test () {
+    managementData (data) {
       if (this.currentInterface !== 'query') {
         this.tableColums = this.queryTableColums
       } else {
         this.tableColums = this.destoryApplyTableColums
       }
-      let xx = {
-        resultCode: '0',
-        resultMessage: 'success',
-        results: {
-          outputs: [
-            {
-              result_data: [
-                {
-                  asset_id: '1111-1',
-                  callbackParameter: '1111-1',
-                  cidr: '111-1',
-                  errorCode: '1111-1',
-                  errorMessage: '1111-1',
-                  id: '1111-1',
-                  name: '1111-1'
-                },
-                {
-                  asset_id: '1111-1',
-                  callbackParameter: '1111-1',
-                  cidr: '111-1',
-                  errorCode: '1111-1',
-                  errorMessage: '1111-1',
-                  id: '1111-1',
-                  name: '1111-1'
-                }
-              ],
-              resource_results: [
-                {
-                  plan_message: '11111',
-                  sourc_name: '1111',
-                  tf_json_new: '1111',
-                  tf_json_old: '1111',
-                  tf_state_import: '1111',
-                  tf_state_new: '111111'
-                },
-                {
-                  plan_message: '11111',
-                  sourc_name: '1111',
-                  tf_json_new: '1111',
-                  tf_json_old: '1111',
-                  tf_state_import: '1111',
-                  tf_state_new: '111111'
-                }
-              ]
-            },
-            {
-              result_data: [
-                {
-                  asset_id: '222',
-                  callbackParameter: '222',
-                  cidr: '222',
-                  errorCode: '222',
-                  errorMessage: '222',
-                  id: '222',
-                  name: '222'
-                },
-                {
-                  asset_id: '222',
-                  callbackParameter: '222',
-                  cidr: '222',
-                  errorCode: '222',
-                  errorMessage: '222',
-                  id: '222',
-                  name: '222'
-                }
-              ],
-              resource_results: [
-                {
-                  plan_message: '222',
-                  sourc_name: '222',
-                  tf_json_new: '222',
-                  tf_json_old: '222',
-                  tf_state_import: '222',
-                  tf_state_new: '222'
-                },
-                {
-                  plan_message: '222',
-                  sourc_name: '222',
-                  tf_json_new: '222',
-                  tf_json_old: '222',
-                  tf_state_import: '222',
-                  tf_state_new: '222'
-                }
-              ]
-            }
-          ]
-        }
-      }
       this.tableData = []
       this.result = {}
-      xx.results.outputs.forEach((element, index) => {
+      data.results.outputs.forEach((element, index) => {
         this.result['res_' + index] = element.result_data
         element.resource_results.forEach((ele, eleIndex) => {
           ele.num = index + '-' + eleIndex
           this.tableData.push(ele)
         })
       })
-      console.log(this.tableData)
       this.showResult = true
     },
     async debuggerRequest () {
-      const { statusCode, data } = await debuggerRequest(this.plugin, this.currentInterface, this.requestBody)
-      if (statusCode === 'OK') {
-        if (this.currentInterface === 'query') {
-          this.tableColums = this.queryTableColums
-        } else {
-          this.tableColums = this.destoryApplyTableColums
-        }
-        this.tableTable = data
-        this.showResult = true
-      }
+      this.$Notice.success({
+        title: 'Successful',
+        desc: 'Need 10s ……'
+      })
+      const result = await debuggerRequest(this.plugin, this.currentInterface, this.requestBody)
+      this.managementData(result)
     },
     async getPlugin () {
       this.pluginOptions = []

@@ -4,7 +4,7 @@
     <Modal v-model="dataDetail.isShow" :title="$t('t_detail')" footer-hide>
       <div
         style="overflow: auto;
-    max-height: 400px;"
+    max-height: 500px;"
       >
         <pre>{{ dataDetail.data }}</pre>
       </div>
@@ -104,6 +104,7 @@ export default {
       }
     },
     showInfo (data) {
+      this.dataDetail.data = ''
       this.dataDetail.isShow = true
       this.dataDetail.data = JSON.parse(data)
     }
