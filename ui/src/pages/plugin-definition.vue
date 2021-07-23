@@ -165,7 +165,9 @@
                           @on-open-change="getObjectNameOptions(param, 'input')"
                         >
                           <template v-if="param.objectName && param.objectNameOptions.length === 0">
-                            <Option :value="param.objectName" :key="param.objectName">{{ param.objectName }}</Option>
+                            <Option :value="param.objectName" :key="param.objectName">{{
+                              param.objectNameTitle
+                            }}</Option>
                           </template>
                           <template v-else>
                             <Option v-for="objName in param.objectNameOptions" :value="objName.id" :key="objName.id">{{

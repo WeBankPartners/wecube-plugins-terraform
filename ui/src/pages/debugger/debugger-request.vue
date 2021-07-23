@@ -12,7 +12,7 @@
             filterable
             style="width:400px"
           >
-            <Option v-for="item in pluginOptions" :value="item.id" :key="item.id">{{ item.name }}</Option>
+            <Option v-for="item in pluginOptions" :value="item.name" :key="item.name">{{ item.name }}</Option>
           </Select>
         </Col>
         <Col span="12">
@@ -94,19 +94,19 @@ export default {
         },
         {
           title: 'tf_json',
-          key: 'tf_json',
+          key: 'tf_json_new',
           width: 300,
           render: (h, params) => {
             console.log(params.row)
             return (
               <div>
                 <div style="display:inline-block;width: 200px;overflow: hidden;text-overflow:ellipsis;white-space: nowrap">
-                  {params.row.tf_json}
+                  {params.row.tf_json_new}
                 </div>
-                {params.row.tf_json !== '' && (
+                {params.row.tf_json_new && (
                   <Button
                     onClick={() => {
-                      this.showInfo(params.row.tf_json)
+                      this.showInfo(params.row.tf_json_new)
                     }}
                     style="vertical-align: top;"
                     icon="ios-search"
@@ -122,7 +122,28 @@ export default {
         {
           title: 'tf_state',
           key: 'tf_state',
-          width: 200
+          width: 300,
+          render: (h, params) => {
+            return (
+              <div>
+                <div style="display:inline-block;width: 200px;overflow: hidden;text-overflow:ellipsis;white-space: nowrap">
+                  {params.row.tf_state_new}
+                </div>
+                {params.row.tf_state_new && (
+                  <Button
+                    onClick={() => {
+                      this.showInfo(params.row.tf_state_new)
+                    }}
+                    style="vertical-align: top;"
+                    icon="ios-search"
+                    type="primary"
+                    ghost
+                    size="small"
+                  ></Button>
+                )}
+              </div>
+            )
+          }
         }
       ],
       destoryApplyTableColums: [
@@ -147,7 +168,7 @@ export default {
                 <div style="display:inline-block;width: 130px;overflow: hidden;text-overflow:ellipsis;white-space: nowrap">
                   {params.row.tf_json_old}
                 </div>
-                {params.row.tf_json_old !== '' && (
+                {params.row.tf_json_old && (
                   <Button
                     onClick={() => {
                       this.showInfo(params.row.tf_json_old)
@@ -174,7 +195,7 @@ export default {
                 <div style="display:inline-block;width: 130px;overflow: hidden;text-overflow:ellipsis;white-space: nowrap">
                   {params.row.tf_json_new}
                 </div>
-                {params.row.tf_json_new !== '' && (
+                {params.row.tf_json_new && (
                   <Button
                     onClick={() => {
                       this.showInfo(params.row.tf_json_new)
@@ -206,7 +227,7 @@ export default {
                 <div style="display:inline-block;width: 130px;overflow: hidden;text-overflow:ellipsis;white-space: nowrap">
                   {params.row.tf_state_new}
                 </div>
-                {params.row.tf_state_new !== '' && (
+                {params.row.tf_state_new && (
                   <Button
                     onClick={() => {
                       this.showInfo(params.row.tf_state_new)
@@ -233,7 +254,7 @@ export default {
                 <div style="display:inline-block;width: 130px;overflow: hidden;text-overflow:ellipsis;white-space: nowrap">
                   {params.row.tf_state_import}
                 </div>
-                {params.row.tf_state_import !== '' && (
+                {params.row.tf_state_import && (
                   <Button
                     onClick={() => {
                       this.showInfo(params.row.tf_state_import)
@@ -260,7 +281,7 @@ export default {
                 <div style="display:inline-block;width: 130px;overflow: hidden;text-overflow:ellipsis;white-space: nowrap">
                   {params.row.plan_message}
                 </div>
-                {params.row.plan_message !== '' && (
+                {params.row.plan_message && (
                   <Button
                     onClick={() => {
                       this.showInfo(params.row.plan_message)
@@ -305,7 +326,7 @@ export default {
       this.showResult = false
     },
     managementData (data) {
-      if (this.currentInterface !== 'query') {
+      if (this.currentInterface === 'query') {
         this.tableColums = this.queryTableColums
       } else {
         this.tableColums = this.destoryApplyTableColums

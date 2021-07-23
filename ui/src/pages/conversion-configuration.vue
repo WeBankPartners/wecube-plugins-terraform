@@ -141,8 +141,9 @@
               class="style-widthout-height"
               :style="{
                 width: '120px',
-                'line-height': (source.args.length + source.attrs.length) * 39 + 'px',
+                height: (source.args.length + source.attrs.length) * 39 + 'px',
                 overflow: 'hidden',
+                padding: '60% 0',
                 'text-overflow': 'ellipsis',
                 'white-space': 'nowrap'
               }"
@@ -150,17 +151,6 @@
               <span :title="source.name" class="xx">
                 {{ source.name }}
               </span>
-            </div>
-            <!-- <div
-              class="style-widthout-height"
-              :style="{
-                width: '120px',
-                'line-height': (source.args.length + source.attrs.length) * 39 + 'px'
-              }"
-            >
-              <div :title="source.name" class="xx">
-                {{ source.name }}
-              </div>
               <div>
                 <Button
                   @click="editSource(source)"
@@ -179,7 +169,7 @@
                   icon="md-trash"
                 ></Button>
               </div>
-            </div> -->
+            </div>
             <div class="style-widthout-height" style="width:120px;vertical-align: top;border:none">
               <div class="style-widthout-height" style="font-size: 0;margin-left:0px;border:none">
                 <div
@@ -237,7 +227,7 @@
                       @on-open-change="getInterfaceParamsWithTemplate(item)"
                     >
                       <template v-if="item.parameter && item.interfaceInputParamsWithTemplate.length === 0">
-                        <Option :value="item.parameter" :key="item.parameter">{{ item.parameter }}</Option>
+                        <Option :value="item.parameter" :key="item.parameter">{{ item.parameterTitle }}</Option>
                       </template>
                       <template v-else>
                         <Option v-for="item in item.interfaceInputParamsWithTemplate" :value="item.id" :key="item.id">{{
@@ -278,7 +268,7 @@
                       @on-open-change="getArgsObjetcNameOptions(source, item)"
                     >
                       <template v-if="item.objectName && item.argsObjetcNameOptions.length === 0">
-                        <Option :value="item.objectName" :key="item.objectName">{{ item.objectName }}</Option>
+                        <Option :value="item.objectName" :key="item.objectName">{{ item.objectNameTitle }}</Option>
                       </template>
                       <template v-else>
                         <Option v-for="item in item.argsObjetcNameOptions" :value="item.id" :key="item.id">{{
@@ -288,20 +278,20 @@
                     </Select>
                   </div>
                   <div class="table-col title-width-level0">
-                    <Select v-model="item.isMulti" @on-clear="item.isMulti = ''" clearable filterable size="small">
+                    <Select v-model="item.isMulti" filterable size="small">
                       <Option value="Y">Y</Option>
                       <Option value="N">N</Option>
                     </Select>
                   </div>
                   <div class="table-col title-width-level0">
-                    <Select v-model="item.isNull" @on-clear="item.isNull = ''" clearable filterable size="small">
+                    <Select v-model="item.isNull" filterable size="small">
                       <Option value="Y">Y</Option>
                       <Option value="N">N</Option>
                     </Select>
                   </div>
 
                   <div class="table-col title-width-level1">
-                    <Select v-model="item.convertWay" size="small">
+                    <Select v-model="item.convertWay" @on-change="changeConverWay(item)" size="small">
                       <Option
                         v-for="item in conversionTypeOptions"
                         clearable
@@ -325,7 +315,7 @@
                     >
                       <template v-if="item.relativeParameter && item.interfaceInputParams.length === 0">
                         <Option :value="item.relativeParameter" :key="item.relativeParameter">{{
-                          item.relativeParameter
+                          item.relativeParameterTitle
                         }}</Option>
                       </template>
                       <template v-else>
@@ -361,7 +351,7 @@
                     <Select
                       v-model="item.relativeSource"
                       size="small"
-                      :disabled="!['attr', 'data', 'context_data'].includes(item.convertWay)"
+                      :disabled="!['attribute', 'data', 'context_data'].includes(item.convertWay)"
                       clearable
                       @on-clear="item.relativeSource = ''"
                       filterable
@@ -369,7 +359,7 @@
                     >
                       <template v-if="item.relativeSource && item.sourceWithFilter.length === 0">
                         <Option :value="item.relativeSource" :key="item.relativeSource">{{
-                          item.relativeSource
+                          item.relativeSourceTitle
                         }}</Option>
                       </template>
                       <template v-else>
@@ -382,7 +372,7 @@
                   <div class="table-col title-width-level1">
                     <Select
                       v-model="item.relativeTfstateAttribute"
-                      :disabled="!['attr'].includes(item.convertWay)"
+                      :disabled="!['attribute'].includes(item.convertWay)"
                       clearable
                       @on-clear="item.relativeTfstateAttribute = ''"
                       @on-open-change="getSourceAttrOptions(item, 'args')"
@@ -391,7 +381,7 @@
                     >
                       <template v-if="item.relativeTfstateAttribute && item.sourceAttr.length === 0">
                         <Option :value="item.relativeTfstateAttribute" :key="item.relativeTfstateAttribute">{{
-                          item.relativeTfstateAttribute
+                          item.relativeTfstateAttributeTitle
                         }}</Option>
                       </template>
                       <template v-else>
@@ -435,7 +425,7 @@
                       @on-open-change="getInterfaceParamsWithTemplate(item)"
                     >
                       <template v-if="item.parameter && item.interfaceOutputParamsWithTemplate.length === 0">
-                        <Option :value="item.parameter" :key="item.parameter">{{ item.parameter }}</Option>
+                        <Option :value="item.parameter" :key="item.parameter">{{ item.parameterTitle }}</Option>
                       </template>
                       <template v-else>
                         <Option
@@ -478,7 +468,7 @@
                       @on-open-change="getAttrsObjetcNameOptions(source, item)"
                     >
                       <template v-if="item.objectName && item.attrsObjetcNameOptions.length === 0">
-                        <Option :value="item.objectName" :key="item.objectName">{{ item.objectName }}</Option>
+                        <Option :value="item.objectName" :key="item.objectName">{{ item.objectNameTitle }}</Option>
                       </template>
                       <template v-else>
                         <Option v-for="item in item.attrsObjetcNameOptions" :value="item.id" :key="item.id">{{
@@ -488,20 +478,20 @@
                     </Select>
                   </div>
                   <div class="table-col title-width-level0">
-                    <Select v-model="item.isMulti" @on-clear="item.isMulti = ''" clearable filterable size="small">
+                    <Select v-model="item.isMulti" filterable size="small">
                       <Option value="Y">Y</Option>
                       <Option value="N">N</Option>
                     </Select>
                   </div>
                   <div class="table-col title-width-level0">
-                    <Select v-model="item.isNull" @on-clear="item.isNull = ''" clearable filterable size="small">
+                    <Select v-model="item.isNull" filterable size="small">
                       <Option value="Y">Y</Option>
                       <Option value="N">N</Option>
                     </Select>
                   </div>
 
                   <div class="table-col title-width-level1">
-                    <Select v-model="item.convertWay" size="small">
+                    <Select v-model="item.convertWay" @on-change="changeConverWay(item)" size="small">
                       <Option
                         v-for="item in conversionTypeOptions"
                         clearable
@@ -526,7 +516,7 @@
                     >
                       <template v-if="item.relativeParameter && item.interfaceOutputParams.length === 0">
                         <Option :value="item.relativeParameter" :key="item.relativeParameter">{{
-                          item.relativeParameter
+                          item.relativeParameterTitle
                         }}</Option>
                       </template>
                       <template v-else>
@@ -562,7 +552,7 @@
                     <Select
                       v-model="item.relativeSource"
                       size="small"
-                      :disabled="!['attr', 'data', 'context_data'].includes(item.convertWay)"
+                      :disabled="!['attribute', 'data', 'context_data'].includes(item.convertWay)"
                       @on-open-change="getSourceByProvider(item)"
                       clearable
                       @on-clear="item.relativeSource = ''"
@@ -570,7 +560,7 @@
                     >
                       <template v-if="item.relativeSource && item.sourceWithFilter.length === 0">
                         <Option :value="item.relativeSource" :key="item.relativeSource">{{
-                          item.relativeSource
+                          item.relativeSourceTitle
                         }}</Option>
                       </template>
                       <template v-else>
@@ -654,15 +644,15 @@ export default {
         { label: 'int', value: 'int' }
       ],
       conversionTypeOptions: [
+        { label: 'direct', value: 'direct' },
         { label: 'data', value: 'data' },
-        { label: 'temp', value: 'temp' },
+        { label: 'attribute', value: 'attribute' },
+        { label: 'template', value: 'template' },
         { label: 'context', value: 'context' },
-        { label: 'context_data', value: 'context_data' },
-        { label: 'attr', value: 'attr' },
-        { label: 'direct', value: 'direct' }
+        { label: 'context_data', value: 'context_data' }
       ],
       emptyParams: {
-        convertWay: '',
+        convertWay: 'direct',
         createTime: '',
         createUser: '',
         defaultValue: '',
@@ -709,6 +699,12 @@ export default {
     this.MODALHEIGHT = window.innerHeight - 300
   },
   methods: {
+    changeConverWay (item) {
+      item.relativeParameter = ''
+      item.relativeParameterValue = ''
+      item.relativeSource = ''
+      item.relativeTfstateAttribute = ''
+    },
     createDefaultValueOptions (item, el) {
       item.defaultValueOptions.push({
         value: el
@@ -789,7 +785,7 @@ export default {
         const { statusCode, data } = await getTemplateValue(find.template)
         if (statusCode === 'OK') {
           const find = data.filter(d => d.value === item.defaultValue)
-          if (find.length === 0) {
+          if (find && find.length === 0) {
             data.push({
               value: item.defaultValue
             })
