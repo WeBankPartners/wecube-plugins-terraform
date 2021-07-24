@@ -349,6 +349,15 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 	resourceId := reqParam["id"].(string)
 	resourceAssetId := reqParam["asset_id"].(string)
 
+	var tfArguments map[string]interface{}
+	tfArguments, resourceAssetId, err = handleConvertParams(action, sourceData, tfArgumentList, reqParam, providerData)
+	if err != nil {
+		err = fmt.Errorf("HandleConvertParams error:%s", err.Error())
+		log.Logger.Warn("HandleConvertParams error", log.Error(err))
+		retOutput["errorMessage"] = err.Error()
+		return
+	}
+	/*
 	tfArguments := make(map[string]interface{})
 	// 循环处理每一个 tf_argument
 	for i := range tfArgumentList {
@@ -411,9 +420,9 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 		if action == "apply" {
 			if tfArgumentList[i].Name == sourceData.AssetIdAttribute {
 				if parameterData.Name == "id" {
-					if arg != nil {
-						resourceId = arg.(string)
-					}
+					// if arg != nil {
+					// 	resourceId = arg.(string)
+					// }
 				} else if parameterData.Name == "asset_id" {
 					if arg != nil {
 						resourceAssetId = arg.(string)
@@ -451,6 +460,7 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 			}
 		}
 	}
+	 */
 
 	if action == "apply" {
 		if resourceId == "" && resourceAssetId == "" {
@@ -459,9 +469,9 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 			retOutput["errorMessage"] = err.Error()
 			return
 		}
-		if resourceId == "" {
-			resourceId = resourceAssetId
-		}
+		// if resourceId == "" {
+		// 	resourceId = resourceAssetId
+		// }
 	}
 
 	_, err = os.Stat(dirPath)
@@ -1795,8 +1805,213 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 		rowData["errorMessage"] = err.Error()
 		return
 	}
-	fmt.Printf("%v\n", sortedSourceList)
+	// fmt.Printf("%v\n", sortedSourceList)
 
+	for _, sortedSourceData := range sortedSourceList {
+		tfArgName := "ROOT"
+		sqlCmd = `SELECT * FROM tf_argument WHERE source=? AND name=?`
+		paramArgs = []interface{}{sortedSourceData.Id, tfArgName}
+		var rootTfArgumentList []*models.TfArgumentTable
+		err = x.SQL(sqlCmd, paramArgs...).Find(&rootTfArgumentList)
+		if err != nil {
+			err = fmt.Errorf("Get tfArgument data by source:%s and name:%s error:%s", sortedSourceData.Id, tfArgName, err.Error())
+			log.Logger.Error("Get tfArgument data by source and name error", log.String("source", sortedSourceData.Id), log.String("name", tfArgName), log.Error(err))
+			rowData["errorMessage"] = err.Error()
+			return
+		}
+
+		inPutValSlice := [][]interface{}{}
+		resource_id := reqParam["id"].(string)
+		for _, rootTfArgumentData := range rootTfArgumentList {
+			if rootTfArgumentData.Parameter == "" && rootTfArgumentData.RelativeSource == "" {
+				err = fmt.Errorf("TfArgument data: %s must have parameter and relative_source", rootTfArgumentData.Id)
+				log.Logger.Error("TfArgument data: %s must have parameter and relative_source", log.String("rootTfArgumentId", rootTfArgumentData.Id), log.Error(err))
+				rowData["errorMessage"] = err.Error()
+				return
+			} else if rootTfArgumentData.Parameter != "" {
+				sqlCmd = "SELECT * FROM parameter WHERE id=?"
+				paramArgs = []interface{}{rootTfArgumentData.Parameter}
+				var tmpInPutParameterList []*models.ParameterTable
+				err = x.SQL(sqlCmd, paramArgs...).Find(&tmpInPutParameterList)
+				if err != nil {
+					err = fmt.Errorf("Get inPutParameter list error:%s", err.Error())
+					log.Logger.Error("Get inPutParameter list error", log.Error(err))
+					rowData["errorMessage"] = err.Error()
+					return
+				}
+				if len(tmpInPutParameterList) == 0 {
+					err = fmt.Errorf("InPutParameter can not be found by id", rootTfArgumentData.Parameter)
+					log.Logger.Warn("InPutParameter can not be found by id", log.String("id", rootTfArgumentData.Parameter), log.Error(err))
+					rowData["errorMessage"] = err.Error()
+					return
+				}
+				inPutParameterData := tmpInPutParameterList[0]
+
+				// get the memberParam of inPutParameterData
+				memberParamType := "input"
+				sqlCmd = "SELECT * FROM parameter WHERE interface=? AND type=? AND object_name=?"
+				paramArgs = []interface{}{interfaceData.Id, memberParamType, inPutParameterData.Id}
+				var memberParameterList []*models.ParameterTable
+				err = x.SQL(sqlCmd, paramArgs...).Find(&memberParameterList)
+				if err != nil {
+					err = fmt.Errorf("Get memberParameter list error:%s", err.Error())
+					log.Logger.Error("Get memberParameter list error", log.Error(err))
+					rowData["errorMessage"] = err.Error()
+					return
+				}
+				if len(memberParameterList) == 0 {
+					err = fmt.Errorf("MemberParameter list can not be found by interface:%s, type:%s and object_name:%s", interfaceData.Id, memberParamType, inPutParameterData.Id)
+					log.Logger.Warn("MemberParameter list can not be found by interface, type and object_name", log.String("interface", interfaceData.Id), log.String("type", memberParamType), log.String("object_name", inPutParameterData.Id), log.Error(err))
+					rowData["errorMessage"] = err.Error()
+					return
+				}
+
+				memberParamIds := []string{}
+				for i := range memberParameterList {
+					memberParamIds = append(memberParamIds, memberParameterList[i].Id)
+				}
+
+				memberParamIdsStr := strings.Join(memberParamIds, "','")
+				// Get the memberParams' tfArguments
+				sqlCmd = "SELECT * FROM tf_argument WHERE source=? AND parameter IN ('" + memberParamIdsStr + "')"
+				var memberTfArguments []*models.TfArgumentTable
+				paramArgs = []interface{}{sortedSourceData.Id}
+				err = x.SQL(sqlCmd, paramArgs...).Find(&memberTfArguments)
+				if err != nil {
+					err = fmt.Errorf("Get memberTfArgument list error:%s", err.Error())
+					log.Logger.Error("Get memberTfArgument list error", log.Error(err))
+					rowData["errorMessage"] = err.Error()
+					return
+				}
+				if len(memberTfArguments) == 0 {
+					err = fmt.Errorf("MemberTfArgument list can not be found by source:%s and memberParamIds:%s", sortedSourceData.Id, memberParamIdsStr)
+					log.Logger.Warn("MemberTfArgument list can not be found by source and memberParamIds", log.String("source", sortedSourceData.Id), log.String("memberParamIds", memberParamIdsStr), log.Error(err))
+					rowData["errorMessage"] = err.Error()
+					return
+				}
+
+				var inPutVal []interface{}
+				if inPutParameterData.Multiple == "Y" {
+					inPutVal = reqParam[inPutParameterData.Name].([]interface{})
+				} else {
+					inPutVal = append(inPutVal, reqParam[inPutParameterData.Name])
+				}
+
+				convertedInPutVal := []interface{}{}
+				for _, v := range inPutVal {
+					curInPut := v.(map[string]interface{})
+					var tmpTfArguments map[string]interface{}
+					tmpTfArguments, _, err = handleConvertParams(action, sortedSourceData, memberTfArguments, curInPut, providerData)
+					if err != nil {
+						err = fmt.Errorf("HandleConvertParams error:%s", err.Error())
+						log.Logger.Warn("HandleConvertParams error", log.Error(err))
+						rowData["errorMessage"] = err.Error()
+						return
+					}
+					convertedInPutVal = append(convertedInPutVal, tmpTfArguments)
+				}
+
+				inPutValSlice = append(inPutValSlice, convertedInPutVal)
+
+			} else if rootTfArgumentData.Parameter == "" {
+				rootTfArgRelativeSource := rootTfArgumentData.RelativeSource
+				sqlCmd = `SELECT * FROM resource_data WHERE resource=? AND resource_id=?`
+
+				if _, ok := reqParam[models.ResourceDataDebug]; ok {
+					sqlCmd = `SELECT * FROM resource_data_debug WHERE resource=? AND resource_id=?`
+				}
+
+				paramArgs = []interface{}{rootTfArgRelativeSource, resource_id}
+				var resourceDataList []*models.ResourceDataTable
+				err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataList)
+				if err != nil {
+					err = fmt.Errorf("Get resource data by resource:%s and resource_id:%s error: %s", rootTfArgRelativeSource, resource_id, err.Error())
+					log.Logger.Error("Get resource data by resource and resource_id error", log.String("resource", rootTfArgRelativeSource), log.String("resource_id", resource_id), log.Error(err))
+					return
+				}
+				if len(resourceDataList) == 0 {
+					err = fmt.Errorf("ResourceData can not be found by resource:%s and resource_id:%s", rootTfArgRelativeSource, resource_id)
+					log.Logger.Warn("ResourceData can not be found by resource and resource_id", log.String("resource", rootTfArgRelativeSource), log.String("resource_id", resource_id), log.Error(err))
+					return
+				}
+				// inPutValCntParamIdMap[rootTfArgumentData.Parameter] = len(resourceDataList)
+				// TODO
+			}
+		}
+
+		// Get the resource_data list by resource_id and source
+		sqlCmd = `SELECT * FROM resource_data WHERE resource=? AND resource_id=?`
+
+		if _, ok := reqParam[models.ResourceDataDebug]; ok {
+			sqlCmd = `SELECT * FROM resource_data_debug WHERE resource=? AND resource_id=?`
+		}
+
+		paramArgs = []interface{}{sortedSourceData.Id, resource_id}
+		var resourceDataList []*models.ResourceDataTable
+		err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataList)
+		if err != nil {
+			err = fmt.Errorf("Get resource data by resource:%s and resource_id:%s error: %s", sortedSourceData.Id, resource_id, err.Error())
+			log.Logger.Error("Get resource data by resource and resource_id error", log.String("resource", sortedSourceData.Id), log.String("resource_id", resource_id), log.Error(err))
+			return
+		}
+		if len(resourceDataList) == 0 {
+			err = fmt.Errorf("ResourceData can not be found by resource:%s and resource_id:%s", sortedSourceData.Id, resource_id)
+			log.Logger.Warn("ResourceData can not be found by resource and resource_id", log.String("resource", sortedSourceData.Id), log.String("resource_id", resource_id), log.Error(err))
+			return
+		}
+
+		// Get tfArgument list by key_argument='Y'
+		sqlCmd = `SELECT * FROM tf_argument WHERE source=? AND key_argument=?`
+		paramArgs = []interface{}{sortedSourceData.Id, "Y"}
+		var tfArgumentDataList []*models.TfArgumentTable
+		err = x.SQL(sqlCmd, paramArgs...).Find(&tfArgumentDataList)
+		if err != nil {
+			err = fmt.Errorf("Get tfArgument data by resource:%s and key_argument:%s error: %s", sortedSourceData.Id, "Y", err.Error())
+			log.Logger.Error("Get tfArgument data by resource and key_argument error", log.String("resource", sortedSourceData.Id), log.String("key_arugment", "Y"), log.Error(err))
+			return
+		}
+		if len(tfArgumentDataList) == 0 {
+			err = fmt.Errorf("TfArgument Data can not be found by resource:%s and key_argument:%s", sortedSourceData.Id, "Y")
+			log.Logger.Warn("TfArgument Data can not be found by resource and key_argument", log.String("resource", sortedSourceData.Id), log.String("key_argument", "Y"), log.Error(err))
+			return
+		}
+		keyArgumentNameVal := make(map[string]string)
+		for _, v := range tfArgumentDataList {
+			keyArgumentNameVal[v.Name] = ""
+		}
+
+		// Construct the object
+		conStructObject := []map[string]interface{}{}
+		curObject := make(map[string]interface{})
+		handleConStructObject(conStructObject, inPutValSlice, curObject, 0)
+
+		for i := range conStructObject {
+			curObject := conStructObject[i]
+			for k, _ := range keyArgumentNameVal {
+				keyArgumentNameVal[k] = curObject[k].(string)
+			}
+			// 对比 datas 的 tf file，看是否都匹配
+			matchResourceData := make(map[string]bool)
+			for _, data := range resourceDataList {
+				tfFile := data.TfFile
+				var tmpVal map[string]string
+				json.Unmarshal([]byte(tfFile), &tmpVal)
+				isMatch := true
+				for k, v := range keyArgumentNameVal {
+					if v != tmpVal[k] {
+						isMatch = false
+						break
+					}
+				}
+				if isMatch {
+					matchResourceData[data.Id] = true
+					// resourceAssetId := data.ResourceAssetId
+					// TerraformImport
+					// TODO
+				}
+			}
+		}
+	}
 
 	sourceData := sourceList[0]
 
@@ -2602,6 +2817,137 @@ func getSortedSourceList(sourceList []*models.SourceTable, interfaceData *models
 				return
 			}
 			remainCnt = len(initAllSourceListIdMap)
+		}
+	}
+	return
+}
+
+func handleConStructObject(conStructObject []map[string]interface{}, inPutValSlice [][]interface{}, curObject map[string]interface{}, idx int) {
+	if idx == len(inPutValSlice) {
+		tmpObject := make(map[string]interface{})
+		for k, v := range curObject {
+			tmpObject[k] = v
+		}
+		if len(tmpObject) > 0 {
+			conStructObject = append(conStructObject, tmpObject)
+		}
+		return
+	}
+	for i := 0; i < len(inPutValSlice[idx]); i++ {
+		tmpVal := inPutValSlice[idx][i].(map[string]interface{})
+		for k, v := range tmpVal {
+			curObject[k] = v
+		}
+		handleConStructObject(conStructObject, inPutValSlice, curObject, idx+1)
+		for k, _ := range tmpVal {
+			delete(curObject, k)
+		}
+	}
+	return
+}
+
+func handleConvertParams(action string,
+	sourceData *models.SourceTable,
+	tfArgumentList []*models.TfArgumentTable,
+	reqParam map[string]interface{},
+	providerData *models.ProviderTable) (tfArguments map[string]interface{}, resourceAssetId string, err error) {
+
+	tfArguments = make(map[string]interface{})
+	// 循环处理每一个 tf_argument
+	for i := range tfArgumentList {
+		if tfArgumentList[i].Parameter == "" {
+			tfArguments[tfArgumentList[i].Name] = tfArgumentList[i].DefaultValue
+			continue
+		}
+		// 查询 tfArgument 对应的 parameter
+		sqlCmd := `SELECT * FROM parameter WHERE id=?`
+		paramArgs := []interface{}{tfArgumentList[i].Parameter}
+		var parameterList []*models.ParameterTable
+		err = x.SQL(sqlCmd, paramArgs...).Find(&parameterList)
+		if err != nil {
+			err = fmt.Errorf("Get Parameter data by id:%s error:%s", tfArgumentList[i].Parameter, err.Error())
+			log.Logger.Error("Get parameter data by id error", log.String("id", tfArgumentList[i].Parameter), log.Error(err))
+			return
+		}
+		if len(parameterList) == 0 {
+			err = fmt.Errorf("Parameter data can not be found by id:%s", tfArgumentList[i].Parameter)
+			log.Logger.Warn("Parameter data can not be found by id", log.String("id", tfArgumentList[i].Parameter), log.Error(err))
+			return
+		}
+		parameterData := parameterList[0]
+
+		if _, ok := reqParam[parameterData.Name]; !ok {
+			continue
+		}
+
+		convertWay := tfArgumentList[i].ConvertWay
+		var arg interface{}
+		var isDiscard = false
+		switch convertWay {
+		case models.ConvertWay["Data"]:
+			// search resource_data table，get resource_asset_id by resource_id and resource(which is relative_source column in tf_argument table )
+			arg, err = convertData(parameterData, tfArgumentList[i].RelativeSource, reqParam)
+		case models.ConvertWay["Template"]:
+			arg, err = convertTemplate(parameterData, providerData, reqParam)
+		case models.ConvertWay["ContextData"]:
+			arg, isDiscard, err = convertContextData(parameterData, tfArgumentList[i], reqParam)
+		case models.ConvertWay["Attr"]:
+			// search resouce_data table by relative_source and 输入的值, 获取 tfstat_file 字段内容,找到relative_tfstate_attribute id(search tfstate_attribute table) 对应的 name, 获取其在 tfstate_file 中的值
+			arg, err = convertAttr(parameterData, tfArgumentList[i], reqParam)
+		case models.ConvertWay["Direct"]:
+			arg, err = convertDirect(parameterData, tfArgumentList[i].DefaultValue, reqParam)
+		case models.ConvertWay["Function"]:
+			arg, err = convertFunction(parameterData, tfArgumentList[i], reqParam)
+		default:
+			err = fmt.Errorf("The convertWay:%s of tfArgument:%s is invalid", convertWay, tfArgumentList[i].Name)
+			log.Logger.Error("The convertWay of tfArgument is invalid", log.String("convertWay", convertWay), log.String("tfArgument", tfArgumentList[i].Name), log.Error(err))
+			return
+		}
+
+		if isDiscard {
+			continue
+		}
+
+		// handle tfArgument that is not in tf.json file
+		if action == "apply" {
+			if tfArgumentList[i].Name == sourceData.AssetIdAttribute {
+				if parameterData.Name == "id" {
+					// if arg != nil {
+					// 	resourceId = arg.(string)
+					// }
+				} else if parameterData.Name == "asset_id" {
+					if arg != nil {
+						resourceAssetId = arg.(string)
+					}
+				}
+				continue
+			}
+		}
+
+		if action == "query" {
+			if arg == nil || arg == "" {
+				continue
+			}
+		}
+
+		if err != nil {
+			err = fmt.Errorf("Convert parameter:%s error:%s", tfArgumentList[i].Parameter, err.Error())
+			log.Logger.Error("Convert parameter error", log.String("parameterId", tfArgumentList[i].Parameter), log.Error(err))
+			return
+		}
+		tfArguments[tfArgumentList[i].Name] = arg
+		if arg != nil && convertWay == "direct" && parameterData.DataType == "string" && arg.(string) == "null" {
+			delete(tfArguments, tfArgumentList[i].Name)
+		}
+		if parameterData.DataType == "object" || parameterData.DataType == "object_str" {
+			var tmpVal map[string]interface{}
+			err = json.Unmarshal([]byte(arg.(string)), &tmpVal)
+			tfArguments[tfArgumentList[i].Name] = tmpVal
+			if err != nil {
+				err = fmt.Errorf("Unmarshal arg error:%s", err.Error())
+				log.Logger.Error("Unmarshal arg error", log.Error(err))
+				return
+			}
 		}
 	}
 	return
