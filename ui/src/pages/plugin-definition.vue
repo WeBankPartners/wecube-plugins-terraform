@@ -543,7 +543,9 @@ export default {
           desc: 'Successful'
         })
         let tmp = data[0]
+        debugger
         tmp.objectNameOptions = []
+        debugger
         this.interfaceParamter[type][index] = data[0]
       }
     },

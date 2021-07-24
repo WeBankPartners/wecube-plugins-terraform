@@ -363,9 +363,9 @@
                         }}</Option>
                       </template>
                       <template v-else>
-                        <Option v-for="item in item.sourceWithFilter" :value="item.id" :key="item.id"
-                          >{{ item.name }} ({{ item.interface }})</Option
-                        >
+                        <Option v-for="item in item.sourceWithFilter" :value="item.id" :key="item.id">{{
+                          item.name
+                        }}</Option>
                       </template>
                     </Select>
                   </div>
@@ -564,18 +564,42 @@
                         }}</Option>
                       </template>
                       <template v-else>
-                        <Option v-for="item in item.sourceWithFilter" :value="item.id" :key="item.id"
-                          >{{ item.name }} ({{ item.interface }})</Option
+                        <Option v-for="item in item.sourceWithFilter" :value="item.id" :key="item.id">{{
+                          item.name
+                        }}</Option>
+                      </template>
+                    </Select>
+                  </div>
+                  <!-- <div class="table-col title-width-level1">
+                    <Select v-model="item.relativeTfstateAttribute" disabled clearable filterable size="small">
+                    </Select>
+                  </div> -->
+                  <div class="table-col title-width-level1">
+                    <Select
+                      v-model="item.relativeTfstateAttribute"
+                      :disabled="!['attribute'].includes(item.convertWay)"
+                      clearable
+                      @on-clear="item.relativeTfstateAttribute = ''"
+                      @on-open-change="getSourceAttrOptions(item, 'attrs')"
+                      filterable
+                      size="small"
+                    >
+                      <template v-if="item.relativeTfstateAttribute && item.sourceAttr.length === 0">
+                        <Option :value="item.relativeTfstateAttribute" :key="item.relativeTfstateAttribute">{{
+                          item.relativeTfstateAttributeTitle
+                        }}</Option>
+                      </template>
+                      <template v-else>
+                        <Option v-for="item in item.sourceAttr" :value="item.id" :key="item.id"
+                          >{{ item.name }} ({{ item.parameter }})</Option
                         >
                       </template>
                     </Select>
                   </div>
                   <div class="table-col title-width-level1">
-                    <Select v-model="item.relativeTfstateAttribute" disabled clearable filterable size="small">
-                    </Select>
-                  </div>
-                  <div class="table-col title-width-level1">
-                    <Button type="primary" @click="updateAttr(item)" ghost size="small">{{ $t('t_save') }}</Button>
+                    <Button type="primary" @click="updateAttr(item, sourceIndex, attrIndex)" ghost size="small">{{
+                      $t('t_save')
+                    }}</Button>
                     <Button type="error" @click="deleteAttr(source.attrs, item, attrIndex)" ghost size="small">{{
                       $t('t_delete')
                     }}</Button>
@@ -796,14 +820,15 @@ export default {
         item.defaultValueOptions = []
       }
     },
-    async updateAttr (item) {
+    async updateAttr (item, sourceIndex, attrIndex) {
       let tmp = JSON.parse(JSON.stringify(item))
-      const { statusCode } = await updateAttrs([tmp])
+      const { statusCode, data } = await updateAttrs([tmp])
       if (statusCode === 'OK') {
         this.$Notice.success({
           title: 'Successful',
           desc: 'Successful'
         })
+        item.id = data[0].id
       }
     },
     async deleteAttr (attrs, item, index) {
@@ -826,17 +851,14 @@ export default {
       })
     },
     async updateArg (item, index) {
-      const defaultValue = this.$refs.sss[index].query
-      if (defaultValue) {
-        item.defaultValue = defaultValue
-      }
       let tmp = JSON.parse(JSON.stringify(item))
-      const { statusCode } = await updateArgs([tmp])
+      const { statusCode, data } = await updateArgs([tmp])
       if (statusCode === 'OK') {
         this.$Notice.success({
           title: 'Successful',
           desc: 'Successful'
         })
+        item.id = data[0].id
       }
     },
     async deleteArg (args, item, index) {
@@ -891,12 +913,9 @@ export default {
       }
     },
     async getSourceAttrOptions (item, type) {
-      item.relativeTfstateAttribute = ''
-      if (type === 'args') {
-        const { statusCode, data } = await getAttrBySource(item.source)
-        if (statusCode === 'OK') {
-          item.sourceAttr = data
-        }
+      const { statusCode, data } = await getAttrBySource(item.relativeSource)
+      if (statusCode === 'OK') {
+        item.sourceAttr = data
       } else {
         item.sourceAttr = []
       }
