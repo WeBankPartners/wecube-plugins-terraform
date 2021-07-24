@@ -1785,6 +1785,19 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 		rowData["errorMessage"] = err.Error()
 		return
 	}
+
+	// Get the sorted source list
+	var sortedSourceList []*models.SourceTable
+	sortedSourceList, err = getSortedSourceList(sourceList, interfaceData, providerData)
+	if err != nil {
+		err = fmt.Errorf("Get sorted source list error: %s", err.Error())
+		log.Logger.Warn("Get sorted source list error", log.Error(err))
+		rowData["errorMessage"] = err.Error()
+		return
+	}
+	fmt.Printf("%v\n", sortedSourceList)
+
+
 	sourceData := sourceList[0]
 
 	terraformFilePath := models.Config.TerraformFilePath
@@ -2493,6 +2506,102 @@ func handleReverseConvert(outPutParameterNameMap map[string]*models.ParameterTab
 			}
 		} else {
 			continue
+		}
+	}
+	return
+}
+
+func getSortedSourceList(sourceList []*models.SourceTable, interfaceData *models.InterfaceTable, providerData *models.ProviderTable) (sortedSourceList []*models.SourceTable, err error) {
+	sortedSourceListIdMap := make(map[string]bool)
+	if len(sourceList) == 1 {
+		sortedSourceList = append(sortedSourceList, sourceList[0])
+		return
+	} else {
+		// get the first batch sourceListId
+		sqlCmd := `SELECT DISTINCT(source) FROM tf_argument WHERE source IN (SELECT id FROM source WHERE interface=? AND provider=?) AND (parameter is not null OR (parameter is  null AND relative_source is null))`
+		paramArgs := []interface{}{interfaceData.Id, providerData.Id}
+		var tmpTfArgumentList []*models.TfArgumentTable
+		err = x.SQL(sqlCmd, paramArgs...).Find(&tmpTfArgumentList)
+		if err != nil {
+			err = fmt.Errorf("Get first batch source ids by interface:%s and provider:%s error:%s", interfaceData.Id, providerData.Id, err.Error())
+			log.Logger.Error("Get first batch source ids by interface and provider error", log.String("interface", interfaceData.Id), log.String("provider", providerData.Id), log.Error(err))
+			return
+		}
+		if len(tmpTfArgumentList) == 0 {
+			err = fmt.Errorf("First batch source_ids can not be found by interface:%s and provider:%s", interfaceData.Id, providerData.Id)
+			log.Logger.Warn("First batch source ids can not be found by interface and provider", log.String("interface", interfaceData.Id), log.String("provider", providerData.Id), log.Error(err))
+			return
+		}
+
+		initAllSourceListIdMap := make(map[string]*models.SourceTable)
+		for i := range sourceList {
+			initAllSourceListIdMap[sourceList[i].Id] = sourceList[i]
+		}
+
+		// delete the first batch sources in initAllSourceListIdMap
+		for i := range tmpTfArgumentList {
+			if _, ok := initAllSourceListIdMap[tmpTfArgumentList[i].Source]; ok {
+				sortedSourceListIdMap[tmpTfArgumentList[i].Source] = true
+				sortedSourceList = append(sortedSourceList, initAllSourceListIdMap[tmpTfArgumentList[i].Source])
+				delete(initAllSourceListIdMap, tmpTfArgumentList[i].Source)
+			} else {
+				err = fmt.Errorf("TfArgument config error: there are some first batch sourceIds not in allSourceList")
+				log.Logger.Warn("TfArgument config error: there are some first batch sourceIds not in allSourceList", log.Error(err))
+				return
+			}
+		}
+
+		// get the all tf_argument data of each remain source list
+		tfArgumentListSourceIdMap := make(map[string][]*models.TfArgumentTable)
+		for sourceId := range initAllSourceListIdMap {
+			sqlCmd = `SELECT * FROM tf_argument WHERE source=?`
+			paramArgs = []interface{}{sourceId}
+			var tmpTfArgumentList []*models.TfArgumentTable
+			err = x.SQL(sqlCmd, paramArgs...).Find(&tmpTfArgumentList)
+			if err != nil {
+				err = fmt.Errorf("Get tfArgument data by source:%s error:%s", sourceId, err.Error())
+				log.Logger.Error("Get tfArgument data by source error", log.String("source", sourceId), log.Error(err))
+				return
+			}
+			if len(tmpTfArgumentList) == 0 {
+				err = fmt.Errorf("TfArgument data can not be found by source:%s", sourceId)
+				log.Logger.Warn("TfArgument data can not be found by source", log.String("source", sourceId), log.Error(err))
+				return
+			}
+			for i := range tmpTfArgumentList {
+				tfArgumentListSourceIdMap[sourceId] = append(tfArgumentListSourceIdMap[sourceId], tmpTfArgumentList[i])
+			}
+		}
+
+		// get the second, the third batch sources ...
+		remainCnt := len(initAllSourceListIdMap)
+		for remainCnt > 0 {
+			for sourceId := range initAllSourceListIdMap {
+				isValid := true
+				for _, tmpTfArgument := range tfArgumentListSourceIdMap[sourceId] {
+					if tmpTfArgument.Parameter != "" {
+						continue
+					} else {
+						if _, ok := sortedSourceListIdMap[tmpTfArgument.RelativeSource]; ok {
+							continue
+						} else {
+							isValid = false
+							break
+						}
+					}
+				}
+				if isValid == true {
+					sortedSourceListIdMap[sourceId] = true
+					sortedSourceList = append(sortedSourceList, initAllSourceListIdMap[sourceId])
+					delete(initAllSourceListIdMap, sourceId)
+				}
+			}
+			if len(initAllSourceListIdMap) == remainCnt {
+				err = fmt.Errorf("TfArgument config error: there are some sourceIds can not be in sortedSourceList")
+				log.Logger.Warn("TfArgument config error: there are some sourceIds can not be in sortedSourceList", log.Error(err))
+				return
+			}
+			remainCnt = len(initAllSourceListIdMap)
 		}
 	}
 	return

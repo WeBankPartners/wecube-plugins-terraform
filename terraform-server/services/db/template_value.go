@@ -32,7 +32,7 @@ func TemplateValueBatchCreate(user string, param []*models.TemplateValueTable) (
 
 	for i := range param {
 		id := guid.CreateGuid()
-		data := &models.TemplateValueTable{Id: id, Value: param[i].Value, Template: param[i].Template, CreateUser: user, CreateTime: createTime, UpdateTime: createTime}
+		data := &models.TemplateValueTable{Id: id, Value: param[i].Value, Template: param[i].Template, CreateUser: user, CreateTime: createTime, UpdateUser: user, UpdateTime: createTime}
 		rowData = append(rowData, data)
 	}
 

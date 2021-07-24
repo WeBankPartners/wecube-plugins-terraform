@@ -16,6 +16,7 @@ const (
 	PasswordDisplay     = "****"
 	TerraformOutPutPrefix  = "$_result_list$"
 	ParameterSourceDefault = "custom"
+	TfArgumentKeyArgumentDefault = "N"
 	ResourceDataDebug  = "$_resource_data_debug$"
 )
 

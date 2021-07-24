@@ -20,6 +20,7 @@ type TfArgumentTable struct {
 	CreateUser               string `json:"createUser" xorm:"create_user"`
 	UpdateTime               string `json:"updateTime" xorm:"update_time"`
 	UpdateUser               string `json:"updateUser" xorm:"update_user"`
+	KeyArgument              string `json:"keyArgument" xorm:"key_argument"`
 }
 
 type TfArgumentQuery struct {

@@ -57,7 +57,7 @@ func TfstateAttributeBatchCreate(user string, param []*models.TfstateAttributeTa
 		id := guid.CreateGuid()
 		data := &models.TfstateAttributeTable{Id: id, Name: param[i].Name, Source: param[i].Source, Parameter: param[i].Parameter, DefaultValue: param[i].DefaultValue, IsNull: param[i].IsNull, Type: param[i].Type, ObjectName: param[i].ObjectName,
 			IsMulti: param[i].IsMulti, ConvertWay: param[i].ConvertWay, RelativeSource: param[i].RelativeSource, RelativeTfstateAttribute: param[i].RelativeTfstateAttribute, RelativeParameter: param[i].RelativeParameter,
-			RelativeParameterValue: param[i].RelativeParameterValue, FunctionDefine: param[i].FunctionDefine, CreateUser: user, CreateTime: createTime, UpdateTime: createTime}
+			RelativeParameterValue: param[i].RelativeParameterValue, FunctionDefine: param[i].FunctionDefine, CreateUser: user, CreateTime: createTime, UpdateUser: user, UpdateTime: createTime}
 		rowData = append(rowData, data)
 	}
 
@@ -142,7 +142,8 @@ func TfstateAttributeBatchCreateUpdate(user string, param []*models.TfstateAttri
 			parameterId = guid.CreateGuid()
 			data = &models.TfstateAttributeTable{Id: parameterId, Name: param[i].Name, Source: param[i].Source, Parameter: param[i].Parameter, DefaultValue: param[i].DefaultValue,
 				IsNull: param[i].IsNull, Type: param[i].Type, ObjectName: param[i].ObjectName, IsMulti: param[i].IsMulti, ConvertWay: param[i].ConvertWay, RelativeSource: param[i].RelativeSource,
-				RelativeTfstateAttribute: param[i].RelativeTfstateAttribute, RelativeParameter: param[i].RelativeParameter, RelativeParameterValue: param[i].RelativeParameterValue, FunctionDefine: param[i].FunctionDefine, CreateUser: user, CreateTime: createTime, UpdateTime: createTime}
+				RelativeTfstateAttribute: param[i].RelativeTfstateAttribute, RelativeParameter: param[i].RelativeParameter, RelativeParameterValue: param[i].RelativeParameterValue,
+				FunctionDefine: param[i].FunctionDefine, CreateUser: user, CreateTime: createTime, UpdateUser: user, UpdateTime: createTime}
 		} else {
 			updateDataIds[param[i].Id] = true
 			parameterId = param[i].Id

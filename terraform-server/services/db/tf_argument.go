@@ -46,7 +46,8 @@ func TfArgumentBatchCreate(user string, param []*models.TfArgumentTable) (rowDat
 		id := guid.CreateGuid()
 		data := &models.TfArgumentTable{Id: id, Name: param[i].Name, Source: param[i].Source, Parameter: param[i].Parameter, DefaultValue: param[i].DefaultValue,
 			IsNull: param[i].IsNull, Type: param[i].Type, ObjectName: param[i].ObjectName, IsMulti: param[i].IsMulti, ConvertWay: param[i].ConvertWay, RelativeSource: param[i].RelativeSource,
-			RelativeTfstateAttribute: param[i].RelativeTfstateAttribute, RelativeParameter: param[i].RelativeParameter, RelativeParameterValue: param[i].RelativeParameterValue, FunctionDefine: param[i].FunctionDefine, CreateUser: user, CreateTime: createTime, UpdateTime: createTime}
+			RelativeTfstateAttribute: param[i].RelativeTfstateAttribute, RelativeParameter: param[i].RelativeParameter, RelativeParameterValue: param[i].RelativeParameterValue,
+			FunctionDefine: param[i].FunctionDefine, CreateUser: user, CreateTime: createTime, UpdateUser: user, UpdateTime: createTime, KeyArgument: param[i].KeyArgument}
 		rowData = append(rowData, data)
 	}
 
@@ -142,7 +143,8 @@ func TfArgumentBatchCreateUpdate(user string, param []*models.TfArgumentTable) (
 			parameterId = guid.CreateGuid()
 			data = &models.TfArgumentTable{Id: parameterId, Name: param[i].Name, Source: param[i].Source, Parameter: param[i].Parameter, DefaultValue: param[i].DefaultValue,
 				IsNull: param[i].IsNull, Type: param[i].Type, ObjectName: param[i].ObjectName, IsMulti: param[i].IsMulti, ConvertWay: param[i].ConvertWay, RelativeSource: param[i].RelativeSource,
-				RelativeTfstateAttribute: param[i].RelativeTfstateAttribute, RelativeParameter: param[i].RelativeParameter, RelativeParameterValue: param[i].RelativeParameterValue, FunctionDefine: param[i].FunctionDefine, CreateUser: user, CreateTime: createTime, UpdateTime: createTime}
+				RelativeTfstateAttribute: param[i].RelativeTfstateAttribute, RelativeParameter: param[i].RelativeParameter, RelativeParameterValue: param[i].RelativeParameterValue,
+				FunctionDefine: param[i].FunctionDefine, CreateUser: user, CreateTime: createTime, UpdateUser: user, UpdateTime: createTime, KeyArgument: param[i].KeyArgument}
 		} else {
 			updateDataIds[param[i].Id] = true
 			parameterId = param[i].Id

@@ -32,7 +32,7 @@ func ProviderBatchCreate(user string, param []*models.ProviderTable) (rowData []
 	for i := range param {
 		id := guid.CreateGuid()
 		data := &models.ProviderTable{Id: id, Name: param[i].Name, Version: param[i].Version, SecretIdAttrName: param[i].SecretIdAttrName,
-			SecretKeyAttrName: param[i].SecretKeyAttrName, RegionAttrName: param[i].RegionAttrName, CreateUser: user, CreateTime: createTime, UpdateTime: createTime}
+			SecretKeyAttrName: param[i].SecretKeyAttrName, RegionAttrName: param[i].RegionAttrName, CreateUser: user, CreateTime: createTime, UpdateUser: user, UpdateTime: createTime}
 		rowData = append(rowData, data)
 	}
 

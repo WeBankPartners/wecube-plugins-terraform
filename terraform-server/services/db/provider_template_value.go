@@ -31,7 +31,7 @@ func ProviderTemplateValueBatchCreate(user string, param []*models.ProviderTempl
 
 	for i := range param {
 		id := guid.CreateGuid()
-		data := &models.ProviderTemplateValueTable{Id: id, Value: param[i].Value, Provider: param[i].Provider, TemplateValue: param[i].TemplateValue, CreateUser: user, CreateTime: createTime, UpdateTime: createTime}
+		data := &models.ProviderTemplateValueTable{Id: id, Value: param[i].Value, Provider: param[i].Provider, TemplateValue: param[i].TemplateValue, CreateUser: user, CreateTime: createTime, UpdateUser: user, UpdateTime: createTime}
 		rowData = append(rowData, data)
 	}
 

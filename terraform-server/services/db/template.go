@@ -31,7 +31,7 @@ func TemplateBatchCreate(user string, param []*models.TemplateTable) (rowData []
 
 	for i := range param {
 		id := guid.CreateGuid()
-		data := &models.TemplateTable{Id: id, Name: param[i].Name, Description: param[i].Description, CreateUser: user, CreateTime: createTime, UpdateTime: createTime}
+		data := &models.TemplateTable{Id: id, Name: param[i].Name, Description: param[i].Description, CreateUser: user, CreateTime: createTime, UpdateUser: user, UpdateTime: createTime}
 		rowData = append(rowData, data)
 	}
 

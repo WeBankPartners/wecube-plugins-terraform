@@ -40,7 +40,8 @@ func ParameterBatchCreate(user string, param []*models.ParameterTable) (rowData 
 	for i := range param {
 		id := guid.CreateGuid()
 		data := &models.ParameterTable{Id: id, Name: param[i].Name, Type: param[i].Type, Multiple: param[i].Multiple,
-			Interface: param[i].Interface, Template: param[i].Template, DataType: param[i].DataType, ObjectName: param[i].ObjectName, Source: models.ParameterSourceDefault, CreateUser: user, CreateTime: createTime, UpdateUser: user, UpdateTime: createTime}
+			Interface: param[i].Interface, Template: param[i].Template, DataType: param[i].DataType, ObjectName: param[i].ObjectName,
+			Source: models.ParameterSourceDefault, CreateUser: user, CreateTime: createTime, UpdateUser: user, UpdateTime: createTime}
 		rowData = append(rowData, data)
 	}
 

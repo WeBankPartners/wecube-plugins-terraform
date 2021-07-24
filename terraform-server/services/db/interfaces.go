@@ -32,7 +32,7 @@ func InterfaceBatchCreate(user string, param []*models.InterfaceTable) (rowData 
 	for i := range param {
 		id := guid.CreateGuid()
 		data := &models.InterfaceTable{Id: id, Name: param[i].Name, Plugin: param[i].Plugin, Description: param[i].Description,
-			CreateUser: user, CreateTime: createTime, UpdateTime: createTime}
+			CreateUser: user, CreateTime: createTime, UpdateUser: user, UpdateTime: createTime}
 		rowData = append(rowData, data)
 	}
 

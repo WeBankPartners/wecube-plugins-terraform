@@ -75,7 +75,7 @@ func PluginBatchCreate(user string, param []*models.PluginTable) (rowData []*mod
 
 	for i := range param {
 		id := guid.CreateGuid()
-		data := &models.PluginTable{Id: id, Name: param[i].Name, CreateUser: user, CreateTime: createTime, UpdateTime: createTime}
+		data := &models.PluginTable{Id: id, Name: param[i].Name, CreateUser: user, CreateTime: createTime, UpdateUser: user, UpdateTime: createTime}
 		rowData = append(rowData, data)
 	}
 
