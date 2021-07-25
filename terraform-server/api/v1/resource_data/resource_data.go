@@ -114,7 +114,8 @@ func TerraformOperation(c *gin.Context) {
 		params[i]["operator_user"] = request_param["operator"]
 		params[i]["requestId"] = request_param["requestId"]
 		params[i]["requestSn"] = strconv.Itoa(i + 1)
-		retData, err := db.TerraformOperation(plugin, action, params[i])
+		debugFileContent := []map[string]interface{}{}
+		retData, err := db.TerraformOperation(plugin, action, params[i], &debugFileContent)
 		if err != nil {
 			rowData.ResultCode = "1"
 			rowData.ResultMessage = "fail"
@@ -198,13 +199,14 @@ func TerraformOperationDebug (c *gin.Context) {
 		params[i]["requestId"] = request_param["requestId"]
 		params[i]["requestSn"] = strconv.Itoa(i + 1)
 		params[i][models.ResourceDataDebug] = true
-
-		retData, err := db.TerraformOperation(plugin, action, params[i])
+		debugFileContent := []map[string]interface{}{}
+		retData, err := db.TerraformOperation(plugin, action, params[i], &debugFileContent)
 		if err != nil {
 			rowData.ResultCode = "1"
 			rowData.ResultMessage = "fail"
 		}
 
+		/*
 		// get file data
 		tf_json_old := params[i][models.ResourceDataDebug+"oldTfFile"]
 		tf_json_new := params[i][models.ResourceDataDebug+"newTfFile"]
@@ -221,6 +223,7 @@ func TerraformOperationDebug (c *gin.Context) {
 		delete(params[i], models.ResourceDataDebug+"importTfFile")
 		delete(params[i], models.ResourceDataDebug+"planFile")
 		delete(params[i], models.ResourceDataDebug+"sourceName")
+		 */
 
 		// handle one input, many output
 		curResultOutputs := []map[string]interface{}{}
@@ -246,6 +249,7 @@ func TerraformOperationDebug (c *gin.Context) {
 		curCombineResult := make(map[string]interface{})
 		curCombineResult["result_data"] = curResultOutputs
 
+		/*
 		tmpCurCombineResult := make(map[string]interface{})
 		tmpCurCombineResult["sourc_name"] = sourceName
 		tmpCurCombineResult["tf_json_old"] = tf_json_old
@@ -257,7 +261,8 @@ func TerraformOperationDebug (c *gin.Context) {
 
 		tmpSlice := []interface{}{}
 		tmpSlice = append(tmpSlice, tmpCurCombineResult)
-		curCombineResult["resource_results"] = tmpSlice
+		 */
+		curCombineResult["resource_results"] = debugFileContent
 
 		rowData.Results.Outputs = append(rowData.Results.Outputs, curCombineResult)
 	}
