@@ -956,7 +956,7 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 		return
 	}
 	//*/
-
+	isInternalAction := false
 	// handle tfstate output
 	err = handleTfstateOutPut(sourceData,
 		interfaceData,
@@ -968,7 +968,8 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 		tfFileContentStr,
 		resourceId,
 		retOutput,
-		curDebugFileContent)
+		curDebugFileContent,
+		isInternalAction)
 
 	/*
 	var tfstateObjectTypeAttribute *models.TfstateAttributeTable
@@ -1961,6 +1962,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	rowData["errorCode"] = "1"
 	rowData["errorMessage"] = ""
 
+
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("TerraformOperation error: %v", r)
@@ -2113,6 +2115,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 		// fmt.Printf("%v\n", resourceAssetId)
 
 		for _, sortedSourceData := range sortedSourceList {
+			isInternalAction := false
 			// Get all tfArguments of source
 			sqlCmd = `SELECT * FROM tf_argument WHERE source=?`
 			paramArgs = []interface{}{sortedSourceData.Id}
@@ -2156,6 +2159,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 				}
 				conStructObject = append(conStructObject, convertedArgumentData)
 			} else {
+				isInternalAction = true
 				inPutValSlice := [][]interface{}{}
 				handledTfArguments := make(map[string]bool)
 				for _, rootTfArgumentData := range rootTfArgumentList {
@@ -2319,7 +2323,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 				}
 				// Construct the object
 				curObject := make(map[string]interface{})
-				handleConStructObject(conStructObject, inPutValSlice, curObject, 0)
+				handleConStructObject(&conStructObject, inPutValSlice, curObject, 0)
 
 				// handle remain tfArguments
 				remainTfArguments := []*models.TfArgumentTable{}
@@ -2657,7 +2661,8 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					tfFileContentStr,
 					resourceId,
 					rowData,
-					curDebugFileContent)
+					curDebugFileContent,
+					isInternalAction)
 
 				*debugFileContent = append(*debugFileContent, curDebugFileContent)
 			}
@@ -2681,6 +2686,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 				}
 			}
 
+			rowData["errorCode"] = "0"
 		}
 	} else {
 		sourceData := sourceList[0]
@@ -3154,9 +3160,7 @@ func convertDirect(parameterData *models.ParameterTable, defaultValue string, re
 	} else if parameterData.DataType == "string" && reqArg.(string) == "" || parameterData.DataType == "int" && reqArg.(float64) == 0 {
 		arg = defaultValue
 	} else {
-		if parameterData.DataType == "string" {
-			arg = reqParam[parameterData.Name]
-		} else {
+		if parameterData.DataType == "object" {
 			if parameterData.Multiple == "N" {
 				var curArg map[string]interface{}
 				tmpMarshal, _ := json.Marshal(reqParam[parameterData.Name])
@@ -3168,6 +3172,8 @@ func convertDirect(parameterData *models.ParameterTable, defaultValue string, re
 				json.Unmarshal(tmpMarshal, &curArg)
 				arg = curArg
 			}
+		} else {
+			arg = reqParam[parameterData.Name]
 		}
 	}
 	return
@@ -3529,14 +3535,14 @@ func getSortedSourceList(sourceList []*models.SourceTable, interfaceData *models
 	return
 }
 
-func handleConStructObject(conStructObject []map[string]interface{}, inPutValSlice [][]interface{}, curObject map[string]interface{}, idx int) {
+func handleConStructObject(conStructObject *[]map[string]interface{}, inPutValSlice [][]interface{}, curObject map[string]interface{}, idx int) {
 	if idx == len(inPutValSlice) {
 		tmpObject := make(map[string]interface{})
 		for k, v := range curObject {
 			tmpObject[k] = v
 		}
 		if len(tmpObject) > 0 {
-			conStructObject = append(conStructObject, tmpObject)
+			*conStructObject = append(*conStructObject, tmpObject)
 		}
 		return
 	}
@@ -3673,7 +3679,8 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 	tfFileContentStr string,
 	resourceId string,
 	retOutput map[string]interface{},
-	curDebugFileContent map[string]interface{}) (err error) {
+	curDebugFileContent map[string]interface{},
+	isInternalAction bool) (err error) {
 
 	sourceIdStr := sourceData.Id
 	// Get tfstate_attribute by sourceId
@@ -3814,10 +3821,10 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 			}
 			if len(oldResourceDataDebugList) == 0 {
 				curDebugFileContent["tf_json_old"] = ""
-				curDebugFileContent["tf_state_new"] = ""
+				curDebugFileContent["tf_state_old"] = ""
 			} else {
 				curDebugFileContent["tf_json_old"] = oldResourceDataDebugList[0].TfFile
-				curDebugFileContent["tf_state_new"] = oldResourceDataDebugList[0].TfStateFile
+				curDebugFileContent["tf_state_old"] = oldResourceDataDebugList[0].TfStateFile
 			}
 
 			if len(oldResourceDataDebugList) == 0 {
@@ -3888,7 +3895,10 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 
 		// handle outPutArgs
 		outPutResultList, _ := handleOutPutArgs(outPutArgs, outPutParameterNameMap, tfstateAttrParamMap, reqParam)
-		retOutput[models.TerraformOutPutPrefix] = outPutResultList
+
+		if isInternalAction {
+			retOutput[models.TerraformOutPutPrefix] = outPutResultList
+		}
 	} else {
 		// 处理结果字段为 object 的情况
 		var tfstateResult []map[string]interface{}
@@ -3935,7 +3945,9 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 			outPutResultList = append(outPutResultList, tmpOutPutResult...)
 			//retOutput[models.TerraformOutPutPrefix] = outPutResultList
 		}
-		retOutput[models.TerraformOutPutPrefix] = outPutResultList
+		if isInternalAction {
+			retOutput[models.TerraformOutPutPrefix] = outPutResultList
+		}
 	}
 	return
 }
