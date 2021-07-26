@@ -358,7 +358,8 @@ export default {
       }
     },
     async getPluginInterface () {
-      const { statusCode, data } = await getInterfaceByPlugin(this.plugin)
+      const plugin = this.pluginOptions.find(p => p.name === this.plugin)
+      const { statusCode, data } = await getInterfaceByPlugin(plugin.id)
       if (statusCode === 'OK') {
         this.interfaceOptions = data
       }
