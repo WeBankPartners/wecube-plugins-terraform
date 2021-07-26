@@ -270,6 +270,8 @@ func TerraformOperationDebug (c *gin.Context) {
 
 		rowData.Results.Outputs = append(rowData.Results.Outputs, curCombineResult)
 	}
-	c.JSON(http.StatusOK, rowData)
+	// c.JSON(http.StatusOK, rowData)
+	tmpRetVal, _ := json.Marshal(rowData)
+	c.Data(http.StatusOK, "application/json", tmpRetVal)
 	return
 }

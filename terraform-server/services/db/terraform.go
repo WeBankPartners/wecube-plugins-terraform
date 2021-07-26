@@ -2125,6 +2125,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 		// resourceAssetId := reqParam["asset_id"].(string)
 		// fmt.Printf("%v\n", resourceAssetId)
 
+		toDestroyList := make(map[string]*models.ResourceDataTable)
 		for _, sortedSourceData := range sortedSourceList {
 			isInternalAction := false
 			// Get all tfArguments of source
@@ -2448,6 +2449,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 
 			newCreateObject := make(map[int]bool)
 			importObject := make(map[int]string)
+			needToTakeAway := make(map[int]string)
 			toDestroyResource := make(map[string]*models.ResourceDataTable)
 			matchResourceData := make(map[string]bool)
 			if len(keyTfArgumentDataList) > 0 {
@@ -2476,30 +2478,57 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 							}
 						}
 						if isMatch {
-							matchResourceData[data.Id] = true
-							importObject[i] = data.ResourceAssetId
+							// check if the item needed to be deleted because of the relatived id in toDestroyList
+							isMatchAgain := true
+							for _, v := range keyArgumentNameVal {
+								isAllValid := true
+								for i := range toDestroyList {
+									if toDestroyList[i].ResourceAssetId == v {
+										isAllValid = false
+										break
+									}
+								}
+								if isAllValid == false {
+									isMatchAgain = false
+									toDestroyResource[data.Id] = data
+									needToTakeAway[i] = data.ResourceAssetId
+									break
+								}
+							}
+							if isMatchAgain {
+								matchResourceData[data.Id] = true
+								importObject[i] = data.ResourceAssetId
+							}
 							break
 						}
 					}
+				}
+			} else {
+				if len(resourceDataList) > 0 {
+					matchResourceData[resourceDataList[0].Id] = true
+					importObject[0] = resourceDataList[0].ResourceAssetId
 				}
 			}
 
 			for i := range conStructObject {
 				if _, ok := importObject[i]; !ok {
-					newCreateObject[i] = true
+					if _, okAgain := needToTakeAway[i]; !okAgain {
+						newCreateObject[i] = true
+					}
 				}
 			}
 			for _, data := range resourceDataList {
 				if _, ok := matchResourceData[data.Id]; !ok {
-					toDestroyResource[data.ResourceAssetId] = data
+					// toDestroyResource[data.ResourceAssetId] = data
+					toDestroyResource[data.Id] = data
 				}
 			}
 			if reqParam["confirmToken"] != "Y" {
 				destroyAssetId := ""
 				totalDestroyCnt := len(toDestroyResource)
 				if len(toDestroyResource) > 0 {
-					for assetId, _ := range toDestroyResource {
-						destroyAssetId += assetId + ", "
+					for _, resourceData := range toDestroyResource {
+						destroyAssetId += resourceData.ResourceAssetId + ", "
 					}
 				}
 				// check if importObject needed to be destroy
@@ -2587,7 +2616,6 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					return
 				}
 			}
-			//}
 			for i := range conStructObject {
 				curDebugFileContent := make(map[string]interface{})
 				curDebugFileContent["tf_json_old"] = ""
@@ -2708,29 +2736,46 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 
 				DelTfstateFile(workDirPath)
 			}
-
 			if len(toDestroyResource) > 0 {
-				for _, v := range toDestroyResource {
-					// destroyAssetId += v + ", "
-					_, err = handleDestroy(workDirPath,
-						sortedSourceData,
-						providerData,
-						providerInfoData,
-						regionData,
-						reqParam,
-						plugin,
-						v)
-					if err != nil {
-						err = fmt.Errorf("Handle Destroy error: %s", err.Error())
-						log.Logger.Error("Handle Destroy error", log.Error(err))
-						rowData["errorMessage"] = err.Error()
-					}
+				for k, v := range toDestroyResource {
+					toDestroyList[k] = v
 				}
 			}
 
+
 			DelProviderFile(workDirPath)
-			rowData["errorCode"] = "0"
 		}
+		if len(toDestroyList) > 0 {
+			for i := len(sortedSourceList) - 1; i >= 0; i-- {
+				// deletedResourceDataId := make(map[string]bool)
+				for _, v := range toDestroyList {
+					if v.Resource == sortedSourceList[i].Id {
+						//deletedResourceDataId[v.Id] = true
+						workDirPath := GenWorkDirPath(reqParam["id"].(string),
+							reqParam["requestSn"].(string),
+							reqParam["requestId"].(string),
+							providerData,
+							regionData,
+							plugin,
+							sortedSourceList[i])
+						_, err = handleDestroy(workDirPath,
+							sortedSourceList[i],
+							providerData,
+							providerInfoData,
+							regionData,
+							reqParam,
+							plugin,
+							v)
+						if err != nil {
+							err = fmt.Errorf("Handle Destroy error: %s", err.Error())
+							log.Logger.Error("Handle Destroy error", log.Error(err))
+							rowData["errorMessage"] = err.Error()
+						}
+					}
+				}
+			}
+		}
+		rowData["errorCode"] = "0"
 	} else {
 		sourceData := sourceList[0]
 
