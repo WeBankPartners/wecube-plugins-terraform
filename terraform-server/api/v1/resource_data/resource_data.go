@@ -243,6 +243,7 @@ func TerraformOperationDebug (c *gin.Context) {
 				//rowData.Results.Outputs = append(rowData.Results.Outputs, tmpRetData)
 			}
 			if len(resultList) == 0 {
+				delete(retData, models.TerraformOutPutPrefix)
 				curResultOutputs = append(curResultOutputs, retData)
 			}
 		} else {
