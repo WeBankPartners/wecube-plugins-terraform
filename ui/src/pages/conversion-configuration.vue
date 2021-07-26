@@ -49,7 +49,7 @@
         'text-align': 'center',
         width: '1900px',
         overflow: 'auto',
-        'max-height': '500px'
+        'max-height': MODALHEIGHT + 'px'
       }"
     >
       <header>
@@ -93,7 +93,7 @@
             <div style="line-height:40px">
               {{ $t('t_conversion') }}
             </div>
-            <div style="font-size: 0;margin-top: -2px;margin-left:1px">
+            <div style="font-size: 0;margin-top: -1px;margin-left:-1px">
               <div class="table-title title-width-level1 title-style">
                 {{ $t('t_conversion_type') }}
               </div>
@@ -114,12 +114,12 @@
               </div>
             </div>
           </div>
-          <div class="table-title title-width-level1" style="margin-left: 0px;position: relative;left: -3px;">
+          <div class="table-title title-width-level1" style="margin-left: 0px;position: relative;left: -1px;">
             {{ $t('t_action') }}
           </div>
         </div>
       </header>
-      <div style="margin-left: 5px">
+      <div style="margin-left: 6px">
         <div
           v-for="(source, sourceIndex) in sourceInfo"
           :key="source.id"
@@ -134,7 +134,8 @@
                 overflow: 'hidden',
                 padding: ((source.args.length + source.attrs.length) * 30) / 2 + 'px ' + ' 0',
                 'text-overflow': 'ellipsis',
-                'white-space': 'nowrap'
+                'white-space': 'nowrap',
+                'margin-top': '-1px'
               }"
             >
               <span :title="source.name" class="xx">
@@ -163,7 +164,7 @@
               <div class="style-widthout-height" style="font-size: 0;margin-left:0px;border:none">
                 <div
                   class="style-widthout-height"
-                  :style="{ width: '120px', 'line-height': source.args.length * 39 + 'px', border: 'none' }"
+                  :style="{ width: '120px', 'line-height': source.args.length * 39 - 1 + 'px', border: 'none' }"
                 >
                   Arg
                   <Button
@@ -176,8 +177,13 @@
                   ></Button>
                 </div>
                 <div
-                  class="style-widthout-height"
-                  :style="{ width: '120px', 'line-height': source.attrs.length * 39 + 'px', 'margin-left': '1px' }"
+                  class="attr-style-widthout-height"
+                  :style="{
+                    width: '120px',
+                    'line-height': source.attrs.length * 39 - 1 + 'px',
+                    'margin-left': '-1px',
+                    'border-top': '1px solid #dcdee2'
+                  }"
                 >
                   Attr
                   <Button
@@ -196,7 +202,7 @@
             <div>
               <div style="margin-top: -1px;" v-for="(item, argIndex) in source.args" :key="argIndex">
                 <template>
-                  <div class="table-col title-width-level1" style="margin-left: 1px">
+                  <div class="table-col title-width-level1" style="margin-left: -1px">
                     <Input v-model="item.name" size="small" />
                   </div>
                   <div class="table-col title-width-level1">
@@ -285,7 +291,7 @@
                     </Select>
                   </div>
 
-                  <div class="table-col title-width-level1" style="margin-left: 1px;">
+                  <div class="table-col title-width-level1" style="margin-left: -1px;">
                     <Select v-model="item.convertWay" @on-change="changeConverWay(item)" size="small">
                       <Option
                         v-for="item in conversionTypeOptions"
@@ -417,7 +423,7 @@
                       }}</Option>
                     </Select>
                   </div>
-                  <div class="table-col title-width-level1" style="margin-left: 0px;">
+                  <div class="table-col title-width-level1" style="margin-left: -1px;">
                     <Select
                       v-model="item.parameter"
                       size="small"
@@ -498,7 +504,7 @@
                     </Select>
                   </div>
 
-                  <div class="table-col title-width-level1" style="margin-left: 1px;">
+                  <div class="table-col title-width-level1" style="margin-left: -1px;">
                     <Select v-model="item.convertWay" @on-change="changeConverWay(item)" size="small">
                       <Option
                         v-for="item in conversionTypeOptions"
@@ -734,7 +740,7 @@ export default {
   mounted () {
     this.getPlugin()
     this.getProviderList()
-    this.MODALHEIGHT = window.innerHeight - 600
+    this.MODALHEIGHT = document.body.scrollHeight - 200
   },
   methods: {
     changeConverWay (item) {
@@ -1064,8 +1070,8 @@ export default {
 
 <style scoped lang="scss">
 .title-style {
-  height: 40px;
-  line-height: 40px;
+  height: 40px !important;
+  line-height: 40px !important;
   vertical-align: text-bottom;
 }
 .table-title {
@@ -1103,6 +1109,14 @@ export default {
   color: #515a6e;
   font-size: 14px;
 }
+.attr-style-widthout-height {
+  display: inline-block;
+  font-size: 12px;
+  margin-left: -1px;
+  font-weight: bold;
+  color: #515a6e;
+  font-size: 14px;
+}
 .title-width-level0 {
   width: 60px;
 }
@@ -1113,7 +1127,7 @@ export default {
   width: 240px;
 }
 .title-width-level3 {
-  width: 720px;
+  width: 715px;
 }
 .xx {
   overflow: hidden;
