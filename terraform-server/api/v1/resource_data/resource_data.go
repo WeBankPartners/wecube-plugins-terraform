@@ -242,6 +242,9 @@ func TerraformOperationDebug (c *gin.Context) {
 				curResultOutputs = append(curResultOutputs, tmpRetData)
 				//rowData.Results.Outputs = append(rowData.Results.Outputs, tmpRetData)
 			}
+			if len(resultList) == 0 {
+				curResultOutputs = append(curResultOutputs, retData)
+			}
 		} else {
 			curResultOutputs = append(curResultOutputs, retData)
 			//rowData.Results.Outputs = append(rowData.Results.Outputs, retData)

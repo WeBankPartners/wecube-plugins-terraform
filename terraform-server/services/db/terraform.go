@@ -248,6 +248,17 @@ func DelProviderFile(dirPath string) (err error) {
 	return
 }
 
+func DelTfstateFile(dirPath string) (err error) {
+	tfstateFilePath := dirPath + "/terraform.tfstate"
+	err = DelFile(tfstateFilePath)
+	if err != nil {
+		err = fmt.Errorf("Delete terraform.tfstate file:%s error:%s", tfstateFilePath, err.Error())
+		log.Logger.Error("Delete terraform.tfstate file error", log.String("providerFilePath", tfstateFilePath), log.Error(err))
+		return
+	}
+	return
+}
+
 func GenWorkDirPath(resourceId string,
 	requestSn string,
 	requestId string,
@@ -2665,6 +2676,8 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					isInternalAction)
 
 				*debugFileContent = append(*debugFileContent, curDebugFileContent)
+
+				DelTfstateFile(workDirPath)
 			}
 
 			if len(toDestroyResource) > 0 {
@@ -2686,6 +2699,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 				}
 			}
 
+			DelProviderFile(workDirPath)
 			rowData["errorCode"] = "0"
 		}
 	} else {
