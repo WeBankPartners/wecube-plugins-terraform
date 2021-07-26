@@ -68,4 +68,5 @@ type FunctionDefineArgs struct {
 	SplitChar  []string            `json:"splitChar"`
 	ReplaceVal []map[string]string `json:"replaceVal"`
 	RegExp     []string            `json:"regExp"`
+	RemoveKey  []string            `json:"keys"`
 }

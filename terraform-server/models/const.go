@@ -25,5 +25,5 @@ var (
 	ConvertWay = map[string]string{"Data": "data", "Template": "template", "ContextData": "context_data", "Attr": "attribute", "Direct": "direct", "Function": "function"}
 	TerraformProviderPathDiffMap = map[string]string{"tencentcloud": ".terraform/providers/registry.terraform.io/tencentcloudstack/tencentcloud/",
 													 "alicloud": ".terraform/providers/registry.terraform.io/hashicorp/alicloud/"}
-	FunctionConvertFunctionDefineName = map[string]string{"Split": "split", "Replace": "replace", "Regx": "regx"}
+	FunctionConvertFunctionDefineName = map[string]string{"Split": "split", "Replace": "replace", "Regx": "regx", "Remove": "remove"}
 )

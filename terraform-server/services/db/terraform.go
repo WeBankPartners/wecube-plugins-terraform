@@ -3293,70 +3293,98 @@ func reverseConvertFunction(parameterData *models.ParameterTable, tfstateAttribu
 		resultIdx, _ = strconv.Atoi(functionDefineData.Return[idxStrStart+1 : idxStrEnd])
 	}
 
-	handleTfstateVals := []string{}
-	if tfstateAttributeData.IsMulti == "Y" {
-		tmpData := tfstateVal.([]interface{})
-		for i := range tmpData {
-			handleTfstateVals = append(handleTfstateVals, tmpData[i].(string))
-		}
-	} else {
-		handleTfstateVals = append(handleTfstateVals, tfstateVal.(string))
-	}
 	var result []interface{}
-	if functionDefineData.Function == models.FunctionConvertFunctionDefineName["Split"] {
-		for _, tfstateValStr := range handleTfstateVals {
-			splitResult := [][]string{}
-			splitChars := functionDefineData.Args.SplitChar
-			for i := range splitChars {
-				curResult := strings.Split(tfstateValStr, splitChars[i])
-				if len(curResult) < 2 || curResult[1] == "" {
-					curResult = append(curResult, curResult[0])
-				}
-				splitResult = append(splitResult, curResult)
+	if tfstateAttributeData.Type == "object" {
+		handleTfstateVals := []map[string]interface{}{}
+		if tfstateAttributeData.IsMulti == "Y" {
+			tmpData := tfstateVal.([]map[string]interface{})
+			for i := range tmpData {
+				handleTfstateVals = append(handleTfstateVals, tmpData[i])
 			}
-			if resultIdx == -1 {
-				result = append(result, splitResult[0])
-			} else {
-				result = append(result, splitResult[0][resultIdx])
-			}
+		} else {
+			handleTfstateVals = append(handleTfstateVals, tfstateVal.(map[string]interface{}))
 		}
-	} else if functionDefineData.Function == models.FunctionConvertFunctionDefineName["Replace"] {
-		for _, tfstateValStr := range handleTfstateVals {
-			replaceResult := []string{}
-			replaceVals := functionDefineData.Args.ReplaceVal
-			for i := range replaceVals {
-				for old, new := range replaceVals[i] {
-					curResult := strings.Replace(tfstateValStr, old, new, -1)
-					replaceResult = append(replaceResult, curResult)
+
+		if functionDefineData.Function == models.FunctionConvertFunctionDefineName["Remove"] {
+			for _, val := range handleTfstateVals {
+				removeResult := []map[string]string{}
+				removeKeys := functionDefineData.Args.RemoveKey
+				for i := range removeKeys {
+					tmpVal := make(map[string]string)
+					for k, v := range val {
+						tmpVal[k] = v.(string)
+					}
+					delete(tmpVal, removeKeys[i])
+					removeResult = append(removeResult, tmpVal)
 				}
-			}
-			if resultIdx == -1 {
-				result = append(result, replaceResult[0])
-			} else {
-				result = append(result, replaceResult[0][resultIdx])
-			}
-		}
-	} else if functionDefineData.Function == models.FunctionConvertFunctionDefineName["Regx"] {
-		for _, tfstateValStr := range handleTfstateVals {
-			regxResult := [][]string{}
-			regExprs := functionDefineData.Args.RegExp
-			for i := range regExprs {
-				regExp := regexp.MustCompile(regExprs[i])
-				curResult := regExp.FindStringSubmatch(tfstateValStr)
-				// the first one is the original str
-				curResult = curResult[1:]
-				regxResult = append(regxResult, curResult)
-			}
-			if resultIdx == -1 {
-				result = append(result, regxResult[0])
-			} else {
-				result = append(result, regxResult[0][resultIdx])
+				result = append(result, removeResult[0])
 			}
 		}
 	} else {
-		err = fmt.Errorf("The function_define:%s of tfstateAttribute:%s config error", functionDefine, tfstateAttributeData.Name)
-		log.Logger.Error("The function_define of tfstateAttribute config error", log.String("function_define", functionDefine), log.String("tfstateAttribute", tfstateAttributeData.Name), log.Error(err))
-		return
+		handleTfstateVals := []string{}
+		if tfstateAttributeData.IsMulti == "Y" {
+			tmpData := tfstateVal.([]interface{})
+			for i := range tmpData {
+				handleTfstateVals = append(handleTfstateVals, tmpData[i].(string))
+			}
+		} else {
+			handleTfstateVals = append(handleTfstateVals, tfstateVal.(string))
+		}
+		if functionDefineData.Function == models.FunctionConvertFunctionDefineName["Split"] {
+			for _, tfstateValStr := range handleTfstateVals {
+				splitResult := [][]string{}
+				splitChars := functionDefineData.Args.SplitChar
+				for i := range splitChars {
+					curResult := strings.Split(tfstateValStr, splitChars[i])
+					if len(curResult) < 2 || curResult[1] == "" {
+						curResult = append(curResult, curResult[0])
+					}
+					splitResult = append(splitResult, curResult)
+				}
+				if resultIdx == -1 {
+					result = append(result, splitResult[0])
+				} else {
+					result = append(result, splitResult[0][resultIdx])
+				}
+			}
+		} else if functionDefineData.Function == models.FunctionConvertFunctionDefineName["Replace"] {
+			for _, tfstateValStr := range handleTfstateVals {
+				replaceResult := []string{}
+				replaceVals := functionDefineData.Args.ReplaceVal
+				for i := range replaceVals {
+					for old, new := range replaceVals[i] {
+						curResult := strings.Replace(tfstateValStr, old, new, -1)
+						replaceResult = append(replaceResult, curResult)
+					}
+				}
+				if resultIdx == -1 {
+					result = append(result, replaceResult[0])
+				} else {
+					result = append(result, replaceResult[0][resultIdx])
+				}
+			}
+		} else if functionDefineData.Function == models.FunctionConvertFunctionDefineName["Regx"] {
+			for _, tfstateValStr := range handleTfstateVals {
+				regxResult := [][]string{}
+				regExprs := functionDefineData.Args.RegExp
+				for i := range regExprs {
+					regExp := regexp.MustCompile(regExprs[i])
+					curResult := regExp.FindStringSubmatch(tfstateValStr)
+					// the first one is the original str
+					curResult = curResult[1:]
+					regxResult = append(regxResult, curResult)
+				}
+				if resultIdx == -1 {
+					result = append(result, regxResult[0])
+				} else {
+					result = append(result, regxResult[0][resultIdx])
+				}
+			}
+		} else {
+			err = fmt.Errorf("The function_define:%s of tfstateAttribute:%s config error", functionDefine, tfstateAttributeData.Name)
+			log.Logger.Error("The function_define of tfstateAttribute config error", log.String("function_define", functionDefine), log.String("tfstateAttribute", tfstateAttributeData.Name), log.Error(err))
+			return
+		}
 	}
 	argKey = parameterData.Name
 	if tfstateAttributeData.IsMulti == "Y" {
@@ -3371,7 +3399,7 @@ func reverseConvertFunction(parameterData *models.ParameterTable, tfstateAttribu
 	return
 }
 
-func reverseConvertDirect(parameterData *models.ParameterTable, tfstateAttributeData *models.TfstateAttributeTable, tfstateVal interface{}) (argKey string, argVal interface{}, err error) {
+func reverseConvertDirect(parameterData *models.ParameterTable, tfstateAttributeData *models.TfstateAttributeTable, tfstateVal interface{}, tfstateAttrIdMap map[string]*models.TfstateAttributeTable, tfstateFileAttributes map[string]interface{}) (argKey string, argVal interface{}, err error) {
 	argKey = parameterData.Name
 	if tfstateVal == nil {
 		return
@@ -3386,6 +3414,12 @@ func reverseConvertDirect(parameterData *models.ParameterTable, tfstateAttribute
 	} else {
 		argVal = tfstateVal
 	}
+	//if tfstateAttributeData.ObjectName != "" {
+	//	relativeTfstateAttr := tfstateAttrIdMap[tfstateAttributeData.ObjectName]
+	//	if relativeTfstateAttr.Type == "object" {
+	//		argVal = tfstateFileAttributes[argKey]
+	//	}
+	//}
 	return
 }
 
@@ -3393,6 +3427,7 @@ func handleReverseConvert(outPutParameterNameMap map[string]*models.ParameterTab
 	outPutParameterIdMap map[string]*models.ParameterTable,
 	tfstateAttrParamMap map[string]*models.TfstateAttributeTable,
 	tfstateAttrNameMap map[string]*models.TfstateAttributeTable,
+	tfstateAttrIdMap map[string]*models.TfstateAttributeTable,
 	reqParam map[string]interface{},
 	providerData *models.ProviderTable,
 	tfstateFileAttributes map[string]interface{},
@@ -3409,7 +3444,8 @@ func handleReverseConvert(outPutParameterNameMap map[string]*models.ParameterTab
 	for _, tfstateAttr := range tfstateAttributeList {
 		if tfstateAttr.ObjectName == parentObjectName {
 			// handle current level tfstateAttribute
-			if tfstateAttr.Type == "object" && tfstateAttr.Name != "tags" {
+			// if tfstateAttr.Type == "object" && tfstateAttr.Name != "tags" {
+			if tfstateAttr.Type == "object" {
 				// go into next level
 				var curTfstateFileAttributes []interface{}
 				var curAttributesRet []interface{}
@@ -3429,6 +3465,7 @@ func handleReverseConvert(outPutParameterNameMap map[string]*models.ParameterTab
 						outPutParameterIdMap,
 						tfstateAttrParamMap,
 						tfstateAttrNameMap,
+						tfstateAttrIdMap,
 						reqParam,
 						providerData,
 						tmpCurTfstateFileAttributes,
@@ -3454,7 +3491,11 @@ func handleReverseConvert(outPutParameterNameMap map[string]*models.ParameterTab
 				*/
 				*paramCnt += 1
 				outPutArgs[models.TerraformOutPutPrefix+strconv.Itoa(*paramCnt)] = curAttributesRet
-			} else {
+
+				if tfstateAttr.Name != "tags" {
+					continue
+				}
+			} /*else {*/
 				curParamData := outPutParameterIdMap[tfstateAttr.Parameter]
 				if tfstateOutParamVal, ok := tfstateFileAttributes[tfstateAttr.Name]; ok {
 					convertWay := tfstateAttr.ConvertWay
@@ -3474,8 +3515,8 @@ func handleReverseConvert(outPutParameterNameMap map[string]*models.ParameterTab
 					case models.ConvertWay["ContextData"]:
 						outArgKey, outArgVal, isDiscard, err = reverseConvertContextData(curParamData, tfstateAttr, tfstateOutParamVal, curLevelResult, reqParam, regionData)
 					case models.ConvertWay["Direct"]:
-						// outArgKey, outArgVal, err = reverseConvertDirect(curParamData, tfstateAttr, tfstateOutParamVal)
-						outArgKey, outArgVal, err = curParamData.Name, tfstateOutParamVal, nil
+						outArgKey, outArgVal, err = reverseConvertDirect(curParamData, tfstateAttr, tfstateOutParamVal, tfstateAttrIdMap, tfstateFileAttributes)
+						// outArgKey, outArgVal, err = curParamData.Name, tfstateOutParamVal, nil
 					case models.ConvertWay["Function"]:
 						outArgKey, outArgVal, err = reverseConvertFunction(curParamData, tfstateAttr, tfstateOutParamVal)
 					default:
@@ -3519,7 +3560,7 @@ func handleReverseConvert(outPutParameterNameMap map[string]*models.ParameterTab
 				} else {
 					outPutArgs[curParamData.Name] = ""
 				}
-			}
+			//}
 		} else {
 			continue
 		}
@@ -3654,6 +3695,24 @@ func handleConvertParams(action string,
 	providerData *models.ProviderTable,
     regionData *models.ResourceDataTable) (tfArguments map[string]interface{}, resourceAssetId string, err error) {
 
+	// sort the tfArgumentList
+	tfArgumentIdMap := make(map[string]*models.TfArgumentTable)
+	orderTfArgumentList := []*models.TfArgumentTable{}
+	for i, v := range tfArgumentList {
+		if v.ObjectName == "" {
+			orderTfArgumentList = append(orderTfArgumentList, tfArgumentList[i])
+			tfArgumentIdMap[v.Id] = tfArgumentList[i]
+		}
+	}
+	for i, v := range tfArgumentList {
+		if _, ok := tfArgumentIdMap[v.Id]; !ok {
+			orderTfArgumentList = append(orderTfArgumentList, tfArgumentList[i])
+			tfArgumentIdMap[v.Id] = tfArgumentList[i]
+		}
+	}
+
+	tfArgumentList = orderTfArgumentList
+
 	tfArguments = make(map[string]interface{})
 	// 循环处理每一个 tf_argument
 	for i := range tfArgumentList {
@@ -3724,6 +3783,17 @@ func handleConvertParams(action string,
 				}
 				continue
 			}
+
+			// merge the input tfArgument
+			if tfArgumentList[i].ObjectName != "" {
+				relativeTfArgumentData := tfArgumentIdMap[tfArgumentList[i].ObjectName]
+				if relativeTfArgumentData.Type == "object" {
+					tmpVal := tfArguments[relativeTfArgumentData.Name].(map[string]interface{})
+					tmpVal[tfArgumentList[i].Name] = arg
+					tfArguments[relativeTfArgumentData.Name] = tmpVal
+					continue
+				}
+			}
 		}
 
 		if action == "query" {
@@ -3741,6 +3811,8 @@ func handleConvertParams(action string,
 		if arg != nil && convertWay == "direct" && parameterData.DataType == "string" && arg.(string) == "null" {
 			delete(tfArguments, tfArgumentList[i].Name)
 		}
+
+
 		/*
 		if parameterData.DataType == "object" || parameterData.DataType == "object_str" {
 			var tmpVal map[string]interface{}
@@ -3809,6 +3881,7 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 	var tfstateObjectTypeAttribute *models.TfstateAttributeTable
 	tfstateAttrParamMap := make(map[string]*models.TfstateAttributeTable)
 	tfstateAttrNameMap := make(map[string]*models.TfstateAttributeTable)
+	tfstateAttrIdMap := make(map[string]*models.TfstateAttributeTable)
 	for _, v := range tfstateAttributeList {
 		if v.Parameter == "" && v.ObjectName == "" {
 			tfstateObjectTypeAttribute = v
@@ -3816,6 +3889,7 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 			tfstateAttrParamMap[v.Parameter] = v
 		}
 		tfstateAttrNameMap[v.Name] = v
+		tfstateAttrIdMap[v.Id] = v
 	}
 
 	sortTfstateAttributesList := []*models.SortTfstateAttributes{}
@@ -3966,6 +4040,7 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 			outPutParameterIdMap,
 			tfstateAttrParamMap,
 			tfstateAttrNameMap,
+			tfstateAttrIdMap,
 			reqParam,
 			providerData,
 			tfstateFileAttributes,
@@ -4012,6 +4087,7 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 				outPutParameterIdMap,
 				tfstateAttrParamMap,
 				tfstateAttrNameMap,
+				tfstateAttrIdMap,
 				reqParam,
 				providerData,
 				tfstateResult[i],
