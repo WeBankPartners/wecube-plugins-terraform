@@ -52,5 +52,7 @@
   "t_tf_file": "tf 文件",
   "t_tf_state_file": "tf state文件",
   "debugger": "发起调试",
-  "debugger_result": "调试结果"
+  "debugger_result": "调试结果",
+  "function_define": "转换函数",
+  "key_argument": "关键参数"
 }

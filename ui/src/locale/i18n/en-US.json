@@ -52,5 +52,7 @@
   "t_tf_file": "TF File",
   "t_tf_state_file": "TF State File",
   "debugger": "Debugger",
-  "debugger_result": "Debugger Result"
+  "debugger_result": "Debugger Result",
+  "function_define": "Function Define",
+  "key_argument": "Key Argument"
 }

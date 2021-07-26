@@ -1,5 +1,5 @@
 <template>
-  <div class=" ">
+  <div style="width: 100%;overflow: auto">
     <!-- 搜索区 -->
     <div>
       <Row>
@@ -43,7 +43,15 @@
       </Row>
     </div>
     <!-- 配置区 -->
-    <div style="margin-top: 36px; text-align: center;width:1700px;overflow:auto;max-height:500px">
+    <div
+      :style="{
+        'margin-top': '36px',
+        'text-align': 'center',
+        width: '1900px',
+        overflow: 'auto',
+        'max-height': '500px'
+      }"
+    >
       <header>
         <div style="font-size: 0">
           <div class="table-title title-width-level2">
@@ -78,54 +86,35 @@
           <div class="table-title title-width-level0">
             {{ $t('t_is_null') }}
           </div>
+          <div class="table-title title-width-level0">
+            {{ $t('key_argument') }}
+          </div>
           <div class="table-title title-width-level3" style="vertical-align: top;">
             <div style="line-height:40px">
               {{ $t('t_conversion') }}
             </div>
             <div style="font-size: 0;margin-top: -2px;margin-left:1px">
-              <div
-                class="table-title title-width-level1"
-                style="height: 40px;
-    line-height: 40px;
-    vertical-align: text-bottom;"
-              >
+              <div class="table-title title-width-level1 title-style">
                 {{ $t('t_conversion_type') }}
               </div>
-              <div
-                class="table-title title-width-level1"
-                style="height: 40px;
-    line-height: 40px;
-    vertical-align: text-bottom;"
-              >
+              <div class="table-title title-width-level1 title-style">
                 {{ $t('t_related_params') }}
               </div>
-              <div
-                class="table-title title-width-level1"
-                style="height: 40px;
-    line-height: 40px;
-    vertical-align: text-bottom;"
-              >
+              <div class="table-title title-width-level1 title-style">
                 {{ $t('t_related_value') }}
               </div>
-              <div
-                class="table-title title-width-level1"
-                style="height: 40px;
-    line-height: 40px;
-    vertical-align: text-bottom;"
-              >
+              <div class="table-title title-width-level1 title-style">
                 关联source
               </div>
-              <div
-                class="table-title title-width-level1"
-                style="height: 40px;
-    line-height: 40px;
-    vertical-align: text-bottom;"
-              >
+              <div class="table-title title-width-level1 title-style">
                 {{ $t('t_related_attr') }}
+              </div>
+              <div class="table-title title-width-level1 title-style">
+                {{ $t('function_define') }}
               </div>
             </div>
           </div>
-          <div class="table-title title-width-level1">
+          <div class="table-title title-width-level1" style="margin-left: 0px;position: relative;left: -3px;">
             {{ $t('t_action') }}
           </div>
         </div>
@@ -143,7 +132,7 @@
                 width: '120px',
                 height: (source.args.length + source.attrs.length) * 39 + 'px',
                 overflow: 'hidden',
-                padding: '60% 0',
+                padding: ((source.args.length + source.attrs.length) * 30) / 2 + 'px ' + ' 0',
                 'text-overflow': 'ellipsis',
                 'white-space': 'nowrap'
               }"
@@ -289,8 +278,14 @@
                       <Option value="N">N</Option>
                     </Select>
                   </div>
+                  <div class="table-col title-width-level0">
+                    <Select v-model="item.keyArgument" filterable size="small">
+                      <Option value="Y">Y</Option>
+                      <Option value="N">N</Option>
+                    </Select>
+                  </div>
 
-                  <div class="table-col title-width-level1">
+                  <div class="table-col title-width-level1" style="margin-left: 1px;">
                     <Select v-model="item.convertWay" @on-change="changeConverWay(item)" size="small">
                       <Option
                         v-for="item in conversionTypeOptions"
@@ -392,6 +387,13 @@
                     </Select>
                   </div>
                   <div class="table-col title-width-level1">
+                    <Input
+                      v-model="item.functionDefine"
+                      :disabled="!['function'].includes(item.convertWay)"
+                      size="small"
+                    />
+                  </div>
+                  <div class="table-col title-width-level1">
                     <Button type="primary" @click="updateArg(item, argIndex)" ghost size="small">{{
                       $t('t_save')
                     }}</Button>
@@ -489,8 +491,14 @@
                       <Option value="N">N</Option>
                     </Select>
                   </div>
+                  <div class="table-col title-width-level0">
+                    <Select v-model="item.keyArgument" filterable disabled size="small">
+                      <Option value="Y">Y</Option>
+                      <Option value="N">N</Option>
+                    </Select>
+                  </div>
 
-                  <div class="table-col title-width-level1">
+                  <div class="table-col title-width-level1" style="margin-left: 1px;">
                     <Select v-model="item.convertWay" @on-change="changeConverWay(item)" size="small">
                       <Option
                         v-for="item in conversionTypeOptions"
@@ -570,10 +578,6 @@
                       </template>
                     </Select>
                   </div>
-                  <!-- <div class="table-col title-width-level1">
-                    <Select v-model="item.relativeTfstateAttribute" disabled clearable filterable size="small">
-                    </Select>
-                  </div> -->
                   <div class="table-col title-width-level1">
                     <Select
                       v-model="item.relativeTfstateAttribute"
@@ -595,6 +599,13 @@
                         >
                       </template>
                     </Select>
+                  </div>
+                  <div class="table-col title-width-level1">
+                    <Input
+                      v-model="item.functionDefine"
+                      :disabled="!['function'].includes(item.convertWay)"
+                      size="small"
+                    />
                   </div>
                   <div class="table-col title-width-level1">
                     <Button type="primary" @click="updateAttr(item, sourceIndex, attrIndex)" ghost size="small">{{
@@ -673,7 +684,8 @@ export default {
         { label: 'attribute', value: 'attribute' },
         { label: 'template', value: 'template' },
         { label: 'context', value: 'context' },
-        { label: 'context_data', value: 'context_data' }
+        { label: 'context_data', value: 'context_data' },
+        { label: 'function', value: 'function' }
       ],
       emptyParams: {
         convertWay: 'direct',
@@ -703,7 +715,9 @@ export default {
         source: '',
         type: '',
         updateTime: '',
-        updateUser: ''
+        updateUser: '',
+        functionDefine: '',
+        keyArgument: 'N'
       },
       newSource: {
         isShow: false,
@@ -720,7 +734,7 @@ export default {
   mounted () {
     this.getPlugin()
     this.getProviderList()
-    this.MODALHEIGHT = window.innerHeight - 300
+    this.MODALHEIGHT = window.innerHeight - 600
   },
   methods: {
     changeConverWay (item) {
@@ -728,6 +742,7 @@ export default {
       item.relativeParameterValue = ''
       item.relativeSource = ''
       item.relativeTfstateAttribute = ''
+      item.functionDefine = ''
     },
     createDefaultValueOptions (item, el) {
       item.defaultValueOptions.push({
@@ -1048,6 +1063,11 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.title-style {
+  height: 40px;
+  line-height: 40px;
+  vertical-align: text-bottom;
+}
 .table-title {
   display: inline-block;
   border: 1px solid #e9e9e9;
@@ -1093,7 +1113,7 @@ export default {
   width: 240px;
 }
 .title-width-level3 {
-  width: 600px;
+  width: 720px;
 }
 .xx {
   overflow: hidden;
