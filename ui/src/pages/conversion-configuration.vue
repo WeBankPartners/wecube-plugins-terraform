@@ -58,6 +58,7 @@
             source
             <Button
               @click="addSource"
+              :disabled="!plugin || !currentInterface || !currentProvider"
               type="success"
               ghost
               size="small"
@@ -641,6 +642,12 @@
         <FormItem :label="$t('t_resource_asset_id_Attribute')">
           <Input type="text" v-model="newSource.form.assetIdAttribute" style="width:400px"></Input>
         </FormItem>
+        <FormItem :label="$t('key_argument')">
+          <Select v-model="newSource.form.keyArgument" style="width:400px">
+            <Option value="Y">Y</Option>
+            <Option value="N">N</Option>
+          </Select>
+        </FormItem>
       </Form>
     </Modal>
   </div>
@@ -730,6 +737,7 @@ export default {
         isAdd: true,
         form: {
           name: '',
+          keyArgument: 'Y',
           plugin: '',
           provider: '',
           assetIdAttribute: ''
@@ -756,6 +764,7 @@ export default {
       })
     },
     editSource (source) {
+      console.log(source)
       this.newSource = {
         isShow: true,
         isAdd: false,
@@ -790,6 +799,7 @@ export default {
         form: {
           name: '',
           plugin: this.plugin,
+          keyArgument: 'Y',
           interface: this.currentInterface,
           provider: this.currentProvider,
           resourceAssetIdAttribute: ''
