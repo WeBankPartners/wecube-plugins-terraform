@@ -206,25 +206,6 @@ func TerraformOperationDebug (c *gin.Context) {
 			rowData.ResultMessage = "fail"
 		}
 
-		/*
-		// get file data
-		tf_json_old := params[i][models.ResourceDataDebug+"oldTfFile"]
-		tf_json_new := params[i][models.ResourceDataDebug+"newTfFile"]
-		tf_state_old := params[i][models.ResourceDataDebug+"oldTfStateFile"]
-		tf_state_new := params[i][models.ResourceDataDebug+"newTfStateFile"]
-		tf_state_import := params[i][models.ResourceDataDebug+"importTfFile"]
-		plan_message := params[i][models.ResourceDataDebug+"planFile"]
-		sourceName := params[i][models.ResourceDataDebug+"sourceName"]
-
-		delete(params[i], models.ResourceDataDebug+"oldTfFile")
-		delete(params[i], models.ResourceDataDebug+"newTfFile")
-		delete(params[i], models.ResourceDataDebug+"oldTfStateFile")
-		delete(params[i], models.ResourceDataDebug+"newTfStateFile")
-		delete(params[i], models.ResourceDataDebug+"importTfFile")
-		delete(params[i], models.ResourceDataDebug+"planFile")
-		delete(params[i], models.ResourceDataDebug+"sourceName")
-		 */
-
 		// handle one input, many output
 		curResultOutputs := []map[string]interface{}{}
 		if v, ok := retData[models.TerraformOutPutPrefix]; ok {
@@ -253,19 +234,6 @@ func TerraformOperationDebug (c *gin.Context) {
 		curCombineResult := make(map[string]interface{})
 		curCombineResult["result_data"] = curResultOutputs
 
-		/*
-		tmpCurCombineResult := make(map[string]interface{})
-		tmpCurCombineResult["sourc_name"] = sourceName
-		tmpCurCombineResult["tf_json_old"] = tf_json_old
-		tmpCurCombineResult["tf_json_new"] = tf_json_new
-		tmpCurCombineResult["tf_state_old"] = tf_state_old
-		tmpCurCombineResult["tf_state_new"] = tf_state_new
-		tmpCurCombineResult["tf_state_import"] = tf_state_import
-		tmpCurCombineResult["plan_message"] = plan_message
-
-		tmpSlice := []interface{}{}
-		tmpSlice = append(tmpSlice, tmpCurCombineResult)
-		 */
 		curCombineResult["resource_results"] = debugFileContent
 
 		rowData.Results.Outputs = append(rowData.Results.Outputs, curCombineResult)

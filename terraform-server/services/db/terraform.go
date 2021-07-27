@@ -1049,8 +1049,6 @@ func RegionApply(reqParam map[string]interface{}, interfaceData *models.Interfac
 	}
 	providerData := providerList[0]
 
-	enCodeproviderTfContent := ""
-
 	// get source data by interfaceId and providerId
 	sqlCmd = `SELECT * FROM source WHERE interface=? AND provider=?`
 	paramArgs = []interface{}{interfaceData.Id, providerData.Id}
@@ -1075,14 +1073,39 @@ func RegionApply(reqParam map[string]interface{}, interfaceData *models.Interfac
 	resourceId := reqParam["id"].(string)
 	resourceAssetId := reqParam["asset_id"].(string)
 	createUser := reqParam["operator_user"].(string)
+	tfFile := fmt.Sprintf("{\"resource\":{\"%s\":{\"%s\":{\"name\":\"%s\"}}}}", sourceData.Name, resourceId, resourceId)
+	tfstateFile := fmt.Sprintf("{\"resources\":{\"instances\":{\"attributes\":{\"name\":\"%s\"}}}}", resourceAssetId)
 
+	// get old resource data
+	var oldResourceDataList []*models.ResourceDataTable
+	sqlCmd = "SELECT * FROM resource_data WHERE resource=? AND resource_id=? AND region_id=? AND resource_asset_id=?"
 
 	if _, ok := reqParam[models.ResourceDataDebug]; ok {
-		_, err = x.Exec("INSERT INTO resource_data_debug(id,resource,resource_id,resource_asset_id,tf_file,region_id,create_time,create_user,update_time) VALUE (?,?,?,?,?,?,?,?,?)",
-			uuid, sourceData.Id, resourceId, resourceAssetId, enCodeproviderTfContent, resourceId, createTime, createUser, createTime)
+		sqlCmd = "SELECT * FROM resource_data_debug WHERE resource=? AND resource_id=? AND region_id=? AND resource_asset_id=?"
+	}
+
+	paramArgs = []interface{}{sourceData.Id, resourceId, resourceId, resourceAssetId}
+	err = x.SQL(sqlCmd, paramArgs...).Find(&oldResourceDataList)
+	if err != nil {
+		err = fmt.Errorf("Get old_resource data by resource:%s and resource_id:%s error: %s", sourceData.Id, resourceId, err.Error())
+		log.Logger.Error("Get old_resource_data by resource and resource_id error", log.String("resource", sourceData.Id), log.String("resource_id", resourceId), log.Error(err))
+		return
+	}
+
+	if _, ok := reqParam[models.ResourceDataDebug]; ok {
+		if len(oldResourceDataList) == 0 {
+			_, err = x.Exec("INSERT INTO resource_data_debug(id,resource,resource_id,resource_asset_id,tf_file,tf_state_file,region_id,create_time,create_user,update_time,update_user) VALUE (?,?,?,?,?,?,?,?,?,?,?)",
+				uuid, sourceData.Id, resourceId, resourceAssetId, tfFile, tfstateFile, resourceId, createTime, createUser, createTime, createUser)
+		} else {
+			err = fmt.Errorf("the region:%s is existed", resourceId)
+		}
 	} else {
-		_, err = x.Exec("INSERT INTO resource_data(id,resource,resource_id,resource_asset_id,tf_file,region_id,create_time,create_user,update_time) VALUE (?,?,?,?,?,?,?,?,?)",
-			uuid, sourceData.Id, resourceId, resourceAssetId, enCodeproviderTfContent, resourceId, createTime, createUser, createTime)
+		if len(oldResourceDataList) == 0 {
+			_, err = x.Exec("INSERT INTO resource_data(id,resource,resource_id,resource_asset_id,tf_file,tf_state_file,region_id,create_time,create_user,update_time,update_user) VALUE (?,?,?,?,?,?,?,?,?,?,?)",
+				uuid, sourceData.Id, resourceId, resourceAssetId, tfFile, tfstateFile, resourceId, createTime, createUser, createTime, createUser)
+		} else {
+			err = fmt.Errorf("the region:%s is existed", resourceId)
+		}
 	}
 
 	if err != nil {
@@ -1111,13 +1134,39 @@ func handleApplyOrQuery(action string, reqParam map[string]interface{}, sourceDa
 		resourceAssetId := reqParam["asset_id"].(string)
 		createUser := reqParam["operator_user"].(string)
 		regionId := reqParam["region_id"].(string)
+		tfFile := fmt.Sprintf("{\"resource\":{\"%s\":{\"%s\":{\"name\":\"%s\"}}}}", sourceData.Name, resourceId, resourceId)
+		tfstateFile := fmt.Sprintf("{\"resources\":{\"instances\":{\"attributes\":{\"name\":\"%s\"}}}}", resourceAssetId)
+
+		// get old resource data
+		var oldResourceDataList []*models.ResourceDataTable
+		sqlCmd := "SELECT * FROM resource_data WHERE resource=? AND resource_id=? AND region_id=? AND resource_asset_id=?"
 
 		if _, ok := reqParam[models.ResourceDataDebug]; ok {
-			_, err = x.Exec("INSERT INTO resource_data_debug(id,resource,resource_id,resource_asset_id,region_id,create_time,create_user,update_time) VALUE (?,?,?,?,?,?,?,?)",
-				uuid, sourceData.Id, resourceId, resourceAssetId, regionId, createTime, createUser, createTime)
+			sqlCmd = "SELECT * FROM resource_data_debug WHERE resource=? AND resource_id=? AND region_id=? AND resource_asset_id=?"
+		}
+
+		paramArgs := []interface{}{sourceData.Id, resourceId, regionData.RegionId, resourceAssetId}
+		err = x.SQL(sqlCmd, paramArgs...).Find(&oldResourceDataList)
+		if err != nil {
+			err = fmt.Errorf("Get old_resource data by resource:%s and resource_id:%s error: %s", sourceData.Id, resourceId, err.Error())
+			log.Logger.Error("Get old_resource_data by resource and resource_id error", log.String("resource", sourceData.Id), log.String("resource_id", resourceId), log.Error(err))
+			return
+		}
+
+		if _, ok := reqParam[models.ResourceDataDebug]; ok {
+			if len(oldResourceDataList) == 0 {
+				_, err = x.Exec("INSERT INTO resource_data_debug(id,resource,resource_id,resource_asset_id,tf_file,tf_state_file,region_id,create_time,create_user,update_time,update_user) VALUE (?,?,?,?,?,?,?,?,?,?,?)",
+					uuid, sourceData.Id, resourceId, resourceAssetId, tfFile, tfstateFile, regionId, createTime, createUser, createTime, createUser)
+			} else {
+				err = fmt.Errorf("the resource_id:%s is existed", resourceId)
+			}
 		} else {
-			_, err = x.Exec("INSERT INTO resource_data(id,resource,resource_id,resource_asset_id,region_id,create_time,create_user,update_time) VALUE (?,?,?,?,?,?,?,?)",
-				uuid, sourceData.Id, resourceId, resourceAssetId, regionId, createTime, createUser, createTime)
+			if len(oldResourceDataList) == 0 {
+				_, err = x.Exec("INSERT INTO resource_data_debug(id,resource,resource_id,resource_asset_id,tf_file,tf_state_file,region_id,create_time,create_user,update_time,update_user) VALUE (?,?,?,?,?,?,?,?,?,?,?)",
+					uuid, sourceData.Id, resourceId, resourceAssetId, tfFile, tfstateFile, regionId, createTime, createUser, createTime, createUser)
+			} else {
+				err = fmt.Errorf("the resource_id:%s is existed", resourceId)
+			}
 		}
 
 		if err != nil {
