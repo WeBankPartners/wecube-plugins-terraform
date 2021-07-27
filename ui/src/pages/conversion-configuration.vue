@@ -648,6 +648,12 @@
             <Option value="N">N</Option>
           </Select>
         </FormItem>
+        <FormItem :label="$t('import_support')">
+          <Select v-model="newSource.form.import_support" style="width:400px">
+            <Option value="Y">Y</Option>
+            <Option value="N">N</Option>
+          </Select>
+        </FormItem>
       </Form>
     </Modal>
   </div>
@@ -740,7 +746,8 @@ export default {
           keyArgument: 'Y',
           plugin: '',
           provider: '',
-          assetIdAttribute: ''
+          assetIdAttribute: '',
+          import_support: 'Y'
         }
       }
     }
@@ -802,6 +809,7 @@ export default {
           keyArgument: 'Y',
           interface: this.currentInterface,
           provider: this.currentProvider,
+          import_support: 'Y',
           resourceAssetIdAttribute: ''
         }
       }

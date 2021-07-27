@@ -54,5 +54,6 @@
   "debugger": "Debugger",
   "debugger_result": "Debugger Result",
   "function_define": "Function Define",
-  "key_argument": "Key Argument"
+  "key_argument": "Key Argument",
+  "import_support": "Import Support"
 }
