@@ -1,7 +1,7 @@
 <template>
-  <div class=" ">
-    <Table border :columns="tableColumns" :data="tableData"></Table>
-    <Modal v-model="dataDetail.isShow" :title="$t('t_detail')" footer-hide>
+  <div>
+    <Table border :columns="tableColumns" :data="tableData" :height="MODALHEIGHT"></Table>
+    <Modal v-model="dataDetail.isShow" :title="$t('t_detail')" width="800" footer-hide>
       <div
         style="overflow: auto;
     max-height: 500px;"
@@ -18,6 +18,7 @@ export default {
   name: '',
   data () {
     return {
+      MODALHEIGHT: 500,
       dataDetail: {
         isShow: false,
         data: {}
@@ -94,6 +95,7 @@ export default {
     }
   },
   mounted () {
+    this.MODALHEIGHT = document.body.scrollHeight - 200
     this.getDebugInfo()
   },
   methods: {

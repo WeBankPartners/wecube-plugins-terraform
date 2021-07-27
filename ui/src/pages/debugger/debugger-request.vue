@@ -1,5 +1,6 @@
 <template>
-  <div class="" style="width: 1100px;margin: 0 auto">
+  <!-- 'max-height': PAGEHEIGHT + 'px', 'overflow': 'auto' -->
+  <div class="" :style="{ width: '1100px', margin: '0 auto' }">
     <div>
       <Row>
         <Col span="12">
@@ -37,7 +38,7 @@
           <Button
             @click="debuggerRequest"
             style="height: 60px;width:100px"
-            :disabled="!plugin || !currentInterface || !requestBody"
+            :disabled="!plugin || !currentInterface || !requestBody || disabledBtn"
             type="primary"
             >{{ $t('debugger') }}</Button
           >
@@ -48,12 +49,12 @@
       <Table :columns="tableColums" :data="tableData" border></Table>
       <div style="margin: 24px 0">
         <span>{{ $t('debugger_result') }}</span>
-        <div style="background: #dcdee2; max-height:300px;overflow:auto">
+        <div style="background: #dcdee2; max-height:400px;overflow:auto">
           <pre>{{ result }}</pre>
         </div>
       </div>
     </template>
-    <Modal v-model="dataDetail.isShow" :title="$t('t_detail')" footer-hide>
+    <Modal v-model="dataDetail.isShow" :title="$t('t_detail')" width="800" footer-hide>
       <div
         style="overflow: auto;
     max-height: 500px;"
@@ -70,13 +71,14 @@ export default {
   name: '',
   data () {
     return {
+      PAGEHEIGHT: 0,
       dataDetail: {
         isShow: false,
         data: {}
       },
-      plugin: 'vpc',
+      plugin: '',
       pluginOptions: [],
-      currentInterface: 'query',
+      currentInterface: '',
       interfaceOptions: [],
       requestBody: '',
       showResult: false,
@@ -88,8 +90,8 @@ export default {
           key: 'num'
         },
         {
-          title: 'sourc_name',
-          key: 'sourc_name',
+          title: 'source_name',
+          key: 'source_name',
           width: 200
         },
         {
@@ -97,7 +99,6 @@ export default {
           key: 'tf_json_new',
           width: 300,
           render: (h, params) => {
-            console.log(params.row)
             return (
               <div>
                 <div style="display:inline-block;width: 200px;overflow: hidden;text-overflow:ellipsis;white-space: nowrap">
@@ -153,8 +154,8 @@ export default {
           width: 80
         },
         {
-          title: 'sourc_name',
-          key: 'sourc_name',
+          title: 'source_name',
+          key: 'source_name',
           width: 200
         },
         {
@@ -162,7 +163,6 @@ export default {
           key: 'tf_json_old',
           width: 200,
           render: (h, params) => {
-            console.log(params.row)
             return (
               <div>
                 <div style="display:inline-block;width: 130px;overflow: hidden;text-overflow:ellipsis;white-space: nowrap">
@@ -189,7 +189,6 @@ export default {
           key: 'tf_json_new',
           width: 200,
           render: (h, params) => {
-            console.log(params.row)
             return (
               <div>
                 <div style="display:inline-block;width: 130px;overflow: hidden;text-overflow:ellipsis;white-space: nowrap">
@@ -214,7 +213,28 @@ export default {
         {
           title: 'tf_state_old',
           key: 'tf_state_old',
-          width: 200
+          width: 200,
+          render: (h, params) => {
+            return (
+              <div>
+                <div style="display:inline-block;width: 130px;overflow: hidden;text-overflow:ellipsis;white-space: nowrap">
+                  {params.row.tf_state_old}
+                </div>
+                {params.row.tf_state_old && (
+                  <Button
+                    onClick={() => {
+                      this.showInfo(params.row.tf_state_old)
+                    }}
+                    style="vertical-align: top;"
+                    icon="ios-search"
+                    type="primary"
+                    ghost
+                    size="small"
+                  ></Button>
+                )}
+              </div>
+            )
+          }
         },
         {
           title: 'tf_state_new',
@@ -299,10 +319,12 @@ export default {
         }
       ],
       tableData: [],
-      result: {}
+      result: {},
+      disabledBtn: false
     }
   },
   mounted () {
+    this.PAGEHEIGHT = document.body.scrollHeight
     this.getPlugin()
   },
   methods: {
@@ -347,8 +369,18 @@ export default {
         title: 'Successful',
         desc: 'Need 10s ……'
       })
+      this.showResult = false
+      this.disabledBtn = true
       const result = await debuggerRequest(this.plugin, this.currentInterface, this.requestBody)
-      this.managementData(result)
+      this.disabledBtn = false
+      if (result.statusCode === 'OK') {
+        this.$Notice.success({
+          title: 'Successful',
+          desc: 'Successful'
+        })
+        this.managementData(result)
+        this.showResult = true
+      }
     },
     async getPlugin () {
       this.pluginOptions = []

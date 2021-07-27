@@ -119,7 +119,7 @@
           </div>
         </div>
       </header>
-      <div style="margin-left: 6px">
+      <div style="margin-left: 8px">
         <div
           v-for="(source, sourceIndex) in sourceInfo"
           :key="source.id"
@@ -1038,7 +1038,6 @@ export default {
       }
     },
     async getSourceByProvider (item) {
-      item.sourceWithFilter = []
       const { statusCode, data } = await getSourceByProvider(this.currentProvider)
       if (statusCode === 'OK') {
         item.sourceWithFilter = data
