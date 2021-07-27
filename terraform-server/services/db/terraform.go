@@ -1896,6 +1896,16 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 						destroyAssetId += resourceData.ResourceAssetId + ", "
 					}
 				}
+
+				tmpcurDebugFileContent := make(map[string]interface{})
+				tmpcurDebugFileContent["tf_json_old"] = ""
+				tmpcurDebugFileContent["tf_json_new"] = ""
+				tmpcurDebugFileContent["tf_state_old"] = ""
+				tmpcurDebugFileContent["tf_state_new"] = ""
+				tmpcurDebugFileContent["tf_state_import"] = ""
+				tmpcurDebugFileContent["plan_message"] = ""
+				tmpcurDebugFileContent["source_name"] = sortedSourceData.Name
+
 				// check if importObject needed to be destroy
 				for i, v := range importObject {
 					// Gen tf.json file
@@ -1937,19 +1947,27 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 						totalDestroyCnt += destroyCnt
 						destroyAssetId += v + ", "
 					}
+
+					if _, ok := reqParam[models.ResourceDataDebug]; ok {
+						// get import tfstate file
+						tfstateFilePath := workDirPath + "/terraform.tfstate"
+						tfstateImportFileData, tmpErr := ReadFile(tfstateFilePath)
+						if tmpErr != nil {
+							err = fmt.Errorf("Read tfstate import file error:%s", tmpErr.Error())
+							log.Logger.Error("Read tfstate import file error", log.Error(err))
+							rowData["errorMessage"] = err.Error()
+							return
+						}
+						tfstateImportFileContentStr := string(tfstateImportFileData)
+						tmpcurDebugFileContent["tf_state_import"] = tfstateImportFileContentStr
+						tf_json_new_content, _ := json.Marshal(conStructObject[i])
+						tmpcurDebugFileContent["tf_json_new"] = string(tf_json_new_content)
+					}
+
 					DelTfstateFile(workDirPath)
 				}
 				if totalDestroyCnt > 0 {
 					if _, ok := reqParam[models.ResourceDataDebug]; ok {
-						curDebugFileContent := make(map[string]interface{})
-						curDebugFileContent["tf_json_old"] = ""
-						curDebugFileContent["tf_json_new"] = ""
-						curDebugFileContent["tf_state_old"] = ""
-						curDebugFileContent["tf_state_new"] = ""
-						curDebugFileContent["tf_state_import"] = ""
-						curDebugFileContent["plan_message"] = ""
-						curDebugFileContent["source_name"] = sortedSourceData.Name
-
 						// resource_data debug mode, get the plan file after terraform plan
 						planFilePath := workDirPath + "/planfile"
 						planFileData, tmpErr := ReadFile(planFilePath)
@@ -1960,12 +1978,18 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 							return
 						}
 						planFileContentStr := string(planFileData)
-						curDebugFileContent["plan_message"] = planFileContentStr
+						tmpcurDebugFileContent["plan_message"] = planFileContentStr
 
 						// get the old tf_json_old and tf_state_old
-						// getOldTfFile(curDebugFileContent)
+						resAssetId := ""
+						if _, ok := reqParam["asset_id"]; ok {
+							resAssetId = reqParam["asset_id"].(string)
+						}
+						if resAssetId != "" {
+							getOldTfFile(tmpcurDebugFileContent, regionData, sortedSourceData, resourceId, resAssetId)
+						}
 
-						*debugFileContent = append(*debugFileContent, curDebugFileContent)
+						*debugFileContent = append(*debugFileContent, tmpcurDebugFileContent)
 					}
 
 					destroyCntStr := strconv.Itoa(totalDestroyCnt)
@@ -3462,17 +3486,20 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 	return
 }
 
-/*
-func getOldTfFile(curDebugFileContent map[string]interface{}) (err error) {
+func getOldTfFile(curDebugFileContent map[string]interface{},
+	regionData *models.ResourceDataTable,
+	sourceData *models.SourceTable,
+	resourceId string,
+	resourceAssetId string) (err error) {
+
 	// get resource_data_debug table
-	sqlCmd = "SELECT * FROM resource_data_debug WHERE resource=? AND resource_id=? AND region_id=? AND resource_asset_id=?"
+	sqlCmd := "SELECT * FROM resource_data_debug WHERE resource=? AND resource_id=? AND region_id=? AND resource_asset_id=?"
 	var oldResourceDataDebugList []*models.ResourceDataTable
-	paramArgs := []interface{}{resourceDataSourceId, resourceDataResourceId, regionData.RegionId, resourceDataResourceAssetId}
+	paramArgs := []interface{}{sourceData.Id, resourceId, regionData.RegionId, resourceAssetId}
 	err = x.SQL(sqlCmd, paramArgs...).Find(&oldResourceDataDebugList)
 	if err != nil {
-		err = fmt.Errorf("Get old_resource data_debug by resource:%s and resource_id:%s error: %s", resourceDataSourceId, resourceDataResourceId, err.Error())
-		log.Logger.Error("Get old_resource_data_debug by resource and resource_id error", log.String("resource", resourceDataSourceId), log.String("resource_id", resourceDataResourceId), log.Error(err))
-		retOutput["errorMessage"] = err.Error()
+		err = fmt.Errorf("Get old_resource data_debug by resource:%s and resource_id:%s error: %s", sourceData.Id, resourceId, err.Error())
+		log.Logger.Error("Get old_resource_data_debug by resource and resource_id error", log.String("resource", sourceData.Id), log.String("resource_id", resourceId), log.Error(err))
 	}
 	if len(oldResourceDataDebugList) == 0 {
 		curDebugFileContent["tf_json_old"] = ""
@@ -3483,4 +3510,3 @@ func getOldTfFile(curDebugFileContent map[string]interface{}) (err error) {
 	}
 	return
 }
-*/
