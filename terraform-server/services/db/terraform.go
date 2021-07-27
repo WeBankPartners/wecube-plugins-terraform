@@ -1012,7 +1012,8 @@ func RegionApply(reqParam map[string]interface{}, interfaceData *models.Interfac
 
 	providerInfoId := reqParam["provider_info"].(string)
 	// Get providerInfo data
-	sqlCmd := `SELECT * FROM provider_info WHERE id=?`
+	// sqlCmd := `SELECT * FROM provider_info WHERE id=?`
+	sqlCmd := `SELECT * FROM provider_info WHERE name=?`
 	paramArgs := []interface{}{providerInfoId}
 	var providerInfoList []*models.ProviderInfoTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&providerInfoList)
@@ -1097,14 +1098,14 @@ func RegionApply(reqParam map[string]interface{}, interfaceData *models.Interfac
 			_, err = x.Exec("INSERT INTO resource_data_debug(id,resource,resource_id,resource_asset_id,tf_file,tf_state_file,region_id,create_time,create_user,update_time,update_user) VALUE (?,?,?,?,?,?,?,?,?,?,?)",
 				uuid, sourceData.Id, resourceId, resourceAssetId, tfFile, tfstateFile, resourceId, createTime, createUser, createTime, createUser)
 		} else {
-			err = fmt.Errorf("the region:%s is existed", resourceId)
+			//err = fmt.Errorf("the region:%s is existed", resourceId)
 		}
 	} else {
 		if len(oldResourceDataList) == 0 {
 			_, err = x.Exec("INSERT INTO resource_data(id,resource,resource_id,resource_asset_id,tf_file,tf_state_file,region_id,create_time,create_user,update_time,update_user) VALUE (?,?,?,?,?,?,?,?,?,?,?)",
 				uuid, sourceData.Id, resourceId, resourceAssetId, tfFile, tfstateFile, resourceId, createTime, createUser, createTime, createUser)
 		} else {
-			err = fmt.Errorf("the region:%s is existed", resourceId)
+			//err = fmt.Errorf("the region:%s is existed", resourceId)
 		}
 	}
 
@@ -1158,14 +1159,14 @@ func handleApplyOrQuery(action string, reqParam map[string]interface{}, sourceDa
 				_, err = x.Exec("INSERT INTO resource_data_debug(id,resource,resource_id,resource_asset_id,tf_file,tf_state_file,region_id,create_time,create_user,update_time,update_user) VALUE (?,?,?,?,?,?,?,?,?,?,?)",
 					uuid, sourceData.Id, resourceId, resourceAssetId, tfFile, tfstateFile, regionId, createTime, createUser, createTime, createUser)
 			} else {
-				err = fmt.Errorf("the resource_id:%s is existed", resourceId)
+				// err = fmt.Errorf("the resource_id:%s is existed", resourceId)
 			}
 		} else {
 			if len(oldResourceDataList) == 0 {
 				_, err = x.Exec("INSERT INTO resource_data_debug(id,resource,resource_id,resource_asset_id,tf_file,tf_state_file,region_id,create_time,create_user,update_time,update_user) VALUE (?,?,?,?,?,?,?,?,?,?,?)",
 					uuid, sourceData.Id, resourceId, resourceAssetId, tfFile, tfstateFile, regionId, createTime, createUser, createTime, createUser)
 			} else {
-				err = fmt.Errorf("the resource_id:%s is existed", resourceId)
+				// err = fmt.Errorf("the resource_id:%s is existed", resourceId)
 			}
 		}
 
@@ -1385,7 +1386,8 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	if actionName == "destroy" {
 		actionName = "apply"
 	}
-	sqlCmd := `SELECT * FROM interface WHERE plugin=? AND name=?`
+	// sqlCmd := `SELECT * FROM interface WHERE plugin=? AND name=?`
+	sqlCmd := `SELECT * FROM interface WHERE plugin IN (SELECT id FROM plugin WHERE name=?) AND name=?`
 	paramArgs := []interface{}{plugin, actionName}
 	var interfaceInfoList []*models.InterfaceTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&interfaceInfoList)
@@ -1435,7 +1437,8 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 
 	// Get providerInfo data
 	providerInfoId := reqParam["provider_info"].(string)
-	sqlCmd = `SELECT * FROM provider_info WHERE id=?`
+	// sqlCmd = `SELECT * FROM provider_info WHERE id=?`
+	sqlCmd = `SELECT * FROM provider_info WHERE name=?`
 	paramArgs = []interface{}{providerInfoId}
 	var providerInfoList []*models.ProviderInfoTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&providerInfoList)
@@ -3116,7 +3119,7 @@ func handleConvertParams(action string,
 			// merge the input tfArgument
 			if tfArgumentList[i].ObjectName != "" {
 				relativeTfArgumentData := tfArgumentIdMap[tfArgumentList[i].ObjectName]
-				if relativeTfArgumentData.Type == "object" {
+				if relativeTfArgumentData != nil && relativeTfArgumentData.Type == "object" && relativeTfArgumentData.Name == "tags" {
 					tmpVal := tfArguments[relativeTfArgumentData.Name].(map[string]interface{})
 					tmpVal[tfArgumentList[i].Name] = arg
 					tfArguments[relativeTfArgumentData.Name] = tmpVal
