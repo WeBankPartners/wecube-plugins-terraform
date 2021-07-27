@@ -664,7 +664,7 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 	if destroyCnt > 0 && reqParam["confirmToken"] != "Y" {
 		// 二次确认
 		destroyCntStr := strconv.Itoa(destroyCnt)
-		retOutput["errorMessage"] = destroyCntStr + "resource(s) will be destroy, please confirm again!"
+		retOutput["errorMessage"] = destroyCntStr + " resource(s) will be destroy, please confirm again!"
 		return
 	}
 
@@ -1940,8 +1940,36 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					DelTfstateFile(workDirPath)
 				}
 				if totalDestroyCnt > 0 {
+					if _, ok := reqParam[models.ResourceDataDebug]; ok {
+						curDebugFileContent := make(map[string]interface{})
+						curDebugFileContent["tf_json_old"] = ""
+						curDebugFileContent["tf_json_new"] = ""
+						curDebugFileContent["tf_state_old"] = ""
+						curDebugFileContent["tf_state_new"] = ""
+						curDebugFileContent["tf_state_import"] = ""
+						curDebugFileContent["plan_message"] = ""
+						curDebugFileContent["source_name"] = sortedSourceData.Name
+
+						// resource_data debug mode, get the plan file after terraform plan
+						planFilePath := workDirPath + "/planfile"
+						planFileData, tmpErr := ReadFile(planFilePath)
+						if tmpErr != nil {
+							err = fmt.Errorf("Read plan file error:%s", tmpErr.Error())
+							log.Logger.Error("Read plan file error", log.Error(err))
+							rowData["errorMessage"] = err.Error()
+							return
+						}
+						planFileContentStr := string(planFileData)
+						curDebugFileContent["plan_message"] = planFileContentStr
+
+						// get the old tf_json_old and tf_state_old
+						// getOldTfFile(curDebugFileContent)
+
+						*debugFileContent = append(*debugFileContent, curDebugFileContent)
+					}
+
 					destroyCntStr := strconv.Itoa(totalDestroyCnt)
-					rowData["errorMessage"] = destroyCntStr + "resource(s) will be destroy: " + destroyAssetId + "please confirm again!"
+					rowData["errorMessage"] = destroyCntStr + " resource(s) will be destroy: " + destroyAssetId + "please confirm again!"
 					return
 				}
 			}
@@ -3433,3 +3461,26 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 	}
 	return
 }
+
+/*
+func getOldTfFile(curDebugFileContent map[string]interface{}) (err error) {
+	// get resource_data_debug table
+	sqlCmd = "SELECT * FROM resource_data_debug WHERE resource=? AND resource_id=? AND region_id=? AND resource_asset_id=?"
+	var oldResourceDataDebugList []*models.ResourceDataTable
+	paramArgs := []interface{}{resourceDataSourceId, resourceDataResourceId, regionData.RegionId, resourceDataResourceAssetId}
+	err = x.SQL(sqlCmd, paramArgs...).Find(&oldResourceDataDebugList)
+	if err != nil {
+		err = fmt.Errorf("Get old_resource data_debug by resource:%s and resource_id:%s error: %s", resourceDataSourceId, resourceDataResourceId, err.Error())
+		log.Logger.Error("Get old_resource_data_debug by resource and resource_id error", log.String("resource", resourceDataSourceId), log.String("resource_id", resourceDataResourceId), log.Error(err))
+		retOutput["errorMessage"] = err.Error()
+	}
+	if len(oldResourceDataDebugList) == 0 {
+		curDebugFileContent["tf_json_old"] = ""
+		curDebugFileContent["tf_state_old"] = ""
+	} else {
+		curDebugFileContent["tf_json_old"] = oldResourceDataDebugList[0].TfFile
+		curDebugFileContent["tf_state_old"] = oldResourceDataDebugList[0].TfStateFile
+	}
+	return
+}
+*/
