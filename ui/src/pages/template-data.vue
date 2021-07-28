@@ -206,6 +206,7 @@ export default {
         this.provider.forEach(p => {
           const find = this.providerList.find(pro => pro.name === p)
           providerValue.push({
+            id: templateValue.id,
             value: templateValue.providerTemplateValueInfo[p].value,
             provider: find.id,
             templateValue: data[0].id

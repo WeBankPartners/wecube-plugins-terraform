@@ -643,13 +643,13 @@
           <Input type="text" v-model="newSource.form.assetIdAttribute" style="width:400px"></Input>
         </FormItem>
         <FormItem :label="$t('key_argument')">
-          <Select v-model="newSource.form.keyArgument" style="width:400px">
+          <Select v-model="newSource.form.terraformUsed" style="width:400px">
             <Option value="Y">Y</Option>
             <Option value="N">N</Option>
           </Select>
         </FormItem>
         <FormItem :label="$t('import_support')">
-          <Select v-model="newSource.form.import_support" style="width:400px">
+          <Select v-model="newSource.form.importSupport" style="width:400px">
             <Option value="Y">Y</Option>
             <Option value="N">N</Option>
           </Select>
@@ -743,11 +743,11 @@ export default {
         isAdd: true,
         form: {
           name: '',
-          keyArgument: 'Y',
+          terraformUsed: 'Y',
           plugin: '',
           provider: '',
           assetIdAttribute: '',
-          import_support: 'Y'
+          importSupport: 'Y'
         }
       }
     }
@@ -806,10 +806,10 @@ export default {
         form: {
           name: '',
           plugin: this.plugin,
-          keyArgument: 'Y',
+          terraformUsed: 'Y',
           interface: this.currentInterface,
           provider: this.currentProvider,
-          import_support: 'Y',
+          importSupport: 'Y',
           resourceAssetIdAttribute: ''
         }
       }
