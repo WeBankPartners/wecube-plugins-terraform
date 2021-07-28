@@ -532,8 +532,16 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 		return
 	}
 
-	resourceId := reqParam["id"].(string)
-	resourceAssetId := reqParam["asset_id"].(string)
+	resourceId := ""
+	resourceAssetId := ""
+
+	if _, ok := reqParam["id"].(string); ok {
+		resourceId = reqParam["id"].(string)
+	}
+
+	if _, ok := reqParam["asset_id"].(string); ok {
+		resourceAssetId = reqParam["asset_id"].(string)
+	}
 
 	var tfArguments map[string]interface{}
 	tfArguments, _, err = handleConvertParams(action, sourceData, tfArgumentList, reqParam, providerData, regionData)
@@ -3055,6 +3063,15 @@ func handleReverseConvert(outPutParameterNameMap map[string]*models.ParameterTab
 						log.Logger.Error("Revese convert parameter error", log.String("parameterId", tfstateAttr.Parameter), log.Error(err))
 						return
 					}
+
+					// check outArg type, string -> int
+					if _, ok := outArgVal.(string); ok {
+						if curParamData.DataType == "int" {
+							tmpVal, _ := strconv.Atoi(outArgVal.(string))
+							outArgVal = tmpVal
+						}
+					}
+
 					// merger the tfstateAttributeVal if they have the same name
 					if _, ok := outPutArgs[outArgKey]; ok {
 						if _, ok := outPutArgs[outArgKey].([]interface{}); ok {
@@ -3320,6 +3337,14 @@ func handleConvertParams(action string,
 			log.Logger.Error("Convert parameter error", log.String("parameterId", tfArgumentList[i].Parameter), log.Error(err))
 			return
 		}
+
+		// check the type string, int
+		if tfArgumentList[i].Type == "int" {
+			// tmpVal, ok := arg.(int)
+			tmpVal, _ := strconv.Atoi(arg.(string))
+			arg = tmpVal
+		}
+
 		tfArguments[tfArgumentList[i].Name] = arg
 		if arg != nil && convertWay == "direct" && parameterData.DataType == "string" && arg.(string) == "null" {
 			delete(tfArguments, tfArgumentList[i].Name)
