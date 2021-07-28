@@ -1367,18 +1367,17 @@ func handleDestroy(workDirPath string,
 }
 
 func TerraformOperation(plugin string, action string, reqParam map[string]interface{}, debugFileContent *[]map[string]interface{}) (rowData map[string]interface{}, err error) {
-	rowData = make(map[string]interface{})
-	rowData["callbackParameter"] = reqParam["callbackParameter"].(string)
-	rowData["errorCode"] = "1"
-	rowData["errorMessage"] = ""
-
-
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("TerraformOperation error: %v", r)
 			rowData["errorMessage"] = err.Error()
 		}
 	}()
+
+	rowData = make(map[string]interface{})
+	rowData["callbackParameter"] = reqParam["callbackParameter"].(string)
+	rowData["errorCode"] = "1"
+	rowData["errorMessage"] = ""
 
 	// Get interface by plugin and action
 	var actionName string
@@ -1583,25 +1582,6 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 						rowData["errorMessage"] = err.Error()
 						return
 					} else if rootTfArgumentData.Parameter != "" {
-						/*
-							sqlCmd = "SELECT * FROM parameter WHERE id=?"
-							paramArgs = []interface{}{rootTfArgumentData.Parameter}
-							var tmpInPutParameterList []*models.ParameterTable
-							err = x.SQL(sqlCmd, paramArgs...).Find(&tmpInPutParameterList)
-							if err != nil {
-								err = fmt.Errorf("Get inPutParameter list error:%s", err.Error())
-								log.Logger.Error("Get inPutParameter list error", log.Error(err))
-								rowData["errorMessage"] = err.Error()
-								return
-							}
-							if len(tmpInPutParameterList) == 0 {
-								err = fmt.Errorf("InPutParameter can not be found by id", rootTfArgumentData.Parameter)
-								log.Logger.Warn("InPutParameter can not be found by id", log.String("id", rootTfArgumentData.Parameter), log.Error(err))
-								rowData["errorMessage"] = err.Error()
-								return
-							}
-							inPutParameterData := tmpInPutParameterList[0]
-						*/
 						convertedArgumentData, _, tmpErr := handleConvertParams(action, sortedSourceData, []*models.TfArgumentTable{rootTfArgumentData}, reqParam, providerData, regionData)
 						if tmpErr != nil {
 							err = fmt.Errorf("Handle convert params error:%s", err.Error())
@@ -1726,6 +1706,9 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					}
 				}
 			}
+
+			// Finish to construct the converted parameters, and start to handle the whole process
+
 			// Get the resource_data list by resource_id and source
 			sqlCmd = `SELECT * FROM resource_data WHERE resource=? AND resource_id=? AND region_id=?`
 			if _, ok := reqParam[models.ResourceDataDebug]; ok {
@@ -1888,6 +1871,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					toDestroyResource[data.Id] = data
 				}
 			}
+			/*
 			if reqParam["confirmToken"] != "Y" {
 				destroyAssetId := ""
 				totalDestroyCnt := len(toDestroyResource)
@@ -1997,33 +1981,10 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					return
 				}
 			}
-			// Do Terraform Action
-			for i := range conStructObject {
-				// Gen tf.json file
-				_, err = GenTfFile(workDirPath, sortedSourceData, action, resourceId, conStructObject[i])
-				if err != nil {
-					err = fmt.Errorf("Gen tfFile error: %s", err.Error())
-					log.Logger.Error("Gen tfFile error", log.Error(err))
-					rowData["errorMessage"] = err.Error()
-					return
-				}
+			 */
 
-				err = TerraformInit(workDirPath)
-				if err != nil {
-					err = fmt.Errorf("Do TerraformInit error:%s", err.Error())
-					log.Logger.Error("Do TerraformInit error", log.Error(err))
-					rowData["errorMessage"] = err.Error()
-					return
-				}
-
-				_, tmpErr := TerraformPlan(workDirPath)
-				if tmpErr != nil {
-					err = fmt.Errorf("Do TerraformPlan error:%s", tmpErr.Error())
-					log.Logger.Error("Do TerraformPlan error", log.Error(err))
-					rowData["errorMessage"] = err.Error()
-					return
-				}
-			}
+			// Recodr the debugFileContent
+			curDebugFileStartIdx := len(*debugFileContent)
 			for i := range conStructObject {
 				curDebugFileContent := make(map[string]interface{})
 				curDebugFileContent["tf_json_old"] = ""
@@ -2033,9 +1994,161 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 				curDebugFileContent["tf_state_import"] = ""
 				curDebugFileContent["plan_message"] = ""
 				curDebugFileContent["source_name"] = sortedSourceData.Name
+				*debugFileContent = append(*debugFileContent, curDebugFileContent)
 
+				if _, ok := reqParam[models.ResourceDataDebug]; ok {
+					curTfFileContentStr, err := GenTfFile(workDirPath, sortedSourceData, action, resourceId, conStructObject[i])
+					if err != nil {
+						err = fmt.Errorf("Gen tfFile error: %s", err.Error())
+						log.Logger.Error("Gen tfFile error", log.Error(err))
+						rowData["errorMessage"] = err.Error()
+						continue
+					}
+					curDebugFileContent["tf_json_new"] = curTfFileContentStr
+
+					if _, tmpOk := importObject[i]; tmpOk {
+						// get tf_json_old and tf_state_old file content
+						getOldTfFile(curDebugFileContent, regionData, sortedSourceData, resourceId, importObject[i])
+
+						/*
+						err = TerraformInit(workDirPath)
+						if err != nil {
+							err = fmt.Errorf("Do TerraformInit error:%s", err.Error())
+							log.Logger.Error("Do TerraformInit error", log.Error(err))
+							rowData["errorMessage"] = err.Error()
+							continue
+						}
+
+						// Gen tf.json file
+						uuid := "_" + guid.CreateGuid()
+						_, err = GenTfFile(workDirPath, sortedSourceData, action, uuid, conStructObject[i])
+						if err != nil {
+							err = fmt.Errorf("Gen tfFile error: %s", err.Error())
+							log.Logger.Error("Gen tfFile error", log.Error(err))
+							rowData["errorMessage"] = err.Error()
+							continue
+						}
+
+						err = TerraformImport(workDirPath, sortedSourceData.Name+"."+uuid, importObject[i])
+						if err != nil {
+							err = fmt.Errorf("Do TerraformImport error:%s", err.Error())
+							rowData["errorMessage"] = err.Error()
+							continue
+						}
+						// get the terraform.state file after terraform import
+						tfstateFilePath := workDirPath + "/terraform.tfstate"
+						tfstateFileData, tmpErr := ReadFile(tfstateFilePath)
+						if tmpErr != nil {
+							err = fmt.Errorf("Read import_tfstate file error:%s", tmpErr.Error())
+							log.Logger.Error("Read import_tfstate file error", log.Error(err))
+							rowData["errorMessage"] = err.Error()
+							continue
+						}
+						tfstateFileContentStr := string(tfstateFileData)
+						curDebugFileContent["tf_state_import"] = tfstateFileContentStr
+						DelTfstateFile(workDirPath)
+						 */
+					}
+				}
+			}
+
+			if reqParam["confirmToken"] != "Y" {
+				destroyAssetId := ""
+				totalDestroyCnt := len(toDestroyResource)
+				if len(toDestroyResource) > 0 {
+					for _, resourceData := range toDestroyResource {
+						destroyAssetId += resourceData.ResourceAssetId + ", "
+					}
+				}
+
+				for i := range conStructObject {
+					curDebugFileContent := (*debugFileContent)[curDebugFileStartIdx+i]
+					// check if importObject needed to be destroy
+					if _, ok := importObject[i]; ok {
+						// Gen tf.json file
+						uuid := "_" + guid.CreateGuid()
+						_, err = GenTfFile(workDirPath, sortedSourceData, action, uuid, conStructObject[i])
+						if err != nil {
+							err = fmt.Errorf("Gen tfFile error: %s", err.Error())
+							log.Logger.Error("Gen tfFile error", log.Error(err))
+							rowData["errorMessage"] = err.Error()
+							continue
+						}
+
+						err = TerraformInit(workDirPath)
+						if err != nil {
+							err = fmt.Errorf("Do TerraformInit error:%s", err.Error())
+							log.Logger.Error("Do TerraformInit error", log.Error(err))
+							rowData["errorMessage"] = err.Error()
+							// return
+							continue
+						}
+
+						err = TerraformImport(workDirPath, sortedSourceData.Name+"."+uuid, importObject[i])
+						if err != nil {
+							err = fmt.Errorf("Do TerraformImport error:%s", err.Error())
+							rowData["errorMessage"] = err.Error()
+							// return
+							continue
+						}
+						if _, ok := reqParam[models.ResourceDataDebug]; ok {
+							// get import tfstate file
+							tfstateFilePath := workDirPath + "/terraform.tfstate"
+							tfstateImportFileData, tmpErr := ReadFile(tfstateFilePath)
+							if tmpErr != nil {
+								err = fmt.Errorf("Read tfstate import file error:%s", tmpErr.Error())
+								log.Logger.Error("Read tfstate import file error", log.Error(err))
+								rowData["errorMessage"] = err.Error()
+								// return
+							}
+							tfstateImportFileContentStr := string(tfstateImportFileData)
+							curDebugFileContent["tf_state_import"] = tfstateImportFileContentStr
+						}
+
+						destroyCnt, tmpErr := TerraformPlan(workDirPath)
+						if tmpErr != nil {
+							err = fmt.Errorf("Do TerraformPlan error:%s", tmpErr.Error())
+							log.Logger.Error("Do TerraformPlan error", log.Error(err))
+							rowData["errorMessage"] = err.Error()
+							// return
+						}
+
+						if destroyCnt > 0 {
+							// 二次确认
+							totalDestroyCnt += destroyCnt
+							destroyAssetId += importObject[i] + ", "
+						}
+
+						if _, ok := reqParam[models.ResourceDataDebug]; ok {
+							// get plan file
+							planFilePath := workDirPath + "/planfile"
+							planFileData, tmpErr := ReadFile(planFilePath)
+							if tmpErr != nil {
+								err = fmt.Errorf("Read tfstate import file error:%s", tmpErr.Error())
+								log.Logger.Error("Read tfstate import file error", log.Error(err))
+								rowData["errorMessage"] = err.Error()
+								// return
+							}
+							planFileContentStr := string(planFileData)
+							curDebugFileContent["plan_message"] = planFileContentStr
+						}
+
+						DelTfstateFile(workDirPath)
+					}
+				}
+				// test
+				// totalDestroyCnt = 1
+				if totalDestroyCnt > 0 {
+					destroyCntStr := strconv.Itoa(totalDestroyCnt)
+					rowData["errorMessage"] = destroyCntStr + " resource(s) will be destroy: " + destroyAssetId + "please confirm again!"
+					return
+				}
+			}
+
+			// Do Terraform Action
+			for i := range conStructObject {
+				curDebugFileContent := (*debugFileContent)[curDebugFileStartIdx+i]
 				var tfFileContentStr string
-
 				err = TerraformInit(workDirPath)
 				if err != nil {
 					err = fmt.Errorf("Do TerraformInit error:%s", err.Error())
@@ -2051,14 +2164,15 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 						err = fmt.Errorf("Gen tfFile error: %s", err.Error())
 						log.Logger.Error("Gen tfFile error", log.Error(err))
 						rowData["errorMessage"] = err.Error()
-						return
+						// return
+						continue
 					}
 
 					err = TerraformImport(workDirPath, sortedSourceData.Name+"."+resourceId, importObject[i])
 					if err != nil {
 						err = fmt.Errorf("Do TerraformImport error:%s", err.Error())
 						rowData["errorMessage"] = err.Error()
-						return
+						// return
 					}
 					if _, ok := reqParam[models.ResourceDataDebug]; ok {
 						// resource_data debug mode, get the terraform.state file after terraform import
@@ -2068,7 +2182,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 							err = fmt.Errorf("Read import_tfstate file error:%s", tmpErr.Error())
 							log.Logger.Error("Read import_tfstate file error", log.Error(err))
 							rowData["errorMessage"] = err.Error()
-							return
+							// return
 						}
 						tfstateFileContentStr := string(tfstateFileData)
 						curDebugFileContent["tf_state_import"] = tfstateFileContentStr
@@ -2082,7 +2196,8 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					err = fmt.Errorf("Gen tfFile error: %s", err.Error())
 					log.Logger.Error("Gen tfFile error", log.Error(err))
 					rowData["errorMessage"] = err.Error()
-					return
+					// return
+					continue
 				}
 
 				destroyCnt, tmpErr := TerraformPlan(workDirPath)
@@ -2091,7 +2206,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					err = fmt.Errorf("Do TerraformPlan error:%s", tmpErr.Error())
 					log.Logger.Error("Do TerraformPlan error", log.Error(err))
 					rowData["errorMessage"] = err.Error()
-					return
+					// return
 				}
 				if _, ok := reqParam[models.ResourceDataDebug]; ok {
 					// resource_data debug mode, get the plan file after terraform plan
@@ -2101,7 +2216,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 						err = fmt.Errorf("Read plan file error:%s", tmpErr.Error())
 						log.Logger.Error("Read plan file error", log.Error(err))
 						rowData["errorMessage"] = err.Error()
-						return
+						// return
 					}
 					planFileContentStr := string(planFileData)
 					curDebugFileContent["plan_message"] = planFileContentStr
@@ -2112,9 +2227,23 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					err = fmt.Errorf("Do TerraformApply error:%s", err.Error())
 					log.Logger.Error("Do TerraformApply error", log.Error(err))
 					rowData["errorMessage"] = err.Error()
-					return
+					// return
+					continue
 				}
-				// TODO handl tfstate file
+
+				if _, ok := reqParam[models.ResourceDataDebug]; ok {
+					tfstateFilePath := workDirPath + "/terraform.tfstate"
+					tfstateFileData, err := ReadFile(tfstateFilePath)
+					if err != nil {
+						err = fmt.Errorf("Read tfstate file error:%s", err.Error())
+						log.Logger.Error("Read tfstate file error", log.Error(err))
+						//return
+					}
+					tfstateFileContentStr := string(tfstateFileData)
+					curDebugFileContent["tf_state_new"] = tfstateFileContentStr
+				}
+
+				// handl tfstate file
 				err = handleTfstateOutPut(sortedSourceData,
 					interfaceData,
 					reqParam,
@@ -2128,7 +2257,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					curDebugFileContent,
 					isInternalAction)
 
-				*debugFileContent = append(*debugFileContent, curDebugFileContent)
+				// *debugFileContent = append(*debugFileContent, curDebugFileContent)
 
 				DelTfstateFile(workDirPath)
 			}

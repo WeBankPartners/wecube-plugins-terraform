@@ -79,6 +79,18 @@ func ResourceDataBatchUpdate(c *gin.Context) {
 }
 
 func TerraformOperation(c *gin.Context) {
+	rowData := models.PluginInterfaceResultObj{}
+	rowData.ResultCode = "0"
+	rowData.ResultMessage = "success"
+	defer func() {
+		if r := recover(); r != nil {
+			err := fmt.Errorf("TerraformOperation error: %v", r)
+			rowData.ResultCode = "1"
+			rowData.ResultMessage = err.Error()
+			c.JSON(http.StatusOK, rowData)
+		}
+	}()
+
 	plugin := c.Param("plugin")
 	action := c.Param("action")
 
@@ -107,9 +119,9 @@ func TerraformOperation(c *gin.Context) {
 		params = append(params, p.Index(i).Interface().(map[string]interface{}))
 	}
 
-	rowData := models.PluginInterfaceResultObj{}
-	rowData.ResultCode = "0"
-	rowData.ResultMessage = "success"
+	// rowData := models.PluginInterfaceResultObj{}
+	// rowData.ResultCode = "0"
+	// rowData.ResultMessage = "success"
 	for i := range params {
 		params[i]["operator_user"] = request_param["operator"]
 		params[i]["requestId"] = request_param["requestId"]
@@ -162,6 +174,19 @@ func ResourceDataDebugList (c *gin.Context) {
 }
 
 func TerraformOperationDebug (c *gin.Context) {
+	rowData := models.PluginInterfaceResultObjDebug{}
+	rowData.StatusCode = "OK"
+	rowData.ResultCode = "0"
+	rowData.ResultMessage = "success"
+	defer func() {
+		if r := recover(); r != nil {
+			err := fmt.Errorf("TerraformOperationDebug error: %v", r)
+			rowData.ResultCode = "1"
+			rowData.ResultMessage = err.Error()
+			c.JSON(http.StatusOK, rowData)
+		}
+	}()
+
 	plugin := c.Param("plugin")
 	action := c.Param("action")
 
@@ -190,10 +215,10 @@ func TerraformOperationDebug (c *gin.Context) {
 		params = append(params, p.Index(i).Interface().(map[string]interface{}))
 	}
 
-	rowData := models.PluginInterfaceResultObjDebug{}
-	rowData.StatusCode = "OK"
-	rowData.ResultCode = "0"
-	rowData.ResultMessage = "success"
+	// rowData := models.PluginInterfaceResultObjDebug{}
+	// rowData.StatusCode = "OK"
+	// rowData.ResultCode = "0"
+	// rowData.ResultMessage = "success"
 	for i := range params {
 		params[i]["operator_user"] = request_param["operator"]
 		params[i]["requestId"] = request_param["requestId"]
