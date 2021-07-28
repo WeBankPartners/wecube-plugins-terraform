@@ -18,6 +18,7 @@ const (
 	ParameterSourceDefault = "custom"
 	TfArgumentKeyArgumentDefault = "N"
 	ResourceDataDebug  = "$_resource_data_debug$"
+	ResourceIdDataConvert  = "#resourceId#"
 )
 
 var (
