@@ -55,5 +55,6 @@
   "debugger_result": "调试结果",
   "function_define": "转换函数",
   "key_argument": "是否应用",
-  "import_support": "导入支持"
+  "import_support": "导入支持",
+  "source_type": "source类型"
 }

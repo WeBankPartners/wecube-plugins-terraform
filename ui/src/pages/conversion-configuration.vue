@@ -654,6 +654,12 @@
             <Option value="N">N</Option>
           </Select>
         </FormItem>
+        <FormItem :label="$t('source_type')">
+          <Select v-model="newSource.form.sourceType" style="width:400px">
+            <Option value="resource">resource</Option>
+            <Option value="data_resource">data_resource</Option>
+          </Select>
+        </FormItem>
       </Form>
     </Modal>
   </div>
@@ -747,7 +753,8 @@ export default {
           plugin: '',
           provider: '',
           assetIdAttribute: '',
-          importSupport: 'Y'
+          importSupport: 'Y',
+          sourceType: ''
         }
       }
     }
@@ -807,6 +814,7 @@ export default {
           name: '',
           plugin: this.plugin,
           terraformUsed: 'Y',
+          sourceType: '',
           interface: this.currentInterface,
           provider: this.currentProvider,
           importSupport: 'Y',
