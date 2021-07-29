@@ -14,6 +14,8 @@ type ParameterTable struct {
 	CreateUser string `json:"createUser" xorm:"create_user"`
 	UpdateTime string `json:"updateTime" xorm:"update_time"`
 	UpdateUser string `json:"updateUser" xorm:"update_user"`
+	Nullable   string `json:"nullable" xorm:"nullable"`
+	Sensitive  string `json:"sensitive" xorm:"sensitive"`
 }
 
 type ParameterQuery struct {
@@ -31,4 +33,6 @@ type ParameterQuery struct {
 	CreateUser      string `json:"createUser" xorm:"create_user"`
 	UpdateTime      string `json:"updateTime" xorm:"update_time"`
 	UpdateUser      string `json:"updateUser" xorm:"update_user"`
+	Nullable        string `json:"nullable" xorm:"nullable"`
+	Sensitive       string `json:"sensitive" xorm:"sensitive"`
 }

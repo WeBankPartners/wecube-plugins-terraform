@@ -41,7 +41,8 @@ func ParameterBatchCreate(user string, param []*models.ParameterTable) (rowData 
 		id := guid.CreateGuid()
 		data := &models.ParameterTable{Id: id, Name: param[i].Name, Type: param[i].Type, Multiple: param[i].Multiple,
 			Interface: param[i].Interface, Template: param[i].Template, DataType: param[i].DataType, ObjectName: param[i].ObjectName,
-			Source: models.ParameterSourceDefault, CreateUser: user, CreateTime: createTime, UpdateUser: user, UpdateTime: createTime}
+			Source: models.ParameterSourceDefault, CreateUser: user, CreateTime: createTime, UpdateUser: user, UpdateTime: createTime,
+		    Nullable: param[i].Nullable, Sensitive: param[i].Sensitive}
 		rowData = append(rowData, data)
 	}
 
@@ -124,11 +125,11 @@ func ParameterBatchCreateUpdate(user string, param []*models.ParameterTable) (ro
 		var data *models.ParameterTable
 		if param[i].Id == "" {
 			parameterId = guid.CreateGuid()
-			data = &models.ParameterTable{Id: parameterId, Name: param[i].Name, Type: param[i].Type, Multiple: param[i].Multiple, Interface: param[i].Interface, Template: param[i].Template, DataType: param[i].DataType, ObjectName: param[i].ObjectName, Source: models.ParameterSourceDefault, CreateUser: user, CreateTime: createTime, UpdateUser: user, UpdateTime: createTime}
+			data = &models.ParameterTable{Id: parameterId, Name: param[i].Name, Type: param[i].Type, Multiple: param[i].Multiple, Interface: param[i].Interface, Template: param[i].Template, DataType: param[i].DataType, ObjectName: param[i].ObjectName, Source: models.ParameterSourceDefault, CreateUser: user, CreateTime: createTime, UpdateUser: user, UpdateTime: createTime, Nullable: param[i].Nullable, Sensitive: param[i].Sensitive}
 		} else {
 			updateDataIds[param[i].Id] = true
 			parameterId = param[i].Id
-			data = &models.ParameterTable{Id: parameterId, Name: param[i].Name, Type: param[i].Type, Multiple: param[i].Multiple, Interface: param[i].Interface, Template: param[i].Template, DataType: param[i].DataType, ObjectName: param[i].ObjectName, CreateUser: param[i].CreateUser, CreateTime: param[i].CreateTime, UpdateUser: user, UpdateTime: createTime}
+			data = &models.ParameterTable{Id: parameterId, Name: param[i].Name, Type: param[i].Type, Multiple: param[i].Multiple, Interface: param[i].Interface, Template: param[i].Template, DataType: param[i].DataType, ObjectName: param[i].ObjectName, CreateUser: param[i].CreateUser, CreateTime: param[i].CreateTime, UpdateUser: user, UpdateTime: createTime, Nullable: param[i].Nullable, Sensitive: param[i].Sensitive}
 		}
 		rowData = append(rowData, data)
 	}
