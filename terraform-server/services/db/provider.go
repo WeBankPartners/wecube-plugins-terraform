@@ -93,7 +93,7 @@ func ProviderBatchUpdate(user string, param []*models.ProviderTable) (err error)
 	return
 }
 
-func ProviderPluginExport(providerId, pluginId string) (result models.ProviderPluginImportObj, err error) {
+func ProviderPluginExport(providerName, pluginName string) (result models.ProviderPluginImportObj, err error) {
 	result = models.ProviderPluginImportObj{Provider: []*models.ProviderTable{}, Plugin: []*models.PluginTable{}}
 	result.ProviderTemplateValue = []*models.ProviderTemplateValueTable{}
 	result.Template = []*models.TemplateTable{}
@@ -103,20 +103,22 @@ func ProviderPluginExport(providerId, pluginId string) (result models.ProviderPl
 	result.Source = []*models.SourceTable{}
 	result.TfArgument = []*models.TfArgumentTable{}
 	result.TfstateAttribute = []*models.TfstateAttributeTable{}
-	err = x.SQL("select * from provider where id=?", providerId).Find(&result.Provider)
+	err = x.SQL("select * from provider where name=?", providerName).Find(&result.Provider)
 	if err != nil {
 		err = fmt.Errorf("Query database provider table fail,%s ", err.Error())
 		return
 	}
 	if len(result.Provider) == 0 {
-		err = fmt.Errorf("Can not find any provider with id:%s ", providerId)
+		err = fmt.Errorf("Can not find any provider with name:%s ", providerName)
 		return
 	}
-	err = x.SQL("select * from plugin where id=?", pluginId).Find(&result.Plugin)
+	providerId := result.Provider[0].Id
+	err = x.SQL("select * from plugin where name=?", pluginName).Find(&result.Plugin)
 	if err == nil && len(result.Plugin) == 0 {
-		err = fmt.Errorf("Can not find any plugin with id:%s ", pluginId)
+		err = fmt.Errorf("Can not find any plugin with name:%s ", pluginName)
 		return
 	}
+	pluginId := result.Plugin[0].Id
 	x.SQL("select * from interface where plugin=?", pluginId).Find(&result.Interface)
 	x.SQL("select * from `parameter` where interface in (select id from interface where plugin=?)", pluginId).Find(&result.Parameter)
 	templateSql := "select * from template where id in (select template_value from provider_template_value where provider=?)"
@@ -140,7 +142,7 @@ func ProviderPluginExport(providerId, pluginId string) (result models.ProviderPl
 	}
 	for i, v := range result.TfArgument {
 		if _, b := sourceMap[v.RelativeSource]; !b {
-			result.TfArgument[i].Source = ""
+			result.TfArgument[i].RelativeSource = ""
 		}
 		if _, b := tfStateAttrMap[v.RelativeTfstateAttribute]; !b {
 			result.TfArgument[i].RelativeTfstateAttribute = ""
@@ -152,7 +154,7 @@ func ProviderPluginExport(providerId, pluginId string) (result models.ProviderPl
 	}
 	for i, v := range result.TfstateAttribute {
 		if _, b := sourceMap[v.RelativeSource]; !b {
-			result.TfstateAttribute[i].Source = ""
+			result.TfstateAttribute[i].RelativeSource = ""
 		}
 		if _, b := tfStateAttrMap[v.RelativeTfstateAttribute]; !b {
 			result.TfstateAttribute[i].RelativeTfstateAttribute = ""
@@ -189,7 +191,7 @@ func ProviderPluginImport(input models.ProviderPluginImportObj, updateUser strin
 		actions = append(actions, &execAction{Sql: "replace into template_value(id,value,template,create_time,create_user,update_time,update_user) values (?,?,?,?,?,?,?)", Param: []interface{}{v.Id, v.Value, v.Template, v.CreateTime, v.CreateUser, updateTime, updateUser}})
 	}
 	for _, v := range input.Parameter {
-		tmpAction := execAction{Sql: "replace into `parameter`(id,name,`type`,multiple,interface,datatype,source,create_time,create_user,update_time,update_user,nullable,sensitive,template,object_name) values (?,?,?,?,?,?,?,?,?,?,?,?,?"}
+		tmpAction := execAction{Sql: "replace into `parameter`(id,name,`type`,multiple,interface,datatype,source,create_time,create_user,update_time,update_user,nullable,`sensitive`,template,object_name) values (?,?,?,?,?,?,?,?,?,?,?,?,?"}
 		tmpAction.Param = []interface{}{v.Id, v.Name, v.Type, v.Multiple, v.Interface, v.DataType, v.Source, v.CreateTime, v.CreateUser, updateTime, updateUser, v.Nullable, v.Sensitive}
 		tmpAction.Sql += "," + getRelativeNullValue(v.Template)
 		tmpAction.Sql += "," + getRelativeNullValue(v.ObjectName) + ")"
@@ -212,7 +214,7 @@ func ProviderPluginImport(input models.ProviderPluginImportObj, updateUser strin
 		actions = append(actions, &tmpAction)
 	}
 	for _, v := range input.TfstateAttribute {
-		tmpAction := execAction{Sql: "replace into tf_argument(id,name,source,default_value,is_null,`type`,is_multi,convert_way,function_define,create_time,create_user,update_time,update_user,`parameter`,object_name,relative_source,relative_tfstate_attribute,relative_parameter,relative_parameter_value) values (?,?,?,?,?,?,?,?,?,?,?,?,?"}
+		tmpAction := execAction{Sql: "replace into tfstate_attribute(id,name,source,default_value,is_null,`type`,is_multi,convert_way,function_define,create_time,create_user,update_time,update_user,`parameter`,object_name,relative_source,relative_tfstate_attribute,relative_parameter,relative_parameter_value) values (?,?,?,?,?,?,?,?,?,?,?,?,?"}
 		tmpAction.Param = []interface{}{v.Id, v.Name, v.Source, v.DefaultValue, v.IsNull, v.Type, v.IsMulti, v.ConvertWay, v.FunctionDefine, v.CreateTime, v.CreateUser, updateTime, updateUser}
 		tmpAction.Sql += "," + getRelativeNullValue(v.Parameter)
 		tmpAction.Sql += "," + getRelativeNullValue(v.ObjectName)
