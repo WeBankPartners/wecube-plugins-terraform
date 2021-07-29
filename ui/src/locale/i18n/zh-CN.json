@@ -54,8 +54,9 @@
   "debugger": "发起调试",
   "debugger_result": "调试结果",
   "function_define": "转换函数",
-  "key_argument": "是否应用",
+  "key_argument": "是否关键",
   "import_support": "导入支持",
   "source_type": "source类型",
-  "t_sensitive": "敏感"
+  "t_sensitive": "敏感",
+  "terraform_used": "是否应用"
 }

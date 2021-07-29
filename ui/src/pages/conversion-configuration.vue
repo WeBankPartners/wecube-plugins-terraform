@@ -642,7 +642,7 @@
         <FormItem :label="$t('t_resource_asset_id_Attribute')">
           <Input type="text" v-model="newSource.form.assetIdAttribute" style="width:400px"></Input>
         </FormItem>
-        <FormItem :label="$t('key_argument')">
+        <FormItem :label="$t('terraform_used')">
           <Select v-model="newSource.form.terraformUsed" style="width:400px">
             <Option value="Y">Y</Option>
             <Option value="N">N</Option>
