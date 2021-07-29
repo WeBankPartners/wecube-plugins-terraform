@@ -1235,16 +1235,17 @@ func handleDestroy(workDirPath string,
 
 	var resourceId string
 	var resourceData *models.ResourceDataTable
+	toDestroyResourceData := []*models.ResourceDataTable{}
 	if inputResourceData == nil {
 		// Get resource_asset_id by resourceId
 		resourceId = reqParam["id"].(string)
-		sqlCmd := `SELECT * FROM resource_data WHERE resource_id=? AND region_id=?`
+		sqlCmd := `SELECT * FROM resource_data WHERE resource_id=? AND region_id=? AND resource=?`
 
 		if _, ok := reqParam[models.ResourceDataDebug]; ok {
-			sqlCmd = `SELECT * FROM resource_data_debug WHERE resource_id=? AND region_id=?`
+			sqlCmd = `SELECT * FROM resource_data_debug WHERE resource_id=? AND region_id=? AND resource=?`
 		}
 
-		paramArgs := []interface{}{resourceId, regionData.RegionId}
+		paramArgs := []interface{}{resourceId, regionData.RegionId, sourceData.Id}
 		var resourceDataInfoList []*models.ResourceDataTable
 		err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataInfoList)
 		if err != nil {
@@ -1259,115 +1260,124 @@ func handleDestroy(workDirPath string,
 			rowData["errorMessage"] = err.Error()
 			return
 		}
-		resourceData = resourceDataInfoList[0]
+		// resourceData = resourceDataInfoList[0]
+		toDestroyResourceData = append(toDestroyResourceData, resourceDataInfoList...)
 	} else {
 		resourceId = inputResourceData.ResourceId
 		resourceData = inputResourceData
+		toDestroyResourceData = append(toDestroyResourceData, resourceData)
 	}
 
 	rowData["id"] = resourceId
-	if sourceData.TerraformUsed == "Y" {
-		// Gen the terraform workdir
-		err = GenDir(workDirPath)
-		if err != nil {
-			err = fmt.Errorf("Gen the terraform workdir: %s error: %s", workDirPath, err.Error())
-			log.Logger.Error("Gen the terraform workdir error", log.String("workDirPath", workDirPath), log.Error(err))
-			rowData["errorMessage"] = err.Error()
-			return
-		}
-
-		// Gen provider.tf.json
-		err = GenProviderFile(workDirPath, providerData, providerInfo, regionData)
-		if err != nil {
-			err = fmt.Errorf("Gen providerFile error: %s", err.Error())
-			log.Logger.Error("Gen providerFile error", log.Error(err))
-			rowData["errorMessage"] = err.Error()
-			return
-		}
-
-		// Gen version.tf
-		err = GenVersionFile(workDirPath, providerData)
-		if err != nil {
-			err = fmt.Errorf("Gen versionFile error: %s", err.Error())
-			log.Logger.Error("Gen versionFile error", log.Error(err))
-			rowData["errorMessage"] = err.Error()
-			return
-		}
-
-		// Gen softlink of terraform provider file
-		err = GenTerraformProviderSoftLink(workDirPath, providerData)
-		if err != nil {
-			err = fmt.Errorf("Gen terraform provider soft link error: %s", err.Error())
-			log.Logger.Error("Gen terraform provider soft link error", log.Error(err))
-			rowData["errorMessage"] = err.Error()
-			return
-		}
-
-		// Gen soft link for .terraform.lock.hcl
-		err = GenTerraformLockHclSoftLink(workDirPath, providerData)
-		if err != nil {
-			err = fmt.Errorf("Gen terraform lock soft link error: %s", err.Error())
-			log.Logger.Error("Gen terraform lock soft link error", log.Error(err))
-			rowData["errorMessage"] = err.Error()
-			return
-		}
-
-		sourceName := sourceData.Name
-		// Gen .tf 文件, 然后执行 terraform import cmd
-		uuid := "_" + guid.CreateGuid()
-		tfFilePath := workDirPath + "/" + sourceName + ".tf"
-		tfFileContent := "resource " + sourceName + " " + uuid + " {}"
-
-		GenFile([]byte(tfFileContent), tfFilePath)
-		err = TerraformInit(workDirPath)
-		if err != nil {
-			err = fmt.Errorf("Do TerraformInit error:%s", err.Error())
-			log.Logger.Error("Do TerraformInit error", log.Error(err))
-			rowData["errorMessage"] = err.Error()
-			return
-		}
-		resourceAssetId := resourceData.ResourceAssetId
-		if !(plugin == "security_rule" && providerData.Name == "tencentcloud") {
-			err = TerraformImport(workDirPath, sourceName+"."+uuid, resourceAssetId)
+	for _, resourceData	:= range toDestroyResourceData {
+		if sourceData.TerraformUsed == "Y" {
+			// Gen the terraform workdir
+			err = GenDir(workDirPath)
 			if err != nil {
-				err = fmt.Errorf("Do TerraformImport error:%s", err.Error())
-				log.Logger.Error("Do TerraformImport error", log.Error(err))
+				err = fmt.Errorf("Gen the terraform workdir: %s error: %s", workDirPath, err.Error())
+				log.Logger.Error("Gen the terraform workdir error", log.String("workDirPath", workDirPath), log.Error(err))
 				rowData["errorMessage"] = err.Error()
 				return
 			}
+
+			// Gen provider.tf.json
+			err = GenProviderFile(workDirPath, providerData, providerInfo, regionData)
+			if err != nil {
+				err = fmt.Errorf("Gen providerFile error: %s", err.Error())
+				log.Logger.Error("Gen providerFile error", log.Error(err))
+				rowData["errorMessage"] = err.Error()
+				return
+			}
+
+			// Gen version.tf
+			err = GenVersionFile(workDirPath, providerData)
+			if err != nil {
+				err = fmt.Errorf("Gen versionFile error: %s", err.Error())
+				log.Logger.Error("Gen versionFile error", log.Error(err))
+				rowData["errorMessage"] = err.Error()
+				return
+			}
+
+			// Gen softlink of terraform provider file
+			err = GenTerraformProviderSoftLink(workDirPath, providerData)
+			if err != nil {
+				err = fmt.Errorf("Gen terraform provider soft link error: %s", err.Error())
+				log.Logger.Error("Gen terraform provider soft link error", log.Error(err))
+				rowData["errorMessage"] = err.Error()
+				return
+			}
+
+			// Gen soft link for .terraform.lock.hcl
+			err = GenTerraformLockHclSoftLink(workDirPath, providerData)
+			if err != nil {
+				err = fmt.Errorf("Gen terraform lock soft link error: %s", err.Error())
+				log.Logger.Error("Gen terraform lock soft link error", log.Error(err))
+				rowData["errorMessage"] = err.Error()
+				return
+			}
+
+			sourceName := sourceData.Name
+			// Gen .tf 文件, 然后执行 terraform import cmd
+			uuid := "_" + guid.CreateGuid()
+			tfFilePath := workDirPath + "/" + sourceName + ".tf"
+			tfFileContent := "resource " + sourceName + " " + uuid + " {}"
+
+			GenFile([]byte(tfFileContent), tfFilePath)
+			err = TerraformInit(workDirPath)
+			if err != nil {
+				err = fmt.Errorf("Do TerraformInit error:%s", err.Error())
+				log.Logger.Error("Do TerraformInit error", log.Error(err))
+				rowData["errorMessage"] = err.Error()
+				return
+			}
+			resourceAssetId := resourceData.ResourceAssetId
+			if sourceData.ImportSupport == "Y" {
+				err = TerraformImport(workDirPath, sourceName+"."+uuid, resourceAssetId)
+				if err != nil {
+					err = fmt.Errorf("Do TerraformImport error:%s", err.Error())
+					log.Logger.Error("Do TerraformImport error", log.Error(err))
+					rowData["errorMessage"] = err.Error()
+					return
+				}
+			} else {
+				// get tfstate file from resource_data table and gen it
+				tfstateFileContent := resourceData.TfStateFile
+				tfstateFilePath := workDirPath + "/terraform.tfstate"
+				GenFile([]byte(tfstateFileContent), tfstateFilePath)
+			}
+
+			// clear tf file
+			os.Truncate(tfFilePath, 0)
+
+			err = TerraformDestroy(workDirPath)
+			if err != nil {
+				err = fmt.Errorf("Do TerraformDestroy error: %s", err.Error())
+				log.Logger.Error("Do TerraformDestroy error", log.Error(err))
+				rowData["errorMessage"] = err.Error()
+				return
+			}
+
+			// Del provider file
+			err = DelProviderFile(workDirPath)
+			// err = DelFile(providerFilePath)
+			if err != nil {
+				err = fmt.Errorf("Do delete provider file error: %s", err.Error())
+				log.Logger.Error("Do delete provider file error", log.Error(err))
+				rowData["errorMessage"] = err.Error()
+			}
 		}
 
-		// clear tf file
-		os.Truncate(tfFilePath, 0)
-
-		err = TerraformDestroy(workDirPath)
+		// delet resource_data item
+		if _, ok := reqParam[models.ResourceDataDebug]; ok {
+			_, err = x.Exec("DELETE FROM resource_data_debug WHERE id=?", resourceData.Id)
+		} else {
+			_, err = x.Exec("DELETE FROM resource_data WHERE id=?", resourceData.Id)
+		}
 		if err != nil {
-			err = fmt.Errorf("Do TerraformDestroy error: %s", err.Error())
-			log.Logger.Error("Do TerraformDestroy error", log.Error(err))
-			rowData["errorMessage"] = err.Error()
-			return
-		}
-
-		// Del provider file
-		err = DelProviderFile(workDirPath)
-		// err = DelFile(providerFilePath)
-		if err != nil {
-			err = fmt.Errorf("Do delete provider file error: %s", err.Error())
-			log.Logger.Error("Do delete provider file error", log.Error(err))
+			err = fmt.Errorf("Delete resource data by id:%s error: %s", resourceData.Id, err.Error())
+			log.Logger.Error("Delete resource data by id error", log.String("id", resourceData.Id), log.Error(err))
 			rowData["errorMessage"] = err.Error()
 		}
-	}
-
-	// delet resource_data item
-	if _, ok := reqParam[models.ResourceDataDebug]; ok {
-		_, err = x.Exec("DELETE FROM resource_data_debug WHERE id=?", resourceData.Id)
-	} else {
-		_, err = x.Exec("DELETE FROM resource_data WHERE id=?", resourceData.Id)
-	}
-	if err != nil {
-		err = fmt.Errorf("Delete resource data by id:%s error: %s", resourceData.Id, err.Error())
-		log.Logger.Error("Delete resource data by id error", log.String("id", resourceData.Id), log.Error(err))
-		rowData["errorMessage"] = err.Error()
 	}
 
 	rowData["errorCode"] = "0"
@@ -2378,6 +2388,26 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 			}
 
 		} else if action == "destroy" {
+			for i := len(sortedSourceList) - 1; i >= 0; i-- {
+				workDirPath = GenWorkDirPath(reqParam["id"].(string),
+					reqParam["requestSn"].(string),
+					reqParam["requestId"].(string),
+					providerData,
+					regionData,
+					plugin,
+					sortedSourceList[i])
+				retOutput, tmpErr := handleDestroy(workDirPath, sortedSourceList[i], providerData, providerInfoData, regionData, reqParam, plugin, nil)
+				if tmpErr != nil {
+					err = fmt.Errorf("Handle Destroy error: %s", tmpErr.Error())
+					log.Logger.Error("Handle Destroy error", log.Error(err))
+					rowData["errorMessage"] = err.Error()
+					return
+				}
+				for k, v := range retOutput {
+					rowData[k] = v
+				}
+			}
+			/*
 			retOutput, tmpErr := handleDestroy(workDirPath, sourceData, providerData, providerInfoData, regionData, reqParam, plugin, nil)
 			if tmpErr != nil {
 				err = fmt.Errorf("Handle Destroy error: %s", tmpErr.Error())
@@ -2388,6 +2418,8 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 			for k, v := range retOutput {
 				rowData[k] = v
 			}
+			 */
+			rowData["id"] = reqParam["id"].(string)
 			rowData["errorCode"] = "0"
 		} else {
 			err = fmt.Errorf("Action: %s is inValid", action)
