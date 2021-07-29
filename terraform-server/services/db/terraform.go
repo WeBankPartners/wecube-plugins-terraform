@@ -241,6 +241,14 @@ func DelTfstateFile(dirPath string) (err error) {
 		log.Logger.Error("Delete terraform.tfstate file error", log.String("providerFilePath", tfstateFilePath), log.Error(err))
 		return
 	}
+	// delete the terraform.tfstate.backup
+	tfstateFilePath = dirPath + "/terraform.tfstate.backup"
+	err = DelFile(tfstateFilePath)
+	if err != nil {
+		err = fmt.Errorf("Delete terraform.tfstate.backup file:%s error:%s", tfstateFilePath, err.Error())
+		log.Logger.Error("Delete terraform.tfstate.backup file error", log.String("providerFilePath", tfstateFilePath), log.Error(err))
+		return
+	}
 	return
 }
 
@@ -1335,6 +1343,7 @@ func handleDestroy(workDirPath string,
 			}
 			resourceAssetId := resourceData.ResourceAssetId
 			if sourceData.ImportSupport == "Y" {
+				DelTfstateFile(workDirPath)
 				err = TerraformImport(workDirPath, sourceName+"."+uuid, resourceAssetId)
 				if err != nil {
 					err = fmt.Errorf("Do TerraformImport error:%s", err.Error())
@@ -2134,6 +2143,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 							continue
 						}
 
+						DelTfstateFile(workDirPath)
 						err = TerraformImport(workDirPath, sortedSourceData.Name+"."+uuid, importObject[i])
 						if err != nil {
 							err = fmt.Errorf("Do TerraformImport error:%s", err.Error())
@@ -2218,6 +2228,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 						continue
 					}
 
+					DelTfstateFile(workDirPath)
 					err = TerraformImport(workDirPath, sortedSourceData.Name+"."+resourceId, importObject[i])
 					if err != nil {
 						err = fmt.Errorf("Do TerraformImport error:%s", err.Error())
@@ -2974,6 +2985,48 @@ func convertDirect(defaultValue string, reqParam map[string]interface{}, tfArgum
 		return
 	}
 
+	if parameterData.DataType == "string" {
+		if parameterData.Multiple == "N" {
+			arg = reqArg.(string)
+		} else {
+			// arg = reqArg.([]string)
+			curArg := reqArg.([]interface{})
+			curRes := []string{}
+			for i := range curArg {
+				curRes = append(curRes, curArg[i].(string))
+			}
+			arg = curRes
+		}
+	} else if parameterData.DataType == "int" {
+		if parameterData.Multiple == "N" {
+			tmpVal, _ := strconv.ParseFloat(fmt.Sprintf("%v", reqArg), 64)
+			arg = tmpVal
+		} else {
+			curArg := reqArg.([]interface{})
+			curRes := []float64{}
+			for i := range curArg {
+				tmpVal, _ := strconv.ParseFloat(fmt.Sprintf("%v", curArg[i]), 64)
+				curRes = append(curRes, tmpVal)
+			}
+			arg = curRes
+		}
+	} else if parameterData.DataType == "object" {
+		if parameterData.Multiple == "N" {
+			var curArg map[string]interface{}
+			tmpMarshal, _ := json.Marshal(reqParam[parameterData.Name])
+			json.Unmarshal(tmpMarshal, &curArg)
+			arg = curArg
+		} else {
+			var curArg []map[string]interface{}
+			tmpMarshal, _ := json.Marshal(reqParam[parameterData.Name])
+			json.Unmarshal(tmpMarshal, &curArg)
+			arg = curArg
+		}
+	} else {
+		arg = reqParam[parameterData.Name]
+	}
+
+	/*
 	if parameterData.DataType == "string" && reqArg.(string) == "null" {
 		arg = "null"
 	} else if parameterData.DataType == "string" && reqArg.(string) == "" || parameterData.DataType == "int" && reqArg.(float64) == 0 {
@@ -2995,6 +3048,7 @@ func convertDirect(defaultValue string, reqParam map[string]interface{}, tfArgum
 			arg = reqParam[parameterData.Name]
 		}
 	}
+	*/
 	return
 }
 
@@ -3294,7 +3348,8 @@ func handleReverseConvert(outPutParameterNameMap map[string]*models.ParameterTab
 					if _, ok := outArgVal.(string); ok {
 						if curParamData.DataType == "int" {
 							// tmpVal, _ := strconv.Atoi(outArgVal.(string))
-							tmpVal := outArgVal.(float64)
+							// tmpVal := outArgVal.(float64)
+							tmpVal, _ := strconv.ParseFloat(fmt.Sprintf("%v", outArgVal), 64)
 							outArgVal = tmpVal
 						}
 					}
@@ -3577,7 +3632,8 @@ func handleConvertParams(action string,
 		if tfArgumentList[i].Type == "int" {
 			// tmpVal, ok := arg.(int)
 			// tmpVal, _ := strconv.Atoi(arg.(string))
-			tmpVal := arg.(float64)
+			// tmpVal := arg.(float64)
+			tmpVal, _ := strconv.ParseFloat(fmt.Sprintf("%v", arg), 64)
 			arg = tmpVal
 		}
 
