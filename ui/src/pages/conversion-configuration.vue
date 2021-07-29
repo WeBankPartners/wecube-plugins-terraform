@@ -307,7 +307,7 @@
                   <div class="table-col title-width-level1">
                     <Select
                       v-model="item.relativeParameter"
-                      :disabled="!['context', 'context_data'].includes(item.convertWay)"
+                      :disabled="!['context_direct', 'context_data'].includes(item.convertWay)"
                       clearable
                       @on-clear="item.relativeParameter = ''"
                       filterable
@@ -330,7 +330,7 @@
                   <div class="table-col title-width-level1">
                     <Select
                       v-model="item.relativeParameterValue"
-                      :disabled="!['context', 'context_data'].includes(item.convertWay)"
+                      :disabled="!['context_direct', 'context_data'].includes(item.convertWay)"
                       @on-open-change="openRelativeParameterValue(item, 'interfaceInputParams')"
                       clearable
                       @on-clear="item.relativeParameterValue = ''"
@@ -521,7 +521,7 @@
                   <div class="table-col title-width-level1">
                     <Select
                       v-model="item.relativeParameter"
-                      :disabled="!['context', 'context_data'].includes(item.convertWay)"
+                      :disabled="!['context_direct', 'context_data', 'context_attribute'].includes(item.convertWay)"
                       @on-open-change="getInterfaceParamter(item)"
                       clearable
                       @on-clear="item.relativeParameter = ''"
@@ -544,7 +544,7 @@
                   <div class="table-col title-width-level1">
                     <Select
                       v-model="item.relativeParameterValue"
-                      :disabled="!['context', 'context_data'].includes(item.convertWay)"
+                      :disabled="!['context_direct', 'context_data', 'context_attribute'].includes(item.convertWay)"
                       @on-open-change="openRelativeParameterValue(item, 'interfaceOutputParams')"
                       clearable
                       @on-clear="item.relativeParameterValue = ''"
@@ -567,7 +567,7 @@
                     <Select
                       v-model="item.relativeSource"
                       size="small"
-                      :disabled="!['attribute', 'data', 'context_data'].includes(item.convertWay)"
+                      :disabled="!['attribute', 'data', 'context_data', 'context_attribute'].includes(item.convertWay)"
                       @on-open-change="getSourceByProvider(item)"
                       clearable
                       @on-clear="item.relativeSource = ''"
@@ -588,7 +588,7 @@
                   <div class="table-col title-width-level1">
                     <Select
                       v-model="item.relativeTfstateAttribute"
-                      :disabled="!['attribute'].includes(item.convertWay)"
+                      :disabled="!['attribute', 'context_attribute'].includes(item.convertWay)"
                       clearable
                       @on-clear="item.relativeTfstateAttribute = ''"
                       @on-open-change="getSourceAttrOptions(item, 'attrs')"
@@ -635,7 +635,7 @@
       @on-ok="confirmSource"
       @on-cancel="newSource.isShow = false"
     >
-      <Form inline :label-width="80">
+      <Form inline :label-width="100">
         <FormItem :label="$t('t_name')">
           <Input type="text" v-model="newSource.form.name" style="width:400px"></Input>
         </FormItem>
@@ -708,8 +708,10 @@ export default {
         { label: 'data', value: 'data' },
         { label: 'attribute', value: 'attribute' },
         { label: 'template', value: 'template' },
-        { label: 'context', value: 'context' },
+        { label: 'context_direct', value: 'context_direct' },
+        { label: 'context_template', value: 'context_template' },
         { label: 'context_data', value: 'context_data' },
+        { label: 'context_attribute', value: 'context_attribute' },
         { label: 'function', value: 'function' }
       ],
       emptyParams: {

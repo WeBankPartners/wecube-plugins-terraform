@@ -54,11 +54,13 @@
         </div>
       </div>
     </template>
-    <Modal v-model="dataDetail.isShow" :title="$t('t_detail')" width="800" footer-hide>
-      <div
-        style="overflow: auto;
-    max-height: 500px;"
-      >
+    <Modal v-model="dataDetail.isShow" :fullscreen="fullscreen" width="800" footer-hide>
+      <p slot="header">
+        <span>{{ $t('t_detail') }}</span>
+        <Icon v-if="!fullscreen" @click="fullscreen = true" class="header-icon" type="ios-expand" />
+        <Icon v-else @click="fullscreen = false" class="header-icon" type="ios-contract" />
+      </p>
+      <div style="overflow: auto;max-height: 500px;">
         <pre>{{ dataDetail.data }}</pre>
       </div>
     </Modal>
@@ -72,6 +74,7 @@ export default {
   data () {
     return {
       PAGEHEIGHT: 0,
+      fullscreen: false,
       dataDetail: {
         isShow: false,
         data: {}
@@ -401,4 +404,9 @@ export default {
 }
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.header-icon {
+  float: right;
+  margin: 3px 40px 0 0 !important;
+}
+</style>

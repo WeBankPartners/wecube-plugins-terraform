@@ -330,7 +330,7 @@
           <Input type="text" v-model="newTemplate.form.name" style="width:400px"></Input>
         </FormItem>
         <FormItem :label="$t('t_description')">
-          <Input type="password" v-model="newTemplate.form.description" style="width:400px"></Input>
+          <Input type="text" v-model="newTemplate.form.description" style="width:400px"></Input>
         </FormItem>
       </Form>
     </Modal>
