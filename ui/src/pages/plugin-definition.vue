@@ -68,33 +68,43 @@
           </div>
         </div>
       </Col>
-      <Col v-if="currentInterface" span="18" offset="1">
+      <Col v-if="currentInterface" span="18" offset="0">
         <div class="modal-paramsContainer">
           <Row style="border-bottom: 1px solid #e5dfdf;margin-bottom:5px">
-            <Col span="3" offset="0">
+            <Col span="2" offset="0">
               <strong style="font-size:15px;">{{ $t('t_params_type') }}</strong>
             </Col>
-            <Col span="3" offset="0">
+            <Col span="2" offset="0">
               <strong style="font-size:15px;">{{ $t('t_name') }}</strong>
             </Col>
-            <Col span="3" offset="1">
-              <strong style="font-size:15px;">{{ $t('t_data_type') }}</strong>
+            <Col span="3" offset="0">
+              <strong style="font-size:15px;margin-left: 18px;">{{ $t('t_data_type') }}</strong>
             </Col>
-            <Col span="4" offset="0" style="margin-left:24px">
+            <Col span="3" offset="0">
               <strong style="font-size:15px;">{{ $t('t_template') }}</strong>
             </Col>
-            <Col span="4" offset="0">
+            <Col span="2" offset="0">
               <strong style="font-size:15px;">
                 {{ $t('t_object_name') }}
               </strong>
             </Col>
             <Col span="2" offset="0">
-              <strong style="font-size:15px;">
+              <strong style="font-size:15px;margin-left: 16px;">
                 {{ $t('t_multiple') }}
               </strong>
             </Col>
+            <Col span="2" offset="0">
+              <strong style="font-size:15px;margin-left: 36px;">
+                {{ $t('t_is_null') }}
+              </strong>
+            </Col>
+            <Col span="2" offset="0">
+              <strong style="font-size:15px;margin-left: 48px;">
+                {{ $t('t_sensitive') }}
+              </strong>
+            </Col>
             <Col span="3" offset="0">
-              <strong style="font-size:15px;">
+              <strong style="font-size:15px;margin-left: 72px;">
                 {{ $t('t_action') }}
               </strong>
             </Col>
@@ -102,7 +112,7 @@
           <div class="modal-interfaceContainers">
             <Form>
               <Row>
-                <Col span="3">
+                <Col span="2">
                   <FormItem :label-width="0">
                     <span>{{ $t('t_input_params') }}</span>
                     <Button @click="addParams('input')" type="primary" ghost size="small" icon="ios-add"></Button>
@@ -110,12 +120,12 @@
                 </Col>
                 <Col span="20" offset="0">
                   <Row v-for="(param, index) in interfaceParamter['input']" :key="index">
-                    <Col span="4">
+                    <Col span="2">
                       <FormItem :label-width="0">
                         <Input v-model="param.name" :disabled="param.source === 'system'" />
                       </FormItem>
                     </Col>
-                    <Col span="4" offset="1">
+                    <Col span="3" offset="0" style="margin-left: 36px">
                       <FormItem :label-width="0">
                         <Select
                           v-model="param.dataType"
@@ -130,7 +140,7 @@
                         </Select>
                       </FormItem>
                     </Col>
-                    <Col span="4" offset="0">
+                    <Col span="3" offset="0">
                       <FormItem :label-width="0">
                         <Select
                           v-model="param.template"
@@ -155,7 +165,7 @@
                         </Select>
                       </FormItem>
                     </Col>
-                    <Col span="3" offset="1">
+                    <Col span="2" offset="0" style="margin-left: 36px">
                       <FormItem :label-width="0">
                         <Select
                           v-model="param.objectName"
@@ -177,13 +187,25 @@
                         </Select>
                       </FormItem>
                     </Col>
-                    <Col span="2" offset="1">
+                    <Col span="2" offset="0" style="margin-left: 36px">
                       <Select v-model="param.multiple" filterable :disabled="param.source === 'system'">
                         <Option value="Y">Y</Option>
                         <Option value="N">N</Option>
                       </Select>
                     </Col>
-                    <Col span="3" offset="1">
+                    <Col span="2" offset="0" style="margin-left: 36px">
+                      <Select v-model="param.nullable" filterable :disabled="param.source === 'system'">
+                        <Option value="Y">Y</Option>
+                        <Option value="N">N</Option>
+                      </Select>
+                    </Col>
+                    <Col span="2" offset="0" style="margin-left: 36px">
+                      <Select v-model="param.sensitive" filterable :disabled="param.source === 'system'">
+                        <Option value="Y">Y</Option>
+                        <Option value="N">N</Option>
+                      </Select>
+                    </Col>
+                    <Col span="3" offset="0" style="margin-left: 36px">
                       <FormItem :label-width="0">
                         <Button
                           type="primary"
@@ -209,7 +231,7 @@
               </Row>
               <hr style="margin:16px 0" />
               <Row>
-                <Col span="3">
+                <Col span="2">
                   <FormItem :label-width="0">
                     <span>{{ $t('t_output_params') }}</span>
                     <Button @click="addParams('output')" type="primary" ghost size="small" icon="ios-add"></Button>
@@ -217,12 +239,12 @@
                 </Col>
                 <Col span="20" offset="0">
                   <Row v-for="(param, index) in interfaceParamter['output']" :key="index">
-                    <Col span="4">
+                    <Col span="2" offset="0">
                       <FormItem :label-width="0">
                         <Input v-model="param.name" style="width:100%" :disabled="param.source === 'system'" />
                       </FormItem>
                     </Col>
-                    <Col span="4" offset="1">
+                    <Col span="3" offset="0" style="margin-left: 36px">
                       <FormItem :label-width="0">
                         <Select
                           v-model="param.dataType"
@@ -237,7 +259,7 @@
                         </Select>
                       </FormItem>
                     </Col>
-                    <Col span="4" offset="0">
+                    <Col span="3" offset="0">
                       <FormItem :label-width="0">
                         <Select
                           v-model="param.template"
@@ -262,7 +284,7 @@
                         </Select>
                       </FormItem>
                     </Col>
-                    <Col span="3" offset="1">
+                    <Col span="2" offset="0" style="margin-left: 36px">
                       <FormItem :label-width="0">
                         <Select
                           v-model="param.objectName"
@@ -282,7 +304,7 @@
                         </Select>
                       </FormItem>
                     </Col>
-                    <Col span="2" offset="1">
+                    <Col span="2" offset="0" style="margin-left: 36px">
                       <FormItem :label-width="0">
                         <Select v-model="param.multiple" filterable :disabled="param.source === 'system'">
                           <Option value="Y">Y</Option>
@@ -290,7 +312,19 @@
                         </Select>
                       </FormItem>
                     </Col>
-                    <Col span="3" offset="1">
+                    <Col span="2" offset="0" style="margin-left: 36px">
+                      <Select v-model="param.nullable" filterable :disabled="param.source === 'system'">
+                        <Option value="Y">Y</Option>
+                        <Option value="N">N</Option>
+                      </Select>
+                    </Col>
+                    <Col span="2" offset="0" style="margin-left: 36px">
+                      <Select v-model="param.sensitive" filterable :disabled="param.source === 'system'">
+                        <Option value="Y">Y</Option>
+                        <Option value="N">N</Option>
+                      </Select>
+                    </Col>
+                    <Col span="3" offset="0" style="margin-left: 36px">
                       <FormItem :label-width="0">
                         <Button
                           type="primary"
@@ -433,7 +467,9 @@ export default {
         template: '',
         type: '',
         updateTime: '',
-        updateUser: ''
+        updateUser: '',
+        nullable: 'N',
+        sensitive: 'N'
       },
       newTemplate: {
         isShow: false,
@@ -543,9 +579,7 @@ export default {
           desc: 'Successful'
         })
         let tmp = data[0]
-        debugger
         tmp.objectNameOptions = []
-        debugger
         this.interfaceParamter[type][index] = data[0]
       }
     },
@@ -578,11 +612,9 @@ export default {
       let tmp = JSON.parse(JSON.stringify(this.emptyParamter))
       tmp.interface = this.currentInterface
       tmp.type = type
-      console.log(tmp)
       this.interfaceParamter[type].push({
         ...tmp
       })
-      console.log(this.interfaceParamter[type])
     },
     async getObjectNameOptions (item, type) {
       const { statusCode, data } = await getParamaByInterface(this.currentInterface)

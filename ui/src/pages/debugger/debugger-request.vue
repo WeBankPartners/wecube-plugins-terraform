@@ -244,7 +244,6 @@ export default {
           key: 'tf_state_new',
           width: 200,
           render: (h, params) => {
-            console.log(params.row)
             return (
               <div>
                 <div style="display:inline-block;width: 130px;overflow: hidden;text-overflow:ellipsis;white-space: nowrap">
@@ -271,7 +270,6 @@ export default {
           key: 'tf_state_import',
           width: 200,
           render: (h, params) => {
-            console.log(params.row)
             return (
               <div>
                 <div style="display:inline-block;width: 130px;overflow: hidden;text-overflow:ellipsis;white-space: nowrap">
@@ -298,7 +296,6 @@ export default {
           key: 'plan_message',
           width: 200,
           render: (h, params) => {
-            console.log(params.row)
             return (
               <div>
                 <div style="display:inline-block;width: 130px;overflow: hidden;text-overflow:ellipsis;white-space: nowrap">

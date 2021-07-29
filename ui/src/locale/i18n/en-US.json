@@ -56,5 +56,6 @@
   "function_define": "Function Define",
   "key_argument": "Key Argument",
   "import_support": "Import Support",
-  "source_type": "Source Type"
+  "source_type": "Source Type",
+  "t_sensitive": "Sensitive"
 }

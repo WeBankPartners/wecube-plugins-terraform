@@ -780,7 +780,6 @@ export default {
       })
     },
     editSource (source) {
-      console.log(source)
       this.newSource = {
         isShow: true,
         isAdd: false,
