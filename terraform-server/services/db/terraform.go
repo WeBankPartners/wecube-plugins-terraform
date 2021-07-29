@@ -723,6 +723,9 @@ func handleOutPutArgs(outPutArgs map[string]interface{},
 	// delete the item that id is nil or nil []interface{}
 	tmpOutPutResultList := []map[string]interface{}{}
 	for i := range flatOutPutArgs {
+		if flatOutPutArgs[i]["id"] == nil {
+			flatOutPutArgs[i]["id"] = ""
+		}
 		if isResultIdValid(flatOutPutArgs[i]["id"]) == false {
 			continue
 		}
@@ -1536,7 +1539,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 		rowData["errorMessage"] = err.Error()
 		return
 	}
-
+	simulateResourceData := make(map[string][]interface{})
 	if action == "apply" && sourceList[0].TerraformUsed == "Y" {
 		// fmt.Printf("%v\n", sortedSourceList)
 
@@ -1546,6 +1549,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 
 		toDestroyList := make(map[string]*models.ResourceDataTable)
 		for _, sortedSourceData := range sortedSourceList {
+			simulateResourceData[sortedSourceData.Id] = []interface{}{}
 			isInternalAction := false
 			// Get all tfArguments of source
 			sqlCmd = `SELECT * FROM tf_argument WHERE source=?`
@@ -2519,8 +2523,11 @@ func convertData(relativeSourceId string, reqParam map[string]interface{}, regio
 		return
 	}
 	if len(resourceDataList) == 0 {
+		/*
 		err = fmt.Errorf("Resource_data can not be found by resource:%s and resource_id:%s", relativeSourceId, resourceIdsStr)
 		log.Logger.Warn("Resource_data can not be found by resource and resource_id", log.String("resource", relativeSourceId), log.String("resource_id", resourceIdsStr), log.Error(err))
+		*/
+		err = nil
 		return
 	}
 
@@ -2669,6 +2676,10 @@ func reverseConvertTemplate(parameterData *models.ParameterTable, providerData *
 }
 
 func convertAttr(tfArgumentData *models.TfArgumentTable, reqParam map[string]interface{}, regionData *models.ResourceDataTable, tfArgument *models.TfArgumentTable) (arg interface{}, err error) {
+	if tfArgument.Parameter == "" {
+		arg = tfArgument.DefaultValue
+		return
+	}
 	// 查询 tfArgument 对应的 parameter
 	sqlCmd := `SELECT * FROM parameter WHERE id=?`
 	paramArgs := []interface{}{tfArgument.Parameter}
@@ -2848,6 +2859,10 @@ func reverseConvertAttr(parameterData *models.ParameterTable, tfstateAttributeDa
 }
 
 func convertContextData(tfArgumentData *models.TfArgumentTable, reqParam map[string]interface{}, regionData *models.ResourceDataTable, tfArgument *models.TfArgumentTable) (arg interface{}, isDiscard bool, err error) {
+	if tfArgument.Parameter == "" {
+		arg = tfArgument.DefaultValue
+		return
+	}
 	// 查询 tfArgument 对应的 parameter
 	sqlCmd := `SELECT * FROM parameter WHERE id=?`
 	paramArgs := []interface{}{tfArgument.Parameter}
@@ -2933,6 +2948,10 @@ func reverseConvertContextData(parameterData *models.ParameterTable,
 }
 
 func convertDirect(defaultValue string, reqParam map[string]interface{}, tfArgument *models.TfArgumentTable) (arg interface{}, err error) {
+	if tfArgument.Parameter == "" {
+		arg = tfArgument.DefaultValue
+		return
+	}
 	// 查询 tfArgument 对应的 parameter
 	sqlCmd := `SELECT * FROM parameter WHERE id=?`
 	paramArgs := []interface{}{tfArgument.Parameter}
@@ -3548,6 +3567,10 @@ func handleConvertParams(action string,
 			err = fmt.Errorf("Convert parameter:%s error:%s", tfArgumentList[i].Parameter, err.Error())
 			log.Logger.Error("Convert parameter error", log.String("parameterId", tfArgumentList[i].Parameter), log.Error(err))
 			return
+		}
+
+		if arg == nil || arg == "" {
+			continue
 		}
 
 		// check the type string, int
