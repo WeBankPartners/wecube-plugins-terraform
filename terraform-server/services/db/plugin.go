@@ -253,11 +253,14 @@ func buildXmlParamObject(interfaceNameMap map[string]string) (result []byte, par
 		tmpParamObject := models.XmlParamObject{Name: fmt.Sprintf("%s_%s_%s", interfaceNameMap[object.Interface], object.Type, object.Name), Properties: []*models.XmlParamProperty{}}
 		paramObjectMap[tmpParamObject.Name] = true
 		for _, property := range objectPropertyMap[object.Id] {
-			tmpProperty := models.XmlParamProperty{Name: property.Name, Multiple: property.Multiple, DataType: property.DataType}
+			tmpProperty := models.XmlParamProperty{Name: property.Name, Multiple: property.Multiple, DataType: property.DataType, SensitiveData: property.Sensitive, Required: "N"}
 			if property.DataType == "object" {
 				if _, b := objectParamsNameMap[property.Id]; b {
 					tmpProperty.RefObjectName = objectParamsNameMap[property.Id]
 				}
+			}
+			if property.Nullable == "N" {
+				tmpProperty.Required = "Y"
 			}
 			tmpParamObject.Properties = append(tmpParamObject.Properties, &tmpProperty)
 		}

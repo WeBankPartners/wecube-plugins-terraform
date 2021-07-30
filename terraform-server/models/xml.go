@@ -68,4 +68,6 @@ type XmlParamProperty struct {
 	Multiple      string   `xml:"multiple,attr"`
 	MapType       string   `xml:"mapType,attr,omitempty"`
 	MapExpr       string   `xml:"mapExpr,attr,omitempty"`
+	Required      string   `xml:"required,attr"`
+	SensitiveData string   `xml:"sensitiveData,attr"`
 }
