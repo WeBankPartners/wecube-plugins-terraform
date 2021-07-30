@@ -18,7 +18,7 @@ func ProviderInfoList(c *gin.Context) {
 		middleware.ReturnServerHandleError(c, err)
 	} else {
 		if len(rowData) == 0 {
-			rowData = []*models.ProviderInfoTable{}
+			rowData = []*models.ProviderInfoQuery{}
 		}
 		middleware.ReturnData(c, rowData)
 	}

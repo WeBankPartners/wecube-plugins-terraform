@@ -1282,7 +1282,7 @@ func handleDestroy(workDirPath string,
 
 	rowData["id"] = resourceId
 	for _, resourceData	:= range toDestroyResourceData {
-		if sourceData.TerraformUsed == "Y" {
+		if sourceData.TerraformUsed != "N" {
 			// Gen the terraform workdir
 			err = GenDir(workDirPath)
 			if err != nil {
@@ -1344,7 +1344,7 @@ func handleDestroy(workDirPath string,
 			}
 			resourceAssetId := resourceData.ResourceAssetId
 			DelTfstateFile(workDirPath)
-			if sourceData.ImportSupport == "Y" {
+			if sourceData.ImportSupport != "N" {
 				err = TerraformImport(workDirPath, sourceName+"."+uuid, resourceAssetId)
 				if err != nil {
 					err = fmt.Errorf("Do TerraformImport error:%s", err.Error())
@@ -1550,7 +1550,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 		return
 	}
 	simulateResourceData := make(map[string][]interface{})
-	if action == "apply" && sourceList[0].TerraformUsed == "Y" {
+	if action == "apply" && sourceList[0].TerraformUsed != "N" {
 		// fmt.Printf("%v\n", sortedSourceList)
 
 		resourceId := reqParam["id"].(string)
@@ -1666,9 +1666,44 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 							}
 							inPutValSlice = append(inPutValSlice, convertedInPutVal)
 						} else {
+							// get the key name for the ROOT's values in convertedArgumentData
+							sqlCmd = "SELECT * FROM tf_argument WHERE source=? AND name!=? AND parameter=?"
+							var memberTfArguments []*models.TfArgumentTable
+							paramArgs = []interface{}{sortedSourceData.Id, "ROOT", rootTfArgumentData.Parameter}
+							err = x.SQL(sqlCmd, paramArgs...).Find(&memberTfArguments)
+							if err != nil {
+								err = fmt.Errorf("Get memberTfArgument list error:%s", err.Error())
+								log.Logger.Error("Get memberTfArgument list error", log.Error(err))
+								rowData["errorMessage"] = err.Error()
+								return
+							}
+							if len(memberTfArguments) == 0 {
+								err = fmt.Errorf("MemberTfArgument list can not be found by source:%s and parameter:%s", sortedSourceData.Id, rootTfArgumentData.Parameter)
+								log.Logger.Warn("MemberTfArgument list can not be found by source and parameter", log.String("source", sortedSourceData.Id), log.String("parameter", rootTfArgumentData.Parameter), log.Error(err))
+								rowData["errorMessage"] = err.Error()
+								return
+							}
 
+							for _, v := range memberTfArguments {
+								handledTfArguments[v.Id] = true
+							}
+
+							rootInputVal := []interface{}{}
+							p := reflect.ValueOf(convertedArgumentData[rootTfArgumentData.Name])
+							for i := 0; i < p.Len(); i++ {
+								rootInputVal = append(rootInputVal, p.Index(i).Interface())
+							}
+
+							convertedInPutVal := []interface{}{}
+							for i := range rootInputVal {
+								curObj := make(map[string]interface{})
+								for j := range memberTfArguments {
+									curObj[memberTfArguments[j].Name] = rootInputVal[i]
+								}
+								convertedInPutVal = append(convertedInPutVal, curObj)
+							}
+							inPutValSlice = append(inPutValSlice, convertedInPutVal)
 						}
-
 					} else if rootTfArgumentData.Parameter == "" {
 						handledTfArguments[rootTfArgumentData.Id] = true
 						// handle remain tfArguments
@@ -1998,7 +2033,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 						}
 
 						DelTfstateFile(workDirPath)
-						if sortedSourceData.ImportSupport == "Y" {
+						if sortedSourceData.ImportSupport != "N" {
 							err = TerraformImport(workDirPath, sortedSourceData.Name+"."+uuid, importObject[i])
 							if err != nil {
 								err = fmt.Errorf("Do TerraformImport error:%s", err.Error())
@@ -2090,7 +2125,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					}
 
 					DelTfstateFile(workDirPath)
-					if sortedSourceData.ImportSupport == "Y" {
+					if sortedSourceData.ImportSupport != "N" {
 						err = TerraformImport(workDirPath, sortedSourceData.Name+"."+resourceId, importObject[i])
 						if err != nil {
 							err = fmt.Errorf("Do TerraformImport error:%s", err.Error())
@@ -2252,7 +2287,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 		if action == "apply" || action == "query" {
 			var retOutput map[string]interface{}
 			var tmpErr error
-			if sourceData.TerraformUsed == "Y" {
+			if sourceData.TerraformUsed != "N" {
 				retOutput, tmpErr = handleTerraformApplyOrQuery(reqParam, sourceData, providerData, providerInfoData, regionData, action, plugin, workDirPath, interfaceData, curDebugFileContent)
 			} else {
 				retOutput, tmpErr = handleApplyOrQuery(action, reqParam, sourceData, regionData)
@@ -3529,8 +3564,9 @@ func getSortedSourceList(sourceList []*models.SourceTable, interfaceData *models
 		return
 	} else {
 		// get the first batch sourceListId
-		sqlCmd := `SELECT DISTINCT(source) FROM tf_argument WHERE source IN (SELECT id FROM source WHERE interface=? AND provider=?) AND (parameter is not null OR (parameter is  null AND relative_source is null))`
-		paramArgs := []interface{}{interfaceData.Id, providerData.Id}
+		// sqlCmd := `SELECT DISTINCT(source) FROM tf_argument WHERE source NOT IN (SELECT id FROM source WHERE interface=? AND provider=?) AND (parameter is null AND relative_source is null)`
+		sqlCmd := `SELECT DISTINCT(source) FROM tf_argument WHERE source NOT IN (SELECT DISTINCT(source) FROM tf_argument WHERE source IN (SELECT id FROM source WHERE interface=? AND provider=?) AND parameter is null AND relative_source is not null) AND source IN (SELECT id FROM source WHERE interface=? AND provider=?)`
+		paramArgs := []interface{}{interfaceData.Id, providerData.Id, interfaceData.Id, providerData.Id}
 		var tmpTfArgumentList []*models.TfArgumentTable
 		err = x.SQL(sqlCmd, paramArgs...).Find(&tmpTfArgumentList)
 		if err != nil {

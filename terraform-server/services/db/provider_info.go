@@ -9,7 +9,8 @@ import (
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/models"
 )
 
-func ProviderInfoList(paramsMap map[string]interface{}) (rowData []*models.ProviderInfoTable, err error) {
+func ProviderInfoList(paramsMap map[string]interface{}) (rowData []*models.ProviderInfoQuery, err error) {
+	/*
 	sqlCmd := "SELECT * FROM provider_info WHERE 1=1"
 	paramArgs := []interface{}{}
 	for k, v := range paramsMap {
@@ -17,7 +18,10 @@ func ProviderInfoList(paramsMap map[string]interface{}) (rowData []*models.Provi
 		paramArgs = append(paramArgs, v)
 	}
 	sqlCmd += " ORDER BY create_time DESC"
-	err = x.SQL(sqlCmd, paramArgs...).Find(&rowData)
+	 */
+	sqlCmd := "SELECT t1.*,t2.name AS provider_title FROM provider_info t1 LEFT JOIN provider t2 ON t1.provider=t2.id"
+	sqlCmd += " ORDER BY t1.id DESC"
+	err = x.SQL(sqlCmd).Find(&rowData)
 	if err != nil {
 		log.Logger.Error("Get providerInfo list error", log.Error(err))
 	}
