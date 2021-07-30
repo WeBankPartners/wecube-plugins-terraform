@@ -152,6 +152,8 @@ func PluginXmlExport() (result []byte, err error) {
 		return result, fmt.Errorf("Try to query interface table fail,%s ", err.Error())
 	}
 	resultBuffer := bytes.NewBuffer(result)
+	resultBuffer.WriteString("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n")
+	var packageXmlObj = models.XmlPackage{Name: "wecube-plugins-terraform", Version: models.Config.Version}
 	interfaceNameMap := make(map[string]string)
 	pluginInterfaceMap := make(map[string][]*models.InterfaceTable)
 	for _, v := range interfaceTable {
@@ -162,12 +164,11 @@ func PluginXmlExport() (result []byte, err error) {
 			pluginInterfaceMap[v.Plugin] = append(pluginInterfaceMap[v.Plugin], v)
 		}
 	}
-	paramObjectBytes, xmlParamObjectMap, err := buildXmlParamObject(interfaceNameMap)
+	paramObjects, xmlParamObjectMap, err := buildXmlParamObject(interfaceNameMap)
 	if err != nil {
 		return result, err
 	}
-	resultBuffer.Write(paramObjectBytes)
-	resultBuffer.WriteString("\n\n")
+	packageXmlObj.ParamObjects = paramObjects
 	var parameterTable []*models.ParameterTable
 	err = x.SQL("select name,`type`,multiple,interface,datatype,nullable,`sensitive` from `parameter` where object_name is null order by interface,`type`,name").Find(&parameterTable)
 	if err != nil {
@@ -208,7 +209,8 @@ func PluginXmlExport() (result []byte, err error) {
 		}
 		xmlPlugins.Plugins = append(xmlPlugins.Plugins, &tmpPlugin)
 	}
-	pluginXmlBytes, marshalErr := xml.MarshalIndent(xmlPlugins, "", "\t")
+	packageXmlObj.Plugins = xmlPlugins
+	pluginXmlBytes, marshalErr := xml.MarshalIndent(packageXmlObj, "", "\t")
 	if marshalErr != nil {
 		return result, fmt.Errorf("Xml marshal plugins fail,%s ", marshalErr.Error())
 	}
@@ -216,8 +218,9 @@ func PluginXmlExport() (result []byte, err error) {
 	return resultBuffer.Bytes(), nil
 }
 
-func buildXmlParamObject(interfaceNameMap map[string]string) (result []byte, paramObjectMap map[string]bool, err error) {
+func buildXmlParamObject(interfaceNameMap map[string]string) (xmlParamObjects models.XmlParamObjects, paramObjectMap map[string]bool, err error) {
 	var objectParams, objectPropertyParams []*models.ParameterTable
+	xmlParamObjects = models.XmlParamObjects{ParamObjects: []*models.XmlParamObject{}}
 	paramObjectMap = make(map[string]bool)
 	err = x.SQL("select * from `parameter` where id in (select distinct object_name from `parameter` where object_name is not null)").Find(&objectParams)
 	if err != nil {
@@ -225,7 +228,6 @@ func buildXmlParamObject(interfaceNameMap map[string]string) (result []byte, par
 		return
 	}
 	if len(objectParams) == 0 {
-		result = []byte("<paramObjects></paramObjects>")
 		return
 	}
 	var objectParamsNameMap = make(map[string]string)
@@ -245,7 +247,6 @@ func buildXmlParamObject(interfaceNameMap map[string]string) (result []byte, par
 			objectPropertyMap[objectProperty.ObjectName] = append(objectPropertyMap[objectProperty.ObjectName], objectProperty)
 		}
 	}
-	var xmlParamObjects = models.XmlParamObjects{ParamObjects: []*models.XmlParamObject{}}
 	for _, object := range objectParams {
 		if _, b := objectPropertyMap[object.Id]; !b {
 			continue
@@ -266,9 +267,5 @@ func buildXmlParamObject(interfaceNameMap map[string]string) (result []byte, par
 		}
 		xmlParamObjects.ParamObjects = append(xmlParamObjects.ParamObjects, &tmpParamObject)
 	}
-	result, err = xml.MarshalIndent(xmlParamObjects, "", "\t")
-	if err != nil {
-		err = fmt.Errorf("Xml marshal paramObjects fail,%s ", err.Error())
-	}
-	return
+	return xmlParamObjects, paramObjectMap, nil
 }

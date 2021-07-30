@@ -2,6 +2,14 @@ package models
 
 import "encoding/xml"
 
+type XmlPackage struct {
+	XMLName      xml.Name `xml:"package"`
+	Name         string   `xml:"name,attr"`
+	Version      string   `xml:"version,attr"`
+	ParamObjects XmlParamObjects
+	Plugins      XmlPlugins
+}
+
 type XmlPlugins struct {
 	XMLName xml.Name `xml:"plugins"`
 	Plugins []*XmlPlugin

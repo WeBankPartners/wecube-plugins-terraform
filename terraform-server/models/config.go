@@ -57,19 +57,20 @@ type MenuApiMapConfig struct {
 }
 
 type GlobalConfig struct {
-	IsPluginMode         string                        `json:"is_plugin_mode"`
-	DefaultLanguage      string                        `json:"default_language"`
-	HttpServer           HttpServerConfig              `json:"http_server"`
-	Log                  LogConfig                     `json:"log"`
-	Database             DatabaseConfig                `json:"database"`
-	RsaKeyPath           string                        `json:"rsa_key_path"`
-	Wecube               WecubeConfig                  `json:"wecube"`
-	Auth                 AuthConfig                    `json:"auth"`
-	MenuApiMap           MenuApiMapConfig              `json:"menu_api_map"`
-	DefaultReportObjAttr []*DefaultReportObjAttrConfig `json:"default_report_obj_attr"`
-	TerraformFilePath    string                        `json:"terraform_file_path"`
-	TerraformCmdPath     string                        `json:"terraform_cmd_path"`
-	TerraformProviderOsArch	string                     `json:"terraform_provider_os_arch"`
+	IsPluginMode            string                        `json:"is_plugin_mode"`
+	DefaultLanguage         string                        `json:"default_language"`
+	HttpServer              HttpServerConfig              `json:"http_server"`
+	Log                     LogConfig                     `json:"log"`
+	Database                DatabaseConfig                `json:"database"`
+	RsaKeyPath              string                        `json:"rsa_key_path"`
+	Wecube                  WecubeConfig                  `json:"wecube"`
+	Auth                    AuthConfig                    `json:"auth"`
+	MenuApiMap              MenuApiMapConfig              `json:"menu_api_map"`
+	DefaultReportObjAttr    []*DefaultReportObjAttrConfig `json:"default_report_obj_attr"`
+	TerraformFilePath       string                        `json:"terraform_file_path"`
+	TerraformCmdPath        string                        `json:"terraform_cmd_path"`
+	TerraformProviderOsArch string                        `json:"terraform_provider_os_arch"`
+	Version                 string                        `json:"version"`
 	// default json
 }
 
