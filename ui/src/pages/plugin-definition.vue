@@ -2,8 +2,11 @@
   <div class="">
     <Row>
       <Col span="5" style="border-right: 1px solid #e8eaec;">
-        <Button type="success" @click="addPlugin" ghost size="small" style="margin-left:24px;width: 85%;">{{
+        <Button type="primary" @click="addPlugin" ghost size="small" style="margin-left:24px;width: 40%;">{{
           $t('t_add')
+        }}</Button>
+        <Button type="success" @click="exportPlugin" ghost size="small" style="margin:0 1%;width: 40%;">{{
+          $t('t_export')
         }}</Button>
         <div style="height: calc(100vh - 180px);overflow-y:auto;">
           <div style="">
@@ -403,6 +406,7 @@
 </template>
 
 <script>
+import axios from 'axios'
 import {
   getPluginList,
   getTemplate,
@@ -484,6 +488,51 @@ export default {
     this.getPlugin()
   },
   methods: {
+    exportPlugin () {
+      axios({
+        method: 'GET',
+        url: `/weterraform/api/v1/plugin_xml/export`
+      })
+        .then(response => {
+          console.log(response)
+          if (response.status < 400) {
+            let content = response.data
+            let fileName = `plugin_${new Date().getFullYear() +
+              '-' +
+              new Date().getMonth() +
+              '-' +
+              new Date().getDay() +
+              '_' +
+              new Date().getHours() +
+              ':' +
+              new Date().getMinutes() +
+              ':' +
+              new Date().getSeconds()}.xml`
+            let blob = new Blob([content])
+            if ('msSaveOrOpenBlob' in navigator) {
+              window.navigator.msSaveOrOpenBlob(blob, fileName)
+            } else {
+              if ('download' in document.createElement('a')) {
+                // 非IE下载
+                let elink = document.createElement('a')
+                elink.download = fileName
+                elink.style.display = 'none'
+                elink.href = URL.createObjectURL(blob)
+                document.body.appendChild(elink)
+                elink.click()
+                URL.revokeObjectURL(elink.href) // 释放URL 对象
+                document.body.removeChild(elink)
+              } else {
+                // IE10+下载
+                navigator.msSaveOrOpenBlob(blob, fileName)
+              }
+            }
+          }
+        })
+        .catch(() => {
+          this.$Message.warning('Error')
+        })
+    },
     deletePlugin (item) {
       this.$Modal.confirm({
         title: this.$t('t_confirm_delete'),
