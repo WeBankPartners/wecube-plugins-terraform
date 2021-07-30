@@ -2,7 +2,9 @@ package plugin
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
+	"time"
 
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/api/middleware"
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/models"
@@ -128,4 +130,14 @@ func PluginBatchUpdate(c *gin.Context) {
 		middleware.ReturnSuccess(c)
 	}
 	return
+}
+
+func PluginXmlExport(c *gin.Context) {
+	result, err := db.PluginXmlExport()
+	if err != nil {
+		middleware.ReturnServerHandleError(c, err)
+		return
+	}
+	c.Writer.Header().Add("Content-Disposition", fmt.Sprintf("attachment; filename=%s_%s.xml", "terrform_xml", time.Now().Format("20060102150405")))
+	c.Data(http.StatusOK, "application/octet-stream", result)
 }

@@ -93,7 +93,7 @@ func ProviderBatchUpdate(user string, param []*models.ProviderTable) (err error)
 	return
 }
 
-func ProviderPluginExport(providerName, pluginName string) (result models.ProviderPluginImportObj, err error) {
+func ProviderPluginExport(providerNameList, pluginNameList []string) (result models.ProviderPluginImportObj, err error) {
 	result = models.ProviderPluginImportObj{Provider: []*models.ProviderTable{}, Plugin: []*models.PluginTable{}}
 	result.ProviderTemplateValue = []*models.ProviderTemplateValueTable{}
 	result.Template = []*models.TemplateTable{}
@@ -103,33 +103,43 @@ func ProviderPluginExport(providerName, pluginName string) (result models.Provid
 	result.Source = []*models.SourceTable{}
 	result.TfArgument = []*models.TfArgumentTable{}
 	result.TfstateAttribute = []*models.TfstateAttributeTable{}
-	err = x.SQL("select * from provider where name=?", providerName).Find(&result.Provider)
+	specSql, paramList := createListParams(providerNameList, "")
+	err = x.SQL("select * from provider where name in ("+specSql+")", paramList...).Find(&result.Provider)
 	if err != nil {
 		err = fmt.Errorf("Query database provider table fail,%s ", err.Error())
 		return
 	}
 	if len(result.Provider) == 0 {
-		err = fmt.Errorf("Can not find any provider with name:%s ", providerName)
+		err = fmt.Errorf("Can not find any provider with name:%s ", providerNameList)
 		return
 	}
-	providerId := result.Provider[0].Id
-	err = x.SQL("select * from plugin where name=?", pluginName).Find(&result.Plugin)
+	var providerIdList, pluginIdList []string
+	var providerIdFilterSql, pluginIdFilterSql string
+	for _, v := range result.Provider {
+		providerIdList = append(providerIdList, v.Id)
+	}
+	providerIdFilterSql = fmt.Sprintf("('%s')", strings.Join(providerIdList, "','"))
+	specSql, paramList = createListParams(pluginNameList, "")
+	err = x.SQL("select * from plugin where name in ("+specSql+")", paramList...).Find(&result.Plugin)
 	if err == nil && len(result.Plugin) == 0 {
-		err = fmt.Errorf("Can not find any plugin with name:%s ", pluginName)
+		err = fmt.Errorf("Can not find any plugin with name:%s ", pluginNameList)
 		return
 	}
-	pluginId := result.Plugin[0].Id
-	x.SQL("select * from interface where plugin=?", pluginId).Find(&result.Interface)
-	x.SQL("select * from `parameter` where interface in (select id from interface where plugin=?)", pluginId).Find(&result.Parameter)
-	templateSql := "select * from template where id in (select template_value from provider_template_value where provider=?)"
+	for _, v := range result.Plugin {
+		pluginIdList = append(pluginIdList, v.Id)
+	}
+	pluginIdFilterSql = fmt.Sprintf("('%s')", strings.Join(pluginIdList, "','"))
+	x.SQL("select * from interface where plugin in " + pluginIdFilterSql).Find(&result.Interface)
+	x.SQL("select * from `parameter` where interface in (select id from interface where plugin in " + pluginIdFilterSql + ")").Find(&result.Parameter)
+	templateSql := "select * from template where id in (select template_value from provider_template_value where provider in " + providerIdFilterSql + ")"
 	templateSql += " union "
-	templateSql += "select * from template where id in (select template from `parameter` where interface in (select id from interface where plugin=?))"
-	x.SQL(templateSql, providerId, pluginId).Find(&result.Template)
-	x.SQL("select * from template_value where template in ("+strings.ReplaceAll(templateSql, "*", "id")+")", providerId, pluginId).Find(&result.TemplateValue)
-	sourceSql := "select * from source where interface in (select id from interface where plugin=?) and provider=?"
-	x.SQL(sourceSql, pluginId, providerId).Find(&result.Source)
-	x.SQL("select * from tf_argument where source in ("+strings.ReplaceAll(sourceSql, "*", "id")+")", pluginId, providerId).Find(&result.TfArgument)
-	x.SQL("select * from tfstate_attribute where source in ("+strings.ReplaceAll(sourceSql, "*", "id")+")", pluginId, providerId).Find(&result.TfstateAttribute)
+	templateSql += "select * from template where id in (select template from `parameter` where interface in (select id from interface where plugin in " + pluginIdFilterSql + "))"
+	x.SQL(templateSql).Find(&result.Template)
+	x.SQL("select * from template_value where template in (" + strings.ReplaceAll(templateSql, "*", "id") + ")").Find(&result.TemplateValue)
+	sourceSql := "select * from source where interface in (select id from interface where plugin in " + pluginIdFilterSql + ") and provider in " + providerIdFilterSql
+	x.SQL(sourceSql).Find(&result.Source)
+	x.SQL("select * from tf_argument where source in (" + strings.ReplaceAll(sourceSql, "*", "id") + ")").Find(&result.TfArgument)
+	x.SQL("select * from tfstate_attribute where source in (" + strings.ReplaceAll(sourceSql, "*", "id") + ")").Find(&result.TfstateAttribute)
 	var sourceMap, tfStateAttrMap, parameterMap = make(map[string]bool), make(map[string]bool), make(map[string]bool)
 	for _, v := range result.Source {
 		sourceMap[v.Id] = true

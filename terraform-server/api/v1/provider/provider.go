@@ -85,7 +85,7 @@ func ProviderPluginExport(c *gin.Context) {
 		middleware.ReturnParamValidateError(c, fmt.Errorf("Param provider and plugin can not emtpy "))
 		return
 	}
-	result, err := db.ProviderPluginExport(providerId, pluginId)
+	result, err := db.ProviderPluginExport(strings.Split(providerId, ","), strings.Split(pluginId, ","))
 	if err != nil {
 		middleware.ReturnServerHandleError(c, err)
 		return
