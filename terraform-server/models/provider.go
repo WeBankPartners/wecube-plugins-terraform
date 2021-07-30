@@ -11,4 +11,18 @@ type ProviderTable struct {
 	CreateUser        string `json:"createUser" xorm:"create_user"`
 	UpdateTime        string `json:"updateTime" xorm:"update_time"`
 	UpdateUser        string `json:"updateUser" xorm:"update_user"`
+	Initialized       string `json:"initialized" xorm:"Initialized"`
+}
+
+type ProviderPluginImportObj struct {
+	Provider              []*ProviderTable              `json:"provider"`
+	ProviderTemplateValue []*ProviderTemplateValueTable `json:"provider_template_value"`
+	Template              []*TemplateTable              `json:"template"`
+	TemplateValue         []*TemplateValueTable         `json:"template_value"`
+	Plugin                []*PluginTable                `json:"plugin"`
+	Interface             []*InterfaceTable             `json:"interface"`
+	Parameter             []*ParameterTable             `json:"parameter"`
+	Source                []*SourceTable                `json:"source"`
+	TfArgument            []*TfArgumentTable            `json:"tf_argument"`
+	TfstateAttribute      []*TfstateAttributeTable      `json:"tfstate_attribute"`
 }

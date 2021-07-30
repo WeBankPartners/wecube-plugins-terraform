@@ -112,6 +112,13 @@ func init() {
 
 		// &handlerFuncObj{Url: "/terraform/:plugin/:action", Method: "POST", HandlerFunc: resource_data.TerraformOperation, LogOperation: true},
 	)
+
+	// export and import
+	httpHandlerFuncList = append(httpHandlerFuncList,
+		&handlerFuncObj{Url: "/provider_plugin_config/export", Method: "GET", HandlerFunc: provider.ProviderPluginExport, LogOperation: true},
+		&handlerFuncObj{Url: "/provider_plugin_config/import", Method: "POST", HandlerFunc: provider.ProviderPluginImport, LogOperation: false},
+		&handlerFuncObj{Url: "/plugin_xml/export", Method: "GET", HandlerFunc: plugin.PluginXmlExport, LogOperation: true},
+	)
 }
 
 func InitHttpServer() {
