@@ -58,5 +58,9 @@
   "import_support": "Import Support",
   "source_type": "Source Type",
   "t_sensitive": "Sensitive",
-  "terraform_used": "Used"
+  "terraform_used": "Used",
+  "t_import": "Import",
+  "t_export": "Export",
+  "t_select_all": "Select All",
+  "t_cancle": "Cancle"
 }

@@ -58,5 +58,9 @@
   "import_support": "导入支持",
   "source_type": "source类型",
   "t_sensitive": "敏感",
-  "terraform_used": "是否应用"
+  "terraform_used": "是否应用",
+  "t_import": "导入",
+  "t_export": "导出",
+  "t_select_all": "全选",
+  "t_cancle": "取消"
 }

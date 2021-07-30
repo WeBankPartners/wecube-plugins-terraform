@@ -388,7 +388,7 @@
                       </template>
                       <template v-else>
                         <Option v-for="item in item.sourceAttr" :value="item.id" :key="item.id"
-                          >{{ item.name }} ({{ item.parameter }})</Option
+                          >{{ item.name }} ({{ item.parameterTitle }})</Option
                         >
                       </template>
                     </Select>
@@ -602,7 +602,7 @@
                       </template>
                       <template v-else>
                         <Option v-for="item in item.sourceAttr" :value="item.id" :key="item.id"
-                          >{{ item.name }} ({{ item.parameter }})</Option
+                          >{{ item.name }} ({{ item.parameterTitle }})</Option
                         >
                       </template>
                     </Select>

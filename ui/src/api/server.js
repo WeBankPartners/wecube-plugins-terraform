@@ -60,3 +60,6 @@ export const deleteProviderInfo = id => req.delete(`/provider_infos?ids=${id}`)
 export const getDebugInfo = () => req.get(`/resource_data_debugs`)
 
 export const debuggerRequest = (plugin, action, data) => req.post(`/terraform_debug/${plugin}/${action}`, data)
+
+export const terraformExport = (provider, plugin) =>
+  req.get(`/provider_plugin_config/export?provider=${provider}&plugin=${plugin}`)
