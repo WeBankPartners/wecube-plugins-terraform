@@ -1716,20 +1716,18 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 							parameterData := parameterList[0]
 
 							tmpRootVal := convertedArgumentData[rootTfArgumentData.Name]
-							p := reflect.ValueOf(tmpRootVal)
 							tmpPVal := []interface{}{}
+							/*
+							p := reflect.ValueOf(tmpRootVal)
 							for i := 0; i < p.Len(); i++ {
 								tmpPVal = append(tmpPVal, p.Index(i).Interface())
 							}
-
-							/*
-							tmpVal := make(map[string]interface{})
-							if parameterData.Multiple == "Y" {
-								tmpVal[parameterData.Name] = tmpPVal
-							} else {
-								tmpVal[parameterData.Name] = tmpPVal[0]
-							}
 							 */
+							if rootTfArgumentData.IsMulti == "N" {
+								tmpPVal = append(tmpPVal, tmpRootVal)
+							} else {
+								tmpPVal = tmpRootVal.([]interface{})
+							}
 
 							convertedInPutVal := []interface{}{}
 							for i := range tmpPVal {
@@ -1804,11 +1802,11 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 								rowData["errorMessage"] = err.Error()
 								return
 							}
-							resourceDataAssetIdList := []string{}
-							if _, ok := tmpTfArguments[remainTfArguments[i].Name].([]string); ok {
-								resourceDataAssetIdList = append(resourceDataAssetIdList, (tmpTfArguments[remainTfArguments[i].Name].([]string))...)
+							resourceDataAssetIdList := []interface{}{}
+							if _, ok := tmpTfArguments[remainTfArguments[i].Name].([]interface{}); ok {
+								resourceDataAssetIdList = append(resourceDataAssetIdList, (tmpTfArguments[remainTfArguments[i].Name].([]interface{}))...)
 							} else {
-								resourceDataAssetIdList = append(resourceDataAssetIdList, tmpTfArguments[remainTfArguments[i].Name].(string))
+								resourceDataAssetIdList = append(resourceDataAssetIdList, tmpTfArguments[remainTfArguments[i].Name])
 							}
 
 							convertedInPutVal := []interface{}{}
@@ -2428,7 +2426,7 @@ func convertData(relativeSourceId string, reqParam map[string]interface{}, regio
 
 		 */
 		if len(resourceDataList) > 1 {
-			tmpRes := []string{}
+			tmpRes := []interface{}{}
 			for i := range resourceDataList {
 				tmpRes = append(tmpRes, resourceDataList[i].ResourceAssetId)
 			}
@@ -2492,7 +2490,7 @@ func convertData(relativeSourceId string, reqParam map[string]interface{}, regio
 	}
 
 	if tfArgument.IsMulti == "Y" {
-		tmpRes := []string{}
+		tmpRes := []interface{}{}
 		for i := range resourceDataList {
 			tmpRes = append(tmpRes, resourceDataList[i].ResourceAssetId)
 		}
@@ -2541,7 +2539,7 @@ func reverseConvertData(parameterData *models.ParameterTable, tfstateAttributeDa
 	argKey = parameterData.Name
 
 	if tfstateAttributeData.IsMulti == "Y" {
-		tmpRes := []string{}
+		tmpRes := []interface{}{}
 		for i := range resourceDataList {
 			tmpRes = append(tmpRes, resourceDataList[i].ResourceId)
 		}
@@ -2720,7 +2718,7 @@ func convertAttr(tfArgumentData *models.TfArgumentTable, reqParam map[string]int
 	}
 
 	if tfArgumentData.IsMulti == "Y" {
-		tmpRes := []string{}
+		tmpRes := []interface{}{}
 		for i := range result {
 			tmpRes = append(tmpRes, result[i].(string))
 		}
@@ -2807,7 +2805,7 @@ func reverseConvertAttr(parameterData *models.ParameterTable, tfstateAttributeDa
 
 	argKey = parameterData.Name
 	if tfstateAttributeData.IsMulti == "Y" {
-		tmpRes := []string{}
+		tmpRes := []interface{}{}
 		for i := range result {
 			tmpRes = append(tmpRes, result[i].(string))
 		}
@@ -3202,19 +3200,25 @@ func convertDirect(defaultValue string, reqParam map[string]interface{}, tfArgum
 		return
 	}
 
+	/*
 	if parameterData.DataType == "string" {
 		if parameterData.Multiple == "N" {
-			arg = reqArg.(string)
-		} else {
-			// arg = reqArg.([]string)
-			curArg := reqArg.([]interface{})
-			curRes := []string{}
-			for i := range curArg {
-				curRes = append(curRes, curArg[i].(string))
+			tmpInputArg := reqArg
+			if tfArgument.IsMulti == "Y" {
+				arg = []interface{}{tmpInputArg}
+			} else {
+				arg = tmpInputArg
 			}
-			arg = curRes
+		} else {
+			tmpInputArg := reqArg.([]interface{})
+			if tfArgument.IsMulti == "Y" {
+				arg = tmpInputArg
+			} else {
+				arg = tmpInputArg[0]
+			}
 		}
 	} else if parameterData.DataType == "int" {
+		/*
 		if parameterData.Multiple == "N" {
 			tmpVal, _ := strconv.ParseFloat(fmt.Sprintf("%v", reqArg), 64)
 			arg = tmpVal
@@ -3227,20 +3231,62 @@ func convertDirect(defaultValue string, reqParam map[string]interface{}, tfArgum
 			}
 			arg = curRes
 		}
-	} else if parameterData.DataType == "object" {
+		 */
+	/*
+		if parameterData.Multiple == "N" {
+			tmpInputArg := reqArg
+			if tfArgument.IsMulti == "Y" {
+				arg = []interface{}{tmpInputArg}
+			} else {
+				arg = tmpInputArg
+			}
+		} else {
+			tmpInputArg := reqArg.([]interface{})
+			if tfArgument.IsMulti == "Y" {
+				arg = tmpInputArg
+			} else {
+				arg = tmpInputArg[0]
+			}
+		}
+	} else*/
+	if parameterData.DataType == "object" {
 		if parameterData.Multiple == "N" {
 			var curArg map[string]interface{}
 			tmpMarshal, _ := json.Marshal(reqParam[parameterData.Name])
 			json.Unmarshal(tmpMarshal, &curArg)
-			arg = curArg
+
+			if tfArgument.IsMulti == "N" {
+				arg = curArg
+			} else {
+				arg = []map[string]interface{}{curArg}
+			}
 		} else {
 			var curArg []map[string]interface{}
 			tmpMarshal, _ := json.Marshal(reqParam[parameterData.Name])
 			json.Unmarshal(tmpMarshal, &curArg)
-			arg = curArg
+			if tfArgument.IsMulti == "Y" {
+				arg = curArg
+			} else {
+				arg = curArg[0]
+			}
 		}
 	} else {
-		arg = reqParam[parameterData.Name]
+		// arg = reqParam[parameterData.Name]
+		if parameterData.Multiple == "N" {
+			tmpInputArg := reqArg
+			if tfArgument.IsMulti == "Y" {
+				arg = []interface{}{tmpInputArg}
+			} else {
+				arg = tmpInputArg
+			}
+		} else {
+			tmpInputArg := reqArg.([]interface{})
+			if tfArgument.IsMulti == "Y" {
+				arg = tmpInputArg
+			} else {
+				arg = tmpInputArg[0]
+			}
+		}
 	}
 
 	/*
@@ -3863,21 +3909,60 @@ func handleConvertParams(action string,
 			// tmpVal, ok := arg.(int)
 			// tmpVal, _ := strconv.Atoi(arg.(string))
 			// tmpVal := arg.(float64)
+			/*
 			tmpVal, _ := strconv.ParseFloat(fmt.Sprintf("%v", arg), 64)
 			arg = tmpVal
+			 */
+			if tfArgumentList[i].IsMulti == "Y" {
+				if tmpVal, ok := arg.([]string); ok {
+					tmpRes := []float64{}
+					for i := range tmpVal {
+						tmpRet, _ := strconv.ParseFloat(fmt.Sprintf("%v", tmpVal[i]), 64)
+						tmpRes = append(tmpRes, tmpRet)
+					}
+					arg = tmpRes
+				}
+			} else {
+				if tmpVal, ok := arg.(string); ok {
+					tmpRes, _ := strconv.ParseFloat(fmt.Sprintf("%v", tmpVal), 64)
+					arg = tmpRes
+				}
+			}
+		} else if tfArgumentList[i].Type == "string" {
+			if tfArgumentList[i].IsMulti == "Y" {
+				if tmpVal, ok := arg.([]float64); ok {
+					tmpRes := []string{}
+					for i := range tmpVal {
+						tmpRes = append(tmpRes, fmt.Sprintf("%.0f", tmpVal[i]))
+					}
+				}
+			} else {
+				if tmpVal, ok := arg.(float64); ok {
+					arg = fmt.Sprintf("%.0f", tmpVal)
+				}
+			}
 		}
 
 		// merger the tfArgument if they have the same name && tfArgument.IsMulti == "Y"
 		if _, ok := tfArguments[tfArgumentList[i].Name]; ok {
 			if tfArgumentList[i].IsMulti == "Y" {
 				tmpData := []interface{}{}
-				p := reflect.ValueOf(tfArguments[tfArgumentList[i].Name])
-				for idx := 0; idx < p.Len(); idx++ {
-					tmpData = append(tmpData, p.Index(idx).Interface())
+				if _, ok := tfArguments[tfArgumentList[i].Name].([]interface{}); ok {
+					p := reflect.ValueOf(tfArguments[tfArgumentList[i].Name])
+					for idx := 0; idx < p.Len(); idx++ {
+						tmpData = append(tmpData, p.Index(idx).Interface())
+					}
+				} else {
+					tmpData = append(tmpData, tfArguments[tfArgumentList[i].Name])
 				}
-				p = reflect.ValueOf(arg)
-				for idx := 0; idx < p.Len(); idx++ {
-					tmpData = append(tmpData, p.Index(idx).Interface())
+
+				if _, ok := arg.([]interface{}); ok {
+					p := reflect.ValueOf(arg)
+					for idx := 0; idx < p.Len(); idx++ {
+						tmpData = append(tmpData, p.Index(idx).Interface())
+					}
+				} else {
+					tmpData = append(tmpData, arg)
 				}
 				tfArguments[tfArgumentList[i].Name] = tmpData
 			} else {
