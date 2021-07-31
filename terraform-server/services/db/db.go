@@ -350,7 +350,8 @@ func GetInsertTableExecAction(tableName string, data interface{}, transNullStr m
 			columnStr += ","
 			valueStr += ","
 		}
-		columnStr += t.Field(i).Tag.Get("xorm")
+		// columnStr += t.Field(i).Tag.Get("xorm")
+		columnStr += "`" + t.Field(i).Tag.Get("xorm") + "`"
 		valueStr += "?"
 
 		if len(transNullStr) > 0 {
@@ -384,7 +385,8 @@ func GetUpdateTableExecAction(tableName string, primeKey string, primeKeyVal str
 		if i > 0 {
 			columnStr += ","
 		}
-		columnStr += t.Field(i).Tag.Get("xorm")
+		// columnStr += t.Field(i).Tag.Get("xorm")
+		columnStr += "`" + t.Field(i).Tag.Get("xorm") + "`"
 		columnStr += "=?"
 
 		if len(transNullStr) > 0 {

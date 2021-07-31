@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/common-lib/guid"
@@ -66,7 +67,7 @@ func InterfaceBatchCreate(user string, param []*models.InterfaceTable) (rowData 
 		for paramType, _ := range systemParams[rowData[i].Name] {
 			for _, paramName := range systemParams[rowData[i].Name][paramType] {
 				paramId := guid.CreateGuid()
-				paramData := &models.ParameterTable{Id: paramId, Name: paramName, Type: paramType, Multiple: "N", Interface: rowData[i].Id, DataType: "string", Source: "system", CreateUser: user, CreateTime: createTime, UpdateTime: createTime}
+				paramData := &models.ParameterTable{Id: paramId, Name: paramName, Type: paramType, Multiple: "N", Interface: rowData[i].Id, DataType: "string", Source: "system", CreateUser: user, CreateTime: createTime, UpdateTime: createTime, UpdateUser: user, Sensitive: "N", Nullable: "N"}
 				action, tmpErr := GetInsertTableExecAction(paramTableName, *paramData, transNullStr)
 				if tmpErr != nil {
 					err = fmt.Errorf("Try to create parameter fail,%s ", tmpErr.Error())
@@ -87,7 +88,26 @@ func InterfaceBatchCreate(user string, param []*models.InterfaceTable) (rowData 
 
 func InterfaceBatchDelete(ids []string) (err error) {
 	actions := []*execAction{}
-	tableName := "interface"
+
+	// get the parameter by interface id
+	interfaceidsStr := strings.Join(ids, "','")
+	sqlCmd := "SELECT * FROM parameter WHERE interface IN ('" + interfaceidsStr + "')"
+	var parameterList []*models.ParameterTable
+	err = x.SQL(sqlCmd).Find(&parameterList)
+	if err != nil {
+		log.Logger.Error("Get parameter list error", log.Error(err))
+	}
+	tableName := "parameter"
+	for i := range parameterList {
+		action, tmpErr := GetDeleteTableExecAction(tableName, "id", parameterList[i].Id)
+		if tmpErr != nil {
+			err = fmt.Errorf("Try to delete parameter fail,%s ", tmpErr.Error())
+			return
+		}
+		actions = append(actions, action)
+	}
+
+	tableName = "interface"
 	for i := range ids {
 		action, tmpErr := GetDeleteTableExecAction(tableName, "id", ids[i])
 		if tmpErr != nil {
