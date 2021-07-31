@@ -1280,7 +1280,7 @@ func handleDestroy(workDirPath string,
 		toDestroyResourceData = append(toDestroyResourceData, resourceData)
 	}
 
-	rowData["id"] = resourceId
+	// rowData["id"] = resourceId
 	for _, resourceData	:= range toDestroyResourceData {
 		if sourceData.TerraformUsed != "N" {
 			// Gen the terraform workdir
@@ -2363,6 +2363,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 			}
 
 		} else if action == "destroy" {
+			rowData["id"] = reqParam["id"].(string)
 			for i := len(sortedSourceList) - 1; i >= 0; i-- {
 				workDirPath = GenWorkDirPath(reqParam["id"].(string),
 					reqParam["requestSn"].(string),
@@ -2376,25 +2377,13 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					err = fmt.Errorf("Handle Destroy error: %s", tmpErr.Error())
 					log.Logger.Error("Handle Destroy error", log.Error(err))
 					rowData["errorMessage"] = err.Error()
-					return
+					continue
 				}
 				for k, v := range retOutput {
 					rowData[k] = v
 				}
+				rowData["id"] = reqParam["id"].(string)
 			}
-			/*
-			retOutput, tmpErr := handleDestroy(workDirPath, sourceData, providerData, providerInfoData, regionData, reqParam, plugin, nil)
-			if tmpErr != nil {
-				err = fmt.Errorf("Handle Destroy error: %s", tmpErr.Error())
-				log.Logger.Error("Handle Destroy error", log.Error(err))
-				rowData["errorMessage"] = err.Error()
-				return
-			}
-			for k, v := range retOutput {
-				rowData[k] = v
-			}
-			 */
-			rowData["id"] = reqParam["id"].(string)
 			rowData["errorCode"] = "0"
 		} else {
 			err = fmt.Errorf("Action: %s is inValid", action)
