@@ -1655,7 +1655,17 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 							convertedInPutVal := []interface{}{}
 							for _, v := range inPutVal {
 								var tmpTfArguments map[string]interface{}
+
+								if _, ok := reqParam[models.ResourceDataDebug]; ok {
+									v[models.ResourceDataDebug] = reqParam[models.ResourceDataDebug]
+								}
+
 								tmpTfArguments, _, err = handleConvertParams(action, sortedSourceData, memberTfArguments, v, providerData, regionData)
+
+								if _, ok := reqParam[models.ResourceDataDebug]; ok {
+									delete(v, models.ResourceDataDebug)
+								}
+
 								if err != nil {
 									err = fmt.Errorf("HandleConvertParams error:%s", err.Error())
 									log.Logger.Warn("HandleConvertParams error", log.Error(err))
@@ -1688,19 +1698,66 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 								handledTfArguments[v.Id] = true
 							}
 
-							rootInputVal := []interface{}{}
-							p := reflect.ValueOf(convertedArgumentData[rootTfArgumentData.Name])
+							// find the root's parameter
+							sqlCmd = `SELECT * FROM parameter WHERE id=?`
+							paramArgs = []interface{}{rootTfArgumentData.Parameter}
+							var parameterList []*models.ParameterTable
+							err = x.SQL(sqlCmd, paramArgs...).Find(&parameterList)
+							if err != nil {
+								err = fmt.Errorf("Get Parameter data by id:%s error:%s", rootTfArgumentData.Parameter, err.Error())
+								log.Logger.Error("Get parameter data by id error", log.String("id", rootTfArgumentData.Parameter), log.Error(err))
+								return
+							}
+							if len(parameterList) == 0 {
+								err = fmt.Errorf("Parameter data can not be found by id:%s", rootTfArgumentData.Parameter)
+								log.Logger.Warn("Parameter data can not be found by id", log.String("id", rootTfArgumentData.Parameter), log.Error(err))
+								return
+							}
+							parameterData := parameterList[0]
+
+							tmpRootVal := convertedArgumentData[rootTfArgumentData.Name]
+							p := reflect.ValueOf(tmpRootVal)
+							tmpPVal := []interface{}{}
 							for i := 0; i < p.Len(); i++ {
-								rootInputVal = append(rootInputVal, p.Index(i).Interface())
+								tmpPVal = append(tmpPVal, p.Index(i).Interface())
 							}
 
+							/*
+							tmpVal := make(map[string]interface{})
+							if parameterData.Multiple == "Y" {
+								tmpVal[parameterData.Name] = tmpPVal
+							} else {
+								tmpVal[parameterData.Name] = tmpPVal[0]
+							}
+							 */
+
 							convertedInPutVal := []interface{}{}
-							for i := range rootInputVal {
-								curObj := make(map[string]interface{})
-								for j := range memberTfArguments {
-									curObj[memberTfArguments[j].Name] = rootInputVal[i]
+							for i := range tmpPVal {
+								v := make(map[string]interface{})
+								if parameterData.Multiple == "Y" {
+									v[parameterData.Name] = []interface{}{tmpPVal[i]}
+								} else {
+									v[parameterData.Name] = tmpPVal[i]
 								}
-								convertedInPutVal = append(convertedInPutVal, curObj)
+
+								var tmpTfArguments map[string]interface{}
+								if _, ok := reqParam[models.ResourceDataDebug]; ok {
+									v[models.ResourceDataDebug] = reqParam[models.ResourceDataDebug]
+								}
+
+								tmpTfArguments, _, err = handleConvertParams(action, sortedSourceData, memberTfArguments, v, providerData, regionData)
+
+								if _, ok := reqParam[models.ResourceDataDebug]; ok {
+									delete(v, models.ResourceDataDebug)
+								}
+
+								if err != nil {
+									err = fmt.Errorf("HandleConvertParams error:%s", err.Error())
+									log.Logger.Warn("HandleConvertParams error", log.Error(err))
+									rowData["errorMessage"] = err.Error()
+									return
+								}
+								convertedInPutVal = append(convertedInPutVal, tmpTfArguments)
 							}
 							inPutValSlice = append(inPutValSlice, convertedInPutVal)
 						}
@@ -1897,7 +1954,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 			toDestroyResource := make(map[string]*models.ResourceDataTable)
 			matchResourceData := make(map[string]bool)
 			if len(keyTfArgumentDataList) > 0 {
-				keyArgumentNameVal := make(map[string]string)
+				keyArgumentNameVal := make(map[string]interface{})
 				for _, v := range keyTfArgumentDataList {
 					keyArgumentNameVal[v.Name] = ""
 				}
@@ -1905,7 +1962,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 				for i := range conStructObject {
 					curObject := conStructObject[i]
 					for k, _ := range keyArgumentNameVal {
-						keyArgumentNameVal[k] = curObject[k].(string)
+						keyArgumentNameVal[k] = curObject[k]
 					}
 					// 对比 datas 的 tf file，看是否都匹配
 					for _, data := range resourceDataList {
@@ -2445,7 +2502,7 @@ func convertData(relativeSourceId string, reqParam map[string]interface{}, regio
 		return
 	}
 
-	if parameterData.Multiple == "Y" {
+	if tfArgument.IsMulti == "Y" {
 		tmpRes := []string{}
 		for i := range resourceDataList {
 			tmpRes = append(tmpRes, resourceDataList[i].ResourceAssetId)
@@ -2673,7 +2730,7 @@ func convertAttr(tfArgumentData *models.TfArgumentTable, reqParam map[string]int
 		result = append(result, tfstateFileAttributes[tfstateAttirbuteData.Name])
 	}
 
-	if parameterData.Multiple == "Y" {
+	if tfArgumentData.IsMulti == "Y" {
 		tmpRes := []string{}
 		for i := range result {
 			tmpRes = append(tmpRes, result[i].(string))
