@@ -3289,6 +3289,11 @@ func convertDirect(defaultValue string, reqParam map[string]interface{}, tfArgum
 		}
 	}
 
+	if tfArgument.DefaultValue == "random" && (arg == nil || arg == "") {
+		randomVal := guid.CreateGuid()
+		arg = randomVal[:16]
+	}
+
 	/*
 	if parameterData.DataType == "string" && reqArg.(string) == "null" {
 		arg = "null"
@@ -3452,9 +3457,9 @@ func reverseConvertFunction(parameterData *models.ParameterTable, tfstateAttribu
 	}
 	argKey = parameterData.Name
 	if tfstateAttributeData.IsMulti == "Y" {
-		tmpRes := []string{}
+		tmpRes := []interface{}{}
 		for i := range result {
-			tmpRes = append(tmpRes, result[i].(string))
+			tmpRes = append(tmpRes, result[i])
 		}
 		argVal = tmpRes
 	} else {
@@ -3614,12 +3619,44 @@ func handleReverseConvert(outPutParameterNameMap map[string]*models.ParameterTab
 					}
 
 					// check outArg type, string -> int
+					/*
 					if _, ok := outArgVal.(string); ok {
 						if curParamData.DataType == "int" {
 							// tmpVal, _ := strconv.Atoi(outArgVal.(string))
 							// tmpVal := outArgVal.(float64)
 							tmpVal, _ := strconv.ParseFloat(fmt.Sprintf("%v", outArgVal), 64)
 							outArgVal = tmpVal
+						}
+					}
+					 */
+					if curParamData.DataType == "int" {
+						if tfstateAttr.IsMulti == "Y" {
+							if tmpVal, ok := outArgVal.([]string); ok {
+								tmpRes := []float64{}
+								for i := range tmpVal {
+									tmpRet, _ := strconv.ParseFloat(fmt.Sprintf("%v", tmpVal[i]), 64)
+									tmpRes = append(tmpRes, tmpRet)
+								}
+								outArgVal = tmpRes
+							}
+						} else {
+							if tmpVal, ok := outArgVal.(string); ok {
+								tmpRes, _ := strconv.ParseFloat(fmt.Sprintf("%v", tmpVal), 64)
+								outArgVal = tmpRes
+							}
+						}
+					} else if curParamData.DataType == "string" {
+						if tfstateAttr.IsMulti == "Y" {
+							if tmpVal, ok := outArgVal.([]float64); ok {
+								tmpRes := []string{}
+								for i := range tmpVal {
+									tmpRes = append(tmpRes, fmt.Sprintf("%.0f", tmpVal[i]))
+								}
+							}
+						} else {
+							if tmpVal, ok := outArgVal.(float64); ok {
+								outArgVal = fmt.Sprintf("%.0f", tmpVal)
+							}
 						}
 					}
 
