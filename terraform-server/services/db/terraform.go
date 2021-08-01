@@ -3608,8 +3608,8 @@ func handleReverseConvert(outPutParameterNameMap map[string]*models.ParameterTab
 					}
 
 					if err != nil {
-						err = fmt.Errorf("Reverse convert parameter:%s error:%s", tfstateAttr.Parameter, err.Error())
-						log.Logger.Error("Revese convert parameter error", log.String("parameterId", tfstateAttr.Parameter), log.Error(err))
+						err = fmt.Errorf("TfstateAttr:%s Reverse convert parameter:%s error:%s", tfstateAttr.Name, curParamData.Name, err.Error())
+						log.Logger.Error("Revese convert parameter error", log.String("tfstateAttrName", tfstateAttr.Name), log.String("parameter", curParamData.Name), log.Error(err))
 						return
 					}
 
@@ -3895,8 +3895,8 @@ func handleConvertParams(action string,
 		}
 
 		if err != nil {
-			err = fmt.Errorf("Convert parameter:%s error:%s", tfArgumentList[i].Parameter, err.Error())
-			log.Logger.Error("Convert parameter error", log.String("parameterId", tfArgumentList[i].Parameter), log.Error(err))
+			err = fmt.Errorf("Source:%s, tfArgument:%s, Convert parameter:%s error:%s", sourceData.Name, tfArgumentList[i].Name, tfArgumentList[i].Parameter, err.Error())
+			log.Logger.Error("Convert parameter error", log.String("sourceName", sourceData.Name), log.String("tfArgumentName", tfArgumentList[i].Name), log.String("parameterId", tfArgumentList[i].Parameter), log.Error(err))
 			return
 		}
 

@@ -12,6 +12,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 func ResourceDataBatchCreate(c *gin.Context) {
@@ -122,35 +123,54 @@ func TerraformOperation(c *gin.Context) {
 	// rowData := models.PluginInterfaceResultObj{}
 	// rowData.ResultCode = "0"
 	// rowData.ResultMessage = "success"
+	count := len(params)
+	resultChan := make(chan []map[string]interface{}, count)
+	var wg sync.WaitGroup
+	wg.Add(count)
 	for i := range params {
-		params[i]["operator_user"] = request_param["operator"]
-		params[i]["requestId"] = request_param["requestId"]
-		params[i]["requestSn"] = strconv.Itoa(i + 1)
-		debugFileContent := []map[string]interface{}{}
-		retData, err := db.TerraformOperation(plugin, action, params[i], &debugFileContent)
-		if err != nil {
-			rowData.ResultCode = "1"
-			rowData.ResultMessage = "fail"
-		}
-		// handle one input, many output
-		if v, ok := retData[models.TerraformOutPutPrefix]; ok {
-			tmpData, _ := json.Marshal(v)
-			var resultList []map[string]interface{}
-			json.Unmarshal(tmpData, &resultList)
-			for i := range resultList {
-				tmpRetData := make(map[string]interface{})
-				tmpRetData["callbackParameter"] = retData["callbackParameter"]
-				tmpRetData["errorCode"] = retData["errorCode"]
-				tmpRetData["errorMessage"] = retData["errorMessage"]
-				for k, v := range resultList[i] {
-					tmpRetData[k] = v
-				}
-				rowData.Results.Outputs = append(rowData.Results.Outputs, tmpRetData)
+		go func(i int) {
+			defer wg.Done()
+
+			params[i]["operator_user"] = request_param["operator"]
+			params[i]["requestId"] = request_param["requestId"].(string) + "_" + strconv.Itoa(i + 1)
+			params[i]["requestSn"] = strconv.Itoa(i + 1)
+			debugFileContent := []map[string]interface{}{}
+			retData, err := db.TerraformOperation(plugin, action, params[i], &debugFileContent)
+			if err != nil {
+				rowData.ResultCode = "1"
+				rowData.ResultMessage = "fail"
 			}
-		} else {
-			rowData.Results.Outputs = append(rowData.Results.Outputs, retData)
-		}
+			curResultOutputs := []map[string]interface{}{}
+			// handle one input, many output
+			if v, ok := retData[models.TerraformOutPutPrefix]; ok {
+				tmpData, _ := json.Marshal(v)
+				var resultList []map[string]interface{}
+				json.Unmarshal(tmpData, &resultList)
+				for i := range resultList {
+					tmpRetData := make(map[string]interface{})
+					tmpRetData["callbackParameter"] = retData["callbackParameter"]
+					tmpRetData["errorCode"] = retData["errorCode"]
+					tmpRetData["errorMessage"] = retData["errorMessage"]
+					for k, v := range resultList[i] {
+						tmpRetData[k] = v
+					}
+					// rowData.Results.Outputs = append(rowData.Results.Outputs, tmpRetData)
+					curResultOutputs = append(curResultOutputs, tmpRetData)
+				}
+			} else {
+				// rowData.Results.Outputs = append(rowData.Results.Outputs, retData)
+				curResultOutputs = append(curResultOutputs, retData)
+			}
+			resultChan<-curResultOutputs
+		}(i)
 	}
+	wg.Wait()
+	close(resultChan)
+	for i := range resultChan {
+		curRes := i
+		rowData.Results.Outputs = append(rowData.Results.Outputs, curRes...)
+	}
+
 	c.JSON(http.StatusOK, rowData)
 	return
 }
@@ -219,50 +239,64 @@ func TerraformOperationDebug (c *gin.Context) {
 	// rowData.StatusCode = "OK"
 	// rowData.ResultCode = "0"
 	// rowData.ResultMessage = "success"
+	count := len(params)
+	resultChan := make(chan map[string]interface{}, count)
+	var wg sync.WaitGroup
+	wg.Add(count)
 	for i := range params {
-		params[i]["operator_user"] = request_param["operator"]
-		params[i]["requestId"] = request_param["requestId"]
-		params[i]["requestSn"] = strconv.Itoa(i + 1)
-		params[i][models.ResourceDataDebug] = true
-		debugFileContent := []map[string]interface{}{}
-		retData, err := db.TerraformOperation(plugin, action, params[i], &debugFileContent)
-		if err != nil {
-			rowData.ResultCode = "1"
-			rowData.ResultMessage = "fail"
-		}
+		go func(i int) {
+			defer wg.Done()
 
-		// handle one input, many output
-		curResultOutputs := []map[string]interface{}{}
-		if v, ok := retData[models.TerraformOutPutPrefix]; ok {
-			tmpData, _ := json.Marshal(v)
-			var resultList []map[string]interface{}
-			json.Unmarshal(tmpData, &resultList)
-			for i := range resultList {
-				tmpRetData := make(map[string]interface{})
-				tmpRetData["callbackParameter"] = retData["callbackParameter"]
-				tmpRetData["errorCode"] = retData["errorCode"]
-				tmpRetData["errorMessage"] = retData["errorMessage"]
-				for k, v := range resultList[i] {
-					tmpRetData[k] = v
-				}
-				curResultOutputs = append(curResultOutputs, tmpRetData)
-				//rowData.Results.Outputs = append(rowData.Results.Outputs, tmpRetData)
+			params[i]["operator_user"] = request_param["operator"]
+			params[i]["requestId"] = request_param["requestId"].(string) + "_" + strconv.Itoa(i+1)
+			params[i]["requestSn"] = strconv.Itoa(i + 1)
+			params[i][models.ResourceDataDebug] = true
+			debugFileContent := []map[string]interface{}{}
+			retData, err := db.TerraformOperation(plugin, action, params[i], &debugFileContent)
+			if err != nil {
+				rowData.ResultCode = "1"
+				rowData.ResultMessage = "fail"
 			}
-			if len(resultList) == 0 {
-				delete(retData, models.TerraformOutPutPrefix)
+
+			// handle one input, many output
+			curResultOutputs := []map[string]interface{}{}
+			if v, ok := retData[models.TerraformOutPutPrefix]; ok {
+				tmpData, _ := json.Marshal(v)
+				var resultList []map[string]interface{}
+				json.Unmarshal(tmpData, &resultList)
+				for i := range resultList {
+					tmpRetData := make(map[string]interface{})
+					tmpRetData["callbackParameter"] = retData["callbackParameter"]
+					tmpRetData["errorCode"] = retData["errorCode"]
+					tmpRetData["errorMessage"] = retData["errorMessage"]
+					for k, v := range resultList[i] {
+						tmpRetData[k] = v
+					}
+					curResultOutputs = append(curResultOutputs, tmpRetData)
+				}
+				if len(resultList) == 0 {
+					delete(retData, models.TerraformOutPutPrefix)
+					curResultOutputs = append(curResultOutputs, retData)
+				}
+			} else {
 				curResultOutputs = append(curResultOutputs, retData)
 			}
-		} else {
-			curResultOutputs = append(curResultOutputs, retData)
-			//rowData.Results.Outputs = append(rowData.Results.Outputs, retData)
-		}
-		curCombineResult := make(map[string]interface{})
-		curCombineResult["result_data"] = curResultOutputs
+			curCombineResult := make(map[string]interface{})
+			curCombineResult["result_data"] = curResultOutputs
 
-		curCombineResult["resource_results"] = debugFileContent
+			curCombineResult["resource_results"] = debugFileContent
+			resultChan<-curCombineResult
+		}(i)
 
-		rowData.Results.Outputs = append(rowData.Results.Outputs, curCombineResult)
+		// rowData.Results.Outputs = append(rowData.Results.Outputs, curCombineResult)
 	}
+	wg.Wait()
+	close(resultChan)
+	for i := range resultChan {
+		curRes := i
+		rowData.Results.Outputs = append(rowData.Results.Outputs, curRes)
+	}
+
 	// c.JSON(http.StatusOK, rowData)
 	tmpRetVal, _ := json.Marshal(rowData)
 	c.Data(http.StatusOK, "application/json", tmpRetVal)
