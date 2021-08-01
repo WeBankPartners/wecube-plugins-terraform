@@ -19,6 +19,7 @@ const (
 	TfArgumentKeyArgumentDefault = "N"
 	ResourceDataDebug  = "$_resource_data_debug$"
 	ResourceIdDataConvert  = "#resourceId#"
+	PGuid               = "6101d5ff9c058ecd8d2dddd974d38f98"
 )
 
 var (

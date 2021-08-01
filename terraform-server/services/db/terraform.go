@@ -1485,14 +1485,14 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 		return
 	}
 	providerInfoData := providerInfoList[0]
-	providerSecretId, decodeErr := cipher.AesDePassword(models.Config.Auth.PasswordSeed, providerInfoData.SecretId)
+	providerSecretId, decodeErr := cipher.AesDePasswordByGuid(models.PGuid, models.Config.Auth.PasswordSeed, providerInfoData.SecretId)
 	if decodeErr != nil {
 		err = fmt.Errorf("Try to decode secretId fail: %s", decodeErr.Error())
 		log.Logger.Error("Try to decode secretId fail", log.Error(decodeErr))
 		rowData["errorMessage"] = err.Error()
 		return
 	}
-	providerSecretKey, decodeErr := cipher.AesDePassword(models.Config.Auth.PasswordSeed, providerInfoData.SecretKey)
+	providerSecretKey, decodeErr := cipher.AesDePasswordByGuid(models.PGuid, models.Config.Auth.PasswordSeed, providerInfoData.SecretKey)
 	if decodeErr != nil {
 		err = fmt.Errorf("Try to decode secretKey fail: %s", decodeErr.Error())
 		log.Logger.Error("Try to decode secretKey fail", log.Error(decodeErr))

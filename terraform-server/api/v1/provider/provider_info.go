@@ -34,12 +34,12 @@ func ProviderInfoBatchCreate(c *gin.Context) {
 	}
 	user := middleware.GetRequestUser(c)
 	for i := range param {
-		enCodeSecretId, encodeErr := cipher.AesEnPassword(models.Config.Auth.PasswordSeed, param[i].SecretId)
+		enCodeSecretId, encodeErr := cipher.AesEnPasswordByGuid(models.PGuid, models.Config.Auth.PasswordSeed, param[i].SecretId, "")
 		if encodeErr != nil {
 			err = fmt.Errorf("Try to encode secretId fail,%s ", encodeErr.Error())
 			return
 		}
-		enCodeSecretKey, encodeErr := cipher.AesEnPassword(models.Config.Auth.PasswordSeed, param[i].SecretKey)
+		enCodeSecretKey, encodeErr := cipher.AesEnPasswordByGuid(models.PGuid, models.Config.Auth.PasswordSeed, param[i].SecretKey, "")
 		if encodeErr != nil {
 			err = fmt.Errorf("Try to encode secretKey fail,%s ", encodeErr.Error())
 			return
@@ -81,12 +81,12 @@ func ProviderInfoBatchUpdate(c *gin.Context) {
 	}
 	user := middleware.GetRequestUser(c)
 	for i := range param {
-		enCodeSecretId, encodeErr := cipher.AesEnPassword(models.Config.Auth.PasswordSeed, param[i].SecretId)
+		enCodeSecretId, encodeErr := cipher.AesEnPasswordByGuid(models.PGuid, models.Config.Auth.PasswordSeed, param[i].SecretId, "")
 		if encodeErr != nil {
 			err = fmt.Errorf("Try to encode secretId fail,%s ", encodeErr.Error())
 			return
 		}
-		enCodeSecretKey, encodeErr := cipher.AesEnPassword(models.Config.Auth.PasswordSeed, param[i].SecretKey)
+		enCodeSecretKey, encodeErr := cipher.AesEnPasswordByGuid(models.PGuid, models.Config.Auth.PasswordSeed, param[i].SecretKey, "")
 		if encodeErr != nil {
 			err = fmt.Errorf("Try to encode secretKey fail,%s ", encodeErr.Error())
 			return
