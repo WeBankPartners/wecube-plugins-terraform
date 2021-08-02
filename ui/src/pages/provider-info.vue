@@ -79,7 +79,7 @@ export default {
         },
         {
           title: this.$t('t_provider'),
-          key: 'provider'
+          key: 'providerTitle'
         },
         {
           title: this.$t('t_secret_key'),
