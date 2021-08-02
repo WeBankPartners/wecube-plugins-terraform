@@ -284,7 +284,7 @@ func TerraformImport(dirPath, address, resourceAssetId string) (err error) {
 	if cmdErr != nil {
 		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
 		outPutStr := string(stderr.Bytes())
-		errorMsgRegx := regexp.MustCompile(`Error: ([\S\ ]*)`)
+		errorMsgRegx := regexp.MustCompile(`Error: ([\S\s]*)`)
 		errorMsg := errorMsgRegx.FindStringSubmatch(outPutStr)
 		errMsg := "Error:"
 		for i := 1; i < len(errorMsg); i++ {
@@ -311,7 +311,7 @@ func TerraformPlan(dirPath string) (destroyCnt int, err error) {
 	if cmdErr != nil {
 		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
 		outPutStr := string(stderr.Bytes())
-		errorMsgRegx := regexp.MustCompile(`Error: ([\S\ ]*)`)
+		errorMsgRegx := regexp.MustCompile(`Error: ([\S\s]*)`)
 		errorMsg := errorMsgRegx.FindStringSubmatch(outPutStr)
 		errMsg := "Error:"
 		for i := 1; i < len(errorMsg); i++ {
@@ -391,7 +391,7 @@ func TerraformApply(dirPath string) (err error) {
 	if cmdErr != nil {
 		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
 		outPutStr := string(stderr.Bytes())
-		errorMsgRegx := regexp.MustCompile(`Error: ([\S\ ]*)`)
+		errorMsgRegx := regexp.MustCompile(`Error: ([\S\s]*)`)
 		errorMsg := errorMsgRegx.FindStringSubmatch(outPutStr)
 		errMsg := "Error:"
 		for i := 1; i < len(errorMsg); i++ {
@@ -417,7 +417,7 @@ func TerraformDestroy(dirPath string) (err error) {
 	if cmdErr != nil {
 		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
 		outPutStr := string(stderr.Bytes())
-		errorMsgRegx := regexp.MustCompile(`Error: ([\S\ ]*)`)
+		errorMsgRegx := regexp.MustCompile(`Error: ([\S\s]*)`)
 		errorMsg := errorMsgRegx.FindStringSubmatch(outPutStr)
 		errMsg := "Error:"
 		for i := 1; i < len(errorMsg); i++ {
@@ -443,7 +443,7 @@ func TerraformInit(dirPath string) (err error) {
 	if cmdErr != nil {
 		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
 		outPutStr := string(stderr.Bytes())
-		errorMsgRegx := regexp.MustCompile(`Error: ([\S\ ]*)`)
+		errorMsgRegx := regexp.MustCompile(`Error: ([\S\s]*)`)
 		errorMsg := errorMsgRegx.FindStringSubmatch(outPutStr)
 		errMsg := "Error:"
 		for i := 1; i < len(errorMsg); i++ {

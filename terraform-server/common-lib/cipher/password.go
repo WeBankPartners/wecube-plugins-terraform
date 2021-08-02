@@ -17,8 +17,8 @@ var (
 	digitalBytes   = []byte("0123456789")
 	lettersBytes   = []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	DEFALT_CIPHER  = "CIPHER_A"
-	// CIPHER_MAP     = map[string]string{"CIPHER_A": "{cipher_a}"}
-	CIPHER_MAP     = map[string]string{"CIPHER_A": "a"}
+	CIPHER_MAP     = map[string]string{"CIPHER_A": "{cipher_a}"}
+	// CIPHER_MAP     = map[string]string{"CIPHER_A": "a"}
 )
 
 func Md5Encode(rawData string) string {
