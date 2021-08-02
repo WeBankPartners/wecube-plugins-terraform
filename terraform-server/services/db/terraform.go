@@ -647,7 +647,7 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 			if tmpErr != nil {
 				err = fmt.Errorf("Read import_tfstate file error:%s", tmpErr.Error())
 				log.Logger.Error("Read import_tfstate file error", log.Error(err))
-				retOutput["errorMessage"] = err.Error()
+				// retOutput["errorMessage"] = err.Error()
 				return
 			}
 			tfstateFileContentStr := string(tfstateFileData)
@@ -1275,6 +1275,29 @@ func handleDestroy(workDirPath string,
 		// resourceData = resourceDataInfoList[0]
 		toDestroyResourceData = append(toDestroyResourceData, resourceDataInfoList...)
 	} else {
+		sqlCmd := `SELECT * FROM resource_data WHERE id=?`
+
+		if _, ok := reqParam[models.ResourceDataDebug]; ok {
+			sqlCmd = `SELECT * FROM resource_data_debug WHERE id=?`
+		}
+
+		paramArgs := []interface{}{inputResourceData.Id}
+		var resourceDataInfoList []*models.ResourceDataTable
+		err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataInfoList)
+		if err != nil {
+			err = fmt.Errorf("Get resourceDataInfo by resource_id:%s error:%s", resourceId, err.Error())
+			log.Logger.Error("Get resourceDataInfo by resource_id error", log.String("resource_id", resourceId), log.Error(err))
+			rowData["errorMessage"] = err.Error()
+			return
+		}
+		if len(resourceDataInfoList) == 0 {
+			// err = fmt.Errorf("ResourceDataInfo can not be found by resource_id:%s", resourceId)
+			// log.Logger.Warn("ResourceDataInfo can not be found by resource_id", log.String("resource_id", resourceId), log.Error(err))
+			// rowData["errorMessage"] = err.Error()
+			err = nil
+			return
+		}
+		inputResourceData = resourceDataInfoList[0]
 		resourceId = inputResourceData.ResourceId
 		resourceData = inputResourceData
 		toDestroyResourceData = append(toDestroyResourceData, resourceData)
@@ -1998,8 +2021,8 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 							isMatchAgain := true
 							for _, v := range keyArgumentNameVal {
 								isAllValid := true
-								for i := range toDestroyList {
-									if toDestroyList[i].ResourceAssetId == v {
+								for j := range toDestroyList {
+									if toDestroyList[j].ResourceAssetId == v {
 										isAllValid = false
 										break
 									}
@@ -2115,7 +2138,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 									// return
 									continue
 								} else {
-									deleteOldResourceData(sortedSourceData, regionData, resourceId, importObject[i], reqParam)
+									// deleteOldResourceData(sortedSourceData, regionData, resourceId, importObject[i], reqParam)
 								}
 							}
 						} else {
@@ -2180,6 +2203,9 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 
 			// Do Terraform Action
 			for i := range conStructObject {
+				if _, ok := needToTakeAway[i]; ok {
+					continue
+				}
 				curDebugFileContent := (*debugFileContent)[curDebugFileStartIdx+i]
 				var tfFileContentStr string
 				err = TerraformInit(workDirPath)
@@ -2227,7 +2253,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 						if tmpErr != nil {
 							err = fmt.Errorf("Read import_tfstate file error:%s", tmpErr.Error())
 							log.Logger.Error("Read import_tfstate file error", log.Error(err))
-							rowData["errorMessage"] = err.Error()
+							// rowData["errorMessage"] = err.Error()
 							// return
 						}
 						tfstateFileContentStr := string(tfstateFileData)
@@ -4212,8 +4238,10 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 				tmpId := oldResourceDataDebugList[0].Id
 				tmpTfFile := tfFileContentStr
 				tmpTfStateFile := tfstateFileContentStr
-				_, err = x.Exec("UPDATE resource_data_debug SET tf_file=?,tf_state_file=?,update_time=?,update_user=? WHERE id=?",
-					tmpTfFile, tmpTfStateFile, createTime, createUser, tmpId)
+				// _, err = x.Exec("UPDATE resource_data_debug SET tf_file=?,tf_state_file=?,update_time=?,update_user=? WHERE id=?",
+				//	tmpTfFile, tmpTfStateFile, createTime, createUser, tmpId)
+				_, err = x.Exec("UPDATE resource_data_debug SET id=?,tf_file=?,tf_state_file=?,update_time=?,update_user=? WHERE id=?",
+					resourceDataId, tmpTfFile, tmpTfStateFile, createTime, createUser, tmpId)
 			}
 		} else {
 			// get resource_data table
@@ -4234,8 +4262,10 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 				tmpId := oldResourceDataList[0].Id
 				tmpTfFile := tfFileContentStr
 				tmpTfStateFile := tfstateFileContentStr
-				_, err = x.Exec("UPDATE resource_data SET tf_file=?,tf_state_file=?,update_time=?,update_user=? WHERE id=?",
-					tmpTfFile, tmpTfStateFile, createTime, createUser, tmpId)
+				// _, err = x.Exec("UPDATE resource_data SET tf_file=?,tf_state_file=?,update_time=?,update_user=? WHERE id=?",
+				//	tmpTfFile, tmpTfStateFile, createTime, createUser, tmpId)
+				_, err = x.Exec("UPDATE resource_data SET id=?,tf_file=?,tf_state_file=?,update_time=?,update_user=? WHERE id=?",
+					resourceDataId, tmpTfFile, tmpTfStateFile, createTime, createUser, tmpId)
 			}
 		}
 
