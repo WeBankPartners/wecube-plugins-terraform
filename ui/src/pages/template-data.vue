@@ -214,7 +214,8 @@ export default {
             id: templateValue.providerTemplateValueInfo[p].id,
             value: templateValue.providerTemplateValueInfo[p].value,
             provider: find.id,
-            templateValue: data[0].id
+            templateValue: data[0].id,
+            createTime: templateValue.providerTemplateValueInfo[p].createTime
           })
         })
         const newTemplateValue = await createProviderTemplateValues(providerValue)
