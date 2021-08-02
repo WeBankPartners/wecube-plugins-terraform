@@ -1342,7 +1342,8 @@ func handleDestroy(workDirPath string,
 				err = fmt.Errorf("Do TerraformInit error:%s", err.Error())
 				log.Logger.Error("Do TerraformInit error", log.Error(err))
 				rowData["errorMessage"] = err.Error()
-				return
+				// return
+				continue
 			}
 			resourceAssetId := resourceData.ResourceAssetId
 			DelTfstateFile(workDirPath)
@@ -1358,13 +1359,13 @@ func handleDestroy(workDirPath string,
 							_, err = x.Exec("DELETE FROM resource_data WHERE id=?", resourceData.Id)
 						}
 						DelProviderFile(workDirPath)
-						return
+						continue
 					}
 
 					err = fmt.Errorf("Do TerraformImport error:%s", err.Error())
 					log.Logger.Error("Do TerraformImport error", log.Error(err))
 					rowData["errorMessage"] = err.Error()
-					return
+					continue
 				}
 			} else {
 				// get tfstate file from resource_data table and gen it
@@ -1381,7 +1382,8 @@ func handleDestroy(workDirPath string,
 				err = fmt.Errorf("Do TerraformDestroy error: %s", err.Error())
 				log.Logger.Error("Do TerraformDestroy error", log.Error(err))
 				rowData["errorMessage"] = err.Error()
-				return
+				// return
+				continue
 			}
 
 			// Del provider file
