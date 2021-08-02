@@ -725,6 +725,11 @@ func handleOutPutArgs(outPutArgs map[string]interface{},
 					  outPutParameterNameMap map[string]*models.ParameterTable,
 					  tfstateAttrParamMap map[string]*models.TfstateAttributeTable,
 					  reqParam map[string]interface{}) (outPutResultList []map[string]interface{}, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("HandleOutPutArgs error, error:%v", r)
+		}
+	}()
 	outPutResultList = []map[string]interface{}{}
 	// flat outPutParam data
 	flatOutPutArgs, _ := handleFlatOutPutParam(outPutArgs)
@@ -2260,6 +2265,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 						curDebugFileContent["tf_state_import"] = tfstateFileContentStr
 						// DelTfstateFile(workDirPath)
 					}
+					reqParam[models.ImportResourceDataTableId] = importObjectResourceData[i].Id
 				}
 
 				// Gen tf.json file
@@ -2299,8 +2305,8 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					err = fmt.Errorf("Do TerraformApply error:%s", err.Error())
 					log.Logger.Error("Do TerraformApply error", log.Error(err))
 					rowData["errorMessage"] = err.Error()
-					// return
-					continue
+					return
+					// continue
 				}
 
 				if _, ok := reqParam[models.ResourceDataDebug]; ok {
@@ -3559,11 +3565,19 @@ func handleReverseConvert(outPutParameterNameMap map[string]*models.ParameterTab
 	paramCnt *int,
 	regionData *models.ResourceDataTable) (outPutArgs map[string]interface{}, err error) {
 
+	var errorTfstateAttr *models.TfstateAttributeTable
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("HandleReverseConvert error, TfstateAttr:%s convert error:%v", errorTfstateAttr.Name, r)
+		}
+	}()
+
 	outPutArgs = make(map[string]interface{})
 	curLevelResult := make(map[string]interface{})
 
 	// 循环遍历每个 tfstateAttribute 进行 reverseConvert 生成输出参数
 	for _, tfstateAttr := range tfstateAttributeList {
+		errorTfstateAttr = tfstateAttr
 		if tfstateAttr.ObjectName == parentObjectName {
 			// handle current level tfstateAttribute
 			// if tfstateAttr.Type == "object" && tfstateAttr.Name != "tags" {
@@ -3867,6 +3881,13 @@ func handleConvertParams(action string,
 	providerData *models.ProviderTable,
     regionData *models.ResourceDataTable) (tfArguments map[string]interface{}, resourceAssetId string, err error) {
 
+	var errorTfArgument *models.TfArgumentTable
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("HandleConvertParams error, sourceName: %s, TfArgument:%s convert error:%v", sourceData.Name, errorTfArgument.Name, r)
+		}
+	}()
+
 	// sort the tfArgumentList
 	tfArgumentIdMap := make(map[string]*models.TfArgumentTable)
 	orderTfArgumentList := []*models.TfArgumentTable{}
@@ -3914,7 +3935,7 @@ func handleConvertParams(action string,
 			continue
 		}
 		 */
-
+		errorTfArgument = tfArgumentList[i]
 		convertWay := tfArgumentList[i].ConvertWay
 		var arg interface{}
 		var isDiscard = false
@@ -4082,6 +4103,12 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 	curDebugFileContent map[string]interface{},
 	isInternalAction bool) (err error) {
 
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("HandleTfstateOutPut error:%v", r)
+		}
+	}()
+
 	sourceIdStr := sourceData.Id
 	// Get tfstate_attribute by sourceId
 	sqlCmd := "SELECT * FROM tfstate_attribute WHERE source IN ('" + sourceIdStr + "')"
@@ -4233,6 +4260,13 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 				// insert into resource_data_debug
 				_, err = x.Exec("INSERT INTO resource_data_debug(id,resource,resource_id,resource_asset_id,tf_file,tf_state_file,region_id,create_time,create_user,update_time,update_user) VALUE (?,?,?,?,?,?,?,?,?,?,?)",
 					resourceDataId, resourceDataSourceId, resourceDataResourceId, resourceDataResourceAssetId, tfFileContentStr, tfstateFileContentStr, regionData.RegionId, createTime, createUser, createTime, createUser)
+
+				if _, ok := reqParam[models.ImportResourceDataTableId]; ok {
+					delId := reqParam[models.ImportResourceDataTableId].(string)
+					_, err = x.Exec("DELETE FROM resource_data_debug WHERE id=?", delId)
+
+					delete(reqParam, models.ImportResourceDataTableId)
+				}
 			} else {
 				// update the oldResourceDataDebug item
 				tmpId := oldResourceDataDebugList[0].Id
@@ -4257,6 +4291,13 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 			if len(oldResourceDataList) == 0 {
 				_, err = x.Exec("INSERT INTO resource_data(id,resource,resource_id,resource_asset_id,tf_file,tf_state_file,region_id,create_time,create_user,update_time,update_user) VALUE (?,?,?,?,?,?,?,?,?,?,?)",
 					resourceDataId, resourceDataSourceId, resourceDataResourceId, resourceDataResourceAssetId, tfFileContentStr, tfstateFileContentStr, regionData.RegionId, createTime, createUser, createTime, createUser)
+
+				if _, ok := reqParam[models.ImportResourceDataTableId]; ok {
+					delId := reqParam[models.ImportResourceDataTableId].(string)
+					_, err = x.Exec("DELETE FROM resource_data_debug WHERE id=?", delId)
+
+					delete(reqParam, models.ImportResourceDataTableId)
+				}
 			} else {
 				// update the oldResourceDataDebug item
 				tmpId := oldResourceDataList[0].Id
