@@ -1301,6 +1301,8 @@ func handleDestroy(workDirPath string,
 				return
 			}
 
+			defer DelProviderFile(workDirPath)
+
 			// Gen version.tf
 			err = GenVersionFile(workDirPath, providerData)
 			if err != nil {
@@ -1347,6 +1349,18 @@ func handleDestroy(workDirPath string,
 			if sourceData.ImportSupport != "N" {
 				err = TerraformImport(workDirPath, sourceName+"."+uuid, resourceAssetId)
 				if err != nil {
+					errMsg := err.Error()
+					if strings.Contains(errMsg, "Cannot import non-existent remote object") {
+						// delet resource_data item
+						if _, ok := reqParam[models.ResourceDataDebug]; ok {
+							_, err = x.Exec("DELETE FROM resource_data_debug WHERE id=?", resourceData.Id)
+						} else {
+							_, err = x.Exec("DELETE FROM resource_data WHERE id=?", resourceData.Id)
+						}
+						DelProviderFile(workDirPath)
+						return
+					}
+
 					err = fmt.Errorf("Do TerraformImport error:%s", err.Error())
 					log.Logger.Error("Do TerraformImport error", log.Error(err))
 					rowData["errorMessage"] = err.Error()
@@ -1917,6 +1931,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 				rowData["errorMessage"] = err.Error()
 				return
 			}
+			defer DelProviderFile(workDirPath)
 
 			// Gen version.tf
 			err = GenVersionFile(workDirPath, providerData)
@@ -2069,8 +2084,8 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					// check if importObject needed to be destroy
 					if _, ok := importObject[i]; ok {
 						// Gen tf.json file
-						uuid := "_" + guid.CreateGuid()
-						_, err = GenTfFile(workDirPath, sortedSourceData, action, uuid, conStructObject[i])
+						// uuid := "_" + guid.CreateGuid()
+						_, err = GenTfFile(workDirPath, sortedSourceData, action, resourceId, conStructObject[i])
 						if err != nil {
 							err = fmt.Errorf("Gen tfFile error: %s", err.Error())
 							log.Logger.Error("Gen tfFile error", log.Error(err))
@@ -2089,12 +2104,17 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 
 						DelTfstateFile(workDirPath)
 						if sortedSourceData.ImportSupport != "N" {
-							err = TerraformImport(workDirPath, sortedSourceData.Name+"."+uuid, importObject[i])
+							err = TerraformImport(workDirPath, sortedSourceData.Name+"."+resourceId, importObject[i])
 							if err != nil {
-								err = fmt.Errorf("Do TerraformImport error:%s", err.Error())
-								rowData["errorMessage"] = err.Error()
-								// return
-								continue
+								errMsg := err.Error()
+								if strings.Contains(errMsg, "Cannot import non-existent remote object") == false {
+									err = fmt.Errorf("Do TerraformImport error:%s", err.Error())
+									rowData["errorMessage"] = err.Error()
+									// return
+									continue
+								} else {
+									deleteOldResourceData(sortedSourceData, regionData, resourceId, importObject[i], reqParam)
+								}
 							}
 						} else {
 							// get tfstate file from resource_data table and gen it
@@ -2183,9 +2203,14 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					if sortedSourceData.ImportSupport != "N" {
 						err = TerraformImport(workDirPath, sortedSourceData.Name+"."+resourceId, importObject[i])
 						if err != nil {
-							err = fmt.Errorf("Do TerraformImport error:%s", err.Error())
-							rowData["errorMessage"] = err.Error()
-							// return
+							errMsg := err.Error()
+							if strings.Contains(errMsg, "Cannot import non-existent remote object") == false {
+								err = fmt.Errorf("Do TerraformImport error:%s", err.Error())
+								rowData["errorMessage"] = err.Error()
+								// return
+							} else {
+								deleteOldResourceData(sortedSourceData, regionData, resourceId, importObject[i], reqParam)
+							}
 						}
 					} else {
 						// get tfstate file from resource_data table and gen it
@@ -4324,6 +4349,38 @@ func getOldTfFile(curDebugFileContent map[string]interface{},
 	} else {
 		curDebugFileContent["tf_json_old"] = oldResourceDataDebugList[0].TfFile
 		curDebugFileContent["tf_state_old"] = oldResourceDataDebugList[0].TfStateFile
+	}
+	return
+}
+
+func deleteOldResourceData(sourceData *models.SourceTable,
+	regionData *models.ResourceDataTable,
+	resourceId string,
+	resourceAssetId string,
+	reqParam map[string]interface{}) (err error) {
+
+	resourceDataSourceId := sourceData.Id
+	resourceDataResourceId := resourceId
+	resourceDataResourceAssetId := resourceAssetId
+
+	sqlCmd := "SELECT * FROM resource_data WHERE resource=? AND resource_id=? AND region_id=? AND resource_asset_id=?"
+	if _, ok := reqParam[models.ResourceDataDebug]; ok {
+		sqlCmd = "SELECT * FROM resource_data_debug WHERE resource=? AND resource_id=? AND region_id=? AND resource_asset_id=?"
+	}
+	var oldResourceDataList []*models.ResourceDataTable
+	paramArgs := []interface{}{resourceDataSourceId, resourceDataResourceId, regionData.RegionId, resourceDataResourceAssetId}
+	err = x.SQL(sqlCmd, paramArgs...).Find(&oldResourceDataList)
+	if err != nil {
+		err = fmt.Errorf("Get old_resource data_debug by resource:%s and resource_id:%s error: %s", resourceDataSourceId, resourceDataResourceId, err.Error())
+		log.Logger.Error("Get old_resource_data_debug by resource and resource_id error", log.String("resource", resourceDataSourceId), log.String("resource_id", resourceDataResourceId), log.Error(err))
+	}
+	if len(oldResourceDataList) > 0 {
+		resourceData := oldResourceDataList[0]
+		if _, ok := reqParam[models.ResourceDataDebug]; ok {
+			_, err = x.Exec("DELETE FROM resource_data_debug WHERE id=?", resourceData.Id)
+		} else {
+			_, err = x.Exec("DELETE FROM resource_data WHERE id=?", resourceData.Id)
+		}
 	}
 	return
 }
