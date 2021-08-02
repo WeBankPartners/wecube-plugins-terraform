@@ -776,7 +776,6 @@ export default {
       })
     },
     async getPlugin () {
-      this.pluginOptions = []
       const { statusCode, data } = await getPluginList()
       if (statusCode === 'OK') {
         this.pluginOptions = data.map(d => {

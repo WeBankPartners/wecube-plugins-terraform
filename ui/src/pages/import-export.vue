@@ -145,14 +145,12 @@ export default {
         })
     },
     async getProviderList () {
-      this.providerList = []
       const { statusCode, data } = await getProviderList()
       if (statusCode === 'OK') {
         this.providerList = data
       }
     },
     async getPlugin () {
-      this.pluginOptions = []
       const { statusCode, data } = await getPluginList()
       if (statusCode === 'OK') {
         this.pluginOptions = data

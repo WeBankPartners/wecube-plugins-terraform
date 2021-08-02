@@ -10,6 +10,7 @@
             clearable
             @on-clear="currentInterface = ''"
             @on-change="currentInterface = ''"
+            @on-open-change="getPlugin"
             filterable
             style="width:200px"
           >
@@ -31,7 +32,7 @@
         </Col>
         <Col span="5">
           <span>{{ $t('t_provider') }}</span>
-          <Select v-model="currentProvider" clearable filterable style="width:200px">
+          <Select v-model="currentProvider" clearable filterable @click="getProviderList" style="width:200px">
             <Option v-for="item in providerList" :value="item.id" :key="item.id">{{ item.name }}</Option>
           </Select>
         </Col>
@@ -1071,14 +1072,12 @@ export default {
       }
     },
     async getProviderList () {
-      this.providerList = []
       const { statusCode, data } = await getProviderList()
       if (statusCode === 'OK') {
         this.providerList = data
       }
     },
     async getPlugin () {
-      this.pluginOptions = []
       const { statusCode, data } = await getPluginList()
       if (statusCode === 'OK') {
         this.pluginOptions = data
