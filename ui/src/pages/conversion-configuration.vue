@@ -205,74 +205,87 @@
               <div style="margin-top: -1px;" v-for="(item, argIndex) in source.args" :key="argIndex">
                 <template>
                   <div class="table-col title-width-level1" style="margin-left: -1px">
-                    <Input v-model="item.name" size="small" />
+                    <Tooltip :content="item.name" :delay="500">
+                      <Input v-model="item.name" size="small" />
+                    </Tooltip>
                   </div>
                   <div class="table-col title-width-level1">
-                    <Select v-model="item.type" clearable filterable @on-clear="item.type = ''" size="small">
-                      <Option v-for="item in dataTypeOptions" :value="item.value" :key="item.value">{{
-                        item.label
-                      }}</Option>
-                    </Select>
-                  </div>
-                  <div class="table-col title-width-level1">
-                    <Select
-                      v-model="item.parameter"
-                      size="small"
-                      clearable
-                      @on-clear="item.parameter = ''"
-                      filterable
-                      @on-open-change="getInterfaceParamsWithTemplate(item)"
-                    >
-                      <template v-if="item.parameter && item.interfaceInputParamsWithTemplate.length === 0">
-                        <Option :value="item.parameter" :key="item.parameter">{{ item.parameterTitle }}</Option>
-                      </template>
-                      <template v-else>
-                        <Option v-for="item in item.interfaceInputParamsWithTemplate" :value="item.id" :key="item.id">{{
-                          item.name
+                    <Tooltip :content="item.type" :delay="500">
+                      <Select v-model="item.type" clearable filterable @on-clear="item.type = ''" size="small">
+                        <Option v-for="item in dataTypeOptions" :value="item.value" :key="item.value">{{
+                          item.label
                         }}</Option>
-                      </template>
-                    </Select>
+                      </Select>
+                    </Tooltip>
                   </div>
                   <div class="table-col title-width-level1">
-                    <Select
-                      v-model="item.defaultValue"
-                      @on-open-change="openDefaultValue(item, 'interfaceInputParamsWithTemplate')"
-                      allow-create
-                      @on-create="createDefaultValueOptions(item, $event)"
-                      ref="sss"
-                      clearable
-                      @on-clear="item.defaultValue = ''"
-                      filterable
-                      size="small"
-                    >
-                      <template v-if="item.defaultValue && item.defaultValueOptions.length === 0">
-                        <Option :value="item.defaultValue" :key="item.defaultValue">{{ item.defaultValue }}</Option>
-                      </template>
-                      <template v-else>
-                        <Option v-for="item in item.defaultValueOptions" :value="item.value" :key="item.value">{{
-                          item.value
-                        }}</Option>
-                      </template>
-                    </Select>
+                    <Tooltip :content="item.parameter" :delay="500">
+                      <Select
+                        v-model="item.parameter"
+                        size="small"
+                        clearable
+                        @on-clear="item.parameter = ''"
+                        filterable
+                        @on-open-change="getInterfaceParamsWithTemplate(item)"
+                      >
+                        <template v-if="item.parameter && item.interfaceInputParamsWithTemplate.length === 0">
+                          <Option :value="item.parameter" :key="item.parameter">{{ item.parameterTitle }}</Option>
+                        </template>
+                        <template v-else>
+                          <Option
+                            v-for="item in item.interfaceInputParamsWithTemplate"
+                            :value="item.id"
+                            :key="item.id"
+                            >{{ item.name }}</Option
+                          >
+                        </template>
+                      </Select>
+                    </Tooltip>
                   </div>
                   <div class="table-col title-width-level1">
-                    <Select
-                      v-model="item.objectName"
-                      @on-clear="item.objectName = ''"
-                      clearable
-                      filterable
-                      size="small"
-                      @on-open-change="getArgsObjetcNameOptions(source, item)"
-                    >
-                      <template v-if="item.objectName && item.argsObjetcNameOptions.length === 0">
-                        <Option :value="item.objectName" :key="item.objectName">{{ item.objectNameTitle }}</Option>
-                      </template>
-                      <template v-else>
-                        <Option v-for="item in item.argsObjetcNameOptions" :value="item.id" :key="item.id">{{
-                          item.name
-                        }}</Option>
-                      </template>
-                    </Select>
+                    <Tooltip :content="item.defaultValue" :delay="500">
+                      <Select
+                        v-model="item.defaultValue"
+                        @on-open-change="openDefaultValue(item, 'interfaceInputParamsWithTemplate')"
+                        allow-create
+                        @on-create="createDefaultValueOptions(item, $event)"
+                        ref="sss"
+                        clearable
+                        @on-clear="item.defaultValue = ''"
+                        filterable
+                        size="small"
+                      >
+                        <template v-if="item.defaultValue && item.defaultValueOptions.length === 0">
+                          <Option :value="item.defaultValue" :key="item.defaultValue">{{ item.defaultValue }}</Option>
+                        </template>
+                        <template v-else>
+                          <Option v-for="item in item.defaultValueOptions" :value="item.value" :key="item.value">{{
+                            item.value
+                          }}</Option>
+                        </template>
+                      </Select>
+                    </Tooltip>
+                  </div>
+                  <div class="table-col title-width-level1">
+                    <Tooltip :content="item.objectName" :delay="500">
+                      <Select
+                        v-model="item.objectName"
+                        @on-clear="item.objectName = ''"
+                        clearable
+                        filterable
+                        size="small"
+                        @on-open-change="getArgsObjetcNameOptions(source, item)"
+                      >
+                        <template v-if="item.objectName && item.argsObjetcNameOptions.length === 0">
+                          <Option :value="item.objectName" :key="item.objectName">{{ item.objectNameTitle }}</Option>
+                        </template>
+                        <template v-else>
+                          <Option v-for="item in item.argsObjetcNameOptions" :value="item.id" :key="item.id">{{
+                            item.name
+                          }}</Option>
+                        </template>
+                      </Select>
+                    </Tooltip>
                   </div>
                   <div class="table-col title-width-level0">
                     <Select v-model="item.isMulti" filterable size="small">
@@ -294,112 +307,124 @@
                   </div>
 
                   <div class="table-col title-width-level1" style="margin-left: -1px;">
-                    <Select v-model="item.convertWay" @on-change="changeConverWay(item)" size="small">
-                      <Option
-                        v-for="item in conversionTypeOptions"
-                        clearable
-                        filterable
-                        :value="item.value"
-                        :key="item.value"
-                        >{{ item.label }}</Option
-                      >
-                    </Select>
-                  </div>
-                  <div class="table-col title-width-level1">
-                    <Select
-                      v-model="item.relativeParameter"
-                      :disabled="!['context_direct', 'context_data'].includes(item.convertWay)"
-                      clearable
-                      @on-clear="item.relativeParameter = ''"
-                      filterable
-                      @on-open-change="getInterfaceParamter(item)"
-                      @on-change="getRelativeValueOptions(item, sourceIndex, 'args', argIndex)"
-                      size="small"
-                    >
-                      <template v-if="item.relativeParameter && item.interfaceInputParams.length === 0">
-                        <Option :value="item.relativeParameter" :key="item.relativeParameter">{{
-                          item.relativeParameterTitle
-                        }}</Option>
-                      </template>
-                      <template v-else>
-                        <Option v-for="item in item.interfaceInputParams" :value="item.id" :key="item.id">{{
-                          item.name
-                        }}</Option>
-                      </template>
-                    </Select>
-                  </div>
-                  <div class="table-col title-width-level1">
-                    <Select
-                      v-model="item.relativeParameterValue"
-                      :disabled="!['context_direct', 'context_data'].includes(item.convertWay)"
-                      @on-open-change="openRelativeParameterValue(item, 'interfaceInputParams')"
-                      clearable
-                      @on-clear="item.relativeParameterValue = ''"
-                      filterable
-                      size="small"
-                    >
-                      <template v-if="item.relativeParameterValue && item.relativeValueOptions.length === 0">
-                        <Option :value="item.relativeParameterValue" :key="item.relativeParameterValue">{{
-                          item.relativeParameterValue
-                        }}</Option>
-                      </template>
-                      <template v-else>
-                        <Option v-for="pv in item.relativeValueOptions" :value="pv.value" :key="pv.value">{{
-                          pv.value
-                        }}</Option>
-                      </template>
-                    </Select>
-                  </div>
-                  <div class="table-col title-width-level1">
-                    <Select
-                      v-model="item.relativeSource"
-                      size="small"
-                      :disabled="!['attribute', 'data', 'context_data'].includes(item.convertWay)"
-                      clearable
-                      @on-clear="item.relativeSource = ''"
-                      filterable
-                      @on-open-change="getSourceByProvider(item)"
-                    >
-                      <template v-if="item.relativeSource && item.sourceWithFilter.length === 0">
-                        <Option :value="item.relativeSource" :key="item.relativeSource">{{
-                          item.relativeSourceTitle
-                        }}</Option>
-                      </template>
-                      <template v-else>
-                        <Option v-for="item in item.sourceWithFilter" :value="item.id" :key="item.id">{{
-                          item.name
-                        }}</Option>
-                      </template>
-                    </Select>
-                  </div>
-                  <div class="table-col title-width-level1">
-                    <Select
-                      v-model="item.relativeTfstateAttribute"
-                      :disabled="!['attribute'].includes(item.convertWay)"
-                      clearable
-                      @on-clear="item.relativeTfstateAttribute = ''"
-                      @on-open-change="getSourceAttrOptions(item, 'args')"
-                      filterable
-                      size="small"
-                    >
-                      <template v-if="item.relativeTfstateAttribute && item.sourceAttr.length === 0">
-                        <Option :value="item.relativeTfstateAttribute" :key="item.relativeTfstateAttribute">{{
-                          item.relativeTfstateAttributeTitle
-                        }}</Option>
-                      </template>
-                      <template v-else>
-                        <Option v-for="item in item.sourceAttr" :value="item.id" :key="item.id"
-                          >{{ item.name }} ({{ item.parameterTitle }})</Option
+                    <Tooltip :content="item.convertWay" :delay="500">
+                      <Select v-model="item.convertWay" @on-change="changeConverWay(item)" size="small">
+                        <Option
+                          v-for="item in conversionTypeOptions"
+                          clearable
+                          filterable
+                          :value="item.value"
+                          :key="item.value"
+                          >{{ item.label }}</Option
                         >
-                      </template>
-                    </Select>
+                      </Select>
+                    </Tooltip>
                   </div>
                   <div class="table-col title-width-level1">
-                    <Input
-                      v-model="item.functionDefine"
-                      :disabled="!['function'].includes(item.convertWay)"
-                      size="small"
-                    />
+                    <Tooltip :content="item.relativeParameter" :delay="500">
+                      <Select
+                        v-model="item.relativeParameter"
+                        :disabled="!['context_direct', 'context_data'].includes(item.convertWay)"
+                        clearable
+                        @on-clear="item.relativeParameter = ''"
+                        filterable
+                        @on-open-change="getInterfaceParamter(item)"
+                        @on-change="getRelativeValueOptions(item, sourceIndex, 'args', argIndex)"
+                        size="small"
+                      >
+                        <template v-if="item.relativeParameter && item.interfaceInputParams.length === 0">
+                          <Option :value="item.relativeParameter" :key="item.relativeParameter">{{
+                            item.relativeParameterTitle
+                          }}</Option>
+                        </template>
+                        <template v-else>
+                          <Option v-for="item in item.interfaceInputParams" :value="item.id" :key="item.id">{{
+                            item.name
+                          }}</Option>
+                        </template>
+                      </Select>
+                    </Tooltip>
+                  </div>
+                  <div class="table-col title-width-level1">
+                    <Tooltip :content="item.relativeParameterValue" :delay="500">
+                      <Select
+                        v-model="item.relativeParameterValue"
+                        :disabled="!['context_direct', 'context_data'].includes(item.convertWay)"
+                        @on-open-change="openRelativeParameterValue(item, 'interfaceInputParams')"
+                        clearable
+                        @on-clear="item.relativeParameterValue = ''"
+                        filterable
+                        size="small"
+                      >
+                        <template v-if="item.relativeParameterValue && item.relativeValueOptions.length === 0">
+                          <Option :value="item.relativeParameterValue" :key="item.relativeParameterValue">{{
+                            item.relativeParameterValue
+                          }}</Option>
+                        </template>
+                        <template v-else>
+                          <Option v-for="pv in item.relativeValueOptions" :value="pv.value" :key="pv.value">{{
+                            pv.value
+                          }}</Option>
+                        </template>
+                      </Select>
+                    </Tooltip>
+                  </div>
+                  <div class="table-col title-width-level1">
+                    <Tooltip :content="item.relativeSource" :delay="500">
+                      <Select
+                        v-model="item.relativeSource"
+                        size="small"
+                        :disabled="!['attribute', 'data', 'context_data'].includes(item.convertWay)"
+                        clearable
+                        @on-clear="item.relativeSource = ''"
+                        filterable
+                        @on-open-change="getSourceByProvider(item)"
+                      >
+                        <template v-if="item.relativeSource && item.sourceWithFilter.length === 0">
+                          <Option :value="item.relativeSource" :key="item.relativeSource">{{
+                            item.relativeSourceTitle
+                          }}</Option>
+                        </template>
+                        <template v-else>
+                          <Option v-for="item in item.sourceWithFilter" :value="item.id" :key="item.id">{{
+                            item.name
+                          }}</Option>
+                        </template>
+                      </Select>
+                    </Tooltip>
+                  </div>
+                  <div class="table-col title-width-level1">
+                    <Tooltip :content="item.relativeTfstateAttribute" :delay="500">
+                      <Select
+                        v-model="item.relativeTfstateAttribute"
+                        :disabled="!['attribute'].includes(item.convertWay)"
+                        clearable
+                        @on-clear="item.relativeTfstateAttribute = ''"
+                        @on-open-change="getSourceAttrOptions(item, 'args')"
+                        filterable
+                        size="small"
+                      >
+                        <template v-if="item.relativeTfstateAttribute && item.sourceAttr.length === 0">
+                          <Option :value="item.relativeTfstateAttribute" :key="item.relativeTfstateAttribute">{{
+                            item.relativeTfstateAttributeTitle
+                          }}</Option>
+                        </template>
+                        <template v-else>
+                          <Option v-for="item in item.sourceAttr" :value="item.id" :key="item.id"
+                            >{{ item.name }} ({{ item.parameterTitle }})</Option
+                          >
+                        </template>
+                      </Select>
+                    </Tooltip>
+                  </div>
+                  <div class="table-col title-width-level1">
+                    <Tooltip :content="item.functionDefine" :delay="500">
+                      <Input
+                        v-model="item.functionDefine"
+                        :disabled="!['function'].includes(item.convertWay)"
+                        size="small"
+                      />
+                    </Tooltip>
                   </div>
                   <div class="table-col title-width-level1">
                     <Button type="primary" @click="updateArg(item, argIndex)" ghost size="small">{{
@@ -416,76 +441,86 @@
               <div style="margin-top: -1px;" v-for="(item, attrIndex) in source.attrs" :key="attrIndex">
                 <template>
                   <div class="table-col title-width-level1" style="margin-left: 0px">
-                    <Input v-model="item.name" size="small" />
+                    <Tooltip :content="item.name" :delay="500">
+                      <Input v-model="item.name" size="small" />
+                    </Tooltip>
                   </div>
                   <div class="table-col title-width-level1">
-                    <Select v-model="item.type" @on-clear="item.type = ''" clearable filterable size="small">
-                      <Option v-for="item in dataTypeOptions" :value="item.value" :key="item.value">{{
-                        item.label
-                      }}</Option>
-                    </Select>
+                    <Tooltip :content="item.type" :delay="500">
+                      <Select v-model="item.type" @on-clear="item.type = ''" clearable filterable size="small">
+                        <Option v-for="item in dataTypeOptions" :value="item.value" :key="item.value">{{
+                          item.label
+                        }}</Option>
+                      </Select>
+                    </Tooltip>
                   </div>
                   <div class="table-col title-width-level1" style="margin-left: -1px;">
-                    <Select
-                      v-model="item.parameter"
-                      size="small"
-                      clearable
-                      @on-clear="item.parameter = ''"
-                      filterable
-                      @on-open-change="getInterfaceParamsWithTemplate(item)"
-                    >
-                      <template v-if="item.parameter && item.interfaceOutputParamsWithTemplate.length === 0">
-                        <Option :value="item.parameter" :key="item.parameter">{{ item.parameterTitle }}</Option>
-                      </template>
-                      <template v-else>
-                        <Option
-                          v-for="item in item.interfaceOutputParamsWithTemplate"
-                          :value="item.id"
-                          :key="item.id"
-                          >{{ item.name }}</Option
-                        >
-                      </template>
-                    </Select>
+                    <Tooltip :content="item.parameter" :delay="500">
+                      <Select
+                        v-model="item.parameter"
+                        size="small"
+                        clearable
+                        @on-clear="item.parameter = ''"
+                        filterable
+                        @on-open-change="getInterfaceParamsWithTemplate(item)"
+                      >
+                        <template v-if="item.parameter && item.interfaceOutputParamsWithTemplate.length === 0">
+                          <Option :value="item.parameter" :key="item.parameter">{{ item.parameterTitle }}</Option>
+                        </template>
+                        <template v-else>
+                          <Option
+                            v-for="item in item.interfaceOutputParamsWithTemplate"
+                            :value="item.id"
+                            :key="item.id"
+                            >{{ item.name }}</Option
+                          >
+                        </template>
+                      </Select>
+                    </Tooltip>
                   </div>
                   <div class="table-col title-width-level1">
-                    <Select
-                      v-model="item.defaultValue"
-                      @on-open-change="openDefaultValue(item, 'interfaceOutputParamsWithTemplate')"
-                      clearable
-                      allow-create
-                      @on-create="createDefaultValueOptions(item, $event)"
-                      @on-clear="item.defaultValue = ''"
-                      filterable
-                      size="small"
-                    >
-                      <template v-if="item.defaultValue && item.defaultValueOptions.length === 0">
-                        <Option :value="item.defaultValue" :key="item.defaultValue">{{ item.defaultValue }}</Option>
-                      </template>
-                      <template v-else>
-                        <Option v-for="item in item.defaultValueOptions" :value="item.value" :key="item.value">{{
-                          item.value
-                        }}</Option>
-                      </template>
-                    </Select>
+                    <Tooltip :content="item.defaultValue" :delay="500">
+                      <Select
+                        v-model="item.defaultValue"
+                        @on-open-change="openDefaultValue(item, 'interfaceOutputParamsWithTemplate')"
+                        clearable
+                        allow-create
+                        @on-create="createDefaultValueOptions(item, $event)"
+                        @on-clear="item.defaultValue = ''"
+                        filterable
+                        size="small"
+                      >
+                        <template v-if="item.defaultValue && item.defaultValueOptions.length === 0">
+                          <Option :value="item.defaultValue" :key="item.defaultValue">{{ item.defaultValue }}</Option>
+                        </template>
+                        <template v-else>
+                          <Option v-for="item in item.defaultValueOptions" :value="item.value" :key="item.value">{{
+                            item.value
+                          }}</Option>
+                        </template>
+                      </Select>
+                    </Tooltip>
                   </div>
                   <div class="table-col title-width-level1">
-                    <Select
-                      v-model="item.objectName"
-                      @on-clear="item.objectName = ''"
-                      clearable
-                      filterable
-                      size="small"
-                      @on-open-change="getAttrsObjetcNameOptions(source, item)"
-                    >
-                      <template v-if="item.objectName && item.attrsObjetcNameOptions.length === 0">
-                        <Option :value="item.objectName" :key="item.objectName">{{ item.objectNameTitle }}</Option>
-                      </template>
-                      <template v-else>
-                        <Option v-for="item in item.attrsObjetcNameOptions" :value="item.id" :key="item.id">{{
-                          item.name
-                        }}</Option>
-                      </template>
-                    </Select>
+                    <Tooltip :content="item.objectName" :delay="500">
+                      <Select
+                        v-model="item.objectName"
+                        @on-clear="item.objectName = ''"
+                        clearable
+                        filterable
+                        size="small"
+                        @on-open-change="getAttrsObjetcNameOptions(source, item)"
+                      >
+                        <template v-if="item.objectName && item.attrsObjetcNameOptions.length === 0">
+                          <Option :value="item.objectName" :key="item.objectName">{{ item.objectNameTitle }}</Option>
+                        </template>
+                        <template v-else>
+                          <Option v-for="item in item.attrsObjetcNameOptions" :value="item.id" :key="item.id">{{
+                            item.name
+                          }}</Option>
+                        </template>
+                      </Select>
+                    </Tooltip>
                   </div>
                   <div class="table-col title-width-level0">
                     <Select v-model="item.isMulti" filterable size="small">
@@ -507,113 +542,127 @@
                   </div>
 
                   <div class="table-col title-width-level1" style="margin-left: -1px;">
-                    <Select v-model="item.convertWay" @on-change="changeConverWay(item)" size="small">
-                      <Option
-                        v-for="item in conversionTypeOptions"
-                        clearable
-                        @on-clear="item.convertWay = ''"
-                        filterable
-                        :value="item.value"
-                        :key="item.value"
-                        >{{ item.label }}</Option
-                      >
-                    </Select>
-                  </div>
-                  <div class="table-col title-width-level1">
-                    <Select
-                      v-model="item.relativeParameter"
-                      :disabled="!['context_direct', 'context_data', 'context_attribute'].includes(item.convertWay)"
-                      @on-open-change="getInterfaceParamter(item)"
-                      clearable
-                      @on-clear="item.relativeParameter = ''"
-                      filterable
-                      @on-change="getRelativeValueOptions(item, sourceIndex, 'attrs', attrIndex)"
-                      size="small"
-                    >
-                      <template v-if="item.relativeParameter && item.interfaceOutputParams.length === 0">
-                        <Option :value="item.relativeParameter" :key="item.relativeParameter">{{
-                          item.relativeParameterTitle
-                        }}</Option>
-                      </template>
-                      <template v-else>
-                        <Option v-for="item in item.interfaceOutputParams" :value="item.id" :key="item.id">{{
-                          item.name
-                        }}</Option>
-                      </template>
-                    </Select>
-                  </div>
-                  <div class="table-col title-width-level1">
-                    <Select
-                      v-model="item.relativeParameterValue"
-                      :disabled="!['context_direct', 'context_data', 'context_attribute'].includes(item.convertWay)"
-                      @on-open-change="openRelativeParameterValue(item, 'interfaceOutputParams')"
-                      clearable
-                      @on-clear="item.relativeParameterValue = ''"
-                      filterable
-                      size="small"
-                    >
-                      <template v-if="item.relativeParameterValue && item.relativeValueOptions.length === 0">
-                        <Option :value="item.relativeParameterValue" :key="item.relativeParameterValue">{{
-                          item.relativeParameterValue
-                        }}</Option>
-                      </template>
-                      <template v-else>
-                        <Option v-for="pv in item.relativeValueOptions" :value="pv.value" :key="pv.value">{{
-                          pv.value
-                        }}</Option>
-                      </template>
-                    </Select>
-                  </div>
-                  <div class="table-col title-width-level1">
-                    <Select
-                      v-model="item.relativeSource"
-                      size="small"
-                      :disabled="!['attribute', 'data', 'context_data', 'context_attribute'].includes(item.convertWay)"
-                      @on-open-change="getSourceByProvider(item)"
-                      clearable
-                      @on-clear="item.relativeSource = ''"
-                      filterable
-                    >
-                      <template v-if="item.relativeSource && item.sourceWithFilter.length === 0">
-                        <Option :value="item.relativeSource" :key="item.relativeSource">{{
-                          item.relativeSourceTitle
-                        }}</Option>
-                      </template>
-                      <template v-else>
-                        <Option v-for="item in item.sourceWithFilter" :value="item.id" :key="item.id">{{
-                          item.name
-                        }}</Option>
-                      </template>
-                    </Select>
-                  </div>
-                  <div class="table-col title-width-level1">
-                    <Select
-                      v-model="item.relativeTfstateAttribute"
-                      :disabled="!['attribute', 'context_attribute'].includes(item.convertWay)"
-                      clearable
-                      @on-clear="item.relativeTfstateAttribute = ''"
-                      @on-open-change="getSourceAttrOptions(item, 'attrs')"
-                      filterable
-                      size="small"
-                    >
-                      <template v-if="item.relativeTfstateAttribute && item.sourceAttr.length === 0">
-                        <Option :value="item.relativeTfstateAttribute" :key="item.relativeTfstateAttribute">{{
-                          item.relativeTfstateAttributeTitle
-                        }}</Option>
-                      </template>
-                      <template v-else>
-                        <Option v-for="item in item.sourceAttr" :value="item.id" :key="item.id"
-                          >{{ item.name }} ({{ item.parameterTitle }})</Option
+                    <Tooltip :content="item.convertWay" :delay="500">
+                      <Select v-model="item.convertWay" @on-change="changeConverWay(item)" size="small">
+                        <Option
+                          v-for="item in conversionTypeOptions"
+                          clearable
+                          @on-clear="item.convertWay = ''"
+                          filterable
+                          :value="item.value"
+                          :key="item.value"
+                          >{{ item.label }}</Option
                         >
-                      </template>
-                    </Select>
+                      </Select>
+                    </Tooltip>
                   </div>
                   <div class="table-col title-width-level1">
-                    <Input
-                      v-model="item.functionDefine"
-                      :disabled="!['function'].includes(item.convertWay)"
-                      size="small"
-                    />
+                    <Tooltip :content="item.relativeParameter" :delay="500">
+                      <Select
+                        v-model="item.relativeParameter"
+                        :disabled="!['context_direct', 'context_data', 'context_attribute'].includes(item.convertWay)"
+                        @on-open-change="getInterfaceParamter(item)"
+                        clearable
+                        @on-clear="item.relativeParameter = ''"
+                        filterable
+                        @on-change="getRelativeValueOptions(item, sourceIndex, 'attrs', attrIndex)"
+                        size="small"
+                      >
+                        <template v-if="item.relativeParameter && item.interfaceOutputParams.length === 0">
+                          <Option :value="item.relativeParameter" :key="item.relativeParameter">{{
+                            item.relativeParameterTitle
+                          }}</Option>
+                        </template>
+                        <template v-else>
+                          <Option v-for="item in item.interfaceOutputParams" :value="item.id" :key="item.id">{{
+                            item.name
+                          }}</Option>
+                        </template>
+                      </Select>
+                    </Tooltip>
+                  </div>
+                  <div class="table-col title-width-level1">
+                    <Tooltip :content="item.relativeParameterValue" :delay="500">
+                      <Select
+                        v-model="item.relativeParameterValue"
+                        :disabled="!['context_direct', 'context_data', 'context_attribute'].includes(item.convertWay)"
+                        @on-open-change="openRelativeParameterValue(item, 'interfaceOutputParams')"
+                        clearable
+                        @on-clear="item.relativeParameterValue = ''"
+                        filterable
+                        size="small"
+                      >
+                        <template v-if="item.relativeParameterValue && item.relativeValueOptions.length === 0">
+                          <Option :value="item.relativeParameterValue" :key="item.relativeParameterValue">{{
+                            item.relativeParameterValue
+                          }}</Option>
+                        </template>
+                        <template v-else>
+                          <Option v-for="pv in item.relativeValueOptions" :value="pv.value" :key="pv.value">{{
+                            pv.value
+                          }}</Option>
+                        </template>
+                      </Select>
+                    </Tooltip>
+                  </div>
+                  <div class="table-col title-width-level1">
+                    <Tooltip :content="item.relativeSource" :delay="500">
+                      <Select
+                        v-model="item.relativeSource"
+                        size="small"
+                        :disabled="
+                          !['attribute', 'data', 'context_data', 'context_attribute'].includes(item.convertWay)
+                        "
+                        @on-open-change="getSourceByProvider(item)"
+                        clearable
+                        @on-clear="item.relativeSource = ''"
+                        filterable
+                      >
+                        <template v-if="item.relativeSource && item.sourceWithFilter.length === 0">
+                          <Option :value="item.relativeSource" :key="item.relativeSource">{{
+                            item.relativeSourceTitle
+                          }}</Option>
+                        </template>
+                        <template v-else>
+                          <Option v-for="item in item.sourceWithFilter" :value="item.id" :key="item.id">{{
+                            item.name
+                          }}</Option>
+                        </template>
+                      </Select>
+                    </Tooltip>
+                  </div>
+                  <div class="table-col title-width-level1">
+                    <Tooltip :content="item.relativeTfstateAttribute" :delay="500">
+                      <Select
+                        v-model="item.relativeTfstateAttribute"
+                        :disabled="!['attribute', 'context_attribute'].includes(item.convertWay)"
+                        clearable
+                        @on-clear="item.relativeTfstateAttribute = ''"
+                        @on-open-change="getSourceAttrOptions(item, 'attrs')"
+                        filterable
+                        size="small"
+                      >
+                        <template v-if="item.relativeTfstateAttribute && item.sourceAttr.length === 0">
+                          <Option :value="item.relativeTfstateAttribute" :key="item.relativeTfstateAttribute">{{
+                            item.relativeTfstateAttributeTitle
+                          }}</Option>
+                        </template>
+                        <template v-else>
+                          <Option v-for="item in item.sourceAttr" :value="item.id" :key="item.id"
+                            >{{ item.name }} ({{ item.parameterTitle }})</Option
+                          >
+                        </template>
+                      </Select>
+                    </Tooltip>
+                  </div>
+                  <div class="table-col title-width-level1">
+                    <Tooltip :content="item.functionDefine" :delay="500">
+                      <Input
+                        v-model="item.functionDefine"
+                        :disabled="!['function'].includes(item.convertWay)"
+                        size="small"
+                      />
+                    </Tooltip>
                   </div>
                   <div class="table-col title-width-level1">
                     <Button type="primary" @click="updateAttr(item, sourceIndex, attrIndex)" ghost size="small">{{
