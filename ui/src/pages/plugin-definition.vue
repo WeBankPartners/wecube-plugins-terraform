@@ -1,7 +1,7 @@
 <template>
   <div class="">
     <Row>
-      <Col span="5" style="border-right: 1px solid #e8eaec;">
+      <Col span="6" style="border-right: 1px solid #e8eaec;">
         <Button type="primary" @click="addPlugin" ghost size="small" style="margin-left:24px;width: 40%;">{{
           $t('t_add')
         }}</Button>
@@ -73,283 +73,268 @@
       </Col>
       <Col v-if="currentInterface" span="18" offset="0">
         <div class="modal-paramsContainer">
-          <Row style="border-bottom: 1px solid #e5dfdf;margin-bottom:5px">
-            <Col span="2" offset="0">
+          <div style="border-bottom: 1px solid #e5dfdf;margin-bottom:5px">
+            <div class="title-style">
               <strong style="font-size:15px;">{{ $t('t_params_type') }}</strong>
-            </Col>
-            <Col span="2" offset="0">
+            </div>
+            <div class="title-style">
               <strong style="font-size:15px;">{{ $t('t_name') }}</strong>
-            </Col>
-            <Col span="3" offset="0">
-              <strong style="font-size:15px;margin-left: 18px;">{{ $t('t_data_type') }}</strong>
-            </Col>
-            <Col span="3" offset="0">
+            </div>
+            <div class="title-style-100">
+              <strong style="font-size:15px;">{{ $t('t_data_type') }}</strong>
+            </div>
+            <div class="title-style">
               <strong style="font-size:15px;">{{ $t('t_template') }}</strong>
-            </Col>
-            <Col span="2" offset="0">
+            </div>
+            <div class="title-style">
               <strong style="font-size:15px;">
                 {{ $t('t_object_name') }}
               </strong>
-            </Col>
-            <Col span="2" offset="0">
-              <strong style="font-size:15px;margin-left: 16px;">
+            </div>
+            <div class="title-style-60">
+              <strong style="font-size:15px;">
                 {{ $t('t_multiple') }}
               </strong>
-            </Col>
-            <Col span="2" offset="0">
-              <strong style="font-size:15px;margin-left: 36px;">
+            </div>
+            <div class="title-style-60">
+              <strong style="font-size:15px;">
                 {{ $t('t_is_null') }}
               </strong>
-            </Col>
-            <Col span="2" offset="0">
-              <strong style="font-size:15px;margin-left: 48px;">
+            </div>
+            <div class="title-style-60">
+              <strong style="font-size:15px;">
                 {{ $t('t_sensitive') }}
               </strong>
-            </Col>
-            <Col span="3" offset="0">
-              <strong style="font-size:15px;margin-left: 72px;">
+            </div>
+            <div class="title-style">
+              <strong style="font-size:15px;">
                 {{ $t('t_action') }}
               </strong>
-            </Col>
-          </Row>
+            </div>
+          </div>
           <div class="modal-interfaceContainers">
             <Form>
               <Row>
-                <Col span="2">
-                  <FormItem :label-width="0">
-                    <span>{{ $t('t_input_params') }}</span>
-                    <Button @click="addParams('input')" type="primary" ghost size="small" icon="ios-add"></Button>
+                <FormItem :label-width="0" class="title-style">
+                  <span>{{ $t('t_input_params') }}</span>
+                  <Button @click="addParams('input')" type="primary" ghost size="small" icon="ios-add"></Button>
+                </FormItem>
+                <div v-for="(param, index) in interfaceParamter['input']" :key="index" style="display:inline-block">
+                  <FormItem v-if="index !== 0" :label-width="0" class="title-style"></FormItem>
+                  <FormItem :label-width="0" class="title-style">
+                    <Input v-model="param.name" :disabled="param.source === 'system'" />
                   </FormItem>
-                </Col>
-                <Col span="20" offset="0">
-                  <Row v-for="(param, index) in interfaceParamter['input']" :key="index">
-                    <Col span="2">
-                      <FormItem :label-width="0">
-                        <Input v-model="param.name" :disabled="param.source === 'system'" />
-                      </FormItem>
-                    </Col>
-                    <Col span="3" offset="0" style="margin-left: 36px">
-                      <FormItem :label-width="0">
-                        <Select
-                          v-model="param.dataType"
-                          filterable
-                          clearable
-                          style="width: 80%"
-                          :disabled="param.source === 'system'"
-                        >
-                          <Option v-for="dt in dataTypeOptions" :value="dt.value" :key="dt.value">{{
-                            dt.label
-                          }}</Option>
-                        </Select>
-                      </FormItem>
-                    </Col>
-                    <Col span="3" offset="0">
-                      <FormItem :label-width="0">
-                        <Select
-                          v-model="param.template"
-                          ref="inputSelect"
-                          filterable
-                          clearable
-                          :disabled="param.source === 'system'"
-                        >
-                          <Button type="success" style="width:100%" @click="addTemplate" size="small">
-                            <Icon type="ios-add" size="24"></Icon>
-                          </Button>
-                          <Option v-for="template in templateOptions" :value="template.id" :key="template.id"
-                            >{{ template.name
-                            }}<span style="float:right">
-                              <Button
-                                @click.stop.prevent="deleteTemplate(param)"
-                                icon="ios-trash"
-                                type="error"
-                                size="small"
-                              ></Button> </span
-                          ></Option>
-                        </Select>
-                      </FormItem>
-                    </Col>
-                    <Col span="2" offset="0" style="margin-left: 36px">
-                      <FormItem :label-width="0">
-                        <Select
-                          v-model="param.objectName"
-                          filterable
-                          clearable
-                          :disabled="param.source === 'system'"
-                          @on-open-change="getObjectNameOptions(param, 'input')"
-                        >
-                          <template v-if="param.objectName && param.objectNameOptions.length === 0">
-                            <Option :value="param.objectName" :key="param.objectName">{{
-                              param.objectNameTitle
-                            }}</Option>
-                          </template>
-                          <template v-else>
-                            <Option v-for="objName in param.objectNameOptions" :value="objName.id" :key="objName.id">{{
-                              objName.name
-                            }}</Option>
-                          </template>
-                        </Select>
-                      </FormItem>
-                    </Col>
-                    <Col span="2" offset="0" style="margin-left: 36px">
-                      <Select v-model="param.multiple" filterable :disabled="param.source === 'system'">
-                        <Option value="Y">Y</Option>
-                        <Option value="N">N</Option>
-                      </Select>
-                    </Col>
-                    <Col span="2" offset="0" style="margin-left: 36px">
-                      <Select v-model="param.nullable" filterable :disabled="param.source === 'system'">
-                        <Option value="Y">Y</Option>
-                        <Option value="N">N</Option>
-                      </Select>
-                    </Col>
-                    <Col span="2" offset="0" style="margin-left: 36px">
-                      <Select v-model="param.sensitive" filterable :disabled="param.source === 'system'">
-                        <Option value="Y">Y</Option>
-                        <Option value="N">N</Option>
-                      </Select>
-                    </Col>
-                    <Col span="3" offset="0" style="margin-left: 36px">
-                      <FormItem :label-width="0">
-                        <Button
-                          type="primary"
-                          ghost
-                          @click="saveParams(param, 'input', index)"
-                          size="small"
-                          :disabled="param.source === 'system'"
-                        >
-                          {{ $t('t_save') }}
-                        </Button>
-                        <Button
-                          type="error"
-                          ghost
-                          size="small"
-                          @click="deleteParams(param)"
-                          :disabled="param.source === 'system'"
-                          >{{ $t('t_delete') }}</Button
-                        >
-                      </FormItem>
-                    </Col>
-                  </Row>
-                </Col>
+                  <FormItem :label-width="0" class="title-style-100">
+                    <Select
+                      v-model="param.dataType"
+                      filterable
+                      clearable
+                      style="width: 100%"
+                      :disabled="param.source === 'system'"
+                    >
+                      <Option v-for="dt in dataTypeOptions" :value="dt.value" :key="dt.value">{{ dt.label }}</Option>
+                    </Select>
+                  </FormItem>
+                  <FormItem :label-width="0" class="title-style">
+                    <Select
+                      v-model="param.template"
+                      ref="inputSelect"
+                      filterable
+                      clearable
+                      :disabled="param.source === 'system'"
+                    >
+                      <Button type="success" style="width:100%" @click="addTemplate" size="small">
+                        <Icon type="ios-add" size="24"></Icon>
+                      </Button>
+                      <Option v-for="template in templateOptions" :value="template.id" :key="template.id"
+                        >{{ template.name
+                        }}<span style="float:right">
+                          <Button
+                            @click.stop.prevent="deleteTemplate(param)"
+                            icon="ios-trash"
+                            type="error"
+                            size="small"
+                          ></Button> </span
+                      ></Option>
+                    </Select>
+                  </FormItem>
+                  <FormItem :label-width="0" class="title-style">
+                    <Select
+                      v-model="param.objectName"
+                      filterable
+                      clearable
+                      :disabled="param.source === 'system'"
+                      @on-open-change="getObjectNameOptions(param, 'input')"
+                    >
+                      <template v-if="param.objectName && param.objectNameOptions.length === 0">
+                        <Option :value="param.objectName" :key="param.objectName">{{ param.objectNameTitle }}</Option>
+                      </template>
+                      <template v-else>
+                        <Option v-for="objName in param.objectNameOptions" :value="objName.id" :key="objName.id">{{
+                          objName.name
+                        }}</Option>
+                      </template>
+                    </Select>
+                  </FormItem>
+                  <Select
+                    v-model="param.multiple"
+                    filterable
+                    :disabled="param.source === 'system'"
+                    class="title-style-60"
+                  >
+                    <Option value="Y">Y</Option>
+                    <Option value="N">N</Option>
+                  </Select>
+                  <Select
+                    v-model="param.nullable"
+                    filterable
+                    :disabled="param.source === 'system'"
+                    class="title-style-60"
+                  >
+                    <Option value="Y">Y</Option>
+                    <Option value="N">N</Option>
+                  </Select>
+                  <Select
+                    v-model="param.sensitive"
+                    filterable
+                    :disabled="param.source === 'system'"
+                    class="title-style-60"
+                  >
+                    <Option value="Y">Y</Option>
+                    <Option value="N">N</Option>
+                  </Select>
+                  <FormItem :label-width="0" class="title-style">
+                    <Button
+                      type="primary"
+                      ghost
+                      @click="saveParams(param, 'input', index)"
+                      size="small"
+                      :disabled="param.source === 'system'"
+                    >
+                      {{ $t('t_save') }}
+                    </Button>
+                    <Button
+                      type="error"
+                      ghost
+                      size="small"
+                      @click="deleteParams(param)"
+                      :disabled="param.source === 'system'"
+                      >{{ $t('t_delete') }}</Button
+                    >
+                  </FormItem>
+                </div>
               </Row>
               <hr style="margin:16px 0" />
               <Row>
-                <Col span="2">
-                  <FormItem :label-width="0">
-                    <span>{{ $t('t_output_params') }}</span>
-                    <Button @click="addParams('output')" type="primary" ghost size="small" icon="ios-add"></Button>
+                <FormItem :label-width="0" class="title-style">
+                  <span>{{ $t('t_output_params') }}</span>
+                  <Button @click="addParams('output')" type="primary" ghost size="small" icon="ios-add"></Button>
+                </FormItem>
+                <div v-for="(param, index) in interfaceParamter['output']" :key="index" style="display:inline-block">
+                  <FormItem v-if="index !== 0" :label-width="0" class="title-style"></FormItem>
+                  <FormItem :label-width="0" class="title-style" :key="index">
+                    <Input v-model="param.name" style="width:100%" :disabled="param.source === 'system'" />
                   </FormItem>
-                </Col>
-                <Col span="20" offset="0">
-                  <Row v-for="(param, index) in interfaceParamter['output']" :key="index">
-                    <Col span="2" offset="0">
-                      <FormItem :label-width="0">
-                        <Input v-model="param.name" style="width:100%" :disabled="param.source === 'system'" />
-                      </FormItem>
-                    </Col>
-                    <Col span="3" offset="0" style="margin-left: 36px">
-                      <FormItem :label-width="0">
-                        <Select
-                          v-model="param.dataType"
-                          filterable
-                          clearable
-                          style="width: 80%"
-                          :disabled="param.source === 'system'"
-                        >
-                          <Option v-for="dt in dataTypeOptions" :value="dt.value" :key="dt.value">{{
-                            dt.label
-                          }}</Option>
-                        </Select>
-                      </FormItem>
-                    </Col>
-                    <Col span="3" offset="0">
-                      <FormItem :label-width="0">
-                        <Select
-                          v-model="param.template"
-                          ref="outputSelect"
-                          filterable
-                          clearable
-                          :disabled="param.source === 'system'"
-                        >
-                          <Button type="success" style="width:100%" @click="addTemplate" size="small">
-                            <Icon type="ios-add" size="24"></Icon>
-                          </Button>
-                          <Option v-for="template in templateOptions" :value="template.id" :key="template.id"
-                            >{{ template.name
-                            }}<span style="float:right">
-                              <Button
-                                @click.stop.prevent="deleteTemplate(template)"
-                                icon="ios-trash"
-                                type="error"
-                                size="small"
-                              ></Button> </span
-                          ></Option>
-                        </Select>
-                      </FormItem>
-                    </Col>
-                    <Col span="2" offset="0" style="margin-left: 36px">
-                      <FormItem :label-width="0">
-                        <Select
-                          v-model="param.objectName"
-                          filterable
-                          clearable
-                          :disabled="param.source === 'system'"
-                          @on-open-change="getObjectNameOptions(param, 'output')"
-                        >
-                          <template v-if="param.objectName && param.objectNameOptions.length === 0">
-                            <Option :value="param.objectName" :key="param.objectName">{{ param.objectName }}</Option>
-                          </template>
-                          <template v-else>
-                            <Option v-for="objName in param.objectNameOptions" :value="objName.id" :key="objName.id">{{
-                              objName.name
-                            }}</Option>
-                          </template>
-                        </Select>
-                      </FormItem>
-                    </Col>
-                    <Col span="2" offset="0" style="margin-left: 36px">
-                      <FormItem :label-width="0">
-                        <Select v-model="param.multiple" filterable :disabled="param.source === 'system'">
-                          <Option value="Y">Y</Option>
-                          <Option value="N">N</Option>
-                        </Select>
-                      </FormItem>
-                    </Col>
-                    <Col span="2" offset="0" style="margin-left: 36px">
-                      <Select v-model="param.nullable" filterable :disabled="param.source === 'system'">
-                        <Option value="Y">Y</Option>
-                        <Option value="N">N</Option>
-                      </Select>
-                    </Col>
-                    <Col span="2" offset="0" style="margin-left: 36px">
-                      <Select v-model="param.sensitive" filterable :disabled="param.source === 'system'">
-                        <Option value="Y">Y</Option>
-                        <Option value="N">N</Option>
-                      </Select>
-                    </Col>
-                    <Col span="3" offset="0" style="margin-left: 36px">
-                      <FormItem :label-width="0">
-                        <Button
-                          type="primary"
-                          ghost
-                          @click="saveParams(param, 'output', index)"
-                          size="small"
-                          :disabled="param.source === 'system'"
-                        >
-                          {{ $t('t_save') }}
-                        </Button>
-                        <Button
-                          type="error"
-                          ghost
-                          size="small"
-                          @click="deleteParams(param)"
-                          :disabled="param.source === 'system'"
-                          >{{ $t('t_delete') }}
-                        </Button>
-                      </FormItem>
-                    </Col>
-                  </Row>
-                </Col>
+                  <FormItem :label-width="0" class="title-style-100" :key="index">
+                    <Select
+                      v-model="param.dataType"
+                      filterable
+                      clearable
+                      style="width: 100%"
+                      :disabled="param.source === 'system'"
+                    >
+                      <Option v-for="dt in dataTypeOptions" :value="dt.value" :key="dt.value">{{ dt.label }}</Option>
+                    </Select>
+                  </FormItem>
+                  <FormItem :label-width="0" class="title-style" :key="index">
+                    <Select
+                      v-model="param.template"
+                      ref="outputSelect"
+                      filterable
+                      clearable
+                      :disabled="param.source === 'system'"
+                    >
+                      <Button type="success" style="width:100%" @click="addTemplate" size="small">
+                        <Icon type="ios-add" size="24"></Icon>
+                      </Button>
+                      <Option v-for="template in templateOptions" :value="template.id" :key="template.id"
+                        >{{ template.name
+                        }}<span style="float:right">
+                          <Button
+                            @click.stop.prevent="deleteTemplate(template)"
+                            icon="ios-trash"
+                            type="error"
+                            size="small"
+                          ></Button> </span
+                      ></Option>
+                    </Select>
+                  </FormItem>
+                  <FormItem :label-width="0" class="title-style" :key="index">
+                    <Select
+                      v-model="param.objectName"
+                      filterable
+                      clearable
+                      :disabled="param.source === 'system'"
+                      @on-open-change="getObjectNameOptions(param, 'output')"
+                    >
+                      <template v-if="param.objectName && param.objectNameOptions.length === 0">
+                        <Option :value="param.objectName" :key="param.objectName">{{ param.objectName }}</Option>
+                      </template>
+                      <template v-else>
+                        <Option v-for="objName in param.objectNameOptions" :value="objName.id" :key="objName.id">{{
+                          objName.name
+                        }}</Option>
+                      </template>
+                    </Select>
+                  </FormItem>
+                  <Select
+                    v-model="param.multiple"
+                    filterable
+                    :disabled="param.source === 'system'"
+                    class="title-style-60"
+                  >
+                    <Option value="Y">Y</Option>
+                    <Option value="N">N</Option>
+                  </Select>
+
+                  <Select
+                    v-model="param.nullable"
+                    filterable
+                    :disabled="param.source === 'system'"
+                    class="title-style-60"
+                  >
+                    <Option value="Y">Y</Option>
+                    <Option value="N">N</Option>
+                  </Select>
+                  <Select
+                    v-model="param.sensitive"
+                    filterable
+                    :disabled="param.source === 'system'"
+                    class="title-style-60"
+                  >
+                    <Option value="Y">Y</Option>
+                    <Option value="N">N</Option>
+                  </Select>
+                  <FormItem :label-width="0" class="title-style" :key="index">
+                    <Button
+                      type="primary"
+                      ghost
+                      @click="saveParams(param, 'output', index)"
+                      size="small"
+                      :disabled="param.source === 'system'"
+                    >
+                      {{ $t('t_save') }}
+                    </Button>
+                    <Button
+                      type="error"
+                      ghost
+                      size="small"
+                      @click="deleteParams(param)"
+                      :disabled="param.source === 'system'"
+                      >{{ $t('t_delete') }}
+                    </Button>
+                  </FormItem>
+                </div>
               </Row>
             </Form>
           </div>
@@ -827,5 +812,18 @@ export default {
     background-color: rgb(226, 222, 222);
     margin-bottom: 5px;
   }
+}
+
+.title-style {
+  width: 120px;
+  display: inline-block;
+}
+.title-style-60 {
+  width: 60px;
+  display: inline-block;
+}
+.title-style-100 {
+  width: 100px;
+  display: inline-block;
 }
 </style>
