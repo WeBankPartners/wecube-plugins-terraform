@@ -308,7 +308,12 @@
 
                   <div class="table-col title-width-level1" style="margin-left: -1px;">
                     <Tooltip :content="item.convertWay" :delay="500">
-                      <Select v-model="item.convertWay" @on-change="changeConverWay(item)" size="small">
+                      <Select
+                        v-model="item.convertWay"
+                        style="width:100px"
+                        @on-change="changeConverWay(item)"
+                        size="small"
+                      >
                         <Option
                           v-for="item in conversionTypeOptions"
                           clearable
@@ -324,7 +329,11 @@
                     <Tooltip :content="item.relativeParameter" :delay="500">
                       <Select
                         v-model="item.relativeParameter"
-                        :disabled="!['context_direct', 'context_data'].includes(item.convertWay)"
+                        :disabled="
+                          !['context_direct', 'context_data', 'context_attribute', 'context_template'].includes(
+                            item.convertWay
+                          )
+                        "
                         clearable
                         @on-clear="item.relativeParameter = ''"
                         filterable
@@ -349,7 +358,11 @@
                     <Tooltip :content="item.relativeParameterValue" :delay="500">
                       <Select
                         v-model="item.relativeParameterValue"
-                        :disabled="!['context_direct', 'context_data'].includes(item.convertWay)"
+                        :disabled="
+                          !['context_direct', 'context_data', 'context_attribute', 'context_template'].includes(
+                            item.convertWay
+                          )
+                        "
                         @on-open-change="openRelativeParameterValue(item, 'interfaceInputParams')"
                         clearable
                         @on-clear="item.relativeParameterValue = ''"
@@ -374,7 +387,9 @@
                       <Select
                         v-model="item.relativeSource"
                         size="small"
-                        :disabled="!['attribute', 'data', 'context_data'].includes(item.convertWay)"
+                        :disabled="
+                          !['attribute', 'data', 'context_data', 'context_attribute'].includes(item.convertWay)
+                        "
                         clearable
                         @on-clear="item.relativeSource = ''"
                         filterable
@@ -394,10 +409,10 @@
                     </Tooltip>
                   </div>
                   <div class="table-col title-width-level1">
-                    <Tooltip :content="item.relativeTfstateAttribute" :delay="500">
+                    <Tooltip :content="item.remark" :delay="500">
                       <Select
                         v-model="item.relativeTfstateAttribute"
-                        :disabled="!['attribute'].includes(item.convertWay)"
+                        :disabled="!['attribute', 'context_attribute'].includes(item.convertWay)"
                         clearable
                         @on-clear="item.relativeTfstateAttribute = ''"
                         @on-open-change="getSourceAttrOptions(item, 'args')"
@@ -543,7 +558,12 @@
 
                   <div class="table-col title-width-level1" style="margin-left: -1px;">
                     <Tooltip :content="item.convertWay" :delay="500">
-                      <Select v-model="item.convertWay" @on-change="changeConverWay(item)" size="small">
+                      <Select
+                        v-model="item.convertWay"
+                        style="width:100px"
+                        @on-change="changeConverWay(item)"
+                        size="small"
+                      >
                         <Option
                           v-for="item in conversionTypeOptions"
                           clearable
@@ -560,7 +580,11 @@
                     <Tooltip :content="item.relativeParameter" :delay="500">
                       <Select
                         v-model="item.relativeParameter"
-                        :disabled="!['context_direct', 'context_data', 'context_attribute'].includes(item.convertWay)"
+                        :disabled="
+                          !['context_direct', 'context_data', 'context_attribute', 'context_template'].includes(
+                            item.convertWay
+                          )
+                        "
                         @on-open-change="getInterfaceParamter(item)"
                         clearable
                         @on-clear="item.relativeParameter = ''"
@@ -585,7 +609,11 @@
                     <Tooltip :content="item.relativeParameterValue" :delay="500">
                       <Select
                         v-model="item.relativeParameterValue"
-                        :disabled="!['context_direct', 'context_data', 'context_attribute'].includes(item.convertWay)"
+                        :disabled="
+                          !['context_direct', 'context_data', 'context_attribute', 'context_template'].includes(
+                            item.convertWay
+                          )
+                        "
                         @on-open-change="openRelativeParameterValue(item, 'interfaceOutputParams')"
                         clearable
                         @on-clear="item.relativeParameterValue = ''"
@@ -710,6 +738,9 @@
             <Option value="data_resource">data_resource</Option>
           </Select>
         </FormItem>
+        <FormItem :label="$t('t_remark')">
+          <Input type="text" v-model="newSource.form.remark" style="width:400px"></Input>
+        </FormItem>
       </Form>
     </Modal>
   </div>
@@ -806,7 +837,8 @@ export default {
           provider: '',
           assetIdAttribute: '',
           importSupport: 'Y',
-          sourceType: ''
+          sourceType: '',
+          remark: ''
         }
       }
     }
@@ -869,7 +901,8 @@ export default {
           interface: this.currentInterface,
           provider: this.currentProvider,
           importSupport: 'Y',
-          resourceAssetIdAttribute: ''
+          resourceAssetIdAttribute: '',
+          remark: ''
         }
       }
     },

@@ -125,7 +125,11 @@
                   <span>{{ $t('t_input_params') }}</span>
                   <Button @click="addParams('input')" type="primary" ghost size="small" icon="ios-add"></Button>
                 </FormItem>
-                <div v-for="(param, index) in interfaceParamter['input']" :key="index" style="display:inline-block">
+                <div
+                  v-for="(param, index) in interfaceParamter['input']"
+                  :key="param.name + index"
+                  style="display:inline-block"
+                >
                   <FormItem v-if="index !== 0" :label-width="0" class="title-style"></FormItem>
                   <FormItem :label-width="0" class="title-style">
                     <Input v-model="param.name" :disabled="param.source === 'system'" />
@@ -236,12 +240,16 @@
                   <span>{{ $t('t_output_params') }}</span>
                   <Button @click="addParams('output')" type="primary" ghost size="small" icon="ios-add"></Button>
                 </FormItem>
-                <div v-for="(param, index) in interfaceParamter['output']" :key="index" style="display:inline-block">
+                <div
+                  v-for="(param, index) in interfaceParamter['output']"
+                  :key="param.name + index"
+                  style="display:inline-block"
+                >
                   <FormItem v-if="index !== 0" :label-width="0" class="title-style"></FormItem>
-                  <FormItem :label-width="0" class="title-style" :key="index">
+                  <FormItem :label-width="0" class="title-style">
                     <Input v-model="param.name" style="width:100%" :disabled="param.source === 'system'" />
                   </FormItem>
-                  <FormItem :label-width="0" class="title-style-100" :key="index">
+                  <FormItem :label-width="0" class="title-style-100">
                     <Select
                       v-model="param.dataType"
                       filterable
@@ -252,7 +260,7 @@
                       <Option v-for="dt in dataTypeOptions" :value="dt.value" :key="dt.value">{{ dt.label }}</Option>
                     </Select>
                   </FormItem>
-                  <FormItem :label-width="0" class="title-style" :key="index">
+                  <FormItem :label-width="0" class="title-style">
                     <Select
                       v-model="param.template"
                       ref="outputSelect"
@@ -275,7 +283,7 @@
                       ></Option>
                     </Select>
                   </FormItem>
-                  <FormItem :label-width="0" class="title-style" :key="index">
+                  <FormItem :label-width="0" class="title-style">
                     <Select
                       v-model="param.objectName"
                       filterable
@@ -284,7 +292,7 @@
                       @on-open-change="getObjectNameOptions(param, 'output')"
                     >
                       <template v-if="param.objectName && param.objectNameOptions.length === 0">
-                        <Option :value="param.objectName" :key="param.objectName">{{ param.objectName }}</Option>
+                        <Option :value="param.objectName" :key="param.objectName">{{ param.objectNameTitle }}</Option>
                       </template>
                       <template v-else>
                         <Option v-for="objName in param.objectNameOptions" :value="objName.id" :key="objName.id">{{
@@ -321,7 +329,7 @@
                     <Option value="Y">Y</Option>
                     <Option value="N">N</Option>
                   </Select>
-                  <FormItem :label-width="0" class="title-style" :key="index">
+                  <FormItem :label-width="0" class="title-style">
                     <Button
                       type="primary"
                       ghost
@@ -614,15 +622,13 @@ export default {
     },
     async saveParams (param, type, index) {
       const method = param.id === '' ? addParameter : editParameter
-      const { statusCode, data } = await method([param])
+      const { statusCode } = await method([param])
       if (statusCode === 'OK') {
         this.$Notice.success({
           title: 'Successful',
           desc: 'Successful'
         })
-        let tmp = data[0]
-        tmp.objectNameOptions = []
-        this.interfaceParamter[type][index] = data[0]
+        this.getInterfaceParamter(param.interface)
       }
     },
     deleteParams (param) {
