@@ -125,11 +125,7 @@
                   <span>{{ $t('t_input_params') }}</span>
                   <Button @click="addParams('input')" type="primary" ghost size="small" icon="ios-add"></Button>
                 </FormItem>
-                <div
-                  v-for="(param, index) in interfaceParamter['input']"
-                  :key="param.name + index"
-                  style="display:inline-block"
-                >
+                <div v-for="(param, index) in interfaceParamter['input']" :key="index" style="display:inline-block">
                   <FormItem v-if="index !== 0" :label-width="0" class="title-style"></FormItem>
                   <FormItem :label-width="0" class="title-style">
                     <Input v-model="param.name" :disabled="param.source === 'system'" />
@@ -240,11 +236,7 @@
                   <span>{{ $t('t_output_params') }}</span>
                   <Button @click="addParams('output')" type="primary" ghost size="small" icon="ios-add"></Button>
                 </FormItem>
-                <div
-                  v-for="(param, index) in interfaceParamter['output']"
-                  :key="param.name + index"
-                  style="display:inline-block"
-                >
+                <div v-for="(param, index) in interfaceParamter['output']" :key="index" style="display:inline-block">
                   <FormItem v-if="index !== 0" :label-width="0" class="title-style"></FormItem>
                   <FormItem :label-width="0" class="title-style">
                     <Input v-model="param.name" style="width:100%" :disabled="param.source === 'system'" />
