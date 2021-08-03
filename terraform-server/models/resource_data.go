@@ -70,3 +70,10 @@ type FunctionDefineArgs struct {
 	RegExp     []string            `json:"regExp"`
 	RemoveKey  []string            `json:"keys"`
 }
+
+type TfFileAttrFetchResult struct {
+	AttrBytes  []byte
+	FileContent string
+	StartIndex int
+	EndIndex   int
+}

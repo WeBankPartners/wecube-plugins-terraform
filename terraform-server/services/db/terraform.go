@@ -2244,6 +2244,53 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 							} else {
 								deleteOldResourceData(sortedSourceData, regionData, resourceId, importObject[i], reqParam)
 							}
+						} else {
+							// firstFileObj := getFileAttrContent(workDirPath + "/terraform.tfstate")
+							// get the old tfstate file content
+							oldTfstateFile := importObjectResourceData[i].TfStateFile
+							var oldTfstateFileObj models.TfstateFileData
+							err = json.Unmarshal([]byte(oldTfstateFile), &oldTfstateFileObj)
+							if err != nil {
+								err = fmt.Errorf("Unmarshal tfstate file data error:%s", err.Error())
+								log.Logger.Error("Unmarshal tfstate file data error", log.Error(err))
+								return
+							}
+
+							secondFileObj := getFileAttrContent(workDirPath + "/terraform.tfstate")
+							first, second := make(map[string]interface{}), make(map[string]interface{})
+							first = oldTfstateFileObj.Resources[0].Instances[0].Attributes
+							/*
+							err := json.Unmarshal(firstFileObj.AttrBytes, &first)
+							if err != nil {
+								fmt.Printf("json unmarshal first file fail,%s \n", err.Error())
+								return
+							}
+							*/
+							err = json.Unmarshal(secondFileObj.AttrBytes, &second)
+							if err != nil {
+								fmt.Printf("json unmarshal second file fail,%s \n", err.Error())
+								return
+							}
+
+							result, diff, message := compareObject(first, second)
+							if diff != 0 {
+								err = fmt.Errorf("Compare import_state file and old tfstate file error:%s", message)
+								log.Logger.Error("Compare import_state file and old tfstate file error", log.String("message", message), log.Error(err))
+								rowData["errorMessage"] = err.Error()
+								return
+							}
+							resultBytes, tmpErr := json.MarshalIndent(result, "        ", "\t")
+							if tmpErr != nil {
+								err = fmt.Errorf("json marshal result fail,%s \n", tmpErr.Error())
+								return
+							}
+
+							newFileBytes := []byte{}
+							newFileWriter := bytes.NewBuffer(newFileBytes)
+							newFileWriter.WriteString(secondFileObj.FileContent[:secondFileObj.StartIndex])
+							newFileWriter.Write(resultBytes)
+							newFileWriter.WriteString(secondFileObj.FileContent[secondFileObj.EndIndex:])
+							ioutil.WriteFile(workDirPath + "/terraform.tfstate", newFileWriter.Bytes(), 0644)
 						}
 					} else {
 						// get tfstate file from resource_data table and gen it
@@ -2284,7 +2331,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					err = fmt.Errorf("Do TerraformPlan error:%s", tmpErr.Error())
 					log.Logger.Error("Do TerraformPlan error", log.Error(err))
 					rowData["errorMessage"] = err.Error()
-					// return
+					return
 				}
 				if _, ok := reqParam[models.ResourceDataDebug]; ok {
 					// resource_data debug mode, get the plan file after terraform plan
@@ -4456,4 +4503,52 @@ func deleteOldResourceData(sourceData *models.SourceTable,
 		}
 	}
 	return
+}
+
+func compareObject(first,second map[string]interface{}) (result map[string]interface{},diff int,message string) {
+	result = make(map[string]interface{})
+	for k,v := range second {
+		result[k] = v
+		if v == nil {
+			if first[k] != nil {
+				fmt.Printf("k: %s is nil,use first value:%v \n", k, first[k])
+				result[k] = first[k]
+			}
+			continue
+		}
+		if fmt.Sprintf("%v", v) != fmt.Sprintf("%v", first[k]) {
+			diff = 1
+			message += fmt.Sprintf("Key:%s is diff with %v -> %v \n", k, first[k], v)
+		}
+	}
+	message = strings.ReplaceAll(message, "<nil>", "null")
+	return
+}
+
+func getFileAttrContent(filename string) models.TfFileAttrFetchResult {
+	result := models.TfFileAttrFetchResult{}
+	tfFileByte,_ := ioutil.ReadFile(filename)
+	result.FileContent = string(tfFileByte)
+	startFlag,startIndex,endIndex := 0,0,0
+	for i:=strings.Index(result.FileContent, "\"attributes\":");i<len(result.FileContent);i++ {
+		if result.FileContent[i] == 123 {
+			startFlag += 1
+			if startIndex == 0 {
+				startIndex = i
+			}
+			continue
+		}
+		if result.FileContent[i] == 125 {
+			startFlag = startFlag - 1
+			if startFlag == 0 {
+				endIndex = i
+				break
+			}
+		}
+	}
+	endIndex += 1
+	result.StartIndex = startIndex
+	result.EndIndex = endIndex
+	result.AttrBytes = []byte(result.FileContent[startIndex:endIndex])
+	return result
 }
