@@ -27,11 +27,11 @@
             </Option>
           </Select>
         </FormItem>
-        <FormItem :label="$t('t_secret_key')">
-          <Input type="textarea" v-model="newProviderInfo.form.secretKey" :rows="4" style="width:400px"></Input>
-        </FormItem>
         <FormItem :label="$t('t_secret_id')">
           <Input type="textarea" v-model="newProviderInfo.form.secretId" :rows="4" style="width:400px"></Input>
+        </FormItem>
+        <FormItem :label="$t('t_secret_key')">
+          <Input type="textarea" v-model="newProviderInfo.form.secretKey" :rows="4" style="width:400px"></Input>
         </FormItem>
       </Form>
     </Modal>

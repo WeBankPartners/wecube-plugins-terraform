@@ -5,9 +5,15 @@
         <Button type="primary" @click="addPlugin" ghost size="small" style="margin-left:24px;width: 40%;">{{
           $t('t_add')
         }}</Button>
-        <Button type="success" @click="exportPlugin" ghost size="small" style="margin:0 1%;width: 40%;">{{
-          $t('t_export')
-        }}</Button>
+        <Button
+          type="success"
+          :disabled="isExport"
+          @click="exportPlugin"
+          ghost
+          size="small"
+          style="margin:0 1%;width: 40%;"
+          >{{ $t('t_export') }}</Button
+        >
         <div style="height: calc(100vh - 180px);overflow-y:auto;">
           <div style="">
             <Menu
@@ -414,6 +420,7 @@ export default {
   name: '',
   data () {
     return {
+      isExport: false,
       currentPlugin: '',
       currentInterface: '',
       pluginOptions: [],
@@ -474,12 +481,13 @@ export default {
   },
   methods: {
     exportPlugin () {
+      this.isExport = true
       axios({
         method: 'GET',
         url: `/weterraform/api/v1/plugin_xml/export`
       })
         .then(response => {
-          console.log(response)
+          this.isExport = false
           if (response.status < 400) {
             let content = response.data
             let fileName = `plugin_${new Date().getFullYear() +

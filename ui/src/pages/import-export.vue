@@ -50,9 +50,12 @@
         </Card>
       </Col>
       <Col span="5" offset="1">
-        <Button @click="exportData" :disabled="plugin.length === 0 || currentProvider.length === 0" type="primary">{{
-          $t('t_export')
-        }}</Button>
+        <Button
+          @click="exportData"
+          :disabled="plugin.length === 0 || currentProvider.length === 0 || isExport"
+          type="primary"
+          >{{ $t('t_export') }}</Button
+        >
         <Upload
           style="float:right"
           :action="uploadUrl"
@@ -78,6 +81,7 @@ export default {
   data () {
     return {
       PAGEHEIGHT: 0,
+      isExport: false,
       plugin: [],
       pluginOptions: [],
       currentProvider: [],
@@ -98,6 +102,7 @@ export default {
       this.currentProvider = this.providerList.map(item => item.name)
     },
     async exportData () {
+      this.isExport = true
       axios({
         method: 'GET',
         url: `/weterraform/api/v1/provider_plugin_config/export?provider=${this.currentProvider.join(
@@ -105,6 +110,7 @@ export default {
         )}&plugin=${this.plugin.join(',')}`
       })
         .then(response => {
+          this.isExport = false
           console.log(response)
           if (response.status < 400) {
             let content = JSON.stringify(response.data)
