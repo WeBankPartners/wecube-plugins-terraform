@@ -5,6 +5,9 @@ import templateData from '@/pages/template-data'
 import providerInfo from '@/pages/provider-info'
 import provider from '@/pages/provider'
 import importAndExport from '@/pages/import-export'
+import debuggerIndex from '@/pages/debugger/debugger-index'
+import debuggerData from '@/pages/debugger/debugger-data'
+import debuggerRequest from '@/pages/debugger/debugger-request'
 const router = [
   {
     path: '/terraformIndex',
@@ -55,6 +58,30 @@ const router = [
         title: '导入导出',
         meta: {},
         component: importAndExport
+      }
+    ]
+  },
+  {
+    path: '/debuggerIndex',
+    name: 'debuggerIndex',
+    component: debuggerIndex,
+    params: {},
+    redirect: '/debuggerIndex/debuggerData',
+    props: true,
+    children: [
+      {
+        path: 'debuggerData',
+        name: 'debuggerData',
+        title: '调试数据',
+        meta: {},
+        component: debuggerData
+      },
+      {
+        path: 'debuggerRequest',
+        name: 'debuggerRequest',
+        title: '调试请求',
+        meta: {},
+        component: debuggerRequest
       }
     ]
   }

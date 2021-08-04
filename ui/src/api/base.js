@@ -3,7 +3,7 @@ import axios from 'axios'
 // import exportFile from '@/const/export-file'
 import { setCookie, getCookie } from '../pages/util/cookie'
 
-export const baseURL = '/weterraform/api/v1'
+export const baseURL = ''
 export const req = axios.create({
   withCredentials: false,
   baseURL,

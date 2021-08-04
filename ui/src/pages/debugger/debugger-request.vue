@@ -10,6 +10,7 @@
             clearable
             @on-clear="clearPlugin"
             @on-change="currentInterface = ''"
+            @on-open-change="getPlugin"
             filterable
             style="width:400px"
           >
@@ -60,7 +61,7 @@
         <Icon v-if="!fullscreen" @click="fullscreen = true" class="header-icon" type="ios-expand" />
         <Icon v-else @click="fullscreen = false" class="header-icon" type="ios-contract" />
       </p>
-      <div style="overflow: auto;max-height: 500px;">
+      <div :style="{ overflow: 'auto', 'max-height': fullscreen ? '' : '500px' }">
         <pre>{{ dataDetail.data }}</pre>
       </div>
     </Modal>
@@ -383,7 +384,6 @@ export default {
       }
     },
     async getPlugin () {
-      this.pluginOptions = []
       const { statusCode, data } = await getPluginList()
       if (statusCode === 'OK') {
         this.pluginOptions = data

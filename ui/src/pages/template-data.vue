@@ -3,7 +3,14 @@
     <!-- 搜索区 -->
     <div>
       <span>{{ $t('t_plugin') }}</span>
-      <Select v-model="plugin" clearable filterable @on-clear="clearPlugin" style="width:300px">
+      <Select
+        v-model="plugin"
+        clearable
+        filterable
+        @on-open-change="getPlugin"
+        @on-clear="clearPlugin"
+        style="width:300px"
+      >
         <Option v-for="item in pluginOptions" :value="item.id" :key="item.id">{{ item.name }}</Option>
       </Select>
       <Button type="primary" @click="getTemplates" :disabled="!plugin">{{ $t('t_search') }}</Button>
@@ -120,7 +127,6 @@ export default {
       this.showOperateZone = false
     },
     async getProviderList () {
-      this.providerList = []
       this.provider = []
       const { statusCode, data } = await getProviderList()
       if (statusCode === 'OK') {
@@ -129,7 +135,6 @@ export default {
       }
     },
     async getPlugin () {
-      this.pluginOptions = []
       const { statusCode, data } = await getPluginList()
       if (statusCode === 'OK') {
         this.pluginOptions = data
@@ -206,10 +211,11 @@ export default {
         this.provider.forEach(p => {
           const find = this.providerList.find(pro => pro.name === p)
           providerValue.push({
-            id: templateValue.id,
+            id: templateValue.providerTemplateValueInfo[p].id,
             value: templateValue.providerTemplateValueInfo[p].value,
             provider: find.id,
-            templateValue: data[0].id
+            templateValue: data[0].id,
+            createTime: templateValue.providerTemplateValueInfo[p].createTime
           })
         })
         const newTemplateValue = await createProviderTemplateValues(providerValue)
