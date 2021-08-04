@@ -15,4 +15,5 @@ type SourceTable struct {
 	ImportSupport    string `json:"importSupport" xorm:"import_support"`
 	ExecutionSeqNo   int    `json:"executionSeqNo" xorm:"execution_seq_no"`
 	SourceType       string `json:"sourceType" xorm:"source_type"`
+	Remark           string `json:"remark" xorm:"remark"`
 }

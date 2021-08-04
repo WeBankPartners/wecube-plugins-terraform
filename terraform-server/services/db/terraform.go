@@ -276,7 +276,7 @@ func GenWorkDirPath(resourceId string,
 
 func TerraformImport(dirPath, address, resourceAssetId string) (err error) {
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " import " + address + " " + resourceAssetId
-	cmd := exec.Command("/bin/bash", "-c", cmdStr)
+	cmd := exec.Command(models.BashCmd, "-c", cmdStr)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
@@ -303,7 +303,7 @@ func TerraformImport(dirPath, address, resourceAssetId string) (err error) {
 func TerraformPlan(dirPath string) (destroyCnt int, err error) {
 	// cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " plan -input=false -out=" + dirPath + "/planfile"
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " plan -input=false"
-	cmd := exec.Command("/bin/bash", "-c", cmdStr)
+	cmd := exec.Command(models.BashCmd, "-c", cmdStr)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
@@ -383,7 +383,7 @@ func TerraformPlan(dirPath string) (destroyCnt int, err error) {
 
 func TerraformApply(dirPath string) (err error) {
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " apply -auto-approve"
-	cmd := exec.Command("/bin/bash", "-c", cmdStr)
+	cmd := exec.Command(models.BashCmd, "-c", cmdStr)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
@@ -409,7 +409,7 @@ func TerraformApply(dirPath string) (err error) {
 
 func TerraformDestroy(dirPath string) (err error) {
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " destroy -auto-approve"
-	cmd := exec.Command("/bin/bash", "-c", cmdStr)
+	cmd := exec.Command(models.BashCmd, "-c", cmdStr)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
@@ -435,7 +435,7 @@ func TerraformDestroy(dirPath string) (err error) {
 
 func TerraformInit(dirPath string) (err error) {
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " init"
-	cmd := exec.Command("/bin/bash", "-c", cmdStr)
+	cmd := exec.Command(models.BashCmd, "-c", cmdStr)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
@@ -737,12 +737,14 @@ func handleOutPutArgs(outPutArgs map[string]interface{},
 	// delete the item that id is nil or nil []interface{}
 	tmpOutPutResultList := []map[string]interface{}{}
 	for i := range flatOutPutArgs {
-		if flatOutPutArgs[i]["id"] == nil {
+		/*
+		if _, ok := flatOutPutArgs[i]["id"]; ok && flatOutPutArgs[i]["id"] == nil {
 			flatOutPutArgs[i]["id"] = ""
 		}
 		if isResultIdValid(flatOutPutArgs[i]["id"]) == false {
 			continue
 		}
+		 */
 		tmpOutPutResultList = append(tmpOutPutResultList, flatOutPutArgs[i])
 	}
 
@@ -750,13 +752,20 @@ func handleOutPutArgs(outPutArgs map[string]interface{},
 	mapOutPutArgs, _ := handleSliceMapOutPutParam(tmpOutPutResultList)
 
 	for i := range mapOutPutArgs {
+		/*
 		for k, v := range outPutParameterNameMap {
 			if _, okParam := tfstateAttrParamMap[v.Id]; !okParam {
-				mapOutPutArgs[i][k] = reqParam[k]
+				if _, ok := reqParam[k]; ok && reqParam[k] != "" {
+					mapOutPutArgs[i][k] = reqParam[k]
+				}
 			}
 		}
+		 */
 		outPutResultList = append(outPutResultList, mapOutPutArgs[i])
 	}
+
+	// construct the object
+
 	return
 }
 
@@ -1601,10 +1610,12 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 		// resourceAssetId := reqParam["asset_id"].(string)
 		// fmt.Printf("%v\n", resourceAssetId)
 
+		reqParam[models.SimulateResourceDataResult] = make(map[string][]map[string]interface{})
 		toDestroyList := make(map[string]*models.ResourceDataTable)
-		for _, sortedSourceData := range sortedSourceList {
+		for sourceDataIdx, sortedSourceData := range sortedSourceList {
 			simulateResourceData[sortedSourceData.Id] = []map[string]interface{}{}
 			reqParam[models.SimulateResourceData] = simulateResourceData
+			reqParam[models.SourceDataIdx] = sourceDataIdx
 
 			isInternalAction := false
 			// Get all tfArguments of source
@@ -1640,6 +1651,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 
 			conStructObject := []map[string]interface{}{}
 			if len(rootTfArgumentList) == 0 {
+				reqParam[models.SourceDataIdx] = 0
 				var convertedArgumentData map[string]interface{}
 				convertedArgumentData, _, err = handleConvertParams(action, sortedSourceData, allTfArgumentList, reqParam, providerData, regionData)
 				if err != nil {
@@ -2440,6 +2452,43 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 				// *debugFileContent = append(*debugFileContent, curDebugFileContent)
 
 				DelTfstateFile(workDirPath)
+
+				if action == "query" {
+					if sourceDataIdx != 0 {
+						resourceDataResult := reqParam[models.SimulateResourceDataResult].(map[string][]map[string]interface{})
+						rootResult := resourceDataResult[sortedSourceList[0].Id]
+						curSourceRes := resourceDataResult[sortedSourceData.Id]
+						rootIdx := -1
+						for ix := range rootResult {
+							flag := true
+							for k, v := range conStructObject[i] {
+								if rootResult[ix][k] != v {
+									flag = false
+									break
+								}
+							}
+							if flag == true {
+								rootIdx = ix
+							}
+						}
+						if rootIdx != -1 {
+							curRootResultOut := rootResult[rootIdx]["output"].(map[string]interface{})
+							// fmt.Printf("%v", curRootResultOut)
+							if len(curSourceRes) > 0 {
+								for j := range curSourceRes {
+									for k, v := range curSourceRes[j] {
+										if _, ok := curRootResultOut[k]; !ok {
+											curRootResultOut[k] = []interface{}{v}
+										} else {
+											curRootResultOut[k] = append(curRootResultOut[k].([]interface{}), v)
+										}
+									}
+								}
+							}
+						}
+						resourceDataResult[sortedSourceData.Id] = []map[string]interface{}{}
+					}
+				}
 			}
 			if action == "apply" && len(toDestroyResource) > 0 {
 				for k, v := range toDestroyResource {
@@ -2448,6 +2497,18 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 			}
 
 			DelProviderFile(workDirPath)
+		}
+		if action == "query" {
+			if len(sortedSourceList) > 1 {
+				curSimulateResourceData := reqParam[models.SimulateResourceDataResult].(map[string][]map[string]interface{})
+				// rowData[models.TerraformOutPutPrefix] = curSimulateResourceData[sortedSourceList[0].Id]
+				curResult := curSimulateResourceData[sortedSourceList[0].Id]
+				result := []interface{}{}
+				for i := range curResult {
+					result = append(result, curResult[i]["output"])
+				}
+				rowData[models.TerraformOutPutPrefix] = result
+			}
 		}
 		if action == "apply" && len(toDestroyList) > 0 {
 			for i := len(sortedSourceList) - 1; i >= 0; i-- {
@@ -2552,28 +2613,30 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	return
 }
 
-func convertData(relativeSourceId string, reqParam map[string]interface{}, regionData *models.ResourceDataTable, tfArgument *models.TfArgumentTable) (arg interface{}, err error) {
+func convertData(relativeSourceId string, reqParam map[string]interface{}, regionData *models.ResourceDataTable, tfArgument *models.TfArgumentTable, sourceData *models.SourceTable) (arg interface{}, err error) {
 	if tfArgument.Parameter == "" {
-		if _, ok := reqParam[models.SimulateResourceData]; ok {
-			curSimulateResourceData := reqParam[models.SimulateResourceData].(map[string][]map[string]interface{})
+		if sourceData.SourceType == "data_resource" {
+			if _, ok := reqParam[models.SimulateResourceData]; ok {
+				curSimulateResourceData := reqParam[models.SimulateResourceData].(map[string][]map[string]interface{})
 
-			tmpRes := []interface{}{}
-			resourceDatas := curSimulateResourceData[relativeSourceId]
-			for i := range resourceDatas {
-				tmpData := resourceDatas[i]["tfstateFile"].(map[string]interface{})
-				assetIdAttribute := resourceDatas[i]["assetIdAttribute"].(string)
-				if _, ok := tmpData[assetIdAttribute]; ok {
-					tmpRes = append(tmpRes, tmpData[assetIdAttribute])
+				tmpRes := []interface{}{}
+				resourceDatas := curSimulateResourceData[relativeSourceId]
+				for i := range resourceDatas {
+					tmpData := resourceDatas[i]["tfstateFile"].(map[string]interface{})
+					assetIdAttribute := resourceDatas[i]["assetIdAttribute"].(string)
+					if _, ok := tmpData[assetIdAttribute]; ok {
+						tmpRes = append(tmpRes, tmpData[assetIdAttribute])
+					}
 				}
-			}
-			if len(tmpRes) > 0 {
-				if tfArgument.IsMulti == "Y" {
-					arg = tmpRes
-				} else {
-					arg = tmpRes[0]
+				if len(tmpRes) > 0 {
+					if tfArgument.IsMulti == "Y" {
+						arg = tmpRes
+					} else {
+						arg = tmpRes[0]
+					}
 				}
+				return
 			}
-			return
 		}
 		// get data from resource_data
 		// curTfArgRelativeSource := remainTfArguments[i].RelativeSource
@@ -2997,7 +3060,7 @@ func reverseConvertAttr(parameterData *models.ParameterTable, tfstateAttributeDa
 	return
 }
 
-func convertContextData(tfArgumentData *models.TfArgumentTable, reqParam map[string]interface{}, regionData *models.ResourceDataTable, tfArgument *models.TfArgumentTable) (arg interface{}, isDiscard bool, err error) {
+func convertContextData(tfArgumentData *models.TfArgumentTable, reqParam map[string]interface{}, regionData *models.ResourceDataTable, tfArgument *models.TfArgumentTable, sourceData *models.SourceTable) (arg interface{}, isDiscard bool, err error) {
 	if tfArgument.Parameter == "" {
 		arg = tfArgument.DefaultValue
 		return
@@ -3038,7 +3101,7 @@ func convertContextData(tfArgumentData *models.TfArgumentTable, reqParam map[str
 	}
 	relativeParameterData := parameterList[0]
 	if reqParam[relativeParameterData.Name].(string) == tfArgumentData.RelativeParameterValue {
-		arg, err = convertData(tfArgumentData.RelativeSource, reqParam, regionData, tfArgument)
+		arg, err = convertData(tfArgumentData.RelativeSource, reqParam, regionData, tfArgument, sourceData)
 	} else {
 		isDiscard = true
 	}
@@ -3747,8 +3810,12 @@ func handleReverseConvert(outPutParameterNameMap map[string]*models.ParameterTab
 						outPutArgs[outPutParameterIdMap[tfstateAttr.Parameter].Name] = curAttributesRet
 					}
 				*/
-				*paramCnt += 1
-				outPutArgs[models.TerraformOutPutPrefix+strconv.Itoa(*paramCnt)] = curAttributesRet
+				if tfstateAttr.Parameter == "" {
+					*paramCnt += 1
+					outPutArgs[models.TerraformOutPutPrefix+strconv.Itoa(*paramCnt)] = curAttributesRet
+				} else {
+					outPutArgs[outPutParameterIdMap[tfstateAttr.Parameter].Name] = curAttributesRet
+				}
 
 				if tfstateAttr.Name != "tags" {
 					continue
@@ -4064,11 +4131,11 @@ func handleConvertParams(action string,
 		switch convertWay {
 		case models.ConvertWay["Data"]:
 			// search resource_data table，get resource_asset_id by resource_id and resource(which is relative_source column in tf_argument table )
-			arg, err = convertData(tfArgumentList[i].RelativeSource, reqParam, regionData, tfArgumentList[i])
+			arg, err = convertData(tfArgumentList[i].RelativeSource, reqParam, regionData, tfArgumentList[i], sourceData)
 		case models.ConvertWay["Template"]:
 			arg, err = convertTemplate(providerData, reqParam, tfArgumentList[i])
 		case models.ConvertWay["ContextData"]:
-			arg, isDiscard, err = convertContextData(tfArgumentList[i], reqParam, regionData, tfArgumentList[i])
+			arg, isDiscard, err = convertContextData(tfArgumentList[i], reqParam, regionData, tfArgumentList[i], sourceData)
 		case models.ConvertWay["Attr"]:
 			// search resouce_data table by relative_source and 输入的值, 获取 tfstat_file 字段内容,找到relative_tfstate_attribute id(search tfstate_attribute table) 对应的 name, 获取其在 tfstate_file 中的值
 			arg, err = convertAttr(tfArgumentList[i], reqParam, regionData, tfArgumentList[i])
@@ -4511,6 +4578,12 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 		if !isInternalAction {
 			retOutput[models.TerraformOutPutPrefix] = outPutResultList
 		}
+
+		if action == "query" {
+			curRes := reqParam[models.SimulateResourceDataResult].(map[string][]map[string]interface{})
+			curRes[sourceData.Id] = append(curRes[sourceData.Id], outPutResultList...)
+			reqParam[models.SimulateResourceDataResult] = curRes
+		}
 	} else {
 		// 处理结果字段为 object 的情况
 		var tfstateResult []map[string]interface{}
@@ -4541,6 +4614,7 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 			}
 		}
 
+		querryFilteredResult := []map[string]interface{}{}
 		outPutResultList := []map[string]interface{}{}
 		for i := range tfstateResult {
 			var outPutArgs map[string]interface{}
@@ -4571,9 +4645,47 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 			tmpOutPutResult, _ := handleOutPutArgs(outPutArgs, outPutParameterNameMap, tfstateAttrParamMap, reqParam)
 			outPutResultList = append(outPutResultList, tmpOutPutResult...)
 			//retOutput[models.TerraformOutPutPrefix] = outPutResultList
+
+			if action == "query" {
+				if reqParam[models.SourceDataIdx] == 0 {
+					// action: query, check the result is valid
+					filterKeys := make(map[string]interface{})
+					for k := range reqParam {
+						if _, ok := models.ExcludeFilterKeys[k]; !ok {
+							filterKeys[k] = reqParam[k]
+						}
+					}
+					for ix := range tmpOutPutResult {
+						isValid := true
+						for k, v := range filterKeys {
+							if tmpOutPutResult[ix][k] != v {
+								isValid = false
+								break
+							}
+						}
+						if isValid {
+							tmpFilterRes := make(map[string]interface{})
+							tmpFilterRes[sourceData.AssetIdAttribute] = tfstateResult[i][sourceData.AssetIdAttribute]
+							tmpFilterRes["output"] = tmpOutPutResult[ix]
+							querryFilteredResult = append(querryFilteredResult, tmpFilterRes)
+						}
+					}
+				}
+			}
+
 		}
 		if !isInternalAction {
 			retOutput[models.TerraformOutPutPrefix] = outPutResultList
+		}
+		if action == "query" {
+			curRes := reqParam[models.SimulateResourceDataResult].(map[string][]map[string]interface{})
+			if reqParam[models.SourceDataIdx] == 0 {
+				curRes[sourceData.Id] = append(curRes[sourceData.Id], querryFilteredResult...)
+				reqParam[models.SimulateResourceDataResult] = curRes
+			} else {
+				curRes[sourceData.Id] = append(curRes[sourceData.Id], outPutResultList...)
+				reqParam[models.SimulateResourceDataResult] = curRes
+			}
 		}
 	}
 	return
