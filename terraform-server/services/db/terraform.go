@@ -4315,6 +4315,23 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 		orderTfstateAttrList = append(orderTfstateAttrList, v.TfstateAttr)
 	}
 
+	// sort the tfstateAttribute by the objectName
+	tmptfstateIdMap := make(map[string]*models.TfstateAttributeTable)
+	tmpOrderTfstateAttrList := []*models.TfstateAttributeTable{}
+	for i, v := range orderTfstateAttrList {
+		if v.ObjectName == "" {
+			tmpOrderTfstateAttrList = append(tmpOrderTfstateAttrList, orderTfstateAttrList[i])
+			tmptfstateIdMap[v.Id] = orderTfstateAttrList[i]
+		}
+	}
+	for i, v := range orderTfstateAttrList {
+		if _, ok := tmptfstateIdMap[v.Id]; !ok {
+			tmpOrderTfstateAttrList = append(tmpOrderTfstateAttrList, orderTfstateAttrList[i])
+			tmptfstateIdMap[v.Id] = orderTfstateAttrList[i]
+		}
+	}
+	orderTfstateAttrList = tmpOrderTfstateAttrList
+
 	outPutParameterNameMap := make(map[string]*models.ParameterTable)
 	outPutParameterIdMap := make(map[string]*models.ParameterTable)
 	for _, v := range outPutParameterList {
