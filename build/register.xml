@@ -8,6 +8,8 @@
 
     <!-- 2.菜单注入 - 描述运行本插件包需要注入的菜单 -->
     <menus>
+        <menu code='ADMIN_TERRAFORM_CONFIG' cat='ADMIN' displayName="Terraform Config" localDisplayName="Terraform配置管理">/weterraform/terraformIndex</menu>
+        <menu code='ADMIN_TERRAFORM_DEBUG' cat='ADMIN' displayName="Terraform debug" localDisplayName="Terraform配置调试">/weterraform/debuggerIndex</menu>
     </menus>
 
     <!-- 3.数据模型 - 描述本插件包的数据模型,并且描述和Framework数据模型的关系 -->
@@ -23,6 +25,8 @@
     <!-- 5.权限设定 -->
     <authorities>
         <authority systemRoleName="SUPER_ADMIN" >
+            <menu code="ADMIN_TERRAFORM_CONFIG" />
+            <menu code="ADMIN_TERRAFORM_DEBUG" />
         </authority >
     </authorities>
 
