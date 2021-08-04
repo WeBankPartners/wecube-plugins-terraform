@@ -1,4 +1,4 @@
-FROM alpine
+FROM ccr.ccs.tencentyun.com/webankpartners/terrafrom-base:v1.0.0
 
 ENV BASE_HOME=/app/terraform
 
