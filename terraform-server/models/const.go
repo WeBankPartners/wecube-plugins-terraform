@@ -14,6 +14,7 @@ const (
 	SystemRole          = "SUB_SYSTEM"
 	PlatformUser        = "SYS_PLATFORM"
 	PasswordDisplay     = "****"
+	BashCmd             = "/bin/sh"
 	TerraformOutPutPrefix  = "$_result_list$"
 	ParameterSourceDefault = "custom"
 	TfArgumentKeyArgumentDefault = "N"

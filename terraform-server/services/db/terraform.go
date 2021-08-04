@@ -276,7 +276,7 @@ func GenWorkDirPath(resourceId string,
 
 func TerraformImport(dirPath, address, resourceAssetId string) (err error) {
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " import " + address + " " + resourceAssetId
-	cmd := exec.Command("/bin/bash", "-c", cmdStr)
+	cmd := exec.Command(models.BashCmd, "-c", cmdStr)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
@@ -303,7 +303,7 @@ func TerraformImport(dirPath, address, resourceAssetId string) (err error) {
 func TerraformPlan(dirPath string) (destroyCnt int, err error) {
 	// cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " plan -input=false -out=" + dirPath + "/planfile"
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " plan -input=false"
-	cmd := exec.Command("/bin/bash", "-c", cmdStr)
+	cmd := exec.Command(models.BashCmd, "-c", cmdStr)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
@@ -383,7 +383,7 @@ func TerraformPlan(dirPath string) (destroyCnt int, err error) {
 
 func TerraformApply(dirPath string) (err error) {
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " apply -auto-approve"
-	cmd := exec.Command("/bin/bash", "-c", cmdStr)
+	cmd := exec.Command(models.BashCmd, "-c", cmdStr)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
@@ -409,7 +409,7 @@ func TerraformApply(dirPath string) (err error) {
 
 func TerraformDestroy(dirPath string) (err error) {
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " destroy -auto-approve"
-	cmd := exec.Command("/bin/bash", "-c", cmdStr)
+	cmd := exec.Command(models.BashCmd, "-c", cmdStr)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
@@ -435,7 +435,7 @@ func TerraformDestroy(dirPath string) (err error) {
 
 func TerraformInit(dirPath string) (err error) {
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " init"
-	cmd := exec.Command("/bin/bash", "-c", cmdStr)
+	cmd := exec.Command(models.BashCmd, "-c", cmdStr)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
