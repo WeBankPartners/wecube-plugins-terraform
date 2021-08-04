@@ -18,10 +18,14 @@ const (
 	TerraformOutPutPrefix  = "$_result_list$"
 	ParameterSourceDefault = "custom"
 	TfArgumentKeyArgumentDefault = "N"
-	ResourceDataDebug  = "$_resource_data_debug$"
+	ResourceDataDebug   = "$_resource_data_debug$"
 	ResourceIdDataConvert  = "#resourceId#"
 	PGuid               = "6101d5ff9c058ecd8d2dddd974d38f98"
 	ImportResourceDataTableId = "$_resource_data_table_id$"
+	SimulateResourceData = "$_simulate_resource_data$"
+	SimulateResourceDataReturn = "$_simulate_resource_data_return$"
+	SimulateResourceDataResult = "$_simulate_resource_data_result$"
+	SourceDataIdx        = "$_source_data_idx$"
 )
 
 var (
@@ -30,4 +34,9 @@ var (
 	TerraformProviderPathDiffMap = map[string]string{"tencentcloud": ".terraform/providers/registry.terraform.io/tencentcloudstack/tencentcloud/",
 													 "alicloud": ".terraform/providers/registry.terraform.io/hashicorp/alicloud/"}
 	FunctionConvertFunctionDefineName = map[string]string{"Split": "split", "Replace": "replace", "Regx": "regx", "Remove": "remove"}
+
+	ExcludeFilterKeys = map[string]bool{"confirmToken":true, "callbackParameter":true, "id":true, "asset_id":true,
+		"provider_info":true, "region_id":true, "operator_user":true, "requestId":true, "requestSn":true,
+		SimulateResourceData:true, ResourceDataDebug:true, ResourceIdDataConvert:true, ImportResourceDataTableId: true,
+		SimulateResourceDataReturn:true, SimulateResourceDataResult:true, SourceDataIdx:true}
 )
