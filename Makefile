@@ -17,27 +17,17 @@ image: build
 
 package: image
 	mkdir -p plugin
-	cp -r ui/plugin/* plugin/
-	cp docker-compose.tpl docker-compose.yml
-	cp build/default.json default.json
+	cp -r ui/dist/* plugin/
 	zip -r ui.zip plugin
 	rm -rf plugin
 	cp build/register.xml ./
 	cp wiki/init.sql ./init.sql
 	sed -i "s~{{PLUGIN_VERSION}}~$(version)~g" ./register.xml
 	sed -i "s~{{REPOSITORY}}~$(project_dir)~g" ./register.xml
-	sed -i "s~{{version}}~$(version)~g" ./docker-compose.yml
-	sed -i "s~{{PLUGIN_MODE}}~no~g" ./default.json
-	sed -i "s~{{GATEWAY_URL}}~~g" ./default.json
-	sed -i "s~{{JWT_SIGNING_KEY}}~~g" ./default.json
-	sed -i "s~{{SUB_SYSTEM_CODE}}~~g" ./default.json
-	sed -i "s~{{SUB_SYSTEM_KEY}}~~g" ./default.json
 	docker save -o image.tar $(project_dir):$(version)
-	zip  $(project_dir)-$(version).zip image.tar init.sql register.xml docker-compose.yml default.json ui.zip
+	zip  $(project_dir)-$(version).zip image.tar init.sql register.xml ui.zip
 	rm -f register.xml init.sql ui.zip
 	rm -rf ./*.tar
-	rm -f docker-compose.yml
-	rm -f default.json
 	docker rmi $(project_dir):$(version)
 
 upload: package
