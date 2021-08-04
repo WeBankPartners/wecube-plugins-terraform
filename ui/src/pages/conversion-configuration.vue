@@ -205,12 +205,12 @@
               <div style="margin-top: -1px;" v-for="(item, argIndex) in source.args" :key="argIndex">
                 <template>
                   <div class="table-col title-width-level1" style="margin-left: -1px">
-                    <Tooltip :content="item.name" :delay="500">
+                    <Tooltip :content="item.name" :delay="500" placement="right">
                       <Input v-model="item.name" size="small" />
                     </Tooltip>
                   </div>
                   <div class="table-col title-width-level1">
-                    <Tooltip :content="item.type" :delay="500">
+                    <Tooltip :content="item.type" :delay="500" placement="right">
                       <Select v-model="item.type" clearable filterable @on-clear="item.type = ''" size="small">
                         <Option v-for="item in dataTypeOptions" :value="item.value" :key="item.value">{{
                           item.label
@@ -219,7 +219,7 @@
                     </Tooltip>
                   </div>
                   <div class="table-col title-width-level1">
-                    <Tooltip :content="item.parameter" :delay="500">
+                    <Tooltip :content="item.parameter" :delay="500" placement="right">
                       <Select
                         v-model="item.parameter"
                         size="small"
@@ -243,7 +243,7 @@
                     </Tooltip>
                   </div>
                   <div class="table-col title-width-level1">
-                    <Tooltip :content="item.defaultValue" :delay="500">
+                    <Tooltip :content="item.defaultValue" :delay="500" placement="right">
                       <Select
                         v-model="item.defaultValue"
                         @on-open-change="openDefaultValue(item, 'interfaceInputParamsWithTemplate')"
@@ -267,7 +267,7 @@
                     </Tooltip>
                   </div>
                   <div class="table-col title-width-level1">
-                    <Tooltip :content="item.objectName" :delay="500">
+                    <Tooltip :content="item.objectName" :delay="500" placement="right">
                       <Select
                         v-model="item.objectName"
                         @on-clear="item.objectName = ''"
@@ -307,7 +307,7 @@
                   </div>
 
                   <div class="table-col title-width-level1" style="margin-left: -1px;">
-                    <Tooltip :content="item.convertWay" :delay="500">
+                    <Tooltip :content="item.convertWay" :delay="500" placement="right">
                       <Select
                         v-model="item.convertWay"
                         style="width:100px"
@@ -326,7 +326,7 @@
                     </Tooltip>
                   </div>
                   <div class="table-col title-width-level1">
-                    <Tooltip :content="item.relativeParameter" :delay="500">
+                    <Tooltip :content="item.relativeParameter" :delay="500" placement="right">
                       <Select
                         v-model="item.relativeParameter"
                         :disabled="
@@ -355,7 +355,7 @@
                     </Tooltip>
                   </div>
                   <div class="table-col title-width-level1">
-                    <Tooltip :content="item.relativeParameterValue" :delay="500">
+                    <Tooltip :content="item.relativeParameterValue" :delay="500" placement="right">
                       <Select
                         v-model="item.relativeParameterValue"
                         :disabled="
@@ -383,7 +383,11 @@
                     </Tooltip>
                   </div>
                   <div class="table-col title-width-level1">
-                    <Tooltip :content="item.relativeSource" :delay="500">
+                    <Tooltip
+                      :content="getTipContent(item.relativeSource, item.sourceWithFilter)"
+                      :delay="500"
+                      placement="right"
+                    >
                       <Select
                         v-model="item.relativeSource"
                         size="small"
@@ -401,15 +405,15 @@
                           }}</Option>
                         </template>
                         <template v-else>
-                          <Option v-for="item in item.sourceWithFilter" :value="item.id" :key="item.id">{{
-                            item.name
-                          }}</Option>
+                          <Option v-for="item in item.sourceWithFilter" :value="item.id" :key="item.id"
+                            >{{ item.name }}(({{ item.sourceType }}))</Option
+                          >
                         </template>
                       </Select>
                     </Tooltip>
                   </div>
                   <div class="table-col title-width-level1">
-                    <Tooltip :content="item.remark" :delay="500">
+                    <Tooltip :content="item.remark" :delay="500" placement="right">
                       <Select
                         v-model="item.relativeTfstateAttribute"
                         :disabled="!['attribute', 'context_attribute'].includes(item.convertWay)"
@@ -433,7 +437,7 @@
                     </Tooltip>
                   </div>
                   <div class="table-col title-width-level1">
-                    <Tooltip :content="item.functionDefine" :delay="500">
+                    <Tooltip :content="item.functionDefine" :delay="500" placement="right">
                       <Input
                         v-model="item.functionDefine"
                         :disabled="!['function'].includes(item.convertWay)"
@@ -456,12 +460,12 @@
               <div style="margin-top: -1px;" v-for="(item, attrIndex) in source.attrs" :key="attrIndex">
                 <template>
                   <div class="table-col title-width-level1" style="margin-left: 0px">
-                    <Tooltip :content="item.name" :delay="500">
+                    <Tooltip :content="item.name" :delay="500" placement="right">
                       <Input v-model="item.name" size="small" />
                     </Tooltip>
                   </div>
                   <div class="table-col title-width-level1">
-                    <Tooltip :content="item.type" :delay="500">
+                    <Tooltip :content="item.type" :delay="500" placement="right">
                       <Select v-model="item.type" @on-clear="item.type = ''" clearable filterable size="small">
                         <Option v-for="item in dataTypeOptions" :value="item.value" :key="item.value">{{
                           item.label
@@ -470,7 +474,7 @@
                     </Tooltip>
                   </div>
                   <div class="table-col title-width-level1" style="margin-left: -1px;">
-                    <Tooltip :content="item.parameter" :delay="500">
+                    <Tooltip :content="item.parameter" :delay="500" placement="right">
                       <Select
                         v-model="item.parameter"
                         size="small"
@@ -494,7 +498,7 @@
                     </Tooltip>
                   </div>
                   <div class="table-col title-width-level1">
-                    <Tooltip :content="item.defaultValue" :delay="500">
+                    <Tooltip :content="item.defaultValue" :delay="500" placement="right">
                       <Select
                         v-model="item.defaultValue"
                         @on-open-change="openDefaultValue(item, 'interfaceOutputParamsWithTemplate')"
@@ -517,7 +521,7 @@
                     </Tooltip>
                   </div>
                   <div class="table-col title-width-level1">
-                    <Tooltip :content="item.objectName" :delay="500">
+                    <Tooltip :content="item.objectName" :delay="500" placement="right">
                       <Select
                         v-model="item.objectName"
                         @on-clear="item.objectName = ''"
@@ -557,7 +561,7 @@
                   </div>
 
                   <div class="table-col title-width-level1" style="margin-left: -1px;">
-                    <Tooltip :content="item.convertWay" :delay="500">
+                    <Tooltip :content="item.convertWay" :delay="500" placement="right">
                       <Select
                         v-model="item.convertWay"
                         style="width:100px"
@@ -577,7 +581,7 @@
                     </Tooltip>
                   </div>
                   <div class="table-col title-width-level1">
-                    <Tooltip :content="item.relativeParameter" :delay="500">
+                    <Tooltip :content="item.relativeParameter" :delay="500" placement="right">
                       <Select
                         v-model="item.relativeParameter"
                         :disabled="
@@ -606,7 +610,7 @@
                     </Tooltip>
                   </div>
                   <div class="table-col title-width-level1">
-                    <Tooltip :content="item.relativeParameterValue" :delay="500">
+                    <Tooltip :content="item.relativeParameterValue" :delay="500" placement="right">
                       <Select
                         v-model="item.relativeParameterValue"
                         :disabled="
@@ -634,7 +638,11 @@
                     </Tooltip>
                   </div>
                   <div class="table-col title-width-level1">
-                    <Tooltip :content="item.relativeSource" :delay="500">
+                    <Tooltip
+                      :content="getTipContent(item.relativeSource, item.sourceWithFilter)"
+                      :delay="500"
+                      placement="right"
+                    >
                       <Select
                         v-model="item.relativeSource"
                         size="small"
@@ -652,15 +660,15 @@
                           }}</Option>
                         </template>
                         <template v-else>
-                          <Option v-for="item in item.sourceWithFilter" :value="item.id" :key="item.id">{{
-                            item.name
-                          }}</Option>
+                          <Option v-for="item in item.sourceWithFilter" :value="item.id" :key="item.id"
+                            >{{ item.name }}(({{ item.sourceType }}))</Option
+                          >
                         </template>
                       </Select>
                     </Tooltip>
                   </div>
                   <div class="table-col title-width-level1">
-                    <Tooltip :content="item.relativeTfstateAttribute" :delay="500">
+                    <Tooltip :content="item.relativeTfstateAttribute" :delay="500" placement="right">
                       <Select
                         v-model="item.relativeTfstateAttribute"
                         :disabled="!['attribute', 'context_attribute'].includes(item.convertWay)"
@@ -684,7 +692,7 @@
                     </Tooltip>
                   </div>
                   <div class="table-col title-width-level1">
-                    <Tooltip :content="item.functionDefine" :delay="500">
+                    <Tooltip :content="item.functionDefine" :delay="500" placement="right">
                       <Input
                         v-model="item.functionDefine"
                         :disabled="!['function'].includes(item.convertWay)"
@@ -715,31 +723,31 @@
     >
       <Form inline :label-width="100">
         <FormItem :label="$t('t_name')">
-          <Input type="text" v-model="newSource.form.name" style="width:400px"></Input>
+          <Input type="text" v-model="newSource.form.name" style="width:350px"></Input>
         </FormItem>
         <FormItem :label="$t('t_resource_asset_id_Attribute')">
-          <Input type="text" v-model="newSource.form.assetIdAttribute" style="width:400px"></Input>
+          <Input type="text" v-model="newSource.form.assetIdAttribute" style="width:350px"></Input>
         </FormItem>
         <FormItem :label="$t('terraform_used')">
-          <Select v-model="newSource.form.terraformUsed" style="width:400px">
+          <Select v-model="newSource.form.terraformUsed" style="width:350px">
             <Option value="Y">Y</Option>
             <Option value="N">N</Option>
           </Select>
         </FormItem>
         <FormItem :label="$t('import_support')">
-          <Select v-model="newSource.form.importSupport" style="width:400px">
+          <Select v-model="newSource.form.importSupport" style="width:350px">
             <Option value="Y">Y</Option>
             <Option value="N">N</Option>
           </Select>
         </FormItem>
         <FormItem :label="$t('source_type')">
-          <Select v-model="newSource.form.sourceType" style="width:400px">
+          <Select v-model="newSource.form.sourceType" style="width:350px">
             <Option value="resource">resource</Option>
             <Option value="data_resource">data_resource</Option>
           </Select>
         </FormItem>
         <FormItem :label="$t('t_remark')">
-          <Input type="text" v-model="newSource.form.remark" style="width:400px"></Input>
+          <Input type="text" v-model="newSource.form.remark" style="width:350px"></Input>
         </FormItem>
       </Form>
     </Modal>
@@ -849,6 +857,14 @@ export default {
     this.MODALHEIGHT = document.body.scrollHeight - 200
   },
   methods: {
+    getTipContent (id, options) {
+      const find = options.find(item => item.id === id)
+      if (find) {
+        return find.remark
+      } else {
+        return ''
+      }
+    },
     changeConverWay (item) {
       item.relativeParameter = ''
       item.relativeParameterValue = ''
