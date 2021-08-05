@@ -32,7 +32,7 @@ func PluginList(paramsMap map[string]interface{}) (rowData []*models.PluginTable
 		sqlCmd += " AND " + k + "=?"
 		paramArgs = append(paramArgs, v)
 	}
-	sqlCmd += " ORDER BY name DESC"
+	sqlCmd += " ORDER BY name ASC"
 	err = x.SQL(sqlCmd, paramArgs...).Find(&rowData)
 	if err != nil {
 		log.Logger.Error("Get plugin list error", log.Error(err))
