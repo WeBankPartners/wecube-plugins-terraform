@@ -15,6 +15,7 @@ const (
 	PlatformUser        = "SYS_PLATFORM"
 	PasswordDisplay     = "****"
 	BashCmd             = "/bin/sh"
+	RandomFlag          = "{random}"
 	TerraformOutPutPrefix  = "$_result_list$"
 	ParameterSourceDefault = "custom"
 	TfArgumentKeyArgumentDefault = "N"

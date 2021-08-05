@@ -3533,7 +3533,7 @@ func convertDirect(defaultValue string, reqParam map[string]interface{}, tfArgum
 		}
 	}
 
-	if tfArgument.DefaultValue == "random" && (arg == nil || arg == "") {
+	if tfArgument.DefaultValue == models.RandomFlag && (arg == nil || arg == "") {
 		randomVal := guid.CreateGuid()
 		arg = randomVal[:16]
 	}
@@ -4270,6 +4270,44 @@ func handleConvertParams(action string,
 			}
 		} else {
 			tfArguments[tfArgumentList[i].Name] = arg
+		}
+
+		// handle convert the object type tfArgument
+		if tfArgumentList[i].Type == "object" && tfArgumentList[i].Name != "tags" {
+			memberArgumentList := []*models.TfArgumentTable{}
+			for j := range tfArgumentList {
+				if tfArgumentList[j].ObjectName == tfArgumentList[i].Id {
+					memberArgumentList = append(memberArgumentList, tfArgumentList[j])
+				}
+			}
+			if len(memberArgumentList) > 0 {
+				inputArgs := []map[string]interface{}{}
+				if tfArgumentList[i].IsMulti == "Y" {
+					// inputArgs = append(inputArgs, arg.([]map[string]interface{})...)
+					inputArgs = arg.([]map[string]interface{})
+				} else {
+					inputArgs = append(inputArgs, arg.(map[string]interface{}))
+				}
+				tmpConvertResult := []interface{}{}
+				for k := range inputArgs {
+					if _, ok := reqParam[models.ResourceDataDebug]; ok {
+						inputArgs[k][models.ResourceDataDebug] = reqParam[models.ResourceDataDebug]
+					}
+					tmpRes, _, _ := handleConvertParams(action,
+						sourceData,
+						memberArgumentList,
+						inputArgs[k],
+						providerData,
+						regionData)
+					tmpConvertResult = append(tmpConvertResult, tmpRes)
+				}
+
+				if tfArgumentList[i].IsMulti == "Y" {
+					tfArguments[tfArgumentList[i].Name] = tmpConvertResult
+				} else {
+					tfArguments[tfArgumentList[i].Name] = tmpConvertResult[0]
+				}
+			}
 		}
 
 		// if arg != nil && convertWay == "direct" && parameterData.DataType == "string" && arg.(string) == "null" {
