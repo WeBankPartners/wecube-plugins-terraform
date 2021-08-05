@@ -85,6 +85,20 @@ export default {
       currentInterface: '',
       interfaceOptions: [],
       requestBody: '',
+      emptyBody: {
+        requestId: 'request-',
+        operator: 'debugger',
+        inputs: [
+          {
+            confirmToken: '',
+            callbackParameter: '',
+            id: '',
+            asset_id: '',
+            provider_info: '',
+            region_id: ''
+          }
+        ]
+      },
       showResult: false,
 
       tableColums: [],
@@ -325,6 +339,8 @@ export default {
     }
   },
   mounted () {
+    this.emptyBody.requestId = this.emptyBody.requestId + new Date().getUTCMilliseconds()
+    this.requestBody = JSON.stringify(this.emptyBody, null, 4)
     this.PAGEHEIGHT = document.body.scrollHeight
     this.getPlugin()
   },
