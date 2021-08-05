@@ -2214,6 +2214,44 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 									} else {
 										// deleteOldResourceData(sortedSourceData, regionData, resourceId, importObject[i], reqParam)
 									}
+								} else {
+									oldTfstateFile := importObjectResourceData[i].TfStateFile
+									var oldTfstateFileObj models.TfstateFileData
+									err = json.Unmarshal([]byte(oldTfstateFile), &oldTfstateFileObj)
+									if err != nil {
+										err = fmt.Errorf("Unmarshal tfstate file data error:%s", err.Error())
+										log.Logger.Error("Unmarshal tfstate file data error", log.Error(err))
+										return
+									}
+
+									secondFileObj := getFileAttrContent(workDirPath + "/terraform.tfstate")
+									first, second := make(map[string]interface{}), make(map[string]interface{})
+									first = oldTfstateFileObj.Resources[0].Instances[0].Attributes
+									err = json.Unmarshal(secondFileObj.AttrBytes, &second)
+									if err != nil {
+										fmt.Printf("json unmarshal second file fail,%s \n", err.Error())
+										return
+									}
+
+									result, diff, message := compareObject(first, second)
+									if diff != 0 {
+										err = fmt.Errorf("Compare import_state file and old tfstate file error:%s. Please confirm again!", message)
+										log.Logger.Error("Compare import_state file and old tfstate file error", log.String("message", message), log.Error(err))
+										rowData["errorMessage"] = err.Error()
+										return
+									}
+									resultBytes, tmpErr := json.MarshalIndent(result, "        ", "\t")
+									if tmpErr != nil {
+										err = fmt.Errorf("json marshal result fail,%s \n", tmpErr.Error())
+										return
+									}
+
+									newFileBytes := []byte{}
+									newFileWriter := bytes.NewBuffer(newFileBytes)
+									newFileWriter.WriteString(secondFileObj.FileContent[:secondFileObj.StartIndex])
+									newFileWriter.Write(resultBytes)
+									newFileWriter.WriteString(secondFileObj.FileContent[secondFileObj.EndIndex:])
+									ioutil.WriteFile(workDirPath+"/terraform.tfstate", newFileWriter.Bytes(), 0644)
 								}
 							} else {
 								// get tfstate file from resource_data table and gen it
@@ -2318,50 +2356,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 							} else {
 								// firstFileObj := getFileAttrContent(workDirPath + "/terraform.tfstate")
 								// get the old tfstate file content
-								oldTfstateFile := importObjectResourceData[i].TfStateFile
-								var oldTfstateFileObj models.TfstateFileData
-								err = json.Unmarshal([]byte(oldTfstateFile), &oldTfstateFileObj)
-								if err != nil {
-									err = fmt.Errorf("Unmarshal tfstate file data error:%s", err.Error())
-									log.Logger.Error("Unmarshal tfstate file data error", log.Error(err))
-									return
-								}
 
-								secondFileObj := getFileAttrContent(workDirPath + "/terraform.tfstate")
-								first, second := make(map[string]interface{}), make(map[string]interface{})
-								first = oldTfstateFileObj.Resources[0].Instances[0].Attributes
-								/*
-									err := json.Unmarshal(firstFileObj.AttrBytes, &first)
-									if err != nil {
-										fmt.Printf("json unmarshal first file fail,%s \n", err.Error())
-										return
-									}
-								*/
-								err = json.Unmarshal(secondFileObj.AttrBytes, &second)
-								if err != nil {
-									fmt.Printf("json unmarshal second file fail,%s \n", err.Error())
-									return
-								}
-
-								result, diff, message := compareObject(first, second)
-								if diff != 0 {
-									err = fmt.Errorf("Compare import_state file and old tfstate file error:%s", message)
-									log.Logger.Error("Compare import_state file and old tfstate file error", log.String("message", message), log.Error(err))
-									rowData["errorMessage"] = err.Error()
-									return
-								}
-								resultBytes, tmpErr := json.MarshalIndent(result, "        ", "\t")
-								if tmpErr != nil {
-									err = fmt.Errorf("json marshal result fail,%s \n", tmpErr.Error())
-									return
-								}
-
-								newFileBytes := []byte{}
-								newFileWriter := bytes.NewBuffer(newFileBytes)
-								newFileWriter.WriteString(secondFileObj.FileContent[:secondFileObj.StartIndex])
-								newFileWriter.Write(resultBytes)
-								newFileWriter.WriteString(secondFileObj.FileContent[secondFileObj.EndIndex:])
-								ioutil.WriteFile(workDirPath+"/terraform.tfstate", newFileWriter.Bytes(), 0644)
 							}
 						} else {
 							// get tfstate file from resource_data table and gen it
@@ -4090,7 +4085,7 @@ func handleConvertParams(action string,
 	tfArgumentList []*models.TfArgumentTable,
 	reqParam map[string]interface{},
 	providerData *models.ProviderTable,
-    regionData *models.ResourceDataTable) (tfArguments map[string]interface{}, resourceAssetId string, err error) {
+    regionData *models.ResourceDataTable) (tfArguments map[string]interface{}, resourceAssetId interface{}, err error) {
 
 	var errorTfArgument *models.TfArgumentTable
 	defer func() {
@@ -4184,6 +4179,9 @@ func handleConvertParams(action string,
 		// handle tfArgument that is not in tf.json file
 		if action == "apply" {
 			if tfArgumentList[i].Name == sourceData.AssetIdAttribute {
+				if arg != nil {
+					resourceAssetId = arg
+				}
 				/*
 				if parameterData.Name == "id" {
 					// if arg != nil {
