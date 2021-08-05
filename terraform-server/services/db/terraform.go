@@ -732,7 +732,7 @@ func handleOutPutArgs(outPutArgs map[string]interface{},
 	}()
 	outPutResultList = []map[string]interface{}{}
 	// flat outPutParam data
-	flatOutPutArgs, _ := handleFlatOutPutParam(outPutArgs)
+	flatOutPutArgs, hasTerraformOutPutPrefix, _ := handleFlatOutPutParam(outPutArgs)
 
 	// delete the item that id is nil or nil []interface{}
 	tmpOutPutResultList := []map[string]interface{}{}
@@ -748,8 +748,13 @@ func handleOutPutArgs(outPutArgs map[string]interface{},
 		tmpOutPutResultList = append(tmpOutPutResultList, flatOutPutArgs[i])
 	}
 
-	// 将数组类型的值进行一一映射
-	mapOutPutArgs, _ := handleSliceMapOutPutParam(tmpOutPutResultList)
+	var mapOutPutArgs []map[string]interface{}
+	if hasTerraformOutPutPrefix {
+		// 将数组类型的值进行一一映射
+		mapOutPutArgs, _ = handleSliceMapOutPutParam(tmpOutPutResultList)
+	} else {
+		mapOutPutArgs = tmpOutPutResultList
+	}
 
 	for i := range mapOutPutArgs {
 		/*
@@ -787,7 +792,7 @@ func isResultIdValid(outPutIdVal interface{}) bool {
 	return true
 }
 
-func handleFlatOutPutParam(outPutArgs map[string]interface{}) (retOutPutArgs []map[string]interface{}, err error) {
+func handleFlatOutPutParam(outPutArgs map[string]interface{}) (retOutPutArgs []map[string]interface{}, hasTerraformOutPutPrefix bool, err error) {
 	flatParams := make(map[string]interface{})
 	for k := range outPutArgs {
 		if strings.Contains(k, models.TerraformOutPutPrefix) == false {
@@ -802,7 +807,7 @@ func handleFlatOutPutParam(outPutArgs map[string]interface{}) (retOutPutArgs []m
 			tmpMarshal, _ := json.Marshal(v)
 			json.Unmarshal(tmpMarshal, &tmpData)
 			for i := range tmpData {
-				ret, _ := handleFlatOutPutParam(tmpData[i])
+				ret, _, _ := handleFlatOutPutParam(tmpData[i])
 				for j := range ret {
 					for fp := range flatParams {
 						ret[j][fp] = flatParams[fp]
@@ -2478,9 +2483,21 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 								for j := range curSourceRes {
 									for k, v := range curSourceRes[j] {
 										if _, ok := curRootResultOut[k]; !ok {
-											curRootResultOut[k] = []interface{}{v}
+											if _, tmpOk := v.([]interface{}); tmpOk {
+												var tmpV []interface{}
+												tmpV = v.([]interface{})
+												curRootResultOut[k] = tmpV
+											} else {
+												curRootResultOut[k] = []interface{}{v}
+											}
 										} else {
-											curRootResultOut[k] = append(curRootResultOut[k].([]interface{}), v)
+											if _, tmpOk := v.([]interface{}); tmpOk {
+												var tmpV []interface{}
+												tmpV = v.([]interface{})
+												curRootResultOut[k] = append(curRootResultOut[k].([]interface{}), tmpV...)
+											} else {
+												curRootResultOut[k] = append(curRootResultOut[k].([]interface{}), v)
+											}
 										}
 									}
 								}
