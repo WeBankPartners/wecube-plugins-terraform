@@ -2978,11 +2978,11 @@ func convertAttr(tfArgumentData *models.TfArgumentTable, reqParam map[string]int
 	if tfArgumentData.IsMulti == "Y" {
 		tmpRes := []interface{}{}
 		for i := range result {
-			tmpRes = append(tmpRes, result[i].(string))
+			tmpRes = append(tmpRes, result[i])
 		}
 		arg = tmpRes
 	} else {
-		arg = result[0].(string)
+		arg = result[0]
 	}
 	return
 }
