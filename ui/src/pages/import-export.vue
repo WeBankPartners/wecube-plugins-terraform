@@ -86,7 +86,7 @@ export default {
       pluginOptions: [],
       currentProvider: [],
       providerList: [],
-      uploadUrl: '/weterraform/api/v1/provider_plugin_config/import'
+      uploadUrl: '/terraform/api/v1/provider_plugin_config/import'
     }
   },
   mounted () {
@@ -105,7 +105,7 @@ export default {
       this.isExport = true
       axios({
         method: 'GET',
-        url: `/weterraform/api/v1/provider_plugin_config/export?provider=${this.currentProvider.join(
+        url: `/terraform/api/v1/provider_plugin_config/export?provider=${this.currentProvider.join(
           ','
         )}&plugin=${this.plugin.join(',')}`
       })

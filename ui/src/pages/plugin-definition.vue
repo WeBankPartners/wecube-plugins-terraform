@@ -484,7 +484,7 @@ export default {
       this.isExport = true
       axios({
         method: 'GET',
-        url: `/weterraform/api/v1/plugin_xml/export`
+        url: `/terraform/api/v1/plugin_xml/export`
       })
         .then(response => {
           this.isExport = false
