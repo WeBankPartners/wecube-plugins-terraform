@@ -153,7 +153,7 @@ func PluginXmlExport() (result []byte, err error) {
 	}
 	resultBuffer := bytes.NewBuffer(result)
 	resultBuffer.WriteString("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n")
-	var packageXmlObj = models.XmlPackage{Name: "wecube-plugins-terraform", Version: models.Config.Version}
+	var packageXmlObj = models.XmlPackage{Name: "weterraform", Version: models.Config.Version}
 	interfaceNameMap := make(map[string]string)
 	pluginInterfaceMap := make(map[string][]*models.InterfaceTable)
 	for _, v := range interfaceTable {
