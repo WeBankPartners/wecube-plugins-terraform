@@ -661,7 +661,7 @@
                         </template>
                         <template v-else>
                           <Option v-for="item in item.sourceWithFilter" :value="item.id" :key="item.id"
-                            >{{ item.name }}(({{ item.sourceType }}))</Option
+                            >{{ item.name }}({{ item.sourceType }})</Option
                           >
                         </template>
                       </Select>
