@@ -3841,6 +3841,9 @@ func handleReverseConvert(outPutParameterNameMap map[string]*models.ParameterTab
 				}
 			} /*else {*/
 				curParamData := outPutParameterIdMap[tfstateAttr.Parameter]
+				if curParamData == nil {
+					continue
+				}
 				if tfstateOutParamVal, ok := tfstateFileAttributes[tfstateAttr.Name]; ok {
 					convertWay := tfstateAttr.ConvertWay
 					var outArgKey string
@@ -4403,6 +4406,10 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 		}
 		tfstateAttrNameMap[v.Name] = v
 		tfstateAttrIdMap[v.Id] = v
+	}
+
+	if action == "apply" {
+		tfstateObjectTypeAttribute = nil
 	}
 
 	sortTfstateAttributesList := []*models.SortTfstateAttributes{}
