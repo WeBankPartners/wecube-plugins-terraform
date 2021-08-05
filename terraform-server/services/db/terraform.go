@@ -1882,7 +1882,9 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 							handledTfArguments[v.Id] = true
 						}
 
+						reqParam[models.ResourceIdDataConvert] = resourceId
 						convertedRootArgumentData, _, tmpErr := handleConvertParams(action, sortedSourceData, []*models.TfArgumentTable{rootTfArgumentData}, reqParam, providerData, regionData)
+						delete(reqParam, models.ResourceIdDataConvert)
 						if tmpErr != nil {
 							err = fmt.Errorf("Handle convert params error:%s", err.Error())
 							log.Logger.Error("Handle convert params error", log.Error(err))
