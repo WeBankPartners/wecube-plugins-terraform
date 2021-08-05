@@ -3810,7 +3810,7 @@ func handleReverseConvert(outPutParameterNameMap map[string]*models.ParameterTab
 						outPutArgs[outPutParameterIdMap[tfstateAttr.Parameter].Name] = curAttributesRet
 					}
 				*/
-				if tfstateAttr.Parameter == "" {
+				if tfstateAttr.Parameter == "" || tfstateAttr.Name == "tags"  {
 					*paramCnt += 1
 					outPutArgs[models.TerraformOutPutPrefix+strconv.Itoa(*paramCnt)] = curAttributesRet
 				} else {
