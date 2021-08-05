@@ -8,13 +8,13 @@ module.exports = {
     open: true,
     port: 3000,
     proxy: {
-      '/weterraform': {
+      '/terraform': {
         target: baseUrl
       }
     }
   },
   runtimeCompiler: true,
-  publicPath: '/weterraform/',
+  publicPath: '/terraform/',
   chainWebpack: config => {
     if (process.env.PLUGIN !== 'plugin') {
       // remove the old loader
