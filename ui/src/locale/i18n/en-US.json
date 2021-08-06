@@ -63,5 +63,6 @@
   "t_export": "Export",
   "t_select_all": "Select All",
   "t_cancle": "Cancle",
-  "t_remark": "Remark"
+  "t_remark": "Remark",
+  "t_namespace": "Namespace"
 }

@@ -20,6 +20,9 @@
         <FormItem :label="$t('t_name')">
           <Input type="text" v-model="newProvider.form.name" style="width:400px"></Input>
         </FormItem>
+        <FormItem :label="$t('t_namespace')">
+          <Input type="text" v-model="newProvider.form.nameSpace" style="width:400px"></Input>
+        </FormItem>
         <FormItem :label="$t('t_version')">
           <Input type="text" v-model="newProvider.form.version" :rows="4" style="width:400px"></Input>
         </FormItem>
@@ -52,6 +55,7 @@ export default {
           createUser: '',
           id: '',
           name: '',
+          nameSpace: '',
           regionAttrName: '',
           secretIdAttrName: '',
           secretKeyAttrName: '',
@@ -65,6 +69,7 @@ export default {
         createUser: '',
         id: '',
         name: '',
+        nameSpace: '',
         regionAttrName: '',
         secretIdAttrName: '',
         secretKeyAttrName: '',
@@ -76,6 +81,10 @@ export default {
         {
           title: this.$t('t_name'),
           key: 'name'
+        },
+        {
+          title: this.$t('t_namespace'),
+          key: 'nameSpace'
         },
         {
           title: this.$t('t_version'),
