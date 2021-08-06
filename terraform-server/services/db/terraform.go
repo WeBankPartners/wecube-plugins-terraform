@@ -1634,6 +1634,8 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 		// fmt.Printf("%v\n", sortedSourceList)
 
 		resourceId := reqParam["id"].(string)
+		var rootResourceAssetId interface{}
+		rootResourceAssetId = ""
 		// resourceAssetId := reqParam["asset_id"].(string)
 		// fmt.Printf("%v\n", resourceAssetId)
 
@@ -1680,7 +1682,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 			if len(rootTfArgumentList) == 0 {
 				reqParam[models.SourceDataIdx] = 0
 				var convertedArgumentData map[string]interface{}
-				convertedArgumentData, _, err = handleConvertParams(action, sortedSourceData, allTfArgumentList, reqParam, providerData, regionData)
+				convertedArgumentData, rootResourceAssetId, err = handleConvertParams(action, sortedSourceData, allTfArgumentList, reqParam, providerData, regionData)
 				if err != nil {
 					err = fmt.Errorf("Handle convert params error:%s", err.Error())
 					log.Logger.Error("Handle convert params error", log.Error(err))
@@ -2203,7 +2205,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					for i := range conStructObject {
 						curDebugFileContent := (*debugFileContent)[curDebugFileStartIdx+i]
 						// check if importObject needed to be destroy
-						if _, ok := importObject[i]; ok {
+						if _, ok := importObject[i]; ok || (sourceDataIdx == 0 && rootResourceAssetId != "" && rootResourceAssetId != nil) {
 							// Gen tf.json file
 							// uuid := "_" + guid.CreateGuid()
 							_, err = GenTfFile(workDirPath, sortedSourceData, action, resourceId, conStructObject[i])
@@ -2225,7 +2227,11 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 
 							DelTfstateFile(workDirPath)
 							if sortedSourceData.ImportSupport != "N" {
-								err = TerraformImport(workDirPath, sortedSourceData.Name+"."+resourceId, importObject[i])
+								if sourceDataIdx == 0 && rootResourceAssetId != "" && rootResourceAssetId != nil {
+									err = TerraformImport(workDirPath, sortedSourceData.Name+"."+resourceId, rootResourceAssetId.(string))
+								} else {
+									err = TerraformImport(workDirPath, sortedSourceData.Name+"."+resourceId, importObject[i])
+								}
 								if err != nil {
 									errMsg := err.Error()
 									if strings.Contains(errMsg, "Cannot import non-existent remote object") == false {
@@ -2236,7 +2242,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 									} else {
 										// deleteOldResourceData(sortedSourceData, regionData, resourceId, importObject[i], reqParam)
 									}
-								} else {
+								} else if !(sourceDataIdx == 0 && rootResourceAssetId != "" && rootResourceAssetId != nil) {
 									oldTfstateFile := importObjectResourceData[i].TfStateFile
 									var oldTfstateFileObj models.TfstateFileData
 									err = json.Unmarshal([]byte(oldTfstateFile), &oldTfstateFileObj)
@@ -2353,7 +2359,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					return
 				}
 				if action == "apply" {
-					if _, ok := importObject[i]; ok {
+					if _, ok := importObject[i]; ok || (sourceDataIdx == 0 && rootResourceAssetId != "" && rootResourceAssetId != nil) {
 						// Gen tf.json file
 						// uuid := "_" + guid.CreateGuid()
 						tfFileContentStr, err = GenTfFile(workDirPath, sortedSourceData, action, resourceId, conStructObject[i])
@@ -2367,7 +2373,11 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 
 						DelTfstateFile(workDirPath)
 						if sortedSourceData.ImportSupport != "N" {
-							err = TerraformImport(workDirPath, sortedSourceData.Name+"."+resourceId, importObject[i])
+							if sourceDataIdx == 0 && rootResourceAssetId != "" && rootResourceAssetId != nil {
+								err = TerraformImport(workDirPath, sortedSourceData.Name+"."+resourceId, rootResourceAssetId.(string))
+							} else {
+								err = TerraformImport(workDirPath, sortedSourceData.Name+"."+resourceId, importObject[i])
+							}
 							if err != nil {
 								errMsg := err.Error()
 								if strings.Contains(errMsg, "Cannot import non-existent remote object") == false {
@@ -2402,7 +2412,9 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 							curDebugFileContent["tf_state_import"] = tfstateFileContentStr
 							// DelTfstateFile(workDirPath)
 						}
-						reqParam[models.ImportResourceDataTableId] = importObjectResourceData[i].Id
+						if len(importObjectResourceData) > 0 {
+							reqParam[models.ImportResourceDataTableId] = importObjectResourceData[i].Id
+						}
 					}
 				}
 
@@ -2602,7 +2614,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 			var retOutput map[string]interface{}
 			var tmpErr error
 			if sourceData.TerraformUsed != "N" {
-				retOutput, tmpErr = handleTerraformApplyOrQuery(reqParam, sourceData, providerData, providerInfoData, regionData, action, plugin, workDirPath, interfaceData, curDebugFileContent)
+				// retOutput, tmpErr = handleTerraformApplyOrQuery(reqParam, sourceData, providerData, providerInfoData, regionData, action, plugin, workDirPath, interfaceData, curDebugFileContent)
 			} else {
 				retOutput, tmpErr = handleApplyOrQuery(action, reqParam, sourceData, regionData)
 			}
@@ -4203,8 +4215,16 @@ func handleConvertParams(action string,
 		// handle tfArgument that is not in tf.json file
 		if action == "apply" {
 			if tfArgumentList[i].Name == sourceData.AssetIdAttribute {
-				if arg != nil {
-					resourceAssetId = arg
+				if arg != nil && arg != "" {
+					if resourceAssetId == "" || resourceAssetId == nil {
+						resourceAssetId = arg
+					} else {
+						if resourceAssetId != arg {
+							err = fmt.Errorf("Source:%s, tfArgument:%s two asset_id result is different error", sourceData.Name, tfArgumentList[i].Name)
+							log.Logger.Error("Convert parameter error: two asset_id result is different", log.String("sourceName", sourceData.Name), log.String("tfArgumentName", tfArgumentList[i].Name), log.String("parameterId", tfArgumentList[i].Parameter), log.Error(err))
+							return
+						}
+					}
 				}
 				/*
 				if parameterData.Name == "id" {
