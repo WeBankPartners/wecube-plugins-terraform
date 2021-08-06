@@ -116,12 +116,31 @@ func GenTfFile(dirPath string, sourceData *models.SourceTable, action string, re
 }
 
 func GenProviderFile(dirPath string, providerData *models.ProviderTable, providerInfo *models.ProviderInfoTable, regionData *models.ResourceDataTable) (err error) {
+	/*
 	providerFileData := make(map[string]map[string]map[string]interface{})
 	providerFileData["provider"] = make(map[string]map[string]interface{})
 	providerFileData["provider"][providerData.Name] = make(map[string]interface{})
 	providerFileData["provider"][providerData.Name][providerData.SecretIdAttrName] = providerInfo.SecretId
 	providerFileData["provider"][providerData.Name][providerData.SecretKeyAttrName] = providerInfo.SecretKey
 	providerFileData["provider"][providerData.Name][providerData.RegionAttrName] = regionData.ResourceAssetId
+	*/
+	// provider
+	providerContentData := make(map[string]map[string]interface{})
+	providerContentData[providerData.Name] = make(map[string]interface{})
+	providerContentData[providerData.Name][providerData.SecretIdAttrName] = providerInfo.SecretId
+	providerContentData[providerData.Name][providerData.SecretKeyAttrName] = providerInfo.SecretKey
+	providerContentData[providerData.Name][providerData.RegionAttrName] = regionData.ResourceAssetId
+
+	// terraform
+	terraformData := make(map[string]map[string]map[string]interface{})
+	terraformData["required_providers"] = make(map[string]map[string]interface{})
+	terraformData["required_providers"][providerData.Name] = make(map[string]interface{})
+	terraformData["required_providers"][providerData.Name]["source"] = providerData.NameSpace + "/" + providerData.Name
+	terraformData["required_providers"][providerData.Name]["version"] = providerData.Version
+
+	providerFileData := make(map[string]interface{})
+	providerFileData["terraform"] = terraformData
+	providerFileData["provider"] = providerContentData
 
 	providerFileContent, err := json.Marshal(providerFileData)
 	if err != nil {
@@ -140,6 +159,7 @@ func GenProviderFile(dirPath string, providerData *models.ProviderTable, provide
 }
 
 func GenVersionFile(dirPath string, providerData *models.ProviderTable) (err error) {
+	return
 	terraformFilePath := models.Config.TerraformFilePath
 	if terraformFilePath[len(terraformFilePath)-1] != '/' {
 		terraformFilePath += "/"
@@ -166,7 +186,8 @@ func GenVersionFile(dirPath string, providerData *models.ProviderTable) (err err
 
 func GenTerraformProviderSoftLink(dirPath string, providerData *models.ProviderTable) (err error) {
 	// targetTerraformProviderPath := dirPath + "/" + models.TerraformProviderPathDiffMap[providerData.Name] + providerData.Version + "/" + models.Config.TerraformProviderOsArch
-	targetTerraformProviderPath := dirPath + "/" + models.TerraformProviderPathDiffMap[providerData.Name] + providerData.Version
+	// targetTerraformProviderPath := dirPath + "/" + models.TerraformProviderPathDiffMap[providerData.Name] + providerData.Version
+	targetTerraformProviderPath := dirPath + "/" + models.TerraformProviderPathDiffMap[providerData.Name] + providerData.NameSpace + "/" + providerData.Name + "/" + providerData.Version
 
 	terraformFilePath := models.Config.TerraformFilePath
 	if terraformFilePath[len(terraformFilePath)-1] != '/' {
@@ -939,7 +960,8 @@ func handleAzQuery(reqParam map[string]interface{},
 
 	// Gen softlink of terraform provider file
 	// targetTerraformProviderPath := workDirPath + "/" + models.TerraformProviderPathDiffMap[providerData.Name] + providerData.Version + "/" + models.Config.TerraformProviderOsArch
-	targetTerraformProviderPath := workDirPath + "/" + models.TerraformProviderPathDiffMap[providerData.Name] + providerData.Version
+	// targetTerraformProviderPath := workDirPath + "/" + models.TerraformProviderPathDiffMap[providerData.Name] + providerData.Version
+	targetTerraformProviderPath := workDirPath + "/" + models.TerraformProviderPathDiffMap[providerData.Name] + providerData.NameSpace + "/" + providerData.Name + "/" + providerData.Version
 
 	_, err = os.Stat(targetTerraformProviderPath)
 	if err != nil {
@@ -2238,6 +2260,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 										err = fmt.Errorf("Compare import_state file and old tfstate file error:%s. Please confirm again!", message)
 										log.Logger.Error("Compare import_state file and old tfstate file error", log.String("message", message), log.Error(err))
 										rowData["errorMessage"] = err.Error()
+										rowData["errorCode"] = "-1"
 										return
 									}
 									resultBytes, tmpErr := json.MarshalIndent(result, "        ", "\t")
@@ -2309,6 +2332,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					if totalDestroyCnt > 0 {
 						destroyCntStr := strconv.Itoa(totalDestroyCnt)
 						rowData["errorMessage"] = destroyCntStr + " resource(s) will be destroy: " + destroyAssetId + "please confirm again!"
+						rowData["errorCode"] = "-1"
 						return
 					}
 				}

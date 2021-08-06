@@ -32,8 +32,10 @@ const (
 var (
 	SEPERATOR  = string([]byte{0x01})
 	ConvertWay = map[string]string{"Data": "data", "Template": "template", "ContextData": "context_data", "Attr": "attribute", "Direct": "direct", "Function": "function", "ContextDirect": "context_direct", "ContextAttr": "context_attribute", "ContextTemplate": "context_template"}
-	TerraformProviderPathDiffMap = map[string]string{"tencentcloud": ".terraform/providers/registry.terraform.io/tencentcloudstack/tencentcloud/",
-													 "alicloud": ".terraform/providers/registry.terraform.io/hashicorp/alicloud/"}
+	// TerraformProviderPathDiffMap = map[string]string{"tencentcloud": ".terraform/providers/registry.terraform.io/tencentcloudstack/tencentcloud/",
+	// 												 "alicloud": ".terraform/providers/registry.terraform.io/hashicorp/alicloud/"}
+	TerraformProviderPathDiffMap = map[string]string{"tencentcloud": ".terraform/providers/registry.terraform.io/",
+													 "alicloud": ".terraform/providers/registry.terraform.io/"}
 	FunctionConvertFunctionDefineName = map[string]string{"Split": "split", "Replace": "replace", "Regx": "regx", "Remove": "remove"}
 
 	ExcludeFilterKeys = map[string]bool{"confirmToken":true, "callbackParameter":true, "id":true, "asset_id":true,
