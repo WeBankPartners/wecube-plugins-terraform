@@ -821,15 +821,15 @@ export default {
 }
 
 .title-style {
-  width: 120px;
+  width: 120px !important;
   display: inline-block;
 }
 .title-style-60 {
-  width: 60px;
+  width: 60px !important;
   display: inline-block;
 }
 .title-style-100 {
-  width: 100px;
+  width: 100px !important;
   display: inline-block;
 }
 </style>
