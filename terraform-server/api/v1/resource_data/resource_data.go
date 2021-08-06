@@ -131,7 +131,11 @@ func TerraformOperation(c *gin.Context) {
 		go func(i int) {
 			defer wg.Done()
 
-			params[i]["operator_user"] = request_param["operator"]
+			if _, ok := request_param["operator"]; ok {
+				params[i]["operator_user"] = request_param["operator"]
+			} else {
+				params[i]["operator_user"] = "system"
+			}
 			params[i]["requestId"] = request_param["requestId"].(string) + "_" + strconv.Itoa(i + 1)
 			params[i]["requestSn"] = strconv.Itoa(i + 1)
 			debugFileContent := []map[string]interface{}{}
@@ -247,7 +251,11 @@ func TerraformOperationDebug (c *gin.Context) {
 		go func(i int) {
 			defer wg.Done()
 
-			params[i]["operator_user"] = request_param["operator"]
+			if _, ok := request_param["operator"]; ok {
+				params[i]["operator_user"] = request_param["operator"]
+			} else {
+				params[i]["operator_user"] = "system"
+			}
 			params[i]["requestId"] = request_param["requestId"].(string) + "_" + strconv.Itoa(i+1)
 			params[i]["requestSn"] = strconv.Itoa(i + 1)
 			params[i][models.ResourceDataDebug] = true
