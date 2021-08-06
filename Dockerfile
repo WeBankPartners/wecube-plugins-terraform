@@ -1,4 +1,4 @@
-FROM ccr.ccs.tencentyun.com/webankpartners/terrafrom-base:v1.0.1
+FROM ccr.ccs.tencentyun.com/webankpartners/terrafrom-base:v1.0.2
 
 ENV BASE_HOME=/app/terraform
 
