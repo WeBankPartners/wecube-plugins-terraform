@@ -64,5 +64,6 @@
   "t_select_all": "Select All",
   "t_cancle": "Cancle",
   "t_remark": "Remark",
-  "t_namespace": "Namespace"
+  "t_namespace": "Namespace",
+  "t_format_parameter": "Format Parameter"
 }

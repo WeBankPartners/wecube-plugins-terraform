@@ -1,12 +1,8 @@
 <template>
   <div class=" ">
     <Form inline>
-      <FormItem prop="user">
-        <Input type="text" v-model="name" style="width:300px" :placeholder="$t('t_name')"> </Input>
-      </FormItem>
       <FormItem>
-        <Button type="primary" @click="getTableData" style="margin-left: 24px">{{ $t('t_search') }}</Button>
-        <Button @click="addProvider" style="margin-left: 24px" type="success">{{ $t('t_add') }}</Button>
+        <Button @click="addProvider" style="margin-left: 24px" type="primary">{{ $t('t_add') }}</Button>
       </FormItem>
     </Form>
     <Table border :columns="tableColumns" :data="tableData"></Table>
@@ -113,7 +109,7 @@ export default {
                 'Button',
                 {
                   props: {
-                    type: 'primary',
+                    type: 'success',
                     size: 'small'
                   },
                   style: {
