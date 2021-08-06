@@ -4319,7 +4319,7 @@ func handleConvertParams(action string,
 					// tmpVal[tfArgumentList[i].Name] = arg
 					// tfArguments[relativeTfArgumentData.Name] = tmpVal
 					if tfArguments[relativeTfArgumentData.Name] != nil {
-						fmt.Printf("%v, %v, %T ## ", tfArguments[relativeTfArgumentData.Name], tfArguments[relativeTfArgumentData.Name] == nil, tfArguments[relativeTfArgumentData.Name])
+						// fmt.Printf("%v, %v, %T ## ", tfArguments[relativeTfArgumentData.Name], tfArguments[relativeTfArgumentData.Name] == nil, tfArguments[relativeTfArgumentData.Name])
 						tmpVal := tfArguments[relativeTfArgumentData.Name].(map[string]interface{})
 						if len(tmpVal) == 0 {
 							tmpVal = make(map[string]interface{})
