@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/common-lib/guid"
@@ -80,6 +81,21 @@ func TfArgumentBatchCreate(user string, param []*models.TfArgumentTable) (rowDat
 
 func TfArgumentBatchDelete(ids []string) (err error) {
 	actions := []*execAction{}
+
+	idsStr := strings.Join(ids, "','")
+	sqlCmd := "SELECT * FROM tf_argument WHERE id IN ('" + idsStr + "')" + "ORDER BY object_name DESC"
+	var tfArgumentList []*models.TfArgumentTable
+	err = x.SQL(sqlCmd).Find(&tfArgumentList)
+	if err != nil {
+		log.Logger.Error("Get tfArgument list error", log.Error(err))
+	}
+
+	tmpIds := []string{}
+	for i := range tfArgumentList {
+		tmpIds = append(tmpIds, tfArgumentList[i].Id)
+	}
+	ids = tmpIds
+
 	tableName := "tf_argument"
 	for i := range ids {
 		action, tmpErr := GetDeleteTableExecAction(tableName, "id", ids[i])

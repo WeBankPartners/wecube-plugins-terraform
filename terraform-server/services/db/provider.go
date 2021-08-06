@@ -33,7 +33,8 @@ func ProviderBatchCreate(user string, param []*models.ProviderTable) (rowData []
 	for i := range param {
 		id := guid.CreateGuid()
 		data := &models.ProviderTable{Id: id, Name: param[i].Name, Version: param[i].Version, SecretIdAttrName: param[i].SecretIdAttrName,
-			SecretKeyAttrName: param[i].SecretKeyAttrName, RegionAttrName: param[i].RegionAttrName, CreateUser: user, CreateTime: createTime, UpdateUser: user, UpdateTime: createTime}
+			SecretKeyAttrName: param[i].SecretKeyAttrName, RegionAttrName: param[i].RegionAttrName, CreateUser: user, CreateTime: createTime,
+			UpdateUser: user, UpdateTime: createTime, NameSpace: param[i].NameSpace}
 		rowData = append(rowData, data)
 	}
 
@@ -181,8 +182,8 @@ func ProviderPluginImport(input models.ProviderPluginImportObj, updateUser strin
 	updateTime := time.Now().Format(models.DateTimeFormat)
 	var actions []*execAction
 	for _, v := range input.Provider {
-		tmpAction := execAction{Sql: "replace into provider(id,name,`version`,secret_id_attr_name,secret_key_attr_name,region_attr_name,Initialized,create_time,create_user,update_time,update_user) values (?,?,?,?,?,?,?,?,?,?,?)"}
-		tmpAction.Param = []interface{}{v.Id, v.Name, v.Version, v.SecretIdAttrName, v.SecretKeyAttrName, v.RegionAttrName, v.Initialized, v.CreateTime, v.CreateUser, updateTime, updateUser}
+		tmpAction := execAction{Sql: "replace into provider(id,name,`version`,secret_id_attr_name,secret_key_attr_name,region_attr_name,Initialized,create_time,create_user,update_time,update_user,name_space) values (?,?,?,?,?,?,?,?,?,?,?,?)"}
+		tmpAction.Param = []interface{}{v.Id, v.Name, v.Version, v.SecretIdAttrName, v.SecretKeyAttrName, v.RegionAttrName, v.Initialized, v.CreateTime, v.CreateUser, updateTime, updateUser, v.NameSpace}
 		actions = append(actions, &tmpAction)
 	}
 	for _, v := range input.Plugin {
