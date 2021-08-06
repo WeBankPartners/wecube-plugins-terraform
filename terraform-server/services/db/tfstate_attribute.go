@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/common-lib/guid"
@@ -79,6 +80,21 @@ func TfstateAttributeBatchCreate(user string, param []*models.TfstateAttributeTa
 
 func TfstateAttributeBatchDelete(ids []string) (err error) {
 	actions := []*execAction{}
+
+	idsStr := strings.Join(ids, "','")
+	sqlCmd := "SELECT * FROM tfstate_attribute WHERE id IN ('" + idsStr + "')" + "ORDER BY object_name DESC"
+	var tfstateAttributeList []*models.TfstateAttributeTable
+	err = x.SQL(sqlCmd).Find(&tfstateAttributeList)
+	if err != nil {
+		log.Logger.Error("Get tfstateAttribute list error", log.Error(err))
+	}
+
+	tmpIds := []string{}
+	for i := range tfstateAttributeList {
+		tmpIds = append(tmpIds, tfstateAttributeList[i].Id)
+	}
+	ids = tmpIds
+
 	tableName := "tfstate_attribute"
 	for i := range ids {
 		action, tmpErr := GetDeleteTableExecAction(tableName, "id", ids[i])

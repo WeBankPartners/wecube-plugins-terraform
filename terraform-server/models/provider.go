@@ -12,6 +12,7 @@ type ProviderTable struct {
 	UpdateTime        string `json:"updateTime" xorm:"update_time"`
 	UpdateUser        string `json:"updateUser" xorm:"update_user"`
 	Initialized       string `json:"initialized" xorm:"Initialized"`
+	NameSpace         string `json:"nameSpace" xorm:"name_space"`
 }
 
 type ProviderPluginImportObj struct {
