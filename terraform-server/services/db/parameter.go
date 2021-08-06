@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/common-lib/guid"
@@ -69,6 +70,21 @@ func ParameterBatchCreate(user string, param []*models.ParameterTable) (rowData 
 
 func ParameterBatchDelete(ids []string) (err error) {
 	actions := []*execAction{}
+
+	idsStr := strings.Join(ids, "','")
+	sqlCmd := "SELECT * FROM parameter WHERE id IN ('" + idsStr + "')" + "ORDER BY object_name DESC"
+	var parameterList []*models.ParameterTable
+	err = x.SQL(sqlCmd).Find(&parameterList)
+	if err != nil {
+		log.Logger.Error("Get parameter list error", log.Error(err))
+	}
+
+	tmpIds := []string{}
+	for i := range parameterList {
+		tmpIds = append(tmpIds, parameterList[i].Id)
+	}
+	ids = tmpIds
+
 	tableName := "parameter"
 	for i := range ids {
 		action, tmpErr := GetDeleteTableExecAction(tableName, "id", ids[i])

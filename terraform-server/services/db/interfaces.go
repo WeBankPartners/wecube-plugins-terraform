@@ -91,7 +91,7 @@ func InterfaceBatchDelete(ids []string) (err error) {
 
 	// get the parameter by interface id
 	interfaceidsStr := strings.Join(ids, "','")
-	sqlCmd := "SELECT * FROM parameter WHERE interface IN ('" + interfaceidsStr + "')"
+	sqlCmd := "SELECT * FROM parameter WHERE interface IN ('" + interfaceidsStr + "')" + "ORDER BY object_name DESC"
 	var parameterList []*models.ParameterTable
 	err = x.SQL(sqlCmd).Find(&parameterList)
 	if err != nil {

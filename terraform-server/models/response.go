@@ -34,7 +34,4 @@ type SysLogTable struct {
 	RequestUrl  string `json:"requestUrl" xorm:"request_url"`
 	ClientHost  string `json:"clientHost" xorm:"client_host"`
 	CreatedDate string `json:"createdDate" xorm:"created_date"`
-	DataCiType  string `json:"dataCiType" xorm:"data_ci_type"`
-	DataGuid    string `json:"dataGuid" xorm:"data_guid"`
-	DataKeyName string `json:"dataKeyName" xorm:"data_key_name"`
 }
