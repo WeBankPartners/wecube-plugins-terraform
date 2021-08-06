@@ -13,6 +13,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/common-lib/cipher"
@@ -295,16 +296,49 @@ func GenWorkDirPath(resourceId string,
 	return
 }
 
+func execRemoteWithTimeout(cmdStr []string, timeOut int) (out string, err error) {
+	if len(cmdStr) == 0 {
+		err = fmt.Errorf("cmdStr can not be empty")
+		return
+	}
+	cmdStr = append([]string{"-c"}, cmdStr...)
+	doneChan := make(chan string)
+	tmpCmd := exec.Command(models.BashCmd, cmdStr...)
+	tmpCmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	go func(a chan string, ct *exec.Cmd) {
+		b, err := ct.Output()
+		if err != nil {
+			a <- "error:" + err.Error()
+		}
+		a <- string(b)
+	}(doneChan,tmpCmd)
+	select {
+	case tmpVal := <-doneChan:
+		out = tmpVal
+	case <-time.After(time.Duration(timeOut) * time.Second):
+		out = fmt.Sprintf("error: %s timeout %d(s)", cmdStr, timeOut)
+		syscall.Kill(-tmpCmd.Process.Pid, syscall.SIGKILL)
+	}
+	if strings.HasPrefix(out, "error:") {
+		err = fmt.Errorf(out)
+	}
+	return
+}
+
 func TerraformImport(dirPath, address, resourceAssetId string) (err error) {
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " import " + address + " " + resourceAssetId
+	/*
 	cmd := exec.Command(models.BashCmd, "-c", cmdStr)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	cmdErr := cmd.Run()
+	 */
+	_, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.CommandTimeOut)
 	if cmdErr != nil {
 		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
-		outPutStr := string(stderr.Bytes())
+		// outPutStr := string(stderr.Bytes())
+		outPutStr := cmdErr.Error()
 		errorMsgRegx := regexp.MustCompile(`Error: ([\S\s]*)`)
 		errorMsg := errorMsgRegx.FindStringSubmatch(outPutStr)
 		errMsg := "Error:"
@@ -324,14 +358,18 @@ func TerraformImport(dirPath, address, resourceAssetId string) (err error) {
 func TerraformPlan(dirPath string) (destroyCnt int, err error) {
 	// cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " plan -input=false -out=" + dirPath + "/planfile"
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " plan -input=false"
+	/*
 	cmd := exec.Command(models.BashCmd, "-c", cmdStr)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	cmdErr := cmd.Run()
+	*/
+	output, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.CommandTimeOut)
 	if cmdErr != nil {
 		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
-		outPutStr := string(stderr.Bytes())
+		// outPutStr := string(stderr.Bytes())
+		outPutStr := cmdErr.Error()
 		errorMsgRegx := regexp.MustCompile(`Error: ([\S\s]*)`)
 		errorMsg := errorMsgRegx.FindStringSubmatch(outPutStr)
 		errMsg := "Error:"
@@ -347,7 +385,7 @@ func TerraformPlan(dirPath string) (destroyCnt int, err error) {
 	}
 	// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
 	filePath := dirPath + "/planfile"
-	err = GenFile(stdout.Bytes(), filePath)
+	err = GenFile([]byte(output), filePath)
 	if err != nil {
 		err = fmt.Errorf("Write planfile error:%s", err.Error())
 		log.Logger.Error("Write planfile error", log.String("planfile", filePath), log.Error(err))
@@ -404,14 +442,18 @@ func TerraformPlan(dirPath string) (destroyCnt int, err error) {
 
 func TerraformApply(dirPath string) (err error) {
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " apply -auto-approve"
+	/*
 	cmd := exec.Command(models.BashCmd, "-c", cmdStr)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	cmdErr := cmd.Run()
+	 */
+	_, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.CommandTimeOut)
 	if cmdErr != nil {
 		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
-		outPutStr := string(stderr.Bytes())
+		// outPutStr := string(stderr.Bytes())
+		outPutStr := cmdErr.Error()
 		errorMsgRegx := regexp.MustCompile(`Error: ([\S\s]*)`)
 		errorMsg := errorMsgRegx.FindStringSubmatch(outPutStr)
 		errMsg := "Error:"
@@ -430,14 +472,18 @@ func TerraformApply(dirPath string) (err error) {
 
 func TerraformDestroy(dirPath string) (err error) {
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " destroy -auto-approve"
+	/*
 	cmd := exec.Command(models.BashCmd, "-c", cmdStr)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	cmdErr := cmd.Run()
+	 */
+	_, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.CommandTimeOut)
 	if cmdErr != nil {
 		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
-		outPutStr := string(stderr.Bytes())
+		// outPutStr := string(stderr.Bytes())
+		outPutStr := cmdErr.Error()
 		errorMsgRegx := regexp.MustCompile(`Error: ([\S\s]*)`)
 		errorMsg := errorMsgRegx.FindStringSubmatch(outPutStr)
 		errMsg := "Error:"
@@ -456,14 +502,18 @@ func TerraformDestroy(dirPath string) (err error) {
 
 func TerraformInit(dirPath string) (err error) {
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " init"
+	/*
 	cmd := exec.Command(models.BashCmd, "-c", cmdStr)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	cmdErr := cmd.Run()
+	 */
+	_, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.CommandTimeOut)
 	if cmdErr != nil {
 		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
-		outPutStr := string(stderr.Bytes())
+		// outPutStr := string(stderr.Bytes())
+		outPutStr := cmdErr.Error()
 		errorMsgRegx := regexp.MustCompile(`Error: ([\S\s]*)`)
 		errorMsg := errorMsgRegx.FindStringSubmatch(outPutStr)
 		errMsg := "Error:"

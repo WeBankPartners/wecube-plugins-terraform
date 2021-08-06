@@ -19,6 +19,7 @@ const (
 	TerraformOutPutPrefix  = "$_result_list$"
 	ParameterSourceDefault = "custom"
 	TfArgumentKeyArgumentDefault = "N"
+	CommandTimeOut      = 600
 	ResourceDataDebug   = "$_resource_data_debug$"
 	ResourceIdDataConvert  = "#resourceId#"
 	PGuid               = "6101d5ff9c058ecd8d2dddd974d38f98"
