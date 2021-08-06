@@ -2242,7 +2242,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 									} else {
 										// deleteOldResourceData(sortedSourceData, regionData, resourceId, importObject[i], reqParam)
 									}
-								} else if !(sourceDataIdx == 0 && rootResourceAssetId != "" && rootResourceAssetId != nil) {
+								} else if len(importObjectResourceData) > i {
 									oldTfstateFile := importObjectResourceData[i].TfStateFile
 									var oldTfstateFileObj models.TfstateFileData
 									err = json.Unmarshal([]byte(oldTfstateFile), &oldTfstateFileObj)
@@ -2390,7 +2390,49 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 							} else {
 								// firstFileObj := getFileAttrContent(workDirPath + "/terraform.tfstate")
 								// get the old tfstate file content
+								if len(importObjectResourceData) > i {
+									oldTfstateFile := importObjectResourceData[i].TfStateFile
+									var oldTfstateFileObj models.TfstateFileData
+									err = json.Unmarshal([]byte(oldTfstateFile), &oldTfstateFileObj)
+									if err != nil {
+										err = fmt.Errorf("Unmarshal tfstate file data error:%s", err.Error())
+										log.Logger.Error("Unmarshal tfstate file data error", log.Error(err))
+										return
+									}
 
+									secondFileObj := getFileAttrContent(workDirPath + "/terraform.tfstate")
+									first, second := make(map[string]interface{}), make(map[string]interface{})
+									first = oldTfstateFileObj.Resources[0].Instances[0].Attributes
+									err = json.Unmarshal(secondFileObj.AttrBytes, &second)
+									if err != nil {
+										fmt.Printf("json unmarshal second file fail,%s \n", err.Error())
+										return
+									}
+
+									result, _, _ := compareObject(first, second)
+									/*
+										result, diff, message := compareObject(first, second)
+										if diff != 0 {
+											err = fmt.Errorf("Compare import_state file and old tfstate file error:%s. Please confirm again!", message)
+											log.Logger.Error("Compare import_state file and old tfstate file error", log.String("message", message), log.Error(err))
+											rowData["errorMessage"] = err.Error()
+											rowData["errorCode"] = "-1"
+											return
+										}
+									*/
+									resultBytes, tmpErr := json.MarshalIndent(result, "        ", "\t")
+									if tmpErr != nil {
+										err = fmt.Errorf("json marshal result fail,%s \n", tmpErr.Error())
+										return
+									}
+
+									newFileBytes := []byte{}
+									newFileWriter := bytes.NewBuffer(newFileBytes)
+									newFileWriter.WriteString(secondFileObj.FileContent[:secondFileObj.StartIndex])
+									newFileWriter.Write(resultBytes)
+									newFileWriter.WriteString(secondFileObj.FileContent[secondFileObj.EndIndex:])
+									ioutil.WriteFile(workDirPath+"/terraform.tfstate", newFileWriter.Bytes(), 0644)
+								}
 							}
 						} else {
 							// get tfstate file from resource_data table and gen it
@@ -2750,6 +2792,9 @@ func convertData(relativeSourceId string, reqParam map[string]interface{}, regio
 	if _, ok := reqParam[parameterData.Name]; !ok {
 		return
 	}
+	if reqParam[parameterData.Name] == nil {
+		return
+	}
 	var resourceIdList []string
 	if parameterData.Multiple == "Y" {
 		reqParamResourceIds := reqParam[parameterData.Name].([]interface{})
@@ -2866,6 +2911,10 @@ func convertTemplate(providerData *models.ProviderTable, reqParam map[string]int
 	}
 	parameterData := parameterList[0]
 
+	if reqParam[parameterData.Name] == nil {
+		return
+	}
+
 	sqlCmd = `SELECT * FROM template_value WHERE template=? AND value=?`
 	templateId := parameterData.Template
 	paramVal := reqParam[parameterData.Name].(string)
@@ -2948,6 +2997,10 @@ func convertAttr(tfArgumentData *models.TfArgumentTable, reqParam map[string]int
 		return
 	}
 	parameterData := parameterList[0]
+
+	if reqParam[parameterData.Name] == nil {
+		return
+	}
 
 	relativeResourceIds := []string{}
 	if parameterData.Multiple == "Y" {
@@ -3150,6 +3203,11 @@ func convertContextData(tfArgumentData *models.TfArgumentTable, reqParam map[str
 		return
 	}
 	relativeParameterData := parameterList[0]
+
+	if reqParam[relativeParameterData.Name] == nil {
+		return
+	}
+
 	if reqParam[relativeParameterData.Name].(string) == tfArgumentData.RelativeParameterValue {
 		arg, err = convertData(tfArgumentData.RelativeSource, reqParam, regionData, tfArgument, sourceData)
 	} else {
@@ -3239,6 +3297,9 @@ func convertContextDirect(tfArgumentData *models.TfArgumentTable, reqParam map[s
 		return
 	}
 	relativeParameterData := parameterList[0]
+	if reqParam[relativeParameterData.Name]	== nil {
+		return
+	}
 	if reqParam[relativeParameterData.Name].(string) == tfArgumentData.RelativeParameterValue {
 		arg, err = convertDirect(tfArgumentData.DefaultValue, reqParam, tfArgumentData)
 	} else {
@@ -3328,6 +3389,9 @@ func convertContextAttr(tfArgumentData *models.TfArgumentTable, reqParam map[str
 		return
 	}
 	relativeParameterData := parameterList[0]
+	if reqParam[relativeParameterData.Name] == nil {
+		return
+	}
 	if reqParam[relativeParameterData.Name].(string) == tfArgumentData.RelativeParameterValue {
 		arg, err = convertAttr(tfArgumentData, reqParam, regionData, tfArgumentData)
 	} else {
@@ -3417,6 +3481,9 @@ func convertContextTemplate(tfArgumentData *models.TfArgumentTable, reqParam map
 		return
 	}
 	relativeParameterData := parameterList[0]
+	if reqParam[relativeParameterData.Name]	== nil {
+		return
+	}
 	if reqParam[relativeParameterData.Name].(string) == tfArgumentData.RelativeParameterValue {
 		arg, err = convertTemplate(providerData, reqParam, tfArgumentData)
 	} else {
@@ -4864,7 +4931,7 @@ func compareObject(first,second map[string]interface{}) (result map[string]inter
 		result[k] = v
 		if v == nil {
 			if first[k] != nil {
-				fmt.Printf("k: %s is nil,use first value:%v \n", k, first[k])
+				// fmt.Printf("k: %s is nil,use first value:%v \n", k, first[k])
 				result[k] = first[k]
 			}
 			continue

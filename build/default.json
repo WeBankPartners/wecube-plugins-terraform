@@ -32,7 +32,7 @@
     "sub_system_key": ""
   },
   "auth": {
-    "password_seed": ""
+    "password_seed": "Abcdef123456"
   },
   "terraform_file_path": "/data/terraform/",
   "terraform_cmd_path": "/usr/local/bin/terraform",
