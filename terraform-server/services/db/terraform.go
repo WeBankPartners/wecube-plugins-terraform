@@ -3489,9 +3489,13 @@ func convertDirect(defaultValue string, reqParam map[string]interface{}, tfArgum
 	}
 	parameterData := parameterList[0]
 
-	reqArg := reqParam[parameterData.Name]
-	if reqArg == nil {
+	var reqArg interface{}
+	if _, ok := reqParam[parameterData.Name]; !ok {
 		return
+	} else if reqParam[parameterData.Name] == nil {
+		reqArg = tfArgument.DefaultValue
+	} else {
+		reqArg = reqParam[parameterData.Name]
 	}
 
 	/*
