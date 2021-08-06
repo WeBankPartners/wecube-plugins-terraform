@@ -1224,7 +1224,7 @@ func handleApplyOrQuery(action string, reqParam map[string]interface{}, sourceDa
 			}
 		} else {
 			if len(oldResourceDataList) == 0 {
-				_, err = x.Exec("INSERT INTO resource_data_debug(id,resource,resource_id,resource_asset_id,tf_file,tf_state_file,region_id,create_time,create_user,update_time,update_user) VALUE (?,?,?,?,?,?,?,?,?,?,?)",
+				_, err = x.Exec("INSERT INTO resource_data(id,resource,resource_id,resource_asset_id,tf_file,tf_state_file,region_id,create_time,create_user,update_time,update_user) VALUE (?,?,?,?,?,?,?,?,?,?,?)",
 					uuid, sourceData.Id, resourceId, resourceAssetId, tfFile, tfstateFile, regionId, createTime, createUser, createTime, createUser)
 			} else {
 				// err = fmt.Errorf("the resource_id:%s is existed", resourceId)
