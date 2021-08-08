@@ -795,7 +795,8 @@ func handleTerraformApplyOrQuery(reqParam map[string]interface{},
 func handleOutPutArgs(outPutArgs map[string]interface{},
 					  outPutParameterNameMap map[string]*models.ParameterTable,
 					  tfstateAttrParamMap map[string]*models.TfstateAttributeTable,
-					  reqParam map[string]interface{}) (outPutResultList []map[string]interface{}, err error) {
+					  reqParam map[string]interface{},
+					  isInternalAction bool) (outPutResultList []map[string]interface{}, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("HandleOutPutArgs error, error:%v", r)
@@ -828,15 +829,15 @@ func handleOutPutArgs(outPutArgs map[string]interface{},
 	}
 
 	for i := range mapOutPutArgs {
-		/*
-		for k, v := range outPutParameterNameMap {
-			if _, okParam := tfstateAttrParamMap[v.Id]; !okParam {
-				if _, ok := reqParam[k]; ok && reqParam[k] != "" {
-					mapOutPutArgs[i][k] = reqParam[k]
+		if !isInternalAction {
+			for k, v := range outPutParameterNameMap {
+				if _, okParam := tfstateAttrParamMap[v.Id]; !okParam {
+					if _, ok := reqParam[k]; ok {
+						mapOutPutArgs[i][k] = reqParam[k]
+					}
 				}
 			}
 		}
-		 */
 		outPutResultList = append(outPutResultList, mapOutPutArgs[i])
 	}
 
@@ -4817,7 +4818,7 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 		}
 
 		// handle outPutArgs
-		outPutResultList, _ := handleOutPutArgs(outPutArgs, outPutParameterNameMap, tfstateAttrParamMap, reqParam)
+		outPutResultList, _ := handleOutPutArgs(outPutArgs, outPutParameterNameMap, tfstateAttrParamMap, reqParam, isInternalAction)
 
 		if !isInternalAction {
 			retOutput[models.TerraformOutPutPrefix] = outPutResultList
@@ -4886,7 +4887,7 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 			}
 
 			// handle outPutArgs
-			tmpOutPutResult, _ := handleOutPutArgs(outPutArgs, outPutParameterNameMap, tfstateAttrParamMap, reqParam)
+			tmpOutPutResult, _ := handleOutPutArgs(outPutArgs, outPutParameterNameMap, tfstateAttrParamMap, reqParam, isInternalAction)
 			outPutResultList = append(outPutResultList, tmpOutPutResult...)
 			//retOutput[models.TerraformOutPutPrefix] = outPutResultList
 
