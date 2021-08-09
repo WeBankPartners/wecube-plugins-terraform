@@ -25,11 +25,11 @@
         <FormItem :label="$t('t_region_attr_name')">
           <Input type="text" v-model="newProvider.form.regionAttrName" style="width:400px"></Input>
         </FormItem>
-        <FormItem :label="$t('t_secretKey_attr_name')">
-          <Input type="text" v-model="newProvider.form.secretKeyAttrName" style="width:400px"></Input>
-        </FormItem>
         <FormItem :label="$t('t_secretId_attr_name')">
           <Input type="text" v-model="newProvider.form.secretIdAttrName" style="width:400px"></Input>
+        </FormItem>
+        <FormItem :label="$t('t_secretKey_attr_name')">
+          <Input type="text" v-model="newProvider.form.secretKeyAttrName" style="width:400px"></Input>
         </FormItem>
       </Form>
     </Modal>
