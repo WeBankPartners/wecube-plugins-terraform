@@ -2941,7 +2941,7 @@ func reverseConvertData(parameterData *models.ParameterTable, tfstateAttributeDa
 	}
 	argKey = parameterData.Name
 
-	if tfstateAttributeData.IsMulti == "Y" {
+	if parameterData.Multiple == "Y" {
 		tmpRes := []interface{}{}
 		for i := range resourceDataList {
 			tmpRes = append(tmpRes, resourceDataList[i].ResourceId)
@@ -3215,7 +3215,7 @@ func reverseConvertAttr(parameterData *models.ParameterTable, tfstateAttributeDa
 	}
 
 	argKey = parameterData.Name
-	if tfstateAttributeData.IsMulti == "Y" {
+	if parameterData.Multiple == "Y" {
 		tmpRes := []interface{}{}
 		for i := range result {
 			tmpRes = append(tmpRes, result[i].(string))
@@ -3886,7 +3886,7 @@ func reverseConvertFunction(parameterData *models.ParameterTable, tfstateAttribu
 		}
 	}
 	argKey = parameterData.Name
-	if tfstateAttributeData.IsMulti == "Y" {
+	if parameterData.Multiple == "Y" {
 		tmpRes := []interface{}{}
 		for i := range result {
 			tmpRes = append(tmpRes, result[i])
@@ -3903,6 +3903,7 @@ func reverseConvertDirect(parameterData *models.ParameterTable, tfstateAttribute
 	if tfstateVal == nil {
 		return
 	}
+	/*
 	if tfstateAttributeData.IsMulti == "Y" {
 		tmpRes := []interface{}{}
 		result := tfstateVal.([]interface{})
@@ -3913,6 +3914,24 @@ func reverseConvertDirect(parameterData *models.ParameterTable, tfstateAttribute
 	} else {
 		argVal = tfstateVal
 	}
+	 */
+	var result []interface{}
+	if tfstateAttributeData.IsMulti == "Y" {
+		result = tfstateVal.([]interface{})
+	} else {
+		result = append(result, tfstateVal)
+	}
+
+	if parameterData.Multiple == "Y" {
+		tmpRes := []interface{}{}
+		for i := range result {
+			tmpRes = append(tmpRes, result[i])
+		}
+		argVal = tmpRes
+	} else {
+		argVal = result[0]
+	}
+
 	//if tfstateAttributeData.ObjectName != "" {
 	//	relativeTfstateAttr := tfstateAttrIdMap[tfstateAttributeData.ObjectName]
 	//	if relativeTfstateAttr.Type == "object" {
