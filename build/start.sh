@@ -13,4 +13,9 @@ sed -i "s~{{SUB_SYSTEM_KEY}}~$SUB_SYSTEM_KEY~g" /app/terraform/conf/default.json
 sed -i "s~{{PLUGIN_VERSION}}~$PLUGIN_VERSION~g" /app/terraform/conf/default.json
 sed -i "s~{{TERRAFORM_SECRET_KEY_SEED}}~$TERRAFORM_SECRET_KEY_SEED~g" /app/terraform/conf/default.json
 
+if [ ! -n "`ls /data/terraform/providers`" ]
+then
+  cp -r /data/terraform/providers_tpl/* /data/terraform/providers/
+fi
+
 ./terraform-server
