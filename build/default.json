@@ -26,13 +26,13 @@
   },
   "rsa_key_path": "/data/certs/rsa_key",
   "wecube": {
-    "base_url": "",
-    "jwt_signing_key": "",
-    "sub_system_code": "",
-    "sub_system_key": ""
+    "base_url": "{{GATEWAY_URL}}",
+    "jwt_signing_key": "{{JWT_SIGNING_KEY}}",
+    "sub_system_code": "{{SUB_SYSTEM_CODE}}",
+    "sub_system_key": "{{SUB_SYSTEM_KEY}}"
   },
   "auth": {
-    "password_seed": ""
+    "password_seed": "{{TERRAFORM_SECRET_KEY_SEED}}"
   },
   "terraform_file_path": "/data/terraform/",
   "terraform_cmd_path": "/usr/local/bin/terraform",
