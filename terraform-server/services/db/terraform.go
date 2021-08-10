@@ -1755,7 +1755,9 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 				}
 				conStructObject = append(conStructObject, convertedArgumentData)
 			} else {
-				isInternalAction = true
+				if sourceDataIdx > 0 {
+					isInternalAction = true
+				}
 				inPutValSlice := [][]interface{}{}
 				handledTfArguments := make(map[string]bool)
 				for _, rootTfArgumentData := range rootTfArgumentList {
