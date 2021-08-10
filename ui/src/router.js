@@ -7,7 +7,7 @@ export default new Router({
     {
       path: '/',
       name: '/',
-      redirect: '/terraformIndex/templateData',
+      redirect: '/terraformIndex/pluginDefinition',
       component: () => import('@/pages/index'),
       children: [
         {
@@ -18,18 +18,18 @@ export default new Router({
           props: true,
           children: [
             {
-              path: 'conversionConfiguration',
-              name: 'conversionConfiguration',
-              title: '转化配置',
-              meta: {},
-              component: () => import('@/pages/conversion-configuration')
-            },
-            {
               path: 'pluginDefinition',
               name: 'pluginDefinition',
               title: '插件定义',
               meta: {},
               component: () => import('@/pages/plugin-definition')
+            },
+            {
+              path: 'conversionConfiguration',
+              name: 'conversionConfiguration',
+              title: '转化配置',
+              meta: {},
+              component: () => import('@/pages/conversion-configuration')
             },
             {
               path: 'templateData',

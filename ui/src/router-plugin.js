@@ -15,8 +15,15 @@ const router = [
     component: terraformIndex,
     params: {},
     props: true,
-    redirect: '/terraformIndex/templateData',
+    redirect: 'terraformIndex/pluginDefinition',
     children: [
+      {
+        path: 'pluginDefinition',
+        name: 'pluginDefinition',
+        title: '插件定义',
+        meta: {},
+        component: pluginDefinition
+      },
       {
         path: 'templateData',
         name: 'templateData',
@@ -30,13 +37,6 @@ const router = [
         title: '转换配置',
         meta: {},
         component: conversionConfiguration
-      },
-      {
-        path: 'pluginDefinition',
-        name: 'pluginDefinition',
-        title: '插件定义',
-        meta: {},
-        component: pluginDefinition
       },
       {
         path: 'providerInfo',
