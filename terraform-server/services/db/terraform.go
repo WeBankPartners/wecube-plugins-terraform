@@ -5131,7 +5131,7 @@ func compareObject(first, second map[string]interface{}) (result map[string]inte
 		}
 		tmpFirV := fmt.Sprintf("%v", first[k])
 		tmpSecV := fmt.Sprintf("%v", v)
-		if tmpSecV == "[]" || tmpSecV == "{}" {
+		if tmpSecV == "[]" || tmpSecV == "{}" || tmpSecV == "map[]" {
 			//fmt.Printf("k:%s fir:%s sec:%s \n",k, tmpFirV, tmpSecV)
 			if tmpFirV == "" || tmpFirV == "<nil>" {
 				continue
