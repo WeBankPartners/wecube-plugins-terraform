@@ -139,8 +139,8 @@ func TerraformOperation(c *gin.Context) {
 			params[i]["requestId"] = request_param["requestId"].(string) + "_" + strconv.Itoa(i + 1)
 			params[i]["requestSn"] = strconv.Itoa(i + 1)
 			debugFileContent := []map[string]interface{}{}
-			retData, err := db.TerraformOperation(plugin, action, params[i], &debugFileContent)
-			if err != nil {
+			retData, _ := db.TerraformOperation(plugin, action, params[i], &debugFileContent)
+			if _, ok := retData["errorCode"]; ok && retData["errorCode"] != "0" {
 				rowData.ResultCode = "1"
 				rowData.ResultMessage = "fail"
 			}
@@ -260,8 +260,8 @@ func TerraformOperationDebug (c *gin.Context) {
 			params[i]["requestSn"] = strconv.Itoa(i + 1)
 			params[i][models.ResourceDataDebug] = true
 			debugFileContent := []map[string]interface{}{}
-			retData, err := db.TerraformOperation(plugin, action, params[i], &debugFileContent)
-			if err != nil {
+			retData, _ := db.TerraformOperation(plugin, action, params[i], &debugFileContent)
+			if _, ok := retData["errorCode"]; ok && retData["errorCode"] != "0" {
 				rowData.ResultCode = "1"
 				rowData.ResultMessage = "fail"
 			}

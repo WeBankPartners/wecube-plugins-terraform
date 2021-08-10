@@ -303,14 +303,27 @@ func execRemoteWithTimeout(cmdStr []string, timeOut int) (out string, err error)
 	}
 	cmdStr = append([]string{"-c"}, cmdStr...)
 	doneChan := make(chan string)
+	defer close(doneChan)
+
 	tmpCmd := exec.Command(models.BashCmd, cmdStr...)
 	tmpCmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	go func(a chan string, ct *exec.Cmd) {
+		/*
 		b, err := ct.Output()
 		if err != nil {
 			a <- "error:" + err.Error()
 		}
 		a <- string(b)
+		 */
+		var stdout, stderr bytes.Buffer
+		ct.Stdout = &stdout
+		ct.Stderr = &stderr
+		cmdErr := ct.Run()
+		if cmdErr != nil {
+			a <- "error:" + string(stderr.Bytes())
+		} else {
+			a <- "success"
+		}
 	}(doneChan,tmpCmd)
 	select {
 	case tmpVal := <-doneChan:
@@ -1573,13 +1586,13 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 
 	// Get regionInfo by regionId
 	regionId := reqParam["region_id"].(string)
-	sqlCmd = `SELECT * FROM resource_data WHERE resource_id=?`
+	sqlCmd = `SELECT * FROM resource_data WHERE resource_id=? AND region_id=?`
 
 	if _, ok := reqParam[models.ResourceDataDebug]; ok {
-		sqlCmd = `SELECT * FROM resource_data_debug WHERE resource_id=?`
+		sqlCmd = `SELECT * FROM resource_data_debug WHERE resource_id=? AND region_id=?`
 	}
 
-	paramArgs = []interface{}{regionId}
+	paramArgs = []interface{}{regionId, regionId}
 	var resourceDataInfoList []*models.ResourceDataTable
 	err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataInfoList)
 	if err != nil {
@@ -2928,7 +2941,7 @@ func reverseConvertData(parameterData *models.ParameterTable, tfstateAttributeDa
 	}
 	argKey = parameterData.Name
 
-	if tfstateAttributeData.IsMulti == "Y" {
+	if parameterData.Multiple == "Y" {
 		tmpRes := []interface{}{}
 		for i := range resourceDataList {
 			tmpRes = append(tmpRes, resourceDataList[i].ResourceId)
@@ -3202,7 +3215,7 @@ func reverseConvertAttr(parameterData *models.ParameterTable, tfstateAttributeDa
 	}
 
 	argKey = parameterData.Name
-	if tfstateAttributeData.IsMulti == "Y" {
+	if parameterData.Multiple == "Y" {
 		tmpRes := []interface{}{}
 		for i := range result {
 			tmpRes = append(tmpRes, result[i].(string))
@@ -3708,6 +3721,7 @@ func convertDirect(defaultValue string, reqParam map[string]interface{}, tfArgum
 	if tfArgument.DefaultValue == models.RandomFlag && (arg == nil || arg == "") {
 		randomVal := guid.CreateGuid()
 		arg = randomVal[:16]
+		reqParam[parameterData.Name] = arg
 	}
 
 	/*
@@ -3872,7 +3886,7 @@ func reverseConvertFunction(parameterData *models.ParameterTable, tfstateAttribu
 		}
 	}
 	argKey = parameterData.Name
-	if tfstateAttributeData.IsMulti == "Y" {
+	if parameterData.Multiple == "Y" {
 		tmpRes := []interface{}{}
 		for i := range result {
 			tmpRes = append(tmpRes, result[i])
@@ -3889,6 +3903,7 @@ func reverseConvertDirect(parameterData *models.ParameterTable, tfstateAttribute
 	if tfstateVal == nil {
 		return
 	}
+	/*
 	if tfstateAttributeData.IsMulti == "Y" {
 		tmpRes := []interface{}{}
 		result := tfstateVal.([]interface{})
@@ -3899,6 +3914,24 @@ func reverseConvertDirect(parameterData *models.ParameterTable, tfstateAttribute
 	} else {
 		argVal = tfstateVal
 	}
+	 */
+	var result []interface{}
+	if tfstateAttributeData.IsMulti == "Y" {
+		result = tfstateVal.([]interface{})
+	} else {
+		result = append(result, tfstateVal)
+	}
+
+	if parameterData.Multiple == "Y" {
+		tmpRes := []interface{}{}
+		for i := range result {
+			tmpRes = append(tmpRes, result[i])
+		}
+		argVal = tmpRes
+	} else {
+		argVal = result[0]
+	}
+
 	//if tfstateAttributeData.ObjectName != "" {
 	//	relativeTfstateAttr := tfstateAttrIdMap[tfstateAttributeData.ObjectName]
 	//	if relativeTfstateAttr.Type == "object" {
