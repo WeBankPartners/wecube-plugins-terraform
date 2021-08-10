@@ -322,7 +322,7 @@ func execRemoteWithTimeout(cmdStr []string, timeOut int) (out string, err error)
 		if cmdErr != nil {
 			a <- "error:" + string(stderr.Bytes())
 		} else {
-			a <- "success"
+			a <- string(stdout.Bytes())
 		}
 	}(doneChan,tmpCmd)
 	select {
@@ -3040,9 +3040,99 @@ func reverseConvertTemplate(parameterData *models.ParameterTable, providerData *
 	return
 }
 
-func convertAttr(tfArgumentData *models.TfArgumentTable, reqParam map[string]interface{}, regionData *models.ResourceDataTable, tfArgument *models.TfArgumentTable) (arg interface{}, err error) {
+func convertAttr(tfArgumentData *models.TfArgumentTable, reqParam map[string]interface{}, regionData *models.ResourceDataTable, tfArgument *models.TfArgumentTable, sourceData *models.SourceTable) (arg interface{}, err error) {
 	if tfArgument.Parameter == "" {
-		arg = tfArgument.DefaultValue
+		// arg = tfArgument.DefaultValue
+		if sourceData.SourceType == "data_resource" {
+			if _, ok := reqParam[models.SimulateResourceData]; ok {
+				/*
+				curSimulateResourceData := reqParam[models.SimulateResourceData].(map[string][]map[string]interface{})
+
+				tmpRes := []interface{}{}
+				relativeSourceId := tfArgumentData.RelativeSource
+				resourceDatas := curSimulateResourceData[relativeSourceId]
+				for i := range resourceDatas {
+					tmpData := resourceDatas[i]["tfstateFile"].(map[string]interface{})
+					assetIdAttribute := resourceDatas[i]["assetIdAttribute"].(string)
+					if _, ok := tmpData[assetIdAttribute]; ok {
+						tmpRes = append(tmpRes, tmpData[assetIdAttribute])
+					}
+				}
+				if len(tmpRes) > 0 {
+					if tfArgument.IsMulti == "Y" {
+						arg = tmpRes
+					} else {
+						arg = tmpRes[0]
+					}
+				}
+				 */
+				return
+			}
+		}
+
+		// get data from resource_data
+		sqlCmd := `SELECT * FROM resource_data WHERE resource=? AND resource_id=? AND region_id=?`
+
+		if _, ok := reqParam[models.ResourceDataDebug]; ok {
+			sqlCmd = `SELECT * FROM resource_data_debug WHERE resource=? AND resource_id=? AND region_id=?`
+		}
+		// resourceId: 来源 param 先判断
+		relativeSourceId := tfArgumentData.RelativeSource
+		resourceId := reqParam[models.ResourceIdDataConvert].(string)
+		paramArgs := []interface{}{relativeSourceId, resourceId, regionData.RegionId}
+		var resourceDataList []*models.ResourceDataTable
+		err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataList)
+		if err != nil {
+			err = fmt.Errorf("Get resource data by resource:%s and resource_id:%s error: %s", relativeSourceId, resourceId, err.Error())
+			log.Logger.Error("Get resource data by resource and resource_id error", log.String("resource", relativeSourceId), log.String("resource_id", resourceId), log.Error(err))
+			return
+		}
+		if len(resourceDataList) == 0 {
+			err = fmt.Errorf("ResourceData can not be found by resource:%s and resource_id:%s", relativeSourceId, resourceId)
+			log.Logger.Warn("ResourceData can not be found by resource and resource_id", log.String("resource", relativeSourceId), log.String("resource_id", resourceId), log.Error(err))
+			return
+		}
+		resourceData := resourceDataList[0]
+
+		sqlCmd = `SELECT * FROM tfstate_attribute WHERE id=?`
+		paramArgs = []interface{}{tfArgumentData.RelativeTfstateAttribute}
+		var tfstateAttirbuteList []*models.TfstateAttributeTable
+		err = x.SQL(sqlCmd, paramArgs...).Find(&tfstateAttirbuteList)
+		if err != nil {
+			err = fmt.Errorf("Get tfstateAttribute data by id:%s error: %s", tfArgumentData.RelativeTfstateAttribute, err.Error())
+			log.Logger.Error("Get tfstateAttribute data by id error", log.String("id", tfArgumentData.RelativeTfstateAttribute), log.Error(err))
+			return
+		}
+		if len(tfstateAttirbuteList) == 0 {
+			err = fmt.Errorf("TfstateAttribute data can not be found by id:%s", tfArgumentData.RelativeTfstateAttribute)
+			log.Logger.Warn("TfstateAttribute data can not be found by id", log.String("id", tfArgumentData.RelativeTfstateAttribute), log.Error(err))
+			return
+		}
+		tfstateAttirbuteData := tfstateAttirbuteList[0]
+
+		tfstateFileData := resourceData.TfStateFile
+		var unmarshalTfstateFileData models.TfstateFileData
+		err = json.Unmarshal([]byte(tfstateFileData), &unmarshalTfstateFileData)
+		if err != nil {
+			err = fmt.Errorf("Unmarshal tfstate file data error:%s", err.Error())
+			log.Logger.Error("Unmarshal tfstate file data error", log.Error(err))
+			return
+		}
+		var tfstateFileAttributes map[string]interface{}
+		tfstateFileAttributes = unmarshalTfstateFileData.Resources[0].Instances[0].Attributes
+		arg = tfstateFileAttributes[tfstateAttirbuteData.Name]
+		/*
+		if tfArgument.IsMulti == "Y" {
+			tmpRes := []interface{}{}
+			for i := range resourceDataList {
+				tmpRes = append(tmpRes, resourceDataList[i].ResourceAssetId)
+			}
+			arg = tmpRes
+		} else {
+			arg = resourceDataList[0].ResourceAssetId
+		}
+
+		 */
 		return
 	}
 	// 查询 tfArgument 对应的 parameter
@@ -3413,7 +3503,7 @@ func reverseConvertContextDirect(parameterData *models.ParameterTable,
 	return
 }
 
-func convertContextAttr(tfArgumentData *models.TfArgumentTable, reqParam map[string]interface{}, regionData *models.ResourceDataTable) (arg interface{}, isDiscard bool, err error) {
+func convertContextAttr(tfArgumentData *models.TfArgumentTable, reqParam map[string]interface{}, regionData *models.ResourceDataTable, sourceData *models.SourceTable) (arg interface{}, isDiscard bool, err error) {
 	if tfArgumentData.Parameter == "" {
 		arg = tfArgumentData.DefaultValue
 		return
@@ -3457,7 +3547,7 @@ func convertContextAttr(tfArgumentData *models.TfArgumentTable, reqParam map[str
 		return
 	}
 	if reqParam[relativeParameterData.Name].(string) == tfArgumentData.RelativeParameterValue {
-		arg, err = convertAttr(tfArgumentData, reqParam, regionData, tfArgumentData)
+		arg, err = convertAttr(tfArgumentData, reqParam, regionData, tfArgumentData, sourceData)
 	} else {
 		isDiscard = true
 	}
@@ -4346,7 +4436,7 @@ func handleConvertParams(action string,
 			arg, isDiscard, err = convertContextData(tfArgumentList[i], reqParam, regionData, tfArgumentList[i], sourceData)
 		case models.ConvertWay["Attr"]:
 			// search resouce_data table by relative_source and 输入的值, 获取 tfstat_file 字段内容,找到relative_tfstate_attribute id(search tfstate_attribute table) 对应的 name, 获取其在 tfstate_file 中的值
-			arg, err = convertAttr(tfArgumentList[i], reqParam, regionData, tfArgumentList[i])
+			arg, err = convertAttr(tfArgumentList[i], reqParam, regionData, tfArgumentList[i], sourceData)
 		case models.ConvertWay["Direct"]:
 			arg, err = convertDirect(tfArgumentList[i].DefaultValue, reqParam, tfArgumentList[i])
 		case models.ConvertWay["Function"]:
@@ -4354,7 +4444,7 @@ func handleConvertParams(action string,
 		case models.ConvertWay["ContextDirect"]:
 			arg, isDiscard, err = convertContextDirect(tfArgumentList[i], reqParam, regionData)
 		case models.ConvertWay["ContextAttr"]:
-			arg, isDiscard, err = convertContextAttr(tfArgumentList[i], reqParam, regionData)
+			arg, isDiscard, err = convertContextAttr(tfArgumentList[i], reqParam, regionData, sourceData)
 		case models.ConvertWay["ContextTemplate"]:
 			arg, isDiscard, err = convertContextTemplate(tfArgumentList[i], reqParam, regionData, providerData)
 		default:
