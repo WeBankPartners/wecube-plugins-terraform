@@ -177,9 +177,11 @@ func TerraformOperation(c *gin.Context) {
 	}
 
 	// clear the workpath
+	/*
 	if curProviderData.Name != "" {
 		db.DelDir(models.Config.TerraformFilePath + curProviderData.Name)
 	}
+	 */
 
 	c.JSON(http.StatusOK, rowData)
 	return

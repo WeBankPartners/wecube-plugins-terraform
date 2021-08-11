@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"path"
 	"reflect"
 	"regexp"
 	"sort"
@@ -88,6 +87,7 @@ func GenDir(dirPath string) (err error) {
 	return
 }
 
+/*
 func DelDir(dirPath string) (err error) {
 	_, err = os.Stat(dirPath)
 	if err != nil {
@@ -108,6 +108,7 @@ func DelDir(dirPath string) (err error) {
 	}
 	return
 }
+ */
 
 func GenTfFile(dirPath string, sourceData *models.SourceTable, action string, resourceId string, tfArguments map[string]interface{}) (tfFileContentStr string, err error) {
 	var tfFilePath string
