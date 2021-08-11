@@ -325,7 +325,7 @@ func execRemoteWithTimeout(cmdStr []string, timeOut int) (out string, err error)
 	}
 	cmdStr = append([]string{"-c"}, cmdStr...)
 	doneChan := make(chan string)
-	defer close(doneChan)
+	// defer close(doneChan)
 
 	tmpCmd := exec.Command(models.BashCmd, cmdStr...)
 	tmpCmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
