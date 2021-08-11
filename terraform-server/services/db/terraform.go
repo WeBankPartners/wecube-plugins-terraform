@@ -1575,6 +1575,9 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 			err = fmt.Errorf("TerraformOperation error: %v", r)
 			rowData["errorMessage"] = err.Error()
 		}
+		if rowData["errorMessage"].(string) != "" && rowData["errorCode"].(string) == "0" {
+			rowData["errorCode"] = "1"
+		}
 	}()
 
 	rowData = make(map[string]interface{})
