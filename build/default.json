@@ -1,0 +1,41 @@
+{
+  "default_language": "en",
+  "http_server": {
+    "port": "8999",
+    "cross": true
+  },
+  "log": {
+    "level": "{{TERRAFORM_LOG_LEVEL}}",
+    "log_dir": "logs",
+    "access_log_enable": true,
+    "db_log_enable": true,
+    "archive_max_size": 64,
+    "archive_max_backup": 10,
+    "archive_max_day": 15,
+    "compress": true
+  },
+  "database": {
+    "server": "{{TERRAFORM_MYSQL_HOST}}",
+    "port": "{{TERRAFORM_MYSQL_PORT}}",
+    "user": "{{TERRAFORM_MYSQL_USER}}",
+    "password": "{{TERRAFORM_MYSQL_PWD}}",
+    "database": "{{TERRAFORM_MYSQL_SCHEMA}}",
+    "maxOpen": 50,
+    "maxIdle": 10,
+    "timeout": 60
+  },
+  "rsa_key_path": "/data/certs/rsa_key",
+  "wecube": {
+    "base_url": "{{GATEWAY_URL}}",
+    "jwt_signing_key": "{{JWT_SIGNING_KEY}}",
+    "sub_system_code": "{{SUB_SYSTEM_CODE}}",
+    "sub_system_key": "{{SUB_SYSTEM_KEY}}"
+  },
+  "auth": {
+    "password_seed": "{{TERRAFORM_SECRET_KEY_SEED}}"
+  },
+  "terraform_file_path": "/data/terraform/",
+  "terraform_cmd_path": "/usr/local/bin/terraform",
+  "terraform_provider_os_arch": "linux_amd64",
+  "version": "{{PLUGIN_VERSION}}"
+}

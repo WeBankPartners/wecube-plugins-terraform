@@ -1,24 +1,14 @@
-FROM python:2.7.18-slim
-LABEL maintainer = "Webank CTB Team"
+FROM ccr.ccs.tencentyun.com/webankpartners/terrafrom-base:v1.0.3
 
-RUN sed -i 's/deb.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list && \
-    sed -i 's/security.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list && \
-    mkdir /data && mkdir -p /app/wecube_plugins_terraform
+ENV BASE_HOME=/app/terraform
 
-WORKDIR /app/wecube_plugins_terraform/
+RUN mkdir -p $BASE_HOME $BASE_HOME/conf $BASE_HOME/logs
 
-COPY . .
+ADD build/start.sh $BASE_HOME/
+ADD build/stop.sh $BASE_HOME/
+ADD build/default.json $BASE_HOME/conf/
+ADD terraform-server/terraform-server $BASE_HOME/
+ADD ui/dist $BASE_HOME/public
 
-RUN mkdir -p /usr/local/share/terraform/plugins && \
-    tar -zxvf /app/wecube_plugins_terraform/plugins/registry.terraform.io.tar.gz  -C /usr/local/share/terraform/plugins && \
-    rm -rf /app/wecube_plugins_terraform/plugins/registry.terraform.io.tar.gz && \
-    rm -rf /app/wecube_plugins_terraform/bin/terraform_0.15.5_linux_amd64.zip && \
-    ls /app/wecube_plugins_terraform/bin && \
-    \cp /app/wecube_plugins_terraform/bin/terraform /usr/bin/terraform && \
-    ls -la && \
-    apt update && apt-get -y install gcc python-dev && \
-    pip install -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com -r /app/wecube_plugins_terraform/requirements.txt && \
-    chmod +x /app/wecube_plugins_terraform/bin/*.sh
-
-EXPOSE 8999
-CMD ["/app/wecube_plugins_terraform/bin/start.sh"]
+WORKDIR $BASE_HOME
+ENTRYPOINT ["/bin/sh", "start.sh"]
