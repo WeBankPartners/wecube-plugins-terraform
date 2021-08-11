@@ -123,6 +123,7 @@ func TerraformOperation(c *gin.Context) {
 	// rowData := models.PluginInterfaceResultObj{}
 	// rowData.ResultCode = "0"
 	// rowData.ResultMessage = "success"
+	var curProviderData = models.ProviderTable{Name: ""}
 	count := len(params)
 	resultChan := make(chan []map[string]interface{}, count)
 	var wg sync.WaitGroup
@@ -139,7 +140,7 @@ func TerraformOperation(c *gin.Context) {
 			params[i]["requestId"] = request_param["requestId"].(string) + "_" + strconv.Itoa(i + 1)
 			params[i]["requestSn"] = strconv.Itoa(i + 1)
 			debugFileContent := []map[string]interface{}{}
-			retData, _ := db.TerraformOperation(plugin, action, params[i], &debugFileContent)
+			retData, _ := db.TerraformOperation(plugin, action, params[i], &debugFileContent, &curProviderData)
 			if _, ok := retData["errorCode"]; ok && retData["errorCode"] != "0" {
 				rowData.ResultCode = "1"
 				rowData.ResultMessage = "fail"
@@ -173,6 +174,11 @@ func TerraformOperation(c *gin.Context) {
 	for i := range resultChan {
 		curRes := i
 		rowData.Results.Outputs = append(rowData.Results.Outputs, curRes...)
+	}
+
+	// clear the workpath
+	if curProviderData.Name != "" {
+		db.DelDir(models.Config.TerraformFilePath + curProviderData.Name)
 	}
 
 	c.JSON(http.StatusOK, rowData)
@@ -243,6 +249,7 @@ func TerraformOperationDebug (c *gin.Context) {
 	// rowData.StatusCode = "OK"
 	// rowData.ResultCode = "0"
 	// rowData.ResultMessage = "success"
+	var curProviderData = models.ProviderTable{Name: ""}
 	count := len(params)
 	resultChan := make(chan map[string]interface{}, count)
 	var wg sync.WaitGroup
@@ -260,7 +267,7 @@ func TerraformOperationDebug (c *gin.Context) {
 			params[i]["requestSn"] = strconv.Itoa(i + 1)
 			params[i][models.ResourceDataDebug] = true
 			debugFileContent := []map[string]interface{}{}
-			retData, _ := db.TerraformOperation(plugin, action, params[i], &debugFileContent)
+			retData, _ := db.TerraformOperation(plugin, action, params[i], &debugFileContent, &curProviderData)
 			if _, ok := retData["errorCode"]; ok && retData["errorCode"] != "0" {
 				rowData.ResultCode = "1"
 				rowData.ResultMessage = "fail"
