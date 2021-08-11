@@ -1400,6 +1400,7 @@ func handleDestroy(workDirPath string,
 			// log.Logger.Warn("ResourceDataInfo can not be found by resource_id", log.String("resource_id", resourceId), log.Error(err))
 			// rowData["errorMessage"] = err.Error()
 			err = nil
+			rowData["errorCode"] = "0"
 			return
 		}
 		inputResourceData = resourceDataInfoList[0]
@@ -1470,8 +1471,8 @@ func handleDestroy(workDirPath string,
 				err = fmt.Errorf("Do TerraformInit error:%s", err.Error())
 				log.Logger.Error("Do TerraformInit error", log.Error(err))
 				rowData["errorMessage"] = err.Error()
-				// return
-				continue
+				return
+				// continue
 			}
 			resourceAssetId := resourceData.ResourceAssetId
 			DelTfstateFile(workDirPath)
@@ -1493,7 +1494,8 @@ func handleDestroy(workDirPath string,
 					err = fmt.Errorf("Do TerraformImport error:%s", err.Error())
 					log.Logger.Error("Do TerraformImport error", log.Error(err))
 					rowData["errorMessage"] = err.Error()
-					continue
+					// continue
+					return
 				}
 			} else {
 				// get tfstate file from resource_data table and gen it
@@ -1510,8 +1512,8 @@ func handleDestroy(workDirPath string,
 				err = fmt.Errorf("Do TerraformDestroy error: %s", err.Error())
 				log.Logger.Error("Do TerraformDestroy error", log.Error(err))
 				rowData["errorMessage"] = err.Error()
-				// return
-				continue
+				return
+				// continue
 			}
 
 			// Del provider file
@@ -1534,6 +1536,7 @@ func handleDestroy(workDirPath string,
 			err = fmt.Errorf("Delete resource data by id:%s error: %s", resourceData.Id, err.Error())
 			log.Logger.Error("Delete resource data by id error", log.String("id", resourceData.Id), log.Error(err))
 			rowData["errorMessage"] = err.Error()
+			return
 		}
 	}
 
@@ -2750,16 +2753,31 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					plugin,
 					sortedSourceList[i])
 				retOutput, tmpErr := handleDestroy(workDirPath, sortedSourceList[i], providerData, providerInfoData, regionData, reqParam, plugin, nil)
+
+				if _, ok := retOutput["errorCode"]; ok {
+					if retOutput["errorCode"] == "1" {
+						err = fmt.Errorf("Handle Destroy error: %s", tmpErr.Error())
+						log.Logger.Error("Handle Destroy error", log.Error(err))
+						rowData["errorMessage"] = err.Error()
+						return
+					}
+				}
+
+				/*
 				if tmpErr != nil {
 					err = fmt.Errorf("Handle Destroy error: %s", tmpErr.Error())
 					log.Logger.Error("Handle Destroy error", log.Error(err))
 					rowData["errorMessage"] = err.Error()
 					continue
 				}
+				 */
+
+				/*
 				for k, v := range retOutput {
 					rowData[k] = v
 				}
-				rowData["id"] = reqParam["id"].(string)
+				 */
+				// rowData["id"] = reqParam["id"].(string)
 			}
 			rowData["errorCode"] = "0"
 		} else {
