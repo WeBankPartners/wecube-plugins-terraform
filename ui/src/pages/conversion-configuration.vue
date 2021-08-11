@@ -1325,15 +1325,19 @@ export default {
         'z-index': 1000000,
         loading: true,
         onOk: async () => {
-          let res = await deleteAttrs(item.id)
-          this.$Modal.remove()
-          if (res.statusCode === 'OK') {
-            this.$Notice.success({
-              title: 'Successful',
-              desc: 'Successful'
-            })
+          if (item.id) {
+            let res = await deleteAttrs(item.id)
+            if (res.statusCode === 'OK') {
+              this.$Notice.success({
+                title: 'Successful',
+                desc: 'Successful'
+              })
+              attrs.splice(index, 1)
+            }
+          } else {
             attrs.splice(index, 1)
           }
+          this.$Modal.remove()
         },
         onCancel: () => {}
       })

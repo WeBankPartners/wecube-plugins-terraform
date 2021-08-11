@@ -223,7 +223,7 @@
                       type="error"
                       ghost
                       size="small"
-                      @click="deleteParams(param)"
+                      @click="deleteParams(param, interfaceParamter['input'], index)"
                       :disabled="param.source === 'system'"
                       >{{ $t('t_delete') }}</Button
                     >
@@ -335,7 +335,7 @@
                       type="error"
                       ghost
                       size="small"
-                      @click="deleteParams(param)"
+                      @click="deleteParams(param, interfaceParamter['output'], index)"
                       :disabled="param.source === 'system'"
                       >{{ $t('t_delete') }}
                     </Button>
@@ -623,21 +623,25 @@ export default {
         this.getInterfaceParamter(param.interface)
       }
     },
-    deleteParams (param) {
+    deleteParams (param, allParams, index) {
       this.$Modal.confirm({
         title: this.$t('t_confirm_delete'),
         'z-index': 1000000,
         loading: true,
         onOk: async () => {
-          let res = await deleteParameter(param.id)
-          this.$Modal.remove()
-          if (res.statusCode === 'OK') {
-            this.$Notice.success({
-              title: 'Successful',
-              desc: 'Successful'
-            })
-            this.getInterfaceParamter(param.interface)
+          if (param.id) {
+            let res = await deleteParameter(param.id)
+            if (res.statusCode === 'OK') {
+              this.$Notice.success({
+                title: 'Successful',
+                desc: 'Successful'
+              })
+              this.getInterfaceParamter(param.interface)
+            }
+          } else {
+            allParams.splice(index, 1)
           }
+          this.$Modal.remove()
         },
         onCancel: () => {}
       })
