@@ -507,7 +507,7 @@
                     </Select>
                   </div>
                   <div class="table-col title-width-level1">
-                    <!-- <Tooltip
+                    <Tooltip
                       :content="getTipContent(item.relativeSource, item.sourceWithFilter)"
                       :delay="500"
                       placement="right"
@@ -534,8 +534,8 @@
                           >
                         </template>
                       </Select>
-                    </Tooltip> -->
-                    <Select
+                    </Tooltip>
+                    <!-- <Select
                       v-model="item.relativeSource"
                       size="small"
                       :disabled="!['attribute', 'data', 'context_data', 'context_attribute'].includes(item.convertWay)"
@@ -554,7 +554,7 @@
                           >{{ item.name }}({{ item.sourceType }})</Option
                         >
                       </template>
-                    </Select>
+                    </Select> -->
                   </div>
                   <div class="table-col title-width-level1">
                     <!-- <Tooltip :content="item.remark" :delay="500" placement="right">
@@ -934,7 +934,7 @@
                     </Select>
                   </div>
                   <div class="table-col title-width-level1">
-                    <!-- <Tooltip
+                    <Tooltip
                       :content="getTipContent(item.relativeSource, item.sourceWithFilter)"
                       :delay="500"
                       placement="right"
@@ -961,8 +961,8 @@
                           >
                         </template>
                       </Select>
-                    </Tooltip> -->
-                    <Select
+                    </Tooltip>
+                    <!-- <Select
                       v-model="item.relativeSource"
                       size="small"
                       :disabled="!['attribute', 'data', 'context_data', 'context_attribute'].includes(item.convertWay)"
@@ -981,7 +981,7 @@
                           >{{ item.name }}({{ item.sourceType }})</Option
                         >
                       </template>
-                    </Select>
+                    </Select> -->
                   </div>
                   <div class="table-col title-width-level1">
                     <!-- <Tooltip :content="item.relativeTfstateAttribute" :delay="500" placement="right">
