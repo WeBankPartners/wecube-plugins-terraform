@@ -3863,6 +3863,12 @@ func convertDirect(defaultValue string, reqParam map[string]interface{}, tfArgum
 		randomVal := guid.CreateGuid()
 		arg = randomVal[:16]
 		reqParam[parameterData.Name] = arg
+	} else {
+		if _, ok := arg.(string); ok && arg.(string) == models.RandomFlag {
+			randomVal := guid.CreateGuid()
+			arg = randomVal[:16]
+			reqParam[parameterData.Name] = arg
+		}
 	}
 
 	/*
