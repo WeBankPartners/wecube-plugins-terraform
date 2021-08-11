@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path"
 	"reflect"
 	"regexp"
 	"sort"
@@ -83,6 +84,27 @@ func GenDir(dirPath string) (err error) {
 			log.Logger.Error("Os stat dir error", log.String("dirPath", dirPath), log.Error(err))
 			return
 		}
+	}
+	return
+}
+
+func DelDir(dirPath string) (err error) {
+	_, err = os.Stat(dirPath)
+	if err != nil {
+		if os.IsNotExist(err) == false {
+			err = fmt.Errorf("Os stat dir: %s error: %s", dirPath, err.Error())
+			log.Logger.Error("Os stat dir error", log.String("dirPath", dirPath), log.Error(err))
+			return
+		}
+	}
+	// clear dir
+	if dirPath[len(dirPath)-1] == '/' {
+		dirPath = dirPath[:len(dirPath)-1]
+	}
+	dir, err := ioutil.ReadDir(dirPath)
+	for _, d := range dir {
+		tmpPath := path.Join([]string{dirPath, d.Name()}...)
+		os.RemoveAll(tmpPath)
 	}
 	return
 }
@@ -1375,6 +1397,8 @@ func handleDestroy(workDirPath string,
 			err = fmt.Errorf("ResourceDataInfo can not be found by resource_id:%s", resourceId)
 			log.Logger.Warn("ResourceDataInfo can not be found by resource_id", log.String("resource_id", resourceId), log.Error(err))
 			rowData["errorMessage"] = err.Error()
+			err = nil
+			rowData["errorCode"] = "0"
 			return
 		}
 		// resourceData = resourceDataInfoList[0]
@@ -1668,6 +1692,13 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 		return
 	}
 	providerData := providerList[0]
+
+	defer func() {
+		if _, ok := reqParam[models.ResourceDataDebug]; !ok {
+			// clear the workpath
+			DelDir(models.Config.TerraformFilePath + providerData.Name)
+		}
+	}()
 
 	// Get sourceData by interface and provider
 	sqlCmd = `SELECT * FROM source WHERE interface=? AND provider=?`
