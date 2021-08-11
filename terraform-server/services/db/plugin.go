@@ -155,9 +155,13 @@ func PluginXmlExport() (result []byte, err error) {
 	resultBuffer.WriteString("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n")
 	var packageXmlObj = models.XmlPackage{Name: "terraform", Version: models.Config.Version}
 	interfaceNameMap := make(map[string]string)
+	pluginNameMap := make(map[string]string)
+	for _, v := range pluginTable {
+		pluginNameMap[v.Id] = v.Name
+	}
 	pluginInterfaceMap := make(map[string][]*models.InterfaceTable)
 	for _, v := range interfaceTable {
-		interfaceNameMap[v.Id] = v.Name
+		interfaceNameMap[v.Id] = fmt.Sprintf("%s_%s", pluginNameMap[v.Plugin], v.Name)
 		if _, b := pluginInterfaceMap[v.Plugin]; !b {
 			pluginInterfaceMap[v.Plugin] = []*models.InterfaceTable{v}
 		} else {
