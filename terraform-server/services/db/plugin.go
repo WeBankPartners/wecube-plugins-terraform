@@ -189,7 +189,7 @@ func PluginXmlExport() (result []byte, err error) {
 			tmpInterface := models.XmlInterface{Action: interfaceObj.Name, InputParameters: models.XmlInputParameters{Parameters: []*models.XmlParameter{}}, OutputParameters: models.XmlOutputParameters{Parameters: []*models.XmlParameter{}}}
 			tmpInterface.Path = fmt.Sprintf("%s/api/v1/terraform/%s/%s", models.UrlPrefix, plugin.Name, interfaceObj.Name)
 			for _, parameter := range parameterMap[interfaceObj.Id] {
-				tmpParameter := models.XmlParameter{Datatype: parameter.DataType, Multiple: parameter.Multiple, SensitiveData: parameter.Sensitive, Required: "N", Value: parameter.Name}
+				tmpParameter := models.XmlParameter{Datatype: parameter.DataType, Multiple: parameter.Multiple, SensitiveData: parameter.Sensitive, Required: "N", Value: parameter.Name, MappingType: "entity"}
 				if parameter.Nullable == "N" {
 					tmpParameter.Required = "Y"
 				}
@@ -254,7 +254,7 @@ func buildXmlParamObject(interfaceNameMap map[string]string) (xmlParamObjects mo
 		tmpParamObject := models.XmlParamObject{Name: fmt.Sprintf("%s_%s_%s", interfaceNameMap[object.Interface], object.Type, object.Name), Properties: []*models.XmlParamProperty{}}
 		paramObjectMap[tmpParamObject.Name] = true
 		for _, property := range objectPropertyMap[object.Id] {
-			tmpProperty := models.XmlParamProperty{Name: property.Name, Multiple: property.Multiple, DataType: property.DataType, SensitiveData: property.Sensitive, Required: "N"}
+			tmpProperty := models.XmlParamProperty{Name: property.Name, Multiple: property.Multiple, DataType: property.DataType, SensitiveData: property.Sensitive, Required: "N", MapType: "entity"}
 			if property.DataType == "object" {
 				if _, b := objectParamsNameMap[property.Id]; b {
 					tmpProperty.RefObjectName = objectParamsNameMap[property.Id]
