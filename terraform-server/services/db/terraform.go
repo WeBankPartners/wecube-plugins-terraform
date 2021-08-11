@@ -5139,7 +5139,7 @@ func compareObject(first, second map[string]interface{}) (result map[string]inte
 		}
 		if tmpSecV != tmpFirV {
 			diff = 1
-			message += fmt.Sprintf("Key:%s is diff with %s -> %s \n", k, tmpFirV, tmpSecV)
+			message += fmt.Sprintf("Key:%s is diff with record:%s, real:%s \n", k, tmpFirV, tmpSecV)
 		}
 	}
 	message = strings.ReplaceAll(message, "<nil>", "null")
