@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path"
 	"reflect"
 	"regexp"
 	"sort"
@@ -87,7 +88,6 @@ func GenDir(dirPath string) (err error) {
 	return
 }
 
-/*
 func DelDir(dirPath string) (err error) {
 	_, err = os.Stat(dirPath)
 	if err != nil {
@@ -96,6 +96,10 @@ func DelDir(dirPath string) (err error) {
 			log.Logger.Error("Os stat dir error", log.String("dirPath", dirPath), log.Error(err))
 			return
 		}
+		return
+	}
+	if dirPath == "" {
+		return
 	}
 	// clear dir
 	if dirPath[len(dirPath)-1] == '/' {
@@ -108,7 +112,6 @@ func DelDir(dirPath string) (err error) {
 	}
 	return
 }
- */
 
 func GenTfFile(dirPath string, sourceData *models.SourceTable, action string, resourceId string, tfArguments map[string]interface{}) (tfFileContentStr string, err error) {
 	var tfFilePath string
@@ -1121,6 +1124,7 @@ func handleDestroy(workDirPath string,
 }
 
 func TerraformOperation(plugin string, action string, reqParam map[string]interface{}, debugFileContent *[]map[string]interface{}, operationProviderData *models.ProviderTable) (rowData map[string]interface{}, err error) {
+	var curWorkDirPath string
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("TerraformOperation error: %v", r)
@@ -1128,6 +1132,13 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 		}
 		if rowData["errorMessage"].(string) != "" && rowData["errorCode"].(string) == "0" {
 			rowData["errorCode"] = "1"
+		}
+
+		if _, ok := reqParam[models.ResourceDataDebug]; !ok {
+			// clear the workDirPath
+			if curWorkDirPath != "" {
+				DelDir(curWorkDirPath)
+			}
 		}
 	}()
 
@@ -1248,14 +1259,6 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	}
 	providerData := providerList[0]
 	operationProviderData.Name = providerData.Name
-	/*
-	defer func() {
-		if _, ok := reqParam[models.ResourceDataDebug]; !ok {
-			// clear the workpath
-			DelDir(models.Config.TerraformFilePath + providerData.Name)
-		}
-	}()
-	 */
 
 	// Get sourceData by interface and provider
 	sqlCmd = `SELECT * FROM source WHERE interface=? AND provider=?`
@@ -1653,6 +1656,8 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 				regionData,
 				plugin,
 				sortedSourceData)
+
+			curWorkDirPath = workDirPath
 
 			// Gen the terraform workdir
 			err = GenDir(workDirPath)
