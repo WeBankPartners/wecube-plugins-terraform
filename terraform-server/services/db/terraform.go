@@ -3904,6 +3904,10 @@ func convertDirect(defaultValue string, reqParam map[string]interface{}, tfArgum
 }
 
 func convertFunction(tfArgumentData *models.TfArgumentTable, reqParam map[string]interface{}, tfArgument *models.TfArgumentTable) (arg interface{}, err error) {
+	if tfArgument.Parameter == "" {
+		arg = tfArgument.DefaultValue
+		return
+	}
 	// 查询 tfArgument 对应的 parameter
 	sqlCmd := `SELECT * FROM parameter WHERE id=?`
 	paramArgs := []interface{}{tfArgument.Parameter}
@@ -3919,7 +3923,129 @@ func convertFunction(tfArgumentData *models.TfArgumentTable, reqParam map[string
 		log.Logger.Warn("Parameter data can not be found by id", log.String("id", tfArgument.Parameter), log.Error(err))
 		return
 	}
-	// parameterData := parameterList[0]
+	parameterData := parameterList[0]
+	if reqParam[parameterData.Name] == nil {
+		return
+	}
+
+	functionDefine := tfArgumentData.FunctionDefine
+	var functionDefineData models.FunctionDefine
+	json.Unmarshal([]byte(functionDefine), &functionDefineData)
+
+	resultIdx := -1
+	if functionDefineData.Return != "result" {
+		idxStrStart := strings.Index(functionDefineData.Return, "[")
+		idxStrEnd := strings.Index(functionDefineData.Return, "]")
+		if idxStrStart == -1 || idxStrEnd == -1 || idxStrStart >= idxStrEnd {
+			err = fmt.Errorf("The function_define return_value: %s of tfArgument:%s config error", functionDefineData.Return, tfArgumentData.Name)
+			log.Logger.Error("The function_define return_value of tfArgument config error", log.String("return_value", functionDefineData.Return), log.String("tfArgument", tfArgumentData.Name), log.Error(err))
+			return
+		}
+		resultIdx, _ = strconv.Atoi(functionDefineData.Return[idxStrStart+1 : idxStrEnd])
+	}
+	reqVal := reqParam[parameterData.Name]
+	var result []interface{}
+	if parameterData.DataType == "object" {
+		handleReqVals := []map[string]interface{}{}
+		if parameterData.Multiple == "Y" {
+			tmpData := reqVal.([]map[string]interface{})
+			for i := range tmpData {
+				handleReqVals = append(handleReqVals, tmpData[i])
+			}
+		} else {
+			handleReqVals = append(handleReqVals, reqVal.(map[string]interface{}))
+		}
+
+		if functionDefineData.Function == models.FunctionConvertFunctionDefineName["Remove"] {
+			for _, val := range handleReqVals {
+				removeResult := []map[string]string{}
+				removeKeys := functionDefineData.Args.RemoveKey
+				for i := range removeKeys {
+					tmpVal := make(map[string]string)
+					for k, v := range val {
+						tmpVal[k] = v.(string)
+					}
+					delete(tmpVal, removeKeys[i])
+					removeResult = append(removeResult, tmpVal)
+				}
+				result = append(result, removeResult[0])
+			}
+		}
+	} else {
+		handleReqVals := []string{}
+		if parameterData.Multiple == "Y" {
+			tmpData := reqVal.([]interface{})
+			for i := range tmpData {
+				handleReqVals = append(handleReqVals, tmpData[i].(string))
+			}
+		} else {
+			handleReqVals = append(handleReqVals, reqVal.(string))
+		}
+		if functionDefineData.Function == models.FunctionConvertFunctionDefineName["Split"] {
+			for _, reqValStr := range handleReqVals {
+				splitResult := [][]string{}
+				splitChars := functionDefineData.Args.SplitChar
+				for i := range splitChars {
+					curResult := strings.Split(reqValStr, splitChars[i])
+					if len(curResult) < 2 || curResult[1] == "" {
+						curResult = append(curResult, curResult[0])
+					}
+					splitResult = append(splitResult, curResult)
+				}
+				if resultIdx == -1 {
+					result = append(result, splitResult[0])
+				} else {
+					result = append(result, splitResult[0][resultIdx])
+				}
+			}
+		} else if functionDefineData.Function == models.FunctionConvertFunctionDefineName["Replace"] {
+			for _, reqValStr := range handleReqVals {
+				replaceResult := []string{}
+				replaceVals := functionDefineData.Args.ReplaceVal
+				for i := range replaceVals {
+					for old, new := range replaceVals[i] {
+						curResult := strings.Replace(reqValStr, old, new, -1)
+						replaceResult = append(replaceResult, curResult)
+					}
+				}
+				if resultIdx == -1 {
+					result = append(result, replaceResult[0])
+				} else {
+					result = append(result, replaceResult[0][resultIdx])
+				}
+			}
+		} else if functionDefineData.Function == models.FunctionConvertFunctionDefineName["Regx"] {
+			for _, reqValStr := range handleReqVals {
+				regxResult := [][]string{}
+				regExprs := functionDefineData.Args.RegExp
+				for i := range regExprs {
+					regExp := regexp.MustCompile(regExprs[i])
+					curResult := regExp.FindStringSubmatch(reqValStr)
+					// the first one is the original str
+					curResult = curResult[1:]
+					regxResult = append(regxResult, curResult)
+				}
+				if resultIdx == -1 {
+					result = append(result, regxResult[0])
+				} else {
+					result = append(result, regxResult[0][resultIdx])
+				}
+			}
+		} else {
+			err = fmt.Errorf("The function_define:%s of tfArgument:%s config error", functionDefine, tfArgumentData.Name)
+			log.Logger.Error("The function_define of tfArgument config error", log.String("function_define", functionDefine), log.String("tfstateAttribute", tfArgumentData.Name), log.Error(err))
+			return
+		}
+	}
+	if tfArgumentData.IsMulti == "Y" {
+		tmpRes := []interface{}{}
+		for i := range result {
+			tmpRes = append(tmpRes, result[i])
+		}
+		arg = tmpRes
+	} else {
+		arg = result[0]
+	}
 	return
 }
 
