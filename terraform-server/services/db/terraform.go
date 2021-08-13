@@ -1124,7 +1124,7 @@ func handleDestroy(workDirPath string,
 }
 
 func TerraformOperation(plugin string, action string, reqParam map[string]interface{}, debugFileContent *[]map[string]interface{}) (rowData map[string]interface{}, err error) {
-	var curWorkDirPath string
+	var curWorkDirPath = []string{}
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("TerraformOperation error: %v", r)
@@ -1136,8 +1136,8 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 
 		if _, ok := reqParam[models.ResourceDataDebug]; !ok {
 			// clear the workDirPath
-			if curWorkDirPath != "" {
-				DelDir(curWorkDirPath)
+			for i := range curWorkDirPath {
+				DelDir(curWorkDirPath[i])
 			}
 		}
 	}()
@@ -1656,7 +1656,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 				plugin,
 				sortedSourceData)
 
-			curWorkDirPath = workDirPath
+			curWorkDirPath = append(curWorkDirPath, workDirPath)
 
 			// Gen the terraform workdir
 			err = GenDir(workDirPath)
@@ -2296,6 +2296,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					regionData,
 					plugin,
 					sortedSourceList[i])
+				curWorkDirPath = append(curWorkDirPath, workDirPath)
 				retOutput, tmpErr := handleDestroy(workDirPath, sortedSourceList[i], providerData, providerInfoData, regionData, reqParam, plugin, nil)
 
 				if _, ok := retOutput["errorCode"]; ok {
