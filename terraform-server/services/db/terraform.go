@@ -1123,7 +1123,7 @@ func handleDestroy(workDirPath string,
 	return
 }
 
-func TerraformOperation(plugin string, action string, reqParam map[string]interface{}, debugFileContent *[]map[string]interface{}, operationProviderData *models.ProviderTable) (rowData map[string]interface{}, err error) {
+func TerraformOperation(plugin string, action string, reqParam map[string]interface{}, debugFileContent *[]map[string]interface{}) (rowData map[string]interface{}, err error) {
 	var curWorkDirPath string
 	defer func() {
 		if r := recover(); r != nil {
@@ -1258,7 +1258,6 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 		return
 	}
 	providerData := providerList[0]
-	operationProviderData.Name = providerData.Name
 
 	// Get sourceData by interface and provider
 	sqlCmd = `SELECT * FROM source WHERE interface=? AND provider=?`

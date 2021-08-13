@@ -20,6 +20,7 @@ const (
 	ParameterSourceDefault = "custom"
 	TfArgumentKeyArgumentDefault = "N"
 	CommandTimeOut      = 300
+	ConsumerCount       = 5
 	ResourceDataDebug   = "$_resource_data_debug$"
 	ResourceIdDataConvert  = "#resourceId#"
 	PGuid               = "6101d5ff9c058ecd8d2dddd974d38f98"
