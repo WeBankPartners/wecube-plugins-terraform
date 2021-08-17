@@ -764,8 +764,8 @@ func RegionApply(reqParam map[string]interface{}, interfaceData *models.Interfac
 		return
 	}
 	if len(sourceList) == 0 {
-		err = fmt.Errorf("Provider can not be found by interface:%s and provider:%s", interfaceData.Id, providerData.Id)
-		log.Logger.Warn("Provider can not be found by interface and provider", log.String("interface", interfaceData.Id), log.String("provider", providerData.Id), log.Error(err))
+		err = fmt.Errorf("Source can not be found by interface:%s and provider:%s", interfaceData.Id, providerData.Id)
+		log.Logger.Warn("Source can not be found by interface and provider", log.String("interface", interfaceData.Id), log.String("provider", providerData.Id), log.Error(err))
 		rowData["errorMessage"] = err.Error()
 		return
 	}
