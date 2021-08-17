@@ -386,7 +386,7 @@ func TerraformImport(dirPath, address, resourceAssetId string) (err error) {
 
 func TerraformPlan(dirPath string) (destroyCnt int, err error) {
 	// cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " plan -input=false -out=" + dirPath + "/planfile"
-	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " plan -input=false"
+	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " plan -input=false -no-color"
 	/*
 		cmd := exec.Command(models.BashCmd, "-c", cmdStr)
 		var stdout, stderr bytes.Buffer
@@ -530,7 +530,7 @@ func TerraformDestroy(dirPath string) (err error) {
 }
 
 func TerraformInit(dirPath string) (err error) {
-	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " init"
+	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " init" + " -plugin-dir=" + dirPath + "/.terraform/providers"
 	/*
 		cmd := exec.Command(models.BashCmd, "-c", cmdStr)
 		var stdout, stderr bytes.Buffer
