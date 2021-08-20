@@ -2190,6 +2190,14 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 									}
 								}
 							}
+						} else {
+							// for aws query
+							if providerData.Name == models.ProviderName["Aws"] {
+								if _, ok := resourceDataResult[providerData.Name]; !ok {
+									resourceDataResult[providerData.Name] = []map[string]interface{}{}
+								}
+								resourceDataResult[providerData.Name] = append(resourceDataResult[providerData.Name], curSourceRes...)
+							}
 						}
 						resourceDataResult[sortedSourceData.Id] = []map[string]interface{}{}
 					}
@@ -2207,10 +2215,17 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 			if len(sortedSourceList) > 1 {
 				curSimulateResourceData := reqParam[models.SimulateResourceDataResult].(map[string][]map[string]interface{})
 				// rowData[models.TerraformOutPutPrefix] = curSimulateResourceData[sortedSourceList[0].Id]
-				curResult := curSimulateResourceData[sortedSourceList[0].Id]
 				result := []interface{}{}
-				for i := range curResult {
-					result = append(result, curResult[i]["output"])
+				if _, ok := curSimulateResourceData[providerData.Name]; !ok {
+					curResult := curSimulateResourceData[sortedSourceList[0].Id]
+					for i := range curResult {
+						result = append(result, curResult[i]["output"])
+					}
+				} else {
+					curResult := curSimulateResourceData[providerData.Name]
+					for i := range curResult {
+						result = append(result, curResult[i])
+					}
 				}
 				rowData[models.TerraformOutPutPrefix] = result
 			}
@@ -2610,27 +2625,29 @@ func convertAttr(tfArgumentData *models.TfArgumentTable, reqParam map[string]int
 		// arg = tfArgument.DefaultValue
 		if sourceData.SourceType == "data_resource" {
 			if _, ok := reqParam[models.SimulateResourceData]; ok {
-				/*
-					curSimulateResourceData := reqParam[models.SimulateResourceData].(map[string][]map[string]interface{})
+				curSimulateResourceData := reqParam[models.SimulateResourceData].(map[string][]map[string]interface{})
 
-					tmpRes := []interface{}{}
-					relativeSourceId := tfArgumentData.RelativeSource
-					resourceDatas := curSimulateResourceData[relativeSourceId]
-					for i := range resourceDatas {
-						tmpData := resourceDatas[i]["tfstateFile"].(map[string]interface{})
-						assetIdAttribute := resourceDatas[i]["assetIdAttribute"].(string)
-						if _, ok := tmpData[assetIdAttribute]; ok {
+				tmpRes := []interface{}{}
+				relativeSourceId := tfArgumentData.RelativeSource
+				resourceDatas := curSimulateResourceData[relativeSourceId]
+				for i := range resourceDatas {
+					tmpData := resourceDatas[i]["tfstateFile"].(map[string]interface{})
+					assetIdAttribute := resourceDatas[i]["assetIdAttribute"].(string)
+					if _, ok := tmpData[assetIdAttribute]; ok {
+						if _, okAgain := tmpData[assetIdAttribute].([]interface{}); okAgain {
+							tmpRes = append(tmpRes, tmpData[assetIdAttribute].([]interface{})...)
+						} else {
 							tmpRes = append(tmpRes, tmpData[assetIdAttribute])
 						}
 					}
-					if len(tmpRes) > 0 {
-						if tfArgument.IsMulti == "Y" {
-							arg = tmpRes
-						} else {
-							arg = tmpRes[0]
-						}
+				}
+				if len(tmpRes) > 0 {
+					if tfArgument.IsMulti == "Y" {
+						arg = tmpRes
+					} else {
+						arg = tmpRes[0]
 					}
-				*/
+				}
 				return
 			}
 		}

@@ -33,6 +33,7 @@ const (
 
 var (
 	SEPERATOR  = string([]byte{0x01})
+	ProviderName = map[string]string{"Aws":"aws", "Alicloud":"alicloud", "Tencentcloud":"tencentcloud"}
 	ConvertWay = map[string]string{"Data": "data", "Template": "template", "ContextData": "context_data", "Attr": "attribute", "Direct": "direct", "Function": "function", "ContextDirect": "context_direct", "ContextAttr": "context_attribute", "ContextTemplate": "context_template"}
 	// TerraformProviderPathDiffMap = map[string]string{"tencentcloud": ".terraform/providers/registry.terraform.io/tencentcloudstack/tencentcloud/",
 	// 												 "alicloud": ".terraform/providers/registry.terraform.io/hashicorp/alicloud/"}
