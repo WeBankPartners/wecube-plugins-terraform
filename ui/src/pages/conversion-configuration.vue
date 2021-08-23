@@ -1059,6 +1059,7 @@
     <Modal
       v-model="newSource.isShow"
       :title="(newSource.isAdd ? $t('t_add') : $t('t_add')) + $t('t_source')"
+      :mask-closable="false"
       @on-ok="confirmSource"
       @on-cancel="newSource.isShow = false"
     >

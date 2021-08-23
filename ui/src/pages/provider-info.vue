@@ -13,6 +13,7 @@
     <Modal
       v-model="newProviderInfo.isShow"
       :title="newProviderInfo.isAdd ? $t('t_add') : $t('t_edit') + $t('t_provider_info')"
+      :mask-closable="false"
       @on-ok="confirmProviderInfo"
       @on-cancel="confirmProviderInfo.isShow = false"
     >
