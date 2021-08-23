@@ -209,9 +209,7 @@ func GenVersionFile(dirPath string, providerData *models.ProviderTable) (err err
 }
 
 func GenTerraformProviderSoftLink(dirPath string, providerData *models.ProviderTable) (err error) {
-	// targetTerraformProviderPath := dirPath + "/" + models.TerraformProviderPathDiffMap[providerData.Name] + providerData.Version + "/" + models.Config.TerraformProviderOsArch
-	// targetTerraformProviderPath := dirPath + "/" + models.TerraformProviderPathDiffMap[providerData.Name] + providerData.Version
-	targetTerraformProviderPath := dirPath + "/" + models.TerraformProviderPathDiffMap[providerData.Name] + providerData.NameSpace + "/" + providerData.Name + "/" + providerData.Version
+	targetTerraformProviderPath := dirPath + "/.terraform/providers/registry.terraform.io/" + providerData.NameSpace + "/" + providerData.Name + "/" + providerData.Version
 
 	terraformFilePath := models.Config.TerraformFilePath
 	if terraformFilePath[len(terraformFilePath)-1] != '/' {
@@ -393,7 +391,7 @@ func TerraformImport(dirPath, address, resourceAssetId string) (err error) {
 
 func TerraformPlan(dirPath string) (destroyCnt int, err error) {
 	// cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " plan -input=false -out=" + dirPath + "/planfile"
-	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " plan -input=false"
+	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " plan -input=false -no-color"
 	/*
 		cmd := exec.Command(models.BashCmd, "-c", cmdStr)
 		var stdout, stderr bytes.Buffer
@@ -477,7 +475,7 @@ func TerraformPlan(dirPath string) (destroyCnt int, err error) {
 }
 
 func TerraformApply(dirPath string) (err error) {
-	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " apply -auto-approve"
+	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " apply -auto-approve -no-color"
 	/*
 		cmd := exec.Command(models.BashCmd, "-c", cmdStr)
 		var stdout, stderr bytes.Buffer
@@ -537,7 +535,7 @@ func TerraformDestroy(dirPath string) (err error) {
 }
 
 func TerraformInit(dirPath string) (err error) {
-	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " init"
+	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " init" + " -plugin-dir=" + dirPath + "/.terraform/providers"
 	/*
 		cmd := exec.Command(models.BashCmd, "-c", cmdStr)
 		var stdout, stderr bytes.Buffer
