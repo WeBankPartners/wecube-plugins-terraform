@@ -601,6 +601,23 @@ func handleOutPutArgs(outPutArgs map[string]interface{},
 				if _, okParam := tfstateAttrParamMap[v.Id]; !okParam {
 					if _, ok := reqParam[k]; ok {
 						mapOutPutArgs[i][k] = reqParam[k]
+						if k == "password" {
+							enCodeStr, encodeErr := cipher.AesEnPasswordByGuid(models.PGuid, models.Config.Auth.PasswordSeed, reqParam[k].(string), "")
+							if encodeErr != nil {
+								log.Logger.Error("Try to encode failed", log.Error(encodeErr))
+							} else {
+								mapOutPutArgs[i][k] = enCodeStr
+							}
+						}
+					}
+				} else {
+					if v.Sensitive == "Y" {
+						enCodeStr, encodeErr := cipher.AesEnPasswordByGuid(models.PGuid, models.Config.Auth.PasswordSeed, mapOutPutArgs[i][k].(string), "")
+						if encodeErr != nil {
+							log.Logger.Error("Try to encode failed", log.Error(encodeErr))
+						} else {
+							mapOutPutArgs[i][k] = enCodeStr
+						}
 					}
 				}
 			}
