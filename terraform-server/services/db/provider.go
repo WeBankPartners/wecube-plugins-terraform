@@ -41,6 +41,25 @@ func ProviderBatchCreate(user string, param []*models.ProviderTable) (rowData []
 			SecretKeyAttrName: param[i].SecretKeyAttrName, RegionAttrName: param[i].RegionAttrName, CreateUser: user, CreateTime: createTime,
 			UpdateUser: user, UpdateTime: createTime, NameSpace: param[i].NameSpace}
 		rowData = append(rowData, data)
+
+		// check is initialized
+		terraformFilePath := models.Config.TerraformFilePath
+		if terraformFilePath[len(terraformFilePath)-1] != '/' {
+			terraformFilePath += "/"
+		}
+		terraformProviderCommonPath := terraformFilePath + "providers/" + data.Name + "/" + data.Version
+		terraformProviderPath := terraformProviderCommonPath + "/" + models.Config.TerraformProviderOsArch
+		terraformLockHclPath :=  terraformProviderCommonPath + "/" + models.Config.TerraformProviderOsArch + "_hcl"
+
+		data.Initialized = "Y"
+		_, err = os.Stat(terraformProviderPath)
+		if err != nil {
+			data.Initialized = "N"
+		}
+		_, err = os.Stat(terraformLockHclPath)
+		if err != nil {
+			data.Initialized = "N"
+		}
 	}
 
 	for i := range rowData {
@@ -82,6 +101,25 @@ func ProviderBatchUpdate(user string, param []*models.ProviderTable) (err error)
 	tableName := "provider"
 	updateTime := time.Now().Format(models.DateTimeFormat)
 	for i := range param {
+		// check is initialized
+		terraformFilePath := models.Config.TerraformFilePath
+		if terraformFilePath[len(terraformFilePath)-1] != '/' {
+			terraformFilePath += "/"
+		}
+		terraformProviderCommonPath := terraformFilePath + "providers/" + param[i].Name + "/" + param[i].Version
+		terraformProviderPath := terraformProviderCommonPath + "/" + models.Config.TerraformProviderOsArch
+		terraformLockHclPath :=  terraformProviderCommonPath + "/" + models.Config.TerraformProviderOsArch + "_hcl"
+
+		param[i].Initialized = "Y"
+		_, err = os.Stat(terraformProviderPath)
+		if err != nil {
+			param[i].Initialized = "N"
+		}
+		_, err = os.Stat(terraformLockHclPath)
+		if err != nil {
+			param[i].Initialized = "N"
+		}
+
 		param[i].UpdateTime = updateTime
 		param[i].UpdateUser = user
 		action, tmpErr := GetUpdateTableExecAction(tableName, "id", param[i].Id, *param[i], nil)
@@ -251,7 +289,7 @@ func getRelativeNullValue(input string) string {
 	return output
 }
 
-func ProviderDownload(providerId string) (err error) {
+func ProviderDownload(providerId string, user string) (err error) {
 	sqlCmd := "SELECT * FROM provider WHERE id=?"
 	paramArgs := []interface{}{providerId}
 	var rowData []*models.ProviderTable
@@ -323,19 +361,26 @@ func ProviderDownload(providerId string) (err error) {
 	if err != nil {
 		err = fmt.Errorf("Del .terraform dir error: %s", err.Error())
 		log.Logger.Error("Del .terraform dir error", log.Error(err))
-		return
+		// return
 	}
 
 	err = DelFile(downloadProviderHclFilePath)
 	if err != nil {
 		err = fmt.Errorf("Del downloaded provider hcl file error: %s", err.Error())
 		log.Logger.Error("Del downloaded provider hcl file error", log.Error(err))
-		return
+		// return
+	}
+
+	// update the initialized column of provider
+	err = ProviderBatchUpdate(user, []*models.ProviderTable{providerData})
+	if err != nil {
+		err = fmt.Errorf("Update provider's initialized column error: %s", err.Error())
+		log.Logger.Error("Update provider's initialized column error", log.Error(err))
 	}
 	return
 }
 
-func ProviderUpload(providerId string, r *http.Request) (err error) {
+func ProviderUpload(providerId string, r *http.Request, user string) (err error) {
 	sqlCmd := "SELECT * FROM provider WHERE id=?"
 	paramArgs := []interface{}{providerId}
 	var rowData []*models.ProviderTable
@@ -468,14 +513,21 @@ func ProviderUpload(providerId string, r *http.Request) (err error) {
 	if err != nil {
 		err = fmt.Errorf("Del upload file tmp dir error: %s", err.Error())
 		log.Logger.Error("Del upload file tmp dir error", log.Error(err))
-		return
+		// return
 	}
 
 	err = DelFile(filePath)
 	if err != nil {
-		err = fmt.Errorf("Del uploaded  file error: %s", err.Error())
+		err = fmt.Errorf("Del uploaded file error: %s", err.Error())
 		log.Logger.Error("Del uploaded file error", log.Error(err))
-		return
+		// return
+	}
+
+	// update the initialized column of provider
+	err = ProviderBatchUpdate(user, []*models.ProviderTable{providerData})
+	if err != nil {
+		err = fmt.Errorf("Update provider's initialized column error: %s", err.Error())
+		log.Logger.Error("Update provider's initialized column error", log.Error(err))
 	}
 	return
 }

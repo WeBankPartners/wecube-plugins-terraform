@@ -136,7 +136,8 @@ func ProviderDownload(c *gin.Context) {
 		middleware.ReturnParamEmptyError(c, "id")
 		return
 	}
-	err := db.ProviderDownload(id)
+	user := middleware.GetRequestUser(c)
+	err := db.ProviderDownload(id, user)
 	if err != nil {
 		middleware.ReturnServerHandleError(c, err)
 	} else {
@@ -151,7 +152,8 @@ func ProviderUpload(c *gin.Context) {
 		middleware.ReturnParamEmptyError(c, "id")
 		return
 	}
-	err := db.ProviderUpload(id, c.Request)
+	user := middleware.GetRequestUser(c)
+	err := db.ProviderUpload(id, c.Request, user)
 	if err != nil {
 		middleware.ReturnServerHandleError(c, err)
 	} else {
