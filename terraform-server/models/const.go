@@ -20,6 +20,7 @@ const (
 	ParameterSourceDefault = "custom"
 	TfArgumentKeyArgumentDefault = "N"
 	CommandTimeOut      = 300
+	DownloadProviderTimeOut = 1800
 	ConsumerCount       = 5
 	ResourceDataDebug   = "$_resource_data_debug$"
 	ResourceIdDataConvert  = "#resourceId#"

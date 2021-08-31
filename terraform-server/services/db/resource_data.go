@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+/*
 func ResourceDataList(paramsMap map[string]interface{}) (rowData []*models.ResourceDataTable, err error) {
 	sqlCmd := "SELECT * FROM resource_data WHERE 1=1"
 	paramArgs := []interface{}{}
@@ -17,6 +18,20 @@ func ResourceDataList(paramsMap map[string]interface{}) (rowData []*models.Resou
 	}
 	sqlCmd += " ORDER BY create_time DESC"
 	err = x.SQL(sqlCmd, paramArgs...).Find(&rowData)
+	if err != nil {
+		log.Logger.Error("Get resource_data list error", log.Error(err))
+	}
+	return
+}
+*/
+
+func ResourceDataList(ids string) (rowData []*models.ResourceDataQuery, err error) {
+	sqlCmd := "SELECT t1.*,t2.name AS resource_title FROM resource_data t1 LEFT JOIN source t2 ON t1.resource=t2.id WHERE 1=1"
+	if ids != "" {
+		sqlCmd += " AND t1.id IN ('" + ids + "')"
+	}
+	sqlCmd += " ORDER BY t1.id DESC"
+	err = x.SQL(sqlCmd).Find(&rowData)
 	if err != nil {
 		log.Logger.Error("Get resource_data list error", log.Error(err))
 	}

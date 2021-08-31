@@ -30,6 +30,7 @@ func ResourceDataBatchCreate(c *gin.Context) {
 	}
 }
 
+/*
 func ResourceDataList(c *gin.Context) {
 	paramsMap := make(map[string]interface{})
 	rowData, err := db.ResourceDataList(paramsMap)
@@ -38,6 +39,24 @@ func ResourceDataList(c *gin.Context) {
 	} else {
 		if len(rowData) == 0 {
 			rowData = []*models.ResourceDataTable{}
+		}
+		middleware.ReturnData(c, rowData)
+	}
+	return
+}
+*/
+
+func ResourceDataList (c *gin.Context) {
+	ids := c.Query("ids")
+	trimIds := strings.Trim(ids, ",")
+	queryIds := strings.Split(trimIds, ",")
+	queryIdsStr := strings.Join(queryIds, "','")
+	rowData, err := db.ResourceDataList(queryIdsStr)
+	if err != nil {
+		middleware.ReturnServerHandleError(c, err)
+	} else {
+		if len(rowData) == 0 {
+			rowData = []*models.ResourceDataQuery{}
 		}
 		middleware.ReturnData(c, rowData)
 	}

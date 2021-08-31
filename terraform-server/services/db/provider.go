@@ -2,6 +2,11 @@ package db
 
 import (
 	"fmt"
+	"io"
+	"mime/multipart"
+	"net/http"
+	"os"
+	"os/exec"
 	"strings"
 	"time"
 
@@ -244,4 +249,233 @@ func getRelativeNullValue(input string) string {
 		output = "'" + input + "'"
 	}
 	return output
+}
+
+func ProviderDownload(providerId string) (err error) {
+	sqlCmd := "SELECT * FROM provider WHERE id=?"
+	paramArgs := []interface{}{providerId}
+	var rowData []*models.ProviderTable
+	err = x.SQL(sqlCmd, paramArgs...).Find(&rowData)
+	if err != nil {
+		log.Logger.Error("Get provider by id error", log.String("id", providerId), log.Error(err))
+		err = fmt.Errorf("Get provider by id:%s error:%s", providerId, err.Error())
+		return
+	}
+	if len(rowData) == 0 {
+		log.Logger.Error("Can not get provider by id", log.String("id", providerId), log.Error(err))
+		err = fmt.Errorf("Can not get provider by id:%s", providerId)
+		return
+	}
+	providerData := rowData[0]
+
+	terraformFilePath := models.Config.TerraformFilePath
+	if terraformFilePath[len(terraformFilePath)-1] != '/' {
+		terraformFilePath += "/"
+	}
+	terraformProviderCommonPath := terraformFilePath + "providers/" + providerData.Name + "/" + providerData.Version
+	// terraformProviderPath := terraformProviderCommonPath + "/" + models.Config.TerraformProviderOsArch
+	terraformLockHclPath :=  terraformProviderCommonPath + "/" + models.Config.TerraformProviderOsArch + "_hcl"
+
+	/*
+	err = GenDir(terraformProviderPath)
+	if err != nil {
+		err = fmt.Errorf("Gen terraformProviderPath : %s error: %s", terraformProviderPath, err.Error())
+		log.Logger.Error("Gen terraformProviderPath error", log.String("terraformProviderPath", terraformProviderPath), log.Error(err))
+		return
+	}
+	*/
+
+	err = GenDir(terraformLockHclPath)
+	if err != nil {
+		err = fmt.Errorf("Gen terraformLockHclPath: %s error: %s", terraformLockHclPath, err.Error())
+		log.Logger.Error("Gen terraformLockHclPath error", log.String("terraformLockHclPath", terraformLockHclPath), log.Error(err))
+		return
+	}
+	GenTerraformConfigFile(terraformProviderCommonPath, providerData)
+	err = DownloadProviderByTerraformInit(terraformProviderCommonPath)
+	if err != nil {
+		err = fmt.Errorf("Download provider file error: %s", err.Error())
+		log.Logger.Error("Download provider file error", log.Error(err))
+		return
+	}
+
+	downloadProviderFilePath := terraformProviderCommonPath + "/.terraform/providers/registry.terraform.io/" + providerData.NameSpace + "/" + providerData.Name + "/" + providerData.Version + "/" + models.Config.TerraformProviderOsArch
+	cmdStr := "cp -R " + downloadProviderFilePath + " " + terraformProviderCommonPath
+	cmd := exec.Command(models.BashCmd, "-c", cmdStr)
+	err = cmd.Run()
+	if err != nil {
+		err = fmt.Errorf("Move provider file error: %s", err.Error())
+		log.Logger.Error("Move provider file error", log.Error(err))
+		return
+	}
+
+	downloadProviderHclFilePath := terraformProviderCommonPath + "/.terraform.lock.hcl"
+	cmdStr = "cp " + downloadProviderHclFilePath + " " + terraformLockHclPath + "/"
+	cmd = exec.Command(models.BashCmd, "-c", cmdStr)
+	err = cmd.Run()
+	if err != nil {
+		err = fmt.Errorf("Move provider hcl file error: %s", err.Error())
+		log.Logger.Error("Move provider hcl file error", log.Error(err))
+		return
+	}
+
+	err = DelDir(terraformProviderCommonPath + "/.terraform")
+	if err != nil {
+		err = fmt.Errorf("Del .terraform dir error: %s", err.Error())
+		log.Logger.Error("Del .terraform dir error", log.Error(err))
+		return
+	}
+
+	err = DelFile(downloadProviderHclFilePath)
+	if err != nil {
+		err = fmt.Errorf("Del downloaded provider hcl file error: %s", err.Error())
+		log.Logger.Error("Del downloaded provider hcl file error", log.Error(err))
+		return
+	}
+	return
+}
+
+func ProviderUpload(providerId string, r *http.Request) (err error) {
+	sqlCmd := "SELECT * FROM provider WHERE id=?"
+	paramArgs := []interface{}{providerId}
+	var rowData []*models.ProviderTable
+	err = x.SQL(sqlCmd, paramArgs...).Find(&rowData)
+	if err != nil {
+		log.Logger.Error("Get provider by id error", log.String("id", providerId), log.Error(err))
+		err = fmt.Errorf("Get provider by id:%s error:%s", providerId, err.Error())
+		return
+	}
+	if len(rowData) == 0 {
+		log.Logger.Error("Can not get provider by id", log.String("id", providerId), log.Error(err))
+		err = fmt.Errorf("Can not get provider by id:%s", providerId)
+		return
+	}
+	providerData := rowData[0]
+
+	terraformFilePath := models.Config.TerraformFilePath
+	if terraformFilePath[len(terraformFilePath)-1] != '/' {
+		terraformFilePath += "/"
+	}
+	terraformProviderCommonPath := terraformFilePath + "providers/" + providerData.Name + "/" + providerData.Version
+	terraformLockHclPath :=  terraformProviderCommonPath + "/" + models.Config.TerraformProviderOsArch + "_hcl"
+
+	err = GenDir(terraformLockHclPath)
+	if err != nil {
+		err = fmt.Errorf("Gen terraformLockHclPath: %s error: %s", terraformLockHclPath, err.Error())
+		log.Logger.Error("Gen terraformLockHclPath error", log.String("terraformLockHclPath", terraformLockHclPath), log.Error(err))
+		return
+	}
+
+	var reader *multipart.Reader
+	reader, err = r.MultipartReader()
+	if err != nil {
+		err = fmt.Errorf("Get multipartReader error: %s", err.Error())
+		log.Logger.Error("Get multipartReader error", log.Error(err))
+		return
+	}
+
+	part, tmpErr := reader.NextPart()
+	if tmpErr != nil {
+		err = fmt.Errorf("Upload file failed:%s", tmpErr.Error())
+		log.Logger.Error("Upload file failed", log.Error(err))
+		return
+	}
+	filePath := terraformProviderCommonPath + "/" + part.FileName()
+	fileName := part.FileName()
+	if !strings.Contains(fileName, ".tar.gz") && !strings.Contains(fileName, ".zip") {
+		err = fmt.Errorf("Upload file only supports tar.gz and zip")
+		log.Logger.Error("Upload file only supports tar.gz and zip")
+		return
+	}
+
+	file, tmpErr := os.Create(filePath)
+	if tmpErr != nil {
+		err = fmt.Errorf("Create file:%s error: %s", filePath, tmpErr.Error())
+		log.Logger.Error("Create file error", log.String("file", filePath), log.Error(err))
+		return
+	}
+	_, tmpErr = io.Copy(file, part)
+	file.Close()
+
+	// Gen the upload file tmp dir
+	uploadFileTmpDir := terraformProviderCommonPath + "/tmp"
+	err = GenDir(uploadFileTmpDir)
+	if err != nil {
+		err = fmt.Errorf("Gen the upload file tmp dir: %s error: %s", uploadFileTmpDir, err.Error())
+		log.Logger.Error("Gen the upload file tmp dir error", log.String("uploadFileTmpDir", uploadFileTmpDir), log.Error(err))
+		return
+	}
+
+	// decompress the upload file
+	var cmdStr string
+	if strings.Contains(fileName, ".tar.gz") {
+		cmdStr = "tar -xzf " + filePath + " -C " + uploadFileTmpDir
+	} else {
+		cmdStr = "unzip " + "-d " + uploadFileTmpDir + " " + filePath
+	}
+	cmd := exec.Command(models.BashCmd, "-c", cmdStr)
+	err = cmd.Run()
+	if err != nil {
+		err = fmt.Errorf("Decompress file:%s error: %s", fileName, err.Error())
+		log.Logger.Error("Decompress file error", log.String("file", fileName), log.Error(err))
+		return
+	}
+
+	// move the upload file to specificied dir
+	uploadProviderFilePath := uploadFileTmpDir + "/.terraform/providers/registry.terraform.io/" + providerData.NameSpace + "/" + providerData.Name + "/" + providerData.Version + "/" + models.Config.TerraformProviderOsArch
+	_, err = os.Stat(uploadProviderFilePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			err = fmt.Errorf("Check dir: %s error: %s", uploadProviderFilePath, err.Error())
+			log.Logger.Error("Check dir error", log.String("dirPath", uploadProviderFilePath), log.Error(err))
+			return
+		}
+		err = fmt.Errorf("Os stat dir: %s error: %s", uploadProviderFilePath, err.Error())
+		log.Logger.Error("Os stat dir error", log.String("dirPath", uploadProviderFilePath), log.Error(err))
+		return
+	}
+	cmdStr = "cp -R " + uploadProviderFilePath + " " + terraformProviderCommonPath
+	cmd = exec.Command(models.BashCmd, "-c", cmdStr)
+	err = cmd.Run()
+	if err != nil {
+		err = fmt.Errorf("Move provider file error: %s", err.Error())
+		log.Logger.Error("Move provider file error", log.Error(err))
+		return
+	}
+
+	uploadProviderHclFilePath := uploadFileTmpDir + "/.terraform.lock.hcl"
+	_, err = os.Stat(uploadProviderHclFilePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			err = fmt.Errorf("Check file: %s error: %s", uploadProviderHclFilePath, err.Error())
+			log.Logger.Error("Check file error", log.String("file", uploadProviderHclFilePath), log.Error(err))
+			return
+		}
+		err = fmt.Errorf("Os stat file: %s error: %s", uploadProviderHclFilePath, err.Error())
+		log.Logger.Error("Os stat file error", log.String("file", uploadProviderHclFilePath), log.Error(err))
+		return
+	}
+	cmdStr = "cp " + uploadProviderHclFilePath + " " + terraformLockHclPath + "/"
+	cmd = exec.Command(models.BashCmd, "-c", cmdStr)
+	err = cmd.Run()
+	if err != nil {
+		err = fmt.Errorf("Move provider hcl file error: %s", err.Error())
+		log.Logger.Error("Move provider hcl file error", log.Error(err))
+		return
+	}
+
+	err = DelDir(uploadFileTmpDir)
+	if err != nil {
+		err = fmt.Errorf("Del upload file tmp dir error: %s", err.Error())
+		log.Logger.Error("Del upload file tmp dir error", log.Error(err))
+		return
+	}
+
+	err = DelFile(filePath)
+	if err != nil {
+		err = fmt.Errorf("Del uploaded  file error: %s", err.Error())
+		log.Logger.Error("Del uploaded file error", log.Error(err))
+		return
+	}
+	return
 }

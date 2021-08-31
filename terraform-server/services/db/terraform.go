@@ -559,6 +559,29 @@ func TerraformInit(dirPath string) (err error) {
 	return
 }
 
+func DownloadProviderByTerraformInit(dirPath string) (err error) {
+	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " init -no-color"
+	_, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.DownloadProviderTimeOut)
+	if cmdErr != nil {
+		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
+		// outPutStr := string(stderr.Bytes())
+		outPutStr := cmdErr.Error()
+		errorMsgRegx := regexp.MustCompile(`Error: ([\S\s]*)`)
+		errorMsg := errorMsgRegx.FindStringSubmatch(outPutStr)
+		errMsg := "Error:"
+		for i := 1; i < len(errorMsg); i++ {
+			errMsg += " "
+			errMsg += errorMsg[i]
+		}
+		colorsCharRegx := regexp.MustCompile(`\[\d+m`)
+		outPutErrMsg := colorsCharRegx.ReplaceAllLiteralString(errMsg, "")
+		err = fmt.Errorf("Cmd:%s run failed: %s, ErrorMsg: %s", cmdStr, cmdErr.Error(), outPutErrMsg)
+		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.String("Error: ", outPutErrMsg), log.Error(cmdErr))
+		return
+	}
+	return
+}
+
 func handleOutPutArgs(outPutArgs map[string]interface{},
 	outPutParameterNameMap map[string]*models.ParameterTable,
 	tfstateAttrParamMap map[string]*models.TfstateAttributeTable,
@@ -4803,4 +4826,36 @@ func getFileAttrContent(filename string) models.TfFileAttrFetchResult {
 	result.EndIndex = endIndex
 	result.AttrBytes = []byte(result.FileContent[startIndex:endIndex])
 	return result
+}
+
+func GenTerraformConfigFile(dirPath string, providerData *models.ProviderTable) (err error) {
+	// provider
+	providerContentData := make(map[string]map[string]interface{})
+	providerContentData[providerData.Name] = make(map[string]interface{})
+
+	// terraform
+	terraformData := make(map[string]map[string]map[string]interface{})
+	terraformData["required_providers"] = make(map[string]map[string]interface{})
+	terraformData["required_providers"][providerData.Name] = make(map[string]interface{})
+	terraformData["required_providers"][providerData.Name]["source"] = providerData.NameSpace + "/" + providerData.Name
+	terraformData["required_providers"][providerData.Name]["version"] = providerData.Version
+
+	providerFileData := make(map[string]interface{})
+	providerFileData["terraform"] = terraformData
+	providerFileData["provider"] = providerContentData
+
+	providerFileContent, err := json.Marshal(providerFileData)
+	if err != nil {
+		err = fmt.Errorf("Marshal providerFileData error: %s", err.Error())
+		log.Logger.Error("Marshal providerFileData error", log.Error(err))
+		return
+	}
+	providerFilePath := dirPath + "/provider.tf.json"
+	err = GenFile(providerFileContent, providerFilePath)
+	if err != nil {
+		err = fmt.Errorf("Gen providerFile: %s error: %s", providerFilePath, err.Error())
+		log.Logger.Error("Gen providerFile error", log.String("providerFilePath", providerFilePath), log.Error(err))
+		return
+	}
+	return
 }
