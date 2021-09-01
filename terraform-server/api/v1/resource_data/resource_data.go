@@ -192,6 +192,9 @@ func TerraformOperation(c *gin.Context) {
 	count := len(params)
 	resultChan := make(chan []map[string]interface{}, count)
 	consumerCnt := models.ConsumerCount
+	if models.Config.RequestConsumerCount > 0 {
+		consumerCnt = models.Config.RequestConsumerCount
+	}
 	if count < consumerCnt {
 		consumerCnt = count
 	}
@@ -334,6 +337,9 @@ func TerraformOperationDebug (c *gin.Context) {
 	count := len(params)
 	resultChan := make(chan map[string]interface{}, count)
 	consumerCnt := models.ConsumerCount
+	if models.Config.RequestConsumerCount > 0 {
+		consumerCnt = models.Config.RequestConsumerCount
+	}
 	if count < consumerCnt {
 		consumerCnt = count
 	}
