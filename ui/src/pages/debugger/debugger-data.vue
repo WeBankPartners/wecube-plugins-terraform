@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Table border :columns="tableColumns" :data="tableData" :height="MODALHEIGHT"></Table>
+    <Table border :columns="tableColumns" :data="tableData" :max-height="MODALHEIGHT"></Table>
     <Modal v-model="dataDetail.isShow" :fullscreen="fullscreen" width="800" :mask-closable="false" footer-hide>
       <p slot="header">
         <span>{{ $t('t_detail') }}</span>
@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import { getDebugInfo } from '@/api/server'
+import { getInstanceData } from '@/api/server'
 export default {
   name: '',
   data () {
@@ -33,7 +33,7 @@ export default {
         },
         {
           title: this.$t('t_resource'),
-          key: 'resource'
+          key: 'resourceTitle'
         },
         {
           title: this.$t('t_resource_asset_id'),
@@ -99,11 +99,11 @@ export default {
   },
   mounted () {
     this.MODALHEIGHT = document.body.scrollHeight - 200
-    this.getDebugInfo()
+    this.getInstanceData()
   },
   methods: {
-    async getDebugInfo () {
-      const { statusCode, data } = await getDebugInfo()
+    async getInstanceData () {
+      const { statusCode, data } = await getInstanceData()
       if (statusCode === 'OK') {
         this.tableData = data
       }

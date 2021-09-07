@@ -1,208 +1,229 @@
 <template>
-  <div class=" ">
-    123412341234
-    <Form inline>
-      <FormItem>
-        <Button @click="addProvider" style="margin-left: 24px" type="primary">{{ $t('t_add') }}</Button>
-      </FormItem>
-    </Form>
-    <Table border :columns="tableColumns" :data="tableData"></Table>
-    <Modal
-      v-model="newProvider.isShow"
-      :title="newProvider.isAdd ? $t('t_add') : $t('t_edit') + $t('t_provider')"
-      :mask-closable="false"
-      @on-ok="confirmProvider"
-      @on-cancel="confirmProvider.isShow = false"
-    >
-      <Form inline :label-width="80">
-        <FormItem :label="$t('t_name')">
-          <Input type="text" v-model="newProvider.form.name" style="width:400px"></Input>
-        </FormItem>
-        <FormItem :label="$t('t_namespace')">
-          <Input type="text" v-model="newProvider.form.nameSpace" style="width:400px"></Input>
-        </FormItem>
-        <FormItem :label="$t('t_version')">
-          <Input type="text" v-model="newProvider.form.version" :rows="4" style="width:400px"></Input>
-        </FormItem>
-        <FormItem :label="$t('t_region_attr_name')">
-          <Input type="text" v-model="newProvider.form.regionAttrName" style="width:400px"></Input>
-        </FormItem>
-        <FormItem :label="$t('t_secretId_attr_name')">
-          <Input type="text" v-model="newProvider.form.secretIdAttrName" style="width:400px"></Input>
-        </FormItem>
-        <FormItem :label="$t('t_secretKey_attr_name')">
-          <Input type="text" v-model="newProvider.form.secretKeyAttrName" style="width:400px"></Input>
-        </FormItem>
-      </Form>
+  <div>
+    <tooltip content=""> </tooltip>
+    <Table border :columns="tableColumns" :data="tableData" :max-height="MODALHEIGHT"></Table>
+    <Modal v-model="dataDetail.isShow" :fullscreen="fullscreen" width="800" :mask-closable="false" footer-hide>
+      <p slot="header">
+        <span>{{ $t('t_detail') }}</span>
+        <Icon v-if="!fullscreen" @click="fullscreen = true" class="header-icon" type="ios-expand" />
+        <Icon v-else @click="fullscreen = false" class="header-icon" type="ios-contract" />
+      </p>
+      <div :style="{ overflow: 'auto', 'max-height': fullscreen ? '' : '500px' }">
+        <pre>{{ dataDetail.data }}</pre>
+      </div>
     </Modal>
   </div>
 </template>
 
 <script>
-import { getProviders, addProvider, deleteProvider, editProvider } from '@/api/server'
+import { getInstanceData, instanceDataDownload } from '@/api/server'
 export default {
   name: '',
   data () {
     return {
-      name: '',
-      newProvider: {
+      MODALHEIGHT: 500,
+      fullscreen: false,
+      dataDetail: {
         isShow: false,
-        isAdd: true,
-        form: {
-          createTime: '',
-          createUser: '',
-          id: '',
-          name: '',
-          nameSpace: '',
-          regionAttrName: '',
-          secretIdAttrName: '',
-          secretKeyAttrName: '',
-          updateTime: '',
-          updateUser: '',
-          version: ''
-        }
-      },
-      emptyForm: {
-        createTime: '',
-        createUser: '',
-        id: '',
-        name: '',
-        nameSpace: '',
-        regionAttrName: '',
-        secretIdAttrName: '',
-        secretKeyAttrName: '',
-        updateTime: '',
-        updateUser: '',
-        version: ''
+        data: {}
       },
       tableColumns: [
         {
-          title: this.$t('t_name'),
-          key: 'name'
+          title: this.$t('t_region'),
+          key: 'regionId'
         },
         {
-          title: this.$t('t_namespace'),
-          key: 'nameSpace'
+          title: this.$t('t_resource'),
+          key: 'resourceTitle'
         },
         {
-          title: this.$t('t_version'),
-          key: 'version'
+          title: this.$t('t_resource_asset_id'),
+          key: 'resourceAssetId'
         },
         {
-          title: this.$t('t_region_attr_name'),
-          key: 'regionAttrName'
+          title: this.$t('t_resource_id'),
+          key: 'resourceId'
         },
         {
-          title: this.$t('t_secretId_attr_name'),
-          key: 'secretIdAttrName'
+          title: this.$t('t_tf_file'),
+          width: 300,
+          render: (h, params) => {
+            return (
+              <div>
+                <div style="display:inline-block;width: 200px;overflow: hidden;text-overflow:ellipsis;white-space: nowrap">
+                  {params.row.tfFile}
+                </div>
+                {params.row.tfFile !== '' && (
+                  <Button
+                    onClick={() => {
+                      this.showInfo(params.row.tfFile)
+                    }}
+                    style="vertical-align: top;"
+                    icon="ios-search"
+                    type="primary"
+                    ghost
+                    size="small"
+                  ></Button>
+                )}
+              </div>
+            )
+          }
         },
         {
-          title: this.$t('t_secretKey_attr_name'),
-          key: 'secretKeyAttrName'
+          title: this.$t('t_tf_state_file'),
+          width: 300,
+          render: (h, params) => {
+            return (
+              <div>
+                <div style="display:inline-block;width: 200px;overflow: hidden;text-overflow:ellipsis;white-space: nowrap">
+                  {params.row.tfStateFile}
+                </div>
+                {params.row.tfStateFile !== '' && (
+                  <Button
+                    onClick={() => {
+                      this.showInfo(params.row.tfStateFile)
+                    }}
+                    style="vertical-align: top;"
+                    icon="ios-search"
+                    type="primary"
+                    ghost
+                    size="small"
+                  ></Button>
+                )}
+              </div>
+            )
+          }
         },
         {
           title: this.$t('t_action'),
           key: 'action',
-          width: 150,
+          width: 160,
           align: 'center',
           render: (h, params) => {
+            if (params.row.providerInitialized === 'Y') {
+              return ''
+            }
             return h('div', [
               h(
-                'Button',
+                'Upload',
                 {
                   props: {
-                    type: 'success',
-                    size: 'small'
+                    type: 'select',
+                    size: 'small',
+                    action: `/terraform/api/v1/providers/upload?id=${params.row.providerId}`,
+                    'on-success': this.handleSuccess,
+                    'on-error': this.handleError
                   },
                   style: {
-                    marginRight: '5px'
+                    display: 'inline-block'
                   },
-                  on: {
-                    click: () => {
-                      this.editProvider(params.row)
-                    }
-                  }
+                  on: {}
                 },
-                this.$t('t_edit')
+                [
+                  h(
+                    'Button',
+                    {
+                      props: {
+                        type: 'success',
+                        size: 'small'
+                      },
+                      style: {},
+                      on: {}
+                    },
+                    this.$t('t_import')
+                  )
+                ]
               ),
               h(
                 'Button',
                 {
-                  props: {
-                    type: 'error',
-                    size: 'small'
+                  props: Object.assign(
+                    {},
+                    {
+                      type: 'primary',
+                      size: 'small'
+                    }
+                  ),
+                  style: {
+                    'margin-left': '8px'
                   },
                   on: {
                     click: () => {
-                      this.deleteProvider(params.row)
+                      this.downloadInstance(params.row)
                     }
                   }
                 },
-                this.$t('t_delete')
+                this.$t('t_export')
               )
             ])
           }
         }
       ],
-      tableData: []
+      tableData: [],
+      uploadUrl: ''
     }
   },
   mounted () {
-    this.getTableData()
+    this.MODALHEIGHT = document.body.scrollHeight - 200
+    this.getInstanceData()
   },
   methods: {
-    editProvider (item) {
-      this.newProvider.form = {
-        ...item
+    handleUpload (file) {
+      if (!file.name.endsWith('.gz')) {
+        this.$Notice.warning({
+          title: 'Warning',
+          desc: 'Must be a json file'
+        })
+        return false
       }
-      this.newProvider.isAdd = false
-      this.newProvider.isShow = true
+      return true
     },
-    deleteProvider (item) {
-      this.$Modal.confirm({
-        title: this.$t('t_confirm_delete'),
-        'z-index': 1000000,
-        loading: true,
-        onOk: async () => {
-          let res = await deleteProvider(item.id)
-          this.$Modal.remove()
-          if (res.statusCode === 'OK') {
-            this.$Notice.success({
-              title: 'Successful',
-              desc: 'Successful'
-            })
-            this.getTableData()
-          }
-        },
-        onCancel: () => {}
+    handleError (val) {
+      this.$Notice.error({
+        title: 'Error',
+        desc: 'Import Faild'
       })
     },
-    addProvider () {
-      this.newProvider.isAdd = true
-      this.newProvider.form = JSON.parse(JSON.stringify(this.emptyForm))
-      this.newProvider.isShow = true
+    handleSuccess (val) {
+      this.$Notice.success({
+        title: 'Successful',
+        desc: 'Successful'
+      })
+      this.getInstanceData()
     },
-    async confirmProvider () {
-      const method = this.newProvider.isAdd ? addProvider : editProvider
-      const { statusCode } = await method([this.newProvider.form])
+    async downloadInstance (item) {
+      this.$Notice.success({
+        title: 'Info',
+        desc: 'Need 10s ……'
+      })
+      const { statusCode } = await instanceDataDownload(item.providerId)
       if (statusCode === 'OK') {
         this.$Notice.success({
           title: 'Successful',
           desc: 'Successful'
         })
-        this.getTableData()
-        this.confirmProvider.isShow = false
+        this.getInstanceData()
       }
     },
-    async getTableData () {
-      const { statusCode, data } = await getProviders()
+    async getInstanceData () {
+      const { statusCode, data } = await getInstanceData()
       if (statusCode === 'OK') {
         this.tableData = data
       }
+    },
+    showInfo (data) {
+      this.dataDetail.data = ''
+      this.dataDetail.isShow = true
+      this.dataDetail.data = JSON.parse(data)
     }
   },
   components: {}
 }
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.header-icon {
+  float: right;
+  margin: 3px 40px 0 0 !important;
+}
+</style>
