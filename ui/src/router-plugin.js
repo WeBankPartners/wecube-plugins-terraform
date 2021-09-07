@@ -4,6 +4,7 @@ import pluginDefinition from '@/pages/plugin-definition'
 import templateData from '@/pages/template-data'
 import providerInfo from '@/pages/provider-info'
 import provider from '@/pages/provider'
+import instanceData from '@/pages/instance-data'
 import importAndExport from '@/pages/import-export'
 import debuggerIndex from '@/pages/debugger/debugger-index'
 import debuggerData from '@/pages/debugger/debugger-data'
@@ -51,6 +52,13 @@ const router = [
         title: '云厂商',
         meta: {},
         component: provider
+      },
+      {
+        path: 'instanceData',
+        name: 'instanceData',
+        title: '实例数据',
+        meta: {},
+        component: instanceData
       },
       {
         path: 'importAndExport',
