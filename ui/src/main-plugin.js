@@ -16,6 +16,10 @@ const implicitRoute = {
     parentBreadcrumb: { 'zh-CN': 'Terraform配置', 'en-US': 'Terraform Config' },
     childBreadcrumb: { 'zh-CN': '云厂商', 'en-US': 'Provider' }
   },
+  'terraformIndex/instanceData': {
+    parentBreadcrumb: { 'zh-CN': 'Terraform配置', 'en-US': 'Terraform Config' },
+    childBreadcrumb: { 'zh-CN': '实例数据', 'en-US': 'Instance Data' }
+  },
   'terraformIndex/templateData': {
     parentBreadcrumb: { 'zh-CN': 'Terraform配置', 'en-US': 'Terraform Config' },
     childBreadcrumb: { 'zh-CN': '模板数据', 'en-US': 'Template Data' }

@@ -65,5 +65,6 @@
   "t_cancle": "Cancle",
   "t_remark": "Remark",
   "t_namespace": "Namespace",
-  "t_format_parameter": "Format Parameter"
+  "t_format_parameter": "Format Parameter",
+  "t_instance_data": "Instance Data"
 }

@@ -53,6 +53,13 @@ export default new Router({
               component: () => import('@/pages/provider')
             },
             {
+              path: 'instanceData',
+              name: 'instanceData',
+              title: '实例数据',
+              meta: {},
+              component: () => import('@/pages/instance-data')
+            },
+            {
               path: 'importAndExport',
               name: 'importAndExport',
               title: '导入导出',

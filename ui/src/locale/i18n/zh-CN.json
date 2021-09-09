@@ -65,5 +65,6 @@
   "t_cancle": "取消",
   "t_remark": "备注",
   "t_namespace": "命名空间",
-  "t_format_parameter": "格式化参数"
+  "t_format_parameter": "格式化参数",
+  "t_instance_data": "实例数据"
 }
