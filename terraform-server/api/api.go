@@ -71,8 +71,8 @@ func init() {
 		&handlerFuncObj{Url: "/providers", Method: "GET", HandlerFunc: provider.ProviderList},
 		&handlerFuncObj{Url: "/providers", Method: "DELETE", HandlerFunc: provider.ProviderBatchDelete, LogOperation: true},
 		&handlerFuncObj{Url: "/providers", Method: "PUT", HandlerFunc: provider.ProviderBatchUpdate, LogOperation: true},
-		&handlerFuncObj{Url: "/providers/download", Method: "POST", HandlerFunc: provider.ProviderDownload, LogOperation: true},
-		&handlerFuncObj{Url: "/providers/upload", Method: "POST", HandlerFunc: provider.ProviderUpload, LogOperation: true},
+		&handlerFuncObj{Url: "/providers/download", Method: "POST", HandlerFunc: provider.ProviderDownload, LogOperation: false},
+		&handlerFuncObj{Url: "/providers/upload", Method: "POST", HandlerFunc: provider.ProviderUpload, LogOperation: false},
 
 		&handlerFuncObj{Url: "/provider_infos", Method: "POST", HandlerFunc: provider.ProviderInfoBatchCreate, LogOperation: true},
 		&handlerFuncObj{Url: "/provider_infos", Method: "GET", HandlerFunc: provider.ProviderInfoList},
