@@ -1,7 +1,7 @@
 <template>
   <div>
     <tooltip content=""> </tooltip>
-    <Table border :columns="tableColumns" :data="tableData" :max-height="MODALHEIGHT"></Table>
+    <Table border size="small" :columns="tableColumns" :data="tableData" :max-height="MODALHEIGHT"></Table>
     <Modal v-model="dataDetail.isShow" :fullscreen="fullscreen" width="800" :mask-closable="false" footer-hide>
       <p slot="header">
         <span>{{ $t('t_detail') }}</span>
@@ -112,7 +112,8 @@ export default {
                     size: 'small',
                     action: `/terraform/api/v1/providers/upload?id=${params.row.providerId}`,
                     'on-success': this.handleSuccess,
-                    'on-error': this.handleError
+                    'on-error': this.handleError,
+                    'before-upload': this.handleUpload
                   },
                   style: {
                     display: 'inline-block'
@@ -169,14 +170,15 @@ export default {
   },
   methods: {
     handleUpload (file) {
-      if (!file.name.endsWith('.gz')) {
+      if (file.name.endsWith('.gz') || file.name.endsWith('.zip')) {
+        return true
+      } else {
         this.$Notice.warning({
           title: 'Warning',
-          desc: 'Must be a json file'
+          desc: 'Must be a .gz or .zip file'
         })
         return false
       }
-      return true
     },
     handleError (val) {
       this.$Notice.error({
