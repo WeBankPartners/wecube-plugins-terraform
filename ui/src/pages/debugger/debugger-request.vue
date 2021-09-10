@@ -53,7 +53,7 @@
       </Row>
     </div>
     <template v-if="showResult">
-      <Table :columns="tableColums" :data="tableData" border></Table>
+      <Table size="small" :columns="tableColums" :data="tableData" border></Table>
       <div style="margin: 24px 0">
         <span>{{ $t('debugger_result') }}</span>
         <div style="background: #dcdee2; max-height:400px;overflow:auto">
