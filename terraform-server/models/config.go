@@ -71,6 +71,7 @@ type GlobalConfig struct {
 	TerraformCmdPath        string                        `json:"terraform_cmd_path"`
 	TerraformProviderOsArch string                        `json:"terraform_provider_os_arch"`
 	Version                 string                        `json:"version"`
+	RequestConsumerCount    int                           `json:"request_consumer_count"`
 	// default json
 }
 

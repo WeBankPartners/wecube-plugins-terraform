@@ -350,6 +350,7 @@
     <Modal
       v-model="newTemplate.isShow"
       :title="$t('t_add_template')"
+      :mask-closable="false"
       @on-ok="confirmAddTemplate"
       @on-cancel="newTemplate.isShow = false"
     >
@@ -365,6 +366,7 @@
     <Modal
       v-model="newPlugin.isShow"
       :title="newPlugin.isAdd ? $t('t_add') : $t('t_edit') + $t('t_plugin')"
+      :mask-closable="false"
       @on-ok="confirmPlugin"
       @on-cancel="newPlugin.isShow = false"
     >
@@ -377,6 +379,7 @@
     <Modal
       v-model="newInterface.isShow"
       :title="(newInterface.isAdd ? $t('t_add') : $t('t_edit')) + $t('t_plugin')"
+      :mask-closable="false"
       @on-ok="confirmInterface"
       @on-cancel="newInterface.isShow = false"
     >

@@ -61,7 +61,7 @@
         </div>
       </div>
     </template>
-    <Modal v-model="dataDetail.isShow" :fullscreen="fullscreen" width="800" footer-hide>
+    <Modal v-model="dataDetail.isShow" :fullscreen="fullscreen" width="800" :mask-closable="false" footer-hide>
       <p slot="header">
         <span>{{ $t('t_detail') }}</span>
         <Icon v-if="!fullscreen" @click="fullscreen = true" class="header-icon" type="ios-expand" />

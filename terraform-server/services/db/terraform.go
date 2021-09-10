@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path"
 	"reflect"
 	"regexp"
 	"sort"
@@ -87,7 +88,6 @@ func GenDir(dirPath string) (err error) {
 	return
 }
 
-/*
 func DelDir(dirPath string) (err error) {
 	_, err = os.Stat(dirPath)
 	if err != nil {
@@ -96,6 +96,10 @@ func DelDir(dirPath string) (err error) {
 			log.Logger.Error("Os stat dir error", log.String("dirPath", dirPath), log.Error(err))
 			return
 		}
+		return
+	}
+	if dirPath == "" {
+		return
 	}
 	// clear dir
 	if dirPath[len(dirPath)-1] == '/' {
@@ -108,7 +112,6 @@ func DelDir(dirPath string) (err error) {
 	}
 	return
 }
- */
 
 func GenTfFile(dirPath string, sourceData *models.SourceTable, action string, resourceId string, tfArguments map[string]interface{}) (tfFileContentStr string, err error) {
 	var tfFilePath string
@@ -140,14 +143,6 @@ func GenTfFile(dirPath string, sourceData *models.SourceTable, action string, re
 }
 
 func GenProviderFile(dirPath string, providerData *models.ProviderTable, providerInfo *models.ProviderInfoTable, regionData *models.ResourceDataTable) (err error) {
-	/*
-		providerFileData := make(map[string]map[string]map[string]interface{})
-		providerFileData["provider"] = make(map[string]map[string]interface{})
-		providerFileData["provider"][providerData.Name] = make(map[string]interface{})
-		providerFileData["provider"][providerData.Name][providerData.SecretIdAttrName] = providerInfo.SecretId
-		providerFileData["provider"][providerData.Name][providerData.SecretKeyAttrName] = providerInfo.SecretKey
-		providerFileData["provider"][providerData.Name][providerData.RegionAttrName] = regionData.ResourceAssetId
-	*/
 	// provider
 	providerContentData := make(map[string]map[string]interface{})
 	providerContentData[providerData.Name] = make(map[string]interface{})
@@ -209,9 +204,7 @@ func GenVersionFile(dirPath string, providerData *models.ProviderTable) (err err
 }
 
 func GenTerraformProviderSoftLink(dirPath string, providerData *models.ProviderTable) (err error) {
-	// targetTerraformProviderPath := dirPath + "/" + models.TerraformProviderPathDiffMap[providerData.Name] + providerData.Version + "/" + models.Config.TerraformProviderOsArch
-	// targetTerraformProviderPath := dirPath + "/" + models.TerraformProviderPathDiffMap[providerData.Name] + providerData.Version
-	targetTerraformProviderPath := dirPath + "/" + models.TerraformProviderPathDiffMap[providerData.Name] + providerData.NameSpace + "/" + providerData.Name + "/" + providerData.Version
+	targetTerraformProviderPath := dirPath + "/.terraform/providers/registry.terraform.io/" + providerData.NameSpace + "/" + providerData.Name + "/" + providerData.Version
 
 	terraformFilePath := models.Config.TerraformFilePath
 	if terraformFilePath[len(terraformFilePath)-1] != '/' {
@@ -362,7 +355,7 @@ func execRemoteWithTimeout(cmdStr []string, timeOut int) (out string, err error)
 }
 
 func TerraformImport(dirPath, address, resourceAssetId string) (err error) {
-	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " import " + address + " " + resourceAssetId
+	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " import -no-color " + address + " " + resourceAssetId
 	/*
 		cmd := exec.Command(models.BashCmd, "-c", cmdStr)
 		var stdout, stderr bytes.Buffer
@@ -393,7 +386,7 @@ func TerraformImport(dirPath, address, resourceAssetId string) (err error) {
 
 func TerraformPlan(dirPath string) (destroyCnt int, err error) {
 	// cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " plan -input=false -out=" + dirPath + "/planfile"
-	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " plan -input=false"
+	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " plan -input=false -no-color"
 	/*
 		cmd := exec.Command(models.BashCmd, "-c", cmdStr)
 		var stdout, stderr bytes.Buffer
@@ -477,7 +470,7 @@ func TerraformPlan(dirPath string) (destroyCnt int, err error) {
 }
 
 func TerraformApply(dirPath string) (err error) {
-	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " apply -auto-approve"
+	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " apply -auto-approve -no-color"
 	/*
 		cmd := exec.Command(models.BashCmd, "-c", cmdStr)
 		var stdout, stderr bytes.Buffer
@@ -507,7 +500,7 @@ func TerraformApply(dirPath string) (err error) {
 }
 
 func TerraformDestroy(dirPath string) (err error) {
-	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " destroy -auto-approve"
+	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " destroy -auto-approve -no-color"
 	/*
 		cmd := exec.Command(models.BashCmd, "-c", cmdStr)
 		var stdout, stderr bytes.Buffer
@@ -537,7 +530,7 @@ func TerraformDestroy(dirPath string) (err error) {
 }
 
 func TerraformInit(dirPath string) (err error) {
-	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " init"
+	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " init -no-color" + " -plugin-dir=" + dirPath + "/.terraform/providers"
 	/*
 		cmd := exec.Command(models.BashCmd, "-c", cmdStr)
 		var stdout, stderr bytes.Buffer
@@ -566,265 +559,26 @@ func TerraformInit(dirPath string) (err error) {
 	return
 }
 
-func handleTerraformApplyOrQuery(reqParam map[string]interface{},
-	sourceData *models.SourceTable,
-	providerData *models.ProviderTable,
-	providerInfo *models.ProviderInfoTable,
-	regionData *models.ResourceDataTable,
-	action string, plugin string, dirPath string,
-	interfaceData *models.InterfaceTable,
-	curDebugFileContent map[string]interface{}) (retOutput map[string]interface{}, err error) {
-
-	retOutput = make(map[string]interface{})
-	retOutput["callbackParameter"] = reqParam["callbackParameter"].(string)
-	retOutput["errorCode"] = "1"
-	retOutput["errorMessage"] = ""
-
-	if plugin == "az" {
-		retData, tmpErr := handleAzQuery(reqParam, dirPath, providerData, providerInfo, regionData, sourceData)
-		if tmpErr != nil {
-			err = fmt.Errorf("Handle Az query error:%s", tmpErr.Error())
-			log.Logger.Warn("Handle Az query error", log.Error(err))
-			retOutput["errorMessage"] = err.Error()
-			return
+func DownloadProviderByTerraformInit(dirPath string) (err error) {
+	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " init -no-color"
+	_, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.DownloadProviderTimeOut)
+	if cmdErr != nil {
+		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
+		// outPutStr := string(stderr.Bytes())
+		outPutStr := cmdErr.Error()
+		errorMsgRegx := regexp.MustCompile(`Error: ([\S\s]*)`)
+		errorMsg := errorMsgRegx.FindStringSubmatch(outPutStr)
+		errMsg := "Error:"
+		for i := 1; i < len(errorMsg); i++ {
+			errMsg += " "
+			errMsg += errorMsg[i]
 		}
-		for k, v := range retData {
-			retOutput[k] = v
-		}
-		retOutput["errorCode"] = "0"
+		colorsCharRegx := regexp.MustCompile(`\[\d+m`)
+		outPutErrMsg := colorsCharRegx.ReplaceAllLiteralString(errMsg, "")
+		err = fmt.Errorf("Cmd:%s run failed: %s, ErrorMsg: %s", cmdStr, cmdErr.Error(), outPutErrMsg)
+		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.String("Error: ", outPutErrMsg), log.Error(cmdErr))
 		return
 	}
-
-	// Get tf_argument_list by sourceId
-	sourceIdStr := sourceData.Id
-	sqlCmd := "SELECT * FROM tf_argument WHERE source IN ('" + sourceIdStr + "')"
-	var tfArgumentList []*models.TfArgumentTable
-	err = x.SQL(sqlCmd).Find(&tfArgumentList)
-	if err != nil {
-		err = fmt.Errorf("Get tf_argument list error:%s", err.Error())
-		log.Logger.Error("Get tf_argument list error", log.Error(err))
-		retOutput["errorMessage"] = err.Error()
-		return
-	}
-	if len(tfArgumentList) == 0 {
-		err = fmt.Errorf("Tf_argument list can not be found by source:%s", sourceIdStr)
-		log.Logger.Warn("Tf_argument list can not be found by source", log.String("source", sourceIdStr), log.Error(err))
-		retOutput["errorMessage"] = err.Error()
-		return
-	}
-
-	// Get tfstate_attribute by sourceId
-	sqlCmd = "SELECT * FROM tfstate_attribute WHERE source IN ('" + sourceIdStr + "')"
-	var tfstateAttributeList []*models.TfstateAttributeTable
-	err = x.SQL(sqlCmd).Find(&tfstateAttributeList)
-	if err != nil {
-		err = fmt.Errorf("Get tfstate_attribute list error:%s", err.Error())
-		log.Logger.Error("Get tfstate_attribute list error", log.Error(err))
-		retOutput["errorMessage"] = err.Error()
-		return
-	}
-	if len(tfstateAttributeList) == 0 {
-		err = fmt.Errorf("Tfstate_attribute list can not be found by source:%s", sourceIdStr)
-		log.Logger.Warn("Tfstate_attribute list can not be found by source", log.String("source", sourceIdStr), log.Error(err))
-		retOutput["errorMessage"] = err.Error()
-		return
-	}
-
-	// Get parameter by interfaceId and type=out
-	sqlCmd = "SELECT * FROM parameter WHERE interface=? and type=?"
-	paramArgs := []interface{}{interfaceData.Id, "output"}
-	var outPutParameterList []*models.ParameterTable
-	err = x.SQL(sqlCmd, paramArgs...).Find(&outPutParameterList)
-	if err != nil {
-		err = fmt.Errorf("Get outPutParameter list error:%s", err.Error())
-		log.Logger.Error("Get outPutParameter list error", log.Error(err))
-		retOutput["errorMessage"] = err.Error()
-		return
-	}
-	if len(outPutParameterList) == 0 {
-		err = fmt.Errorf("OutPutParameter can not be found by interface:%s and type=out", interfaceData.Id)
-		log.Logger.Warn("OutPutParameter can not be found by interface and type", log.String("interface", interfaceData.Id), log.String("type", "out"), log.Error(err))
-		retOutput["errorMessage"] = err.Error()
-		return
-	}
-
-	resourceId := ""
-	resourceAssetId := ""
-
-	if _, ok := reqParam["id"].(string); ok {
-		resourceId = reqParam["id"].(string)
-	}
-
-	if _, ok := reqParam["asset_id"].(string); ok {
-		resourceAssetId = reqParam["asset_id"].(string)
-	}
-
-	var tfArguments map[string]interface{}
-	tfArguments, _, err = handleConvertParams(action, sourceData, tfArgumentList, reqParam, providerData, regionData)
-	if err != nil {
-		err = fmt.Errorf("HandleConvertParams error:%s", err.Error())
-		log.Logger.Warn("HandleConvertParams error", log.Error(err))
-		retOutput["errorMessage"] = err.Error()
-		return
-	}
-
-	// Gen the terraform workdir
-	err = GenDir(dirPath)
-	if err != nil {
-		err = fmt.Errorf("Gen the terraform workdir: %s error: %s", dirPath, err.Error())
-		log.Logger.Error("Gen the terraform workdir error", log.String("dirPath", dirPath), log.Error(err))
-		retOutput["errorMessage"] = err.Error()
-		return
-	}
-
-	// Gen tf.json file
-	var tfFileContentStr string
-	tfFileContentStr, err = GenTfFile(dirPath, sourceData, action, resourceId, tfArguments)
-	if err != nil {
-		err = fmt.Errorf("Gen tfFile error: %s", err.Error())
-		log.Logger.Error("Gen tfFile error", log.Error(err))
-		retOutput["errorMessage"] = err.Error()
-		return
-	}
-
-	// Gen provider.tf.json
-	err = GenProviderFile(dirPath, providerData, providerInfo, regionData)
-	if err != nil {
-		err = fmt.Errorf("Gen providerFile error: %s", err.Error())
-		log.Logger.Error("Gen providerFile error", log.Error(err))
-		retOutput["errorMessage"] = err.Error()
-		return
-	}
-
-	// Gen version.tf
-	err = GenVersionFile(dirPath, providerData)
-	if err != nil {
-		err = fmt.Errorf("Gen versionFile error: %s", err.Error())
-		log.Logger.Error("Gen versionFile error", log.Error(err))
-		retOutput["errorMessage"] = err.Error()
-		return
-	}
-
-	// Gen softlink of terraform provider file
-	err = GenTerraformProviderSoftLink(dirPath, providerData)
-	if err != nil {
-		err = fmt.Errorf("Gen terraform provider soft link error: %s", err.Error())
-		log.Logger.Error("Gen terraform provider soft link error", log.Error(err))
-		retOutput["errorMessage"] = err.Error()
-		return
-	}
-
-	// Gen soft link for .terraform.lock.hcl
-	err = GenTerraformLockHclSoftLink(dirPath, providerData)
-	if err != nil {
-		err = fmt.Errorf("Gen terraform lock soft link error: %s", err.Error())
-		log.Logger.Error("Gen terraform lock soft link error", log.Error(err))
-		retOutput["errorMessage"] = err.Error()
-		return
-	}
-
-	// test
-	///*
-	// terraform init
-	err = TerraformInit(dirPath)
-	if err != nil {
-		err = fmt.Errorf("Do TerraformInit error:%s", err.Error())
-		log.Logger.Error("Do TerraformInit error", log.Error(err))
-		retOutput["errorMessage"] = err.Error()
-		return
-	}
-
-	canDoImport := true
-	if providerData.Name == "tencentcloud" && plugin == "security_rule" {
-		canDoImport = false
-	}
-
-	if resourceAssetId != "" && action == "apply" && canDoImport == true {
-		// terraform import when assetId has value in apply
-		err = TerraformImport(dirPath, sourceData.Name+"."+resourceId, resourceAssetId)
-		if err != nil {
-			err = fmt.Errorf("Do TerraformImport error:%s", err.Error())
-			retOutput["errorMessage"] = err.Error()
-			return
-		}
-		if _, ok := reqParam[models.ResourceDataDebug]; ok {
-			// resource_data debug mode, get the terraform.state file after terraform import
-			tfstateFilePath := dirPath + "/terraform.tfstate"
-			tfstateFileData, tmpErr := ReadFile(tfstateFilePath)
-			if tmpErr != nil {
-				err = fmt.Errorf("Read import_tfstate file error:%s", tmpErr.Error())
-				log.Logger.Error("Read import_tfstate file error", log.Error(err))
-				// retOutput["errorMessage"] = err.Error()
-				return
-			}
-			tfstateFileContentStr := string(tfstateFileData)
-			curDebugFileContent["tf_state_import"] = tfstateFileContentStr
-		}
-	}
-
-	// terraform plan
-	destroyCnt, err := TerraformPlan(dirPath)
-	if err != nil {
-		err = fmt.Errorf("Do TerraformPlan error:%s", err.Error())
-		log.Logger.Error("Do TerraformPlan error", log.Error(err))
-		retOutput["errorMessage"] = err.Error()
-		return
-	}
-
-	if _, ok := reqParam[models.ResourceDataDebug]; ok {
-		// resource_data debug mode, get the plan file after terraform plan
-		planFilePath := dirPath + "/planfile"
-		planFileData, tmpErr := ReadFile(planFilePath)
-		if tmpErr != nil {
-			err = fmt.Errorf("Read plan file error:%s", tmpErr.Error())
-			log.Logger.Error("Read plan file error", log.Error(err))
-			retOutput["errorMessage"] = err.Error()
-			return
-		}
-		planFileContentStr := string(planFileData)
-		curDebugFileContent["plan_message"] = planFileContentStr
-	}
-
-	if destroyCnt > 0 && reqParam["confirmToken"] != "Y" {
-		// 二次确认
-		destroyCntStr := strconv.Itoa(destroyCnt)
-		retOutput["errorMessage"] = destroyCntStr + " resource(s) will be destroy, please confirm again!"
-		return
-	}
-
-	// terraform apply
-	err = TerraformApply(dirPath)
-	if err != nil {
-		err = fmt.Errorf("Do TerraformApply error:%s", err.Error())
-		log.Logger.Error("Do TerraformApply error", log.Error(err))
-		retOutput["errorMessage"] = err.Error()
-		return
-	}
-	//*/
-	isInternalAction := false
-	// handle tfstate output
-	err = handleTfstateOutPut(sourceData,
-		interfaceData,
-		reqParam,
-		regionData,
-		providerData,
-		action,
-		dirPath,
-		tfFileContentStr,
-		resourceId,
-		retOutput,
-		curDebugFileContent,
-		isInternalAction)
-
-	// delete provider.tf.json
-	err = DelProviderFile(dirPath)
-	if err != nil {
-		err = fmt.Errorf("Delete provider.tf.json file error:%s", err.Error())
-		log.Logger.Error("Delete provider.tf.json file error", log.Error(err))
-		retOutput["errorMessage"] = err.Error()
-		return
-	}
-	retOutput["errorCode"] = "0"
 	return
 }
 
@@ -870,6 +624,23 @@ func handleOutPutArgs(outPutArgs map[string]interface{},
 				if _, okParam := tfstateAttrParamMap[v.Id]; !okParam {
 					if _, ok := reqParam[k]; ok {
 						mapOutPutArgs[i][k] = reqParam[k]
+						if k == "password" {
+							enCodeStr, encodeErr := cipher.AesEnPasswordByGuid(models.PGuid, models.Config.Auth.PasswordSeed, reqParam[k].(string), "")
+							if encodeErr != nil {
+								log.Logger.Error("Try to encode failed", log.Error(encodeErr))
+							} else {
+								mapOutPutArgs[i][k] = enCodeStr
+							}
+						}
+					}
+				} else {
+					if v.Sensitive == "Y" {
+						enCodeStr, encodeErr := cipher.AesEnPasswordByGuid(models.PGuid, models.Config.Auth.PasswordSeed, mapOutPutArgs[i][k].(string), "")
+						if encodeErr != nil {
+							log.Logger.Error("Try to encode failed", log.Error(encodeErr))
+						} else {
+							mapOutPutArgs[i][k] = enCodeStr
+						}
 					}
 				}
 			}
@@ -975,183 +746,6 @@ func handleSliceMapOutPutParam(outPutArgs []map[string]interface{}) (retOutPutAr
 	return
 }
 
-func handleAzQuery(reqParam map[string]interface{},
-	workDirPath string,
-	providerData *models.ProviderTable,
-	providerInfo *models.ProviderInfoTable,
-	regionData *models.ResourceDataTable,
-	sourceData *models.SourceTable) (rowData map[string]interface{}, err error) {
-	rowData = make(map[string]interface{})
-	_, err = os.Stat(workDirPath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			err = os.MkdirAll(workDirPath, os.ModePerm)
-			if err != nil {
-				err = fmt.Errorf("Make dir: %s error: %s", workDirPath, err.Error())
-				log.Logger.Error("Make dir error", log.String("workDirPath", workDirPath), log.Error(err))
-				rowData["errorMessage"] = err.Error()
-				return
-			}
-		} else {
-			err = fmt.Errorf("Os stat dir: %s error: %s", workDirPath, err.Error())
-			log.Logger.Error("Os stat dir error", log.String("workDirPath", workDirPath), log.Error(err))
-			rowData["errorMessage"] = err.Error()
-			return
-		}
-	}
-
-	// Gen provider.tf.json
-	providerFileData := make(map[string]map[string]map[string]interface{})
-	providerFileData["provider"] = make(map[string]map[string]interface{})
-	providerFileData["provider"][providerData.Name] = make(map[string]interface{})
-	providerFileData["provider"][providerData.Name][providerData.SecretIdAttrName] = providerInfo.SecretId
-	providerFileData["provider"][providerData.Name][providerData.SecretKeyAttrName] = providerInfo.SecretKey
-	providerFileData["provider"][providerData.Name][providerData.RegionAttrName] = regionData.ResourceAssetId
-
-	providerFileContent, tmpErr := json.Marshal(providerFileData)
-	if tmpErr != nil {
-		err = fmt.Errorf("Marshal providerFileData error: %s", tmpErr.Error())
-		log.Logger.Error("Marshal providerFileData error", log.Error(err))
-		return
-	}
-	providerFilePath := workDirPath + "/provider.tf.json"
-	err = GenFile(providerFileContent, providerFilePath)
-	if err != nil {
-		err = fmt.Errorf("Gen providerFile: %s error: %s", providerFilePath, err.Error())
-		log.Logger.Error("Gen providerFile error", log.String("providerFilePath", providerFilePath), log.Error(err))
-		return
-	}
-
-	// Gen version.tf
-	terraformFilePath := models.Config.TerraformFilePath
-	if terraformFilePath[len(terraformFilePath)-1] != '/' {
-		terraformFilePath += "/"
-	}
-	if providerData.Name == "tencentcloud" {
-		versionTfFilePath := terraformFilePath + "versiontf/" + providerData.Name + "/version.tf"
-		versionTfFileContent, tmpErr := ReadFile(versionTfFilePath)
-		if tmpErr != nil {
-			err = fmt.Errorf("Read versionTfFile: %s error: %s", versionTfFilePath, tmpErr.Error())
-			log.Logger.Error("Read versionTfFile error", log.String("versionTfFilePath", versionTfFilePath), log.Error(err))
-			return
-		}
-
-		genVersionTfFilePath := workDirPath + "/version.tf"
-		err = GenFile(versionTfFileContent, genVersionTfFilePath)
-		if err != nil {
-			err = fmt.Errorf("Gen versionTfFile: %s error: %s", genVersionTfFilePath, err.Error())
-			log.Logger.Error("Gen versionTfFile error", log.String("genVersionTfFilePath", genVersionTfFilePath), log.Error(err))
-			return
-		}
-	}
-
-	// Gen softlink of terraform provider file
-	// targetTerraformProviderPath := workDirPath + "/" + models.TerraformProviderPathDiffMap[providerData.Name] + providerData.Version + "/" + models.Config.TerraformProviderOsArch
-	// targetTerraformProviderPath := workDirPath + "/" + models.TerraformProviderPathDiffMap[providerData.Name] + providerData.Version
-	targetTerraformProviderPath := workDirPath + "/" + models.TerraformProviderPathDiffMap[providerData.Name] + providerData.NameSpace + "/" + providerData.Name + "/" + providerData.Version
-
-	_, err = os.Stat(targetTerraformProviderPath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			err = os.MkdirAll(targetTerraformProviderPath, os.ModePerm)
-			if err != nil {
-				err = fmt.Errorf("Make dir: %s error: %s", workDirPath, err.Error())
-				log.Logger.Error("Make dir error", log.String("dirPath", workDirPath), log.Error(err))
-				rowData["errorMessage"] = err.Error()
-				return
-			}
-			terraformProviderPath := terraformFilePath + "providers/" + providerData.Name + "/" + providerData.Version + "/" + models.Config.TerraformProviderOsArch
-			err = os.Symlink(terraformProviderPath, targetTerraformProviderPath+"/"+models.Config.TerraformProviderOsArch)
-			if err != nil {
-				err = fmt.Errorf("Make soft link : %s error: %s", targetTerraformProviderPath, err.Error())
-				log.Logger.Error("Make soft link error", log.String("softLink", targetTerraformProviderPath), log.Error(err))
-				rowData["errorMessage"] = err.Error()
-				return
-			}
-		} else {
-			err = fmt.Errorf("Os stat dir: %s error: %s", targetTerraformProviderPath, err.Error())
-			log.Logger.Error("Os stat dir error", log.String("targetTerraformProviderPath", targetTerraformProviderPath), log.Error(err))
-			rowData["errorMessage"] = err.Error()
-			return
-		}
-	}
-	// Gen soft link for .terraform.lock.hcl
-	targetTerraformLockHclPath := workDirPath + "/.terraform.lock.hcl"
-	_, err = os.Stat(targetTerraformLockHclPath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			terraformLockHclPath := terraformFilePath + "providers/" + providerData.Name + "/" + providerData.Version + "/" + models.Config.TerraformProviderOsArch + "_hcl" + "/.terraform.lock.hcl"
-			err = os.Symlink(terraformLockHclPath, targetTerraformLockHclPath)
-			if err != nil {
-				err = fmt.Errorf("Make soft link : %s error: %s", targetTerraformLockHclPath, err.Error())
-				log.Logger.Error("Make soft link error", log.String("softLink", targetTerraformLockHclPath), log.Error(err))
-				rowData["errorMessage"] = err.Error()
-				return
-			}
-		} else {
-			err = fmt.Errorf("Os stat dir: %s error: %s", targetTerraformLockHclPath, err.Error())
-			log.Logger.Error("Os stat dir error", log.String("targetTerraformLockHclPath", targetTerraformLockHclPath), log.Error(err))
-			rowData["errorMessage"] = err.Error()
-			return
-		}
-	}
-
-	sourceName := sourceData.Name
-	// Gen .tf 文件, 然后执行 terraform import cmd
-	uuid := "_" + guid.CreateGuid()
-	tfFilePath := workDirPath + "/" + sourceName + ".tf"
-	tfFileContent := "data " + sourceName + " " + uuid + " {}"
-
-	GenFile([]byte(tfFileContent), tfFilePath)
-	err = TerraformInit(workDirPath)
-	if err != nil {
-		err = fmt.Errorf("Do TerraformInit error:%s", err.Error())
-		log.Logger.Error("Do TerraformInit error", log.Error(err))
-		rowData["errorMessage"] = err.Error()
-		return
-	}
-
-	err = TerraformApply(workDirPath)
-	if err != nil {
-		err = fmt.Errorf("Do TerraformApply error:%s", err.Error())
-		log.Logger.Error("Do TerraformApply error", log.Error(err))
-		rowData["errorMessage"] = err.Error()
-		return
-	}
-
-	// Read terraform.tfstate 文件
-	var tfstateFilePath string
-	tfstateFilePath = workDirPath + "/terraform.tfstate"
-	tfstateFileData, err := ReadFile(tfstateFilePath)
-	if err != nil {
-		err = fmt.Errorf("Read tfstate file error:%s", err.Error())
-		log.Logger.Error("Read tfstate file error", log.Error(err))
-		rowData["errorMessage"] = err.Error()
-		return
-	}
-	//tfstateFileContentStr := string(tfstateFileData)
-	var unmarshalTfstateFileData models.TfstateFileData
-	err = json.Unmarshal(tfstateFileData, &unmarshalTfstateFileData)
-	if err != nil {
-		err = fmt.Errorf("Unmarshal tfstate file data error:%s", err.Error())
-		log.Logger.Error("Unmarshal tfstate file data error", log.Error(err))
-		rowData["errorMessage"] = err.Error()
-		return
-	}
-	var tfstateFileAttributes map[string]interface{}
-	tfstateFileAttributes = unmarshalTfstateFileData.Resources[0].Instances[0].Attributes
-	rowData["az"] = tfstateFileAttributes["zones"]
-
-	// Del provider file
-	err = DelFile(providerFilePath)
-	if err != nil {
-		err = fmt.Errorf("Do delete provider file error: %s", err.Error())
-		log.Logger.Error("Do delete provider file error", log.Error(err))
-		rowData["errorMessage"] = err.Error()
-	}
-	return
-}
-
 func RegionApply(reqParam map[string]interface{}, interfaceData *models.InterfaceTable) (rowData map[string]interface{}, err error) {
 	rowData = make(map[string]interface{})
 	rowData["callbackParameter"] = reqParam["callbackParameter"].(string)
@@ -1210,8 +804,8 @@ func RegionApply(reqParam map[string]interface{}, interfaceData *models.Interfac
 		return
 	}
 	if len(sourceList) == 0 {
-		err = fmt.Errorf("Provider can not be found by interface:%s and provider:%s", interfaceData.Id, providerData.Id)
-		log.Logger.Warn("Provider can not be found by interface and provider", log.String("interface", interfaceData.Id), log.String("provider", providerData.Id), log.Error(err))
+		err = fmt.Errorf("Source can not be found by interface:%s and provider:%s", interfaceData.Id, providerData.Id)
+		log.Logger.Warn("Source can not be found by interface and provider", log.String("interface", interfaceData.Id), log.String("provider", providerData.Id), log.Error(err))
 		rowData["errorMessage"] = err.Error()
 		return
 	}
@@ -1569,7 +1163,8 @@ func handleDestroy(workDirPath string,
 	return
 }
 
-func TerraformOperation(plugin string, action string, reqParam map[string]interface{}, debugFileContent *[]map[string]interface{}, operationProviderData *models.ProviderTable) (rowData map[string]interface{}, err error) {
+func TerraformOperation(plugin string, action string, reqParam map[string]interface{}, debugFileContent *[]map[string]interface{}) (rowData map[string]interface{}, err error) {
+	var curWorkDirPath = []string{}
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("TerraformOperation error: %v", r)
@@ -1577,6 +1172,13 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 		}
 		if rowData["errorMessage"].(string) != "" && rowData["errorCode"].(string) == "0" {
 			rowData["errorCode"] = "1"
+		}
+
+		if _, ok := reqParam[models.ResourceDataDebug]; !ok {
+			// clear the workDirPath
+			for i := range curWorkDirPath {
+				DelDir(curWorkDirPath[i])
+			}
 		}
 	}()
 
@@ -1696,15 +1298,6 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 		return
 	}
 	providerData := providerList[0]
-	operationProviderData.Name = providerData.Name
-	/*
-	defer func() {
-		if _, ok := reqParam[models.ResourceDataDebug]; !ok {
-			// clear the workpath
-			DelDir(models.Config.TerraformFilePath + providerData.Name)
-		}
-	}()
-	 */
 
 	// Get sourceData by interface and provider
 	sqlCmd = `SELECT * FROM source WHERE interface=? AND provider=?`
@@ -1953,44 +1546,6 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 							inPutValSlice = append(inPutValSlice, convertedInPutVal)
 						}
 					} else if rootTfArgumentData.Parameter == "" {
-						/*
-							handledTfArguments[rootTfArgumentData.Id] = true
-							// handle remain tfArguments
-							remainTfArguments := []*models.TfArgumentTable{}
-							for _, v := range allTfArgumentList {
-								if _, ok := handledTfArguments[v.Id]; !ok {
-									remainTfArguments = append(remainTfArguments, v)
-								}
-							}
-							for i := range remainTfArguments {
-								handledTfArguments[remainTfArguments[i].Id] = true
-								var tmpTfArguments map[string]interface{}
-								reqParam[models.ResourceIdDataConvert] = resourceId
-								tmpTfArguments, _, err = handleConvertParams(action, sortedSourceData, []*models.TfArgumentTable{remainTfArguments[i]}, reqParam, providerData, regionData)
-								delete(reqParam, models.ResourceIdDataConvert)
-								if err != nil {
-									err = fmt.Errorf("HandleConvertParams error:%s", err.Error())
-									log.Logger.Warn("HandleConvertParams error", log.Error(err))
-									rowData["errorMessage"] = err.Error()
-									return
-								}
-								resourceDataAssetIdList := []interface{}{}
-								if _, ok := tmpTfArguments[remainTfArguments[i].Name].([]interface{}); ok {
-									resourceDataAssetIdList = append(resourceDataAssetIdList, (tmpTfArguments[remainTfArguments[i].Name].([]interface{}))...)
-								} else {
-									resourceDataAssetIdList = append(resourceDataAssetIdList, tmpTfArguments[remainTfArguments[i].Name])
-								}
-
-								convertedInPutVal := []interface{}{}
-								for idx := range resourceDataAssetIdList {
-									tmpInPutVal := make(map[string]interface{})
-									tmpInPutVal[remainTfArguments[i].Name] = resourceDataAssetIdList[idx]
-									convertedInPutVal = append(convertedInPutVal, tmpInPutVal)
-								}
-								inPutValSlice = append(inPutValSlice, convertedInPutVal)
-							}
-						*/
-
 						sqlCmd = "SELECT * FROM tf_argument WHERE source=? AND relative_source=? AND name!=?"
 						var memberTfArguments []*models.TfArgumentTable
 						paramArgs = []interface{}{sortedSourceData.Id, rootTfArgumentData.RelativeSource, "ROOT"}
@@ -2140,6 +1695,8 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 				regionData,
 				plugin,
 				sortedSourceData)
+
+			curWorkDirPath = append(curWorkDirPath, workDirPath)
 
 			// Gen the terraform workdir
 			err = GenDir(workDirPath)
@@ -2516,16 +2073,6 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 									}
 
 									result, _, _ := compareObject(first, second)
-									/*
-										result, diff, message := compareObject(first, second)
-										if diff != 0 {
-											err = fmt.Errorf("Compare import_state file and old tfstate file error:%s. Please confirm again!", message)
-											log.Logger.Error("Compare import_state file and old tfstate file error", log.String("message", message), log.Error(err))
-											rowData["errorMessage"] = err.Error()
-											rowData["errorCode"] = "-1"
-											return
-										}
-									*/
 									resultBytes, tmpErr := json.MarshalIndent(result, "        ", "\t")
 									if tmpErr != nil {
 										err = fmt.Errorf("json marshal result fail,%s \n", tmpErr.Error())
@@ -2683,6 +2230,14 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 									}
 								}
 							}
+						} else {
+							// for aws query
+							if providerData.Name == models.ProviderName["Aws"] {
+								if _, ok := resourceDataResult[providerData.Name]; !ok {
+									resourceDataResult[providerData.Name] = []map[string]interface{}{}
+								}
+								resourceDataResult[providerData.Name] = append(resourceDataResult[providerData.Name], curSourceRes...)
+							}
 						}
 						resourceDataResult[sortedSourceData.Id] = []map[string]interface{}{}
 					}
@@ -2700,10 +2255,17 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 			if len(sortedSourceList) > 1 {
 				curSimulateResourceData := reqParam[models.SimulateResourceDataResult].(map[string][]map[string]interface{})
 				// rowData[models.TerraformOutPutPrefix] = curSimulateResourceData[sortedSourceList[0].Id]
-				curResult := curSimulateResourceData[sortedSourceList[0].Id]
 				result := []interface{}{}
-				for i := range curResult {
-					result = append(result, curResult[i]["output"])
+				if _, ok := curSimulateResourceData[providerData.Name]; !ok {
+					curResult := curSimulateResourceData[sortedSourceList[0].Id]
+					for i := range curResult {
+						result = append(result, curResult[i]["output"])
+					}
+				} else {
+					curResult := curSimulateResourceData[providerData.Name]
+					for i := range curResult {
+						result = append(result, curResult[i])
+					}
 				}
 				rowData[models.TerraformOutPutPrefix] = result
 			}
@@ -2789,6 +2351,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					regionData,
 					plugin,
 					sortedSourceList[i])
+				curWorkDirPath = append(curWorkDirPath, workDirPath)
 				retOutput, tmpErr := handleDestroy(workDirPath, sortedSourceList[i], providerData, providerInfoData, regionData, reqParam, plugin, nil)
 
 				if _, ok := retOutput["errorCode"]; ok {
@@ -3102,27 +2665,29 @@ func convertAttr(tfArgumentData *models.TfArgumentTable, reqParam map[string]int
 		// arg = tfArgument.DefaultValue
 		if sourceData.SourceType == "data_resource" {
 			if _, ok := reqParam[models.SimulateResourceData]; ok {
-				/*
-					curSimulateResourceData := reqParam[models.SimulateResourceData].(map[string][]map[string]interface{})
+				curSimulateResourceData := reqParam[models.SimulateResourceData].(map[string][]map[string]interface{})
 
-					tmpRes := []interface{}{}
-					relativeSourceId := tfArgumentData.RelativeSource
-					resourceDatas := curSimulateResourceData[relativeSourceId]
-					for i := range resourceDatas {
-						tmpData := resourceDatas[i]["tfstateFile"].(map[string]interface{})
-						assetIdAttribute := resourceDatas[i]["assetIdAttribute"].(string)
-						if _, ok := tmpData[assetIdAttribute]; ok {
+				tmpRes := []interface{}{}
+				relativeSourceId := tfArgumentData.RelativeSource
+				resourceDatas := curSimulateResourceData[relativeSourceId]
+				for i := range resourceDatas {
+					tmpData := resourceDatas[i]["tfstateFile"].(map[string]interface{})
+					assetIdAttribute := resourceDatas[i]["assetIdAttribute"].(string)
+					if _, ok := tmpData[assetIdAttribute]; ok {
+						if _, okAgain := tmpData[assetIdAttribute].([]interface{}); okAgain {
+							tmpRes = append(tmpRes, tmpData[assetIdAttribute].([]interface{})...)
+						} else {
 							tmpRes = append(tmpRes, tmpData[assetIdAttribute])
 						}
 					}
-					if len(tmpRes) > 0 {
-						if tfArgument.IsMulti == "Y" {
-							arg = tmpRes
-						} else {
-							arg = tmpRes[0]
-						}
+				}
+				if len(tmpRes) > 0 {
+					if tfArgument.IsMulti == "Y" {
+						arg = tmpRes
+					} else {
+						arg = tmpRes[0]
 					}
-				*/
+				}
 				return
 			}
 		}
@@ -3776,55 +3341,6 @@ func convertDirect(defaultValue string, reqParam map[string]interface{}, tfArgum
 		reqArg = reqParam[parameterData.Name]
 	}
 
-	/*
-		if parameterData.DataType == "string" {
-			if parameterData.Multiple == "N" {
-				tmpInputArg := reqArg
-				if tfArgument.IsMulti == "Y" {
-					arg = []interface{}{tmpInputArg}
-				} else {
-					arg = tmpInputArg
-				}
-			} else {
-				tmpInputArg := reqArg.([]interface{})
-				if tfArgument.IsMulti == "Y" {
-					arg = tmpInputArg
-				} else {
-					arg = tmpInputArg[0]
-				}
-			}
-		} else if parameterData.DataType == "int" {
-			/*
-			if parameterData.Multiple == "N" {
-				tmpVal, _ := strconv.ParseFloat(fmt.Sprintf("%v", reqArg), 64)
-				arg = tmpVal
-			} else {
-				curArg := reqArg.([]interface{})
-				curRes := []float64{}
-				for i := range curArg {
-					tmpVal, _ := strconv.ParseFloat(fmt.Sprintf("%v", curArg[i]), 64)
-					curRes = append(curRes, tmpVal)
-				}
-				arg = curRes
-			}
-	*/
-	/*
-		if parameterData.Multiple == "N" {
-			tmpInputArg := reqArg
-			if tfArgument.IsMulti == "Y" {
-				arg = []interface{}{tmpInputArg}
-			} else {
-				arg = tmpInputArg
-			}
-		} else {
-			tmpInputArg := reqArg.([]interface{})
-			if tfArgument.IsMulti == "Y" {
-				arg = tmpInputArg
-			} else {
-				arg = tmpInputArg[0]
-			}
-		}
-	} else*/
 	if parameterData.DataType == "object" {
 		if parameterData.Multiple == "N" {
 			var curArg map[string]interface{}
@@ -3877,33 +3393,14 @@ func convertDirect(defaultValue string, reqParam map[string]interface{}, tfArgum
 		}
 	}
 
-	/*
-		if parameterData.DataType == "string" && reqArg.(string) == "null" {
-			arg = "null"
-		} else if parameterData.DataType == "string" && reqArg.(string) == "" || parameterData.DataType == "int" && reqArg.(float64) == 0 {
-			arg = defaultValue
-		} else {
-			if parameterData.DataType == "object" {
-				if parameterData.Multiple == "N" {
-					var curArg map[string]interface{}
-					tmpMarshal, _ := json.Marshal(reqParam[parameterData.Name])
-					json.Unmarshal(tmpMarshal, &curArg)
-					arg = curArg
-				} else {
-					var curArg []map[string]interface{}
-					tmpMarshal, _ := json.Marshal(reqParam[parameterData.Name])
-					json.Unmarshal(tmpMarshal, &curArg)
-					arg = curArg
-				}
-			} else {
-				arg = reqParam[parameterData.Name]
-			}
-		}
-	*/
 	return
 }
 
 func convertFunction(tfArgumentData *models.TfArgumentTable, reqParam map[string]interface{}, tfArgument *models.TfArgumentTable) (arg interface{}, err error) {
+	if tfArgument.Parameter == "" {
+		arg = tfArgument.DefaultValue
+		return
+	}
 	// 查询 tfArgument 对应的 parameter
 	sqlCmd := `SELECT * FROM parameter WHERE id=?`
 	paramArgs := []interface{}{tfArgument.Parameter}
@@ -3919,7 +3416,129 @@ func convertFunction(tfArgumentData *models.TfArgumentTable, reqParam map[string
 		log.Logger.Warn("Parameter data can not be found by id", log.String("id", tfArgument.Parameter), log.Error(err))
 		return
 	}
-	// parameterData := parameterList[0]
+	parameterData := parameterList[0]
+	if reqParam[parameterData.Name] == nil {
+		return
+	}
+
+	functionDefine := tfArgumentData.FunctionDefine
+	var functionDefineData models.FunctionDefine
+	json.Unmarshal([]byte(functionDefine), &functionDefineData)
+
+	resultIdx := -1
+	if functionDefineData.Return != "result" {
+		idxStrStart := strings.Index(functionDefineData.Return, "[")
+		idxStrEnd := strings.Index(functionDefineData.Return, "]")
+		if idxStrStart == -1 || idxStrEnd == -1 || idxStrStart >= idxStrEnd {
+			err = fmt.Errorf("The function_define return_value: %s of tfArgument:%s config error", functionDefineData.Return, tfArgumentData.Name)
+			log.Logger.Error("The function_define return_value of tfArgument config error", log.String("return_value", functionDefineData.Return), log.String("tfArgument", tfArgumentData.Name), log.Error(err))
+			return
+		}
+		resultIdx, _ = strconv.Atoi(functionDefineData.Return[idxStrStart+1 : idxStrEnd])
+	}
+	reqVal := reqParam[parameterData.Name]
+	var result []interface{}
+	if parameterData.DataType == "object" {
+		handleReqVals := []map[string]interface{}{}
+		if parameterData.Multiple == "Y" {
+			tmpData := reqVal.([]map[string]interface{})
+			for i := range tmpData {
+				handleReqVals = append(handleReqVals, tmpData[i])
+			}
+		} else {
+			handleReqVals = append(handleReqVals, reqVal.(map[string]interface{}))
+		}
+
+		if functionDefineData.Function == models.FunctionConvertFunctionDefineName["Remove"] {
+			for _, val := range handleReqVals {
+				removeResult := []map[string]string{}
+				removeKeys := functionDefineData.Args.RemoveKey
+				for i := range removeKeys {
+					tmpVal := make(map[string]string)
+					for k, v := range val {
+						tmpVal[k] = v.(string)
+					}
+					delete(tmpVal, removeKeys[i])
+					removeResult = append(removeResult, tmpVal)
+				}
+				result = append(result, removeResult[0])
+			}
+		}
+	} else {
+		handleReqVals := []string{}
+		if parameterData.Multiple == "Y" {
+			tmpData := reqVal.([]interface{})
+			for i := range tmpData {
+				handleReqVals = append(handleReqVals, tmpData[i].(string))
+			}
+		} else {
+			handleReqVals = append(handleReqVals, reqVal.(string))
+		}
+		if functionDefineData.Function == models.FunctionConvertFunctionDefineName["Split"] {
+			for _, reqValStr := range handleReqVals {
+				splitResult := [][]string{}
+				splitChars := functionDefineData.Args.SplitChar
+				for i := range splitChars {
+					curResult := strings.Split(reqValStr, splitChars[i])
+					if len(curResult) < 2 || curResult[1] == "" {
+						curResult = append(curResult, curResult[0])
+					}
+					splitResult = append(splitResult, curResult)
+				}
+				if resultIdx == -1 {
+					result = append(result, splitResult[0])
+				} else {
+					result = append(result, splitResult[0][resultIdx])
+				}
+			}
+		} else if functionDefineData.Function == models.FunctionConvertFunctionDefineName["Replace"] {
+			for _, reqValStr := range handleReqVals {
+				replaceResult := []string{}
+				replaceVals := functionDefineData.Args.ReplaceVal
+				for i := range replaceVals {
+					for old, new := range replaceVals[i] {
+						curResult := strings.Replace(reqValStr, old, new, -1)
+						replaceResult = append(replaceResult, curResult)
+					}
+				}
+				if resultIdx == -1 {
+					result = append(result, replaceResult[0])
+				} else {
+					result = append(result, replaceResult[0][resultIdx])
+				}
+			}
+		} else if functionDefineData.Function == models.FunctionConvertFunctionDefineName["Regx"] {
+			for _, reqValStr := range handleReqVals {
+				regxResult := [][]string{}
+				regExprs := functionDefineData.Args.RegExp
+				for i := range regExprs {
+					regExp := regexp.MustCompile(regExprs[i])
+					curResult := regExp.FindStringSubmatch(reqValStr)
+					// the first one is the original str
+					curResult = curResult[1:]
+					regxResult = append(regxResult, curResult)
+				}
+				if resultIdx == -1 {
+					result = append(result, regxResult[0])
+				} else {
+					result = append(result, regxResult[0][resultIdx])
+				}
+			}
+		} else {
+			err = fmt.Errorf("The function_define:%s of tfArgument:%s config error", functionDefine, tfArgumentData.Name)
+			log.Logger.Error("The function_define of tfArgument config error", log.String("function_define", functionDefine), log.String("tfstateAttribute", tfArgumentData.Name), log.Error(err))
+			return
+		}
+	}
+	if tfArgumentData.IsMulti == "Y" {
+		tmpRes := []interface{}{}
+		for i := range result {
+			tmpRes = append(tmpRes, result[i])
+		}
+		arg = tmpRes
+	} else {
+		arg = result[0]
+	}
 	return
 }
 
@@ -4459,32 +4078,6 @@ func handleConvertParams(action string,
 	tfArguments = make(map[string]interface{})
 	// 循环处理每一个 tf_argument
 	for i := range tfArgumentList {
-		/*
-			if tfArgumentList[i].Parameter == "" {
-				tfArguments[tfArgumentList[i].Name] = tfArgumentList[i].DefaultValue
-				continue
-			}
-			// 查询 tfArgument 对应的 parameter
-			sqlCmd := `SELECT * FROM parameter WHERE id=?`
-			paramArgs := []interface{}{tfArgumentList[i].Parameter}
-			var parameterList []*models.ParameterTable
-			err = x.SQL(sqlCmd, paramArgs...).Find(&parameterList)
-			if err != nil {
-				err = fmt.Errorf("Get Parameter data by id:%s error:%s", tfArgumentList[i].Parameter, err.Error())
-				log.Logger.Error("Get parameter data by id error", log.String("id", tfArgumentList[i].Parameter), log.Error(err))
-				return
-			}
-			if len(parameterList) == 0 {
-				err = fmt.Errorf("Parameter data can not be found by id:%s", tfArgumentList[i].Parameter)
-				log.Logger.Warn("Parameter data can not be found by id", log.String("id", tfArgumentList[i].Parameter), log.Error(err))
-				return
-			}
-			parameterData := parameterList[0]
-
-			if _, ok := reqParam[parameterData.Name]; !ok {
-				continue
-			}
-		*/
 		errorTfArgument = tfArgumentList[i]
 		convertWay := tfArgumentList[i].ConvertWay
 		var arg interface{}
@@ -5006,8 +4599,32 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 		// handle outPutArgs
 		outPutResultList, _ := handleOutPutArgs(outPutArgs, outPutParameterNameMap, tfstateAttrParamMap, reqParam, isInternalAction)
 
+		if action == "apply" {
+			isInternalAction = false
+		}
+
 		if !isInternalAction {
-			retOutput[models.TerraformOutPutPrefix] = outPutResultList
+			if action == "apply" {
+				if retOutput[models.TerraformOutPutPrefix] == nil {
+					retOutput[models.TerraformOutPutPrefix] = outPutResultList
+				} else {
+					if curRetOutput, ok := retOutput[models.TerraformOutPutPrefix].([]map[string]interface{}); ok {
+						if len(curRetOutput) > 0 {
+							if len(outPutResultList) > 0 {
+								for k, v := range outPutResultList[0] {
+									curRetOutput[0][k] = v
+								}
+							}
+						} else {
+							retOutput[models.TerraformOutPutPrefix] = outPutResultList
+						}
+					} else {
+						retOutput[models.TerraformOutPutPrefix] = outPutResultList
+					}
+				}
+			} else {
+				retOutput[models.TerraformOutPutPrefix] = outPutResultList
+			}
 		}
 
 		if action == "query" {
@@ -5105,8 +4722,33 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 			}
 
 		}
+
+		if action == "apply" {
+			isInternalAction = false
+		}
+
 		if !isInternalAction {
-			retOutput[models.TerraformOutPutPrefix] = outPutResultList
+			if action == "apply" {
+				if retOutput[models.TerraformOutPutPrefix] == nil {
+					retOutput[models.TerraformOutPutPrefix] = outPutResultList
+				} else {
+					if curRetOutput, ok := retOutput[models.TerraformOutPutPrefix].([]map[string]interface{}); ok {
+						if len(curRetOutput) > 0 {
+							if len(outPutResultList) > 0 {
+								for k, v := range outPutResultList[0] {
+									curRetOutput[0][k] = v
+								}
+							}
+						} else {
+							retOutput[models.TerraformOutPutPrefix] = outPutResultList
+						}
+					} else {
+						retOutput[models.TerraformOutPutPrefix] = outPutResultList
+					}
+				}
+			} else {
+				retOutput[models.TerraformOutPutPrefix] = outPutResultList
+			}
 		}
 		if action == "query" {
 			curRes := reqParam[models.SimulateResourceDataResult].(map[string][]map[string]interface{})
@@ -5233,4 +4875,36 @@ func getFileAttrContent(filename string) models.TfFileAttrFetchResult {
 	result.EndIndex = endIndex
 	result.AttrBytes = []byte(result.FileContent[startIndex:endIndex])
 	return result
+}
+
+func GenTerraformConfigFile(dirPath string, providerData *models.ProviderTable) (err error) {
+	// provider
+	providerContentData := make(map[string]map[string]interface{})
+	providerContentData[providerData.Name] = make(map[string]interface{})
+
+	// terraform
+	terraformData := make(map[string]map[string]map[string]interface{})
+	terraformData["required_providers"] = make(map[string]map[string]interface{})
+	terraformData["required_providers"][providerData.Name] = make(map[string]interface{})
+	terraformData["required_providers"][providerData.Name]["source"] = providerData.NameSpace + "/" + providerData.Name
+	terraformData["required_providers"][providerData.Name]["version"] = providerData.Version
+
+	providerFileData := make(map[string]interface{})
+	providerFileData["terraform"] = terraformData
+	providerFileData["provider"] = providerContentData
+
+	providerFileContent, err := json.Marshal(providerFileData)
+	if err != nil {
+		err = fmt.Errorf("Marshal providerFileData error: %s", err.Error())
+		log.Logger.Error("Marshal providerFileData error", log.Error(err))
+		return
+	}
+	providerFilePath := dirPath + "/provider.tf.json"
+	err = GenFile(providerFileContent, providerFilePath)
+	if err != nil {
+		err = fmt.Errorf("Gen providerFile: %s error: %s", providerFilePath, err.Error())
+		log.Logger.Error("Gen providerFile error", log.String("providerFilePath", providerFilePath), log.Error(err))
+		return
+	}
+	return
 }

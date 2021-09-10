@@ -19,6 +19,7 @@ export default {
       activeTab: '/terraformIndex/templateData',
       tabs: [
         { label: 't_plugin_definition', path: '/terraformIndex/pluginDefinition' },
+        { label: 't_instance_data', path: '/terraformIndex/instanceData' },
         { label: 't_provider', path: '/terraformIndex/provider' },
         { label: 't_template_data', path: '/terraformIndex/templateData' },
         { label: 't_conversion_configuration', path: '/terraformIndex/conversionConfiguration' },

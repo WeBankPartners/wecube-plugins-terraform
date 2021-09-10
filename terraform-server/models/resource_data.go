@@ -27,6 +27,15 @@ type ResourceDataQuery struct {
 	CreateUser      string `json:"createUser" xorm:"create_user"`
 	UpdateTime      string `json:"updateTime" xorm:"update_time"`
 	UpdateUser      string `json:"updateUser" xorm:"update_user"`
+
+	ProviderId                string `json:"providerId" xorm:"provider_id"`
+	ProviderName              string `json:"providerName" xorm:"provider_name"`
+	ProviderVersion           string `json:"providerVersion" xorm:"provider_version"`
+	ProviderSecretIdAttrName  string `json:"providerSecretIdAttrName" xorm:"provider_secret_id_attr_name"`
+	ProviderSecretKeyAttrName string `json:"providerSecretKeyAttrName" xorm:"provider_secret_key_attr_name"`
+	ProviderRegionAttrName    string `json:"providerRegionAttrName" xorm:"provider_region_attr_name"`
+	ProviderInitialized       string `json:"providerInitialized" xorm:"provider_initialized"`
+	ProviderNamespace         string `json:"providerNamespace" xorm:"provider_namespace"`
 }
 
 type RegionProviderData struct {

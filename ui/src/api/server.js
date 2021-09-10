@@ -64,3 +64,7 @@ export const debuggerRequest = (plugin, action, data) =>
 
 export const terraformExport = (provider, plugin) =>
   req.get(`/terraform/api/v1/provider_plugin_config/export?provider=${provider}&plugin=${plugin}`)
+
+export const getInstanceData = () => req.get(`/terraform/api/v1/resource_datas`)
+
+export const instanceDataDownload = data => req.post(`/terraform/api/v1/providers/download?id=${data}`)
