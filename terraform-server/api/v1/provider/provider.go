@@ -129,3 +129,35 @@ func ProviderPluginImport(c *gin.Context) {
 		middleware.ReturnSuccess(c)
 	}
 }
+
+func ProviderDownload(c *gin.Context) {
+	id := c.Query("id")
+	if id == "" {
+		middleware.ReturnParamEmptyError(c, "id")
+		return
+	}
+	user := middleware.GetRequestUser(c)
+	err := db.ProviderDownload(id, user)
+	if err != nil {
+		middleware.ReturnBadRequestError(c, err)
+	} else {
+		middleware.ReturnSuccess(c)
+	}
+	return
+}
+
+func ProviderUpload(c *gin.Context) {
+	id := c.Query("id")
+	if id == "" {
+		middleware.ReturnParamEmptyError(c, "id")
+		return
+	}
+	user := middleware.GetRequestUser(c)
+	err := db.ProviderUpload(id, c.Request, user)
+	if err != nil {
+		middleware.ReturnBadRequestError(c, err)
+	} else {
+		middleware.ReturnSuccess(c)
+	}
+	return
+}

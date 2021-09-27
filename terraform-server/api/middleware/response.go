@@ -37,6 +37,14 @@ func ReturnError(c *gin.Context, statusCode, statusMessage string, data interfac
 	c.JSON(http.StatusOK, models.ResponseErrorJson{StatusCode: statusCode, StatusMessage: statusMessage, Data: data})
 }
 
+func BadRequestError(c *gin.Context, statusCode, statusMessage string, data interface{}) {
+	if data == nil {
+		data = []string{}
+	}
+	log.Logger.Error("Handle error", log.String("statusCode", statusCode), log.String("message", statusMessage))
+	c.JSON(http.StatusBadRequest, models.ResponseErrorJson{StatusCode: statusCode, StatusMessage: statusMessage, Data: data})
+}
+
 func ReturnBatchUpdateError(c *gin.Context, data []*models.ResponseErrorObj) {
 	ReturnError(c, "ERR_BATCH_CHANGE", "message", data)
 }
@@ -52,6 +60,11 @@ func ReturnParamEmptyError(c *gin.Context, paramName string) {
 func ReturnServerHandleError(c *gin.Context, err error) {
 	log.Logger.Error("Request server handle error", log.Error(err))
 	ReturnError(c, "SERVER_HANDLE_ERROR", err.Error(), nil)
+}
+
+func ReturnBadRequestError(c *gin.Context, err error) {
+	log.Logger.Error("Bad Request error", log.Error(err))
+	BadRequestError(c, "BAD_REQUEST_ERROR", err.Error(), nil)
 }
 
 func ReturnTokenValidateError(c *gin.Context, err error) {

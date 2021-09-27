@@ -53,7 +53,7 @@
       </Row>
     </div>
     <template v-if="showResult">
-      <Table :columns="tableColums" :data="tableData" border></Table>
+      <Table size="small" :columns="tableColums" :data="tableData" border></Table>
       <div style="margin: 24px 0">
         <span>{{ $t('debugger_result') }}</span>
         <div style="background: #dcdee2; max-height:400px;overflow:auto">
@@ -61,7 +61,7 @@
         </div>
       </div>
     </template>
-    <Modal v-model="dataDetail.isShow" :fullscreen="fullscreen" width="800" footer-hide>
+    <Modal v-model="dataDetail.isShow" :fullscreen="fullscreen" width="800" :mask-closable="false" footer-hide>
       <p slot="header">
         <span>{{ $t('t_detail') }}</span>
         <Icon v-if="!fullscreen" @click="fullscreen = true" class="header-icon" type="ios-expand" />

@@ -1,5 +1,6 @@
 <template>
   <div>
+    <tooltip content=""> </tooltip>
     <Table border size="small" :columns="tableColumns" :data="tableData" :max-height="MODALHEIGHT"></Table>
     <Modal v-model="dataDetail.isShow" :fullscreen="fullscreen" width="800" :mask-closable="false" footer-hide>
       <p slot="header">
@@ -15,7 +16,7 @@
 </template>
 
 <script>
-import { getInstanceData } from '@/api/server'
+import { getInstanceData, instanceDataDownload } from '@/api/server'
 export default {
   name: '',
   data () {
@@ -92,9 +93,75 @@ export default {
               </div>
             )
           }
+        },
+        {
+          title: this.$t('t_action'),
+          key: 'action',
+          width: 160,
+          align: 'center',
+          render: (h, params) => {
+            if (params.row.providerInitialized === 'Y') {
+              return ''
+            }
+            return h('div', [
+              h(
+                'Upload',
+                {
+                  props: {
+                    type: 'select',
+                    size: 'small',
+                    action: `/terraform/api/v1/providers/upload?id=${params.row.providerId}`,
+                    'on-success': this.handleSuccess,
+                    'on-error': this.handleError,
+                    'before-upload': this.handleUpload
+                  },
+                  style: {
+                    display: 'inline-block'
+                  },
+                  on: {}
+                },
+                [
+                  h(
+                    'Button',
+                    {
+                      props: {
+                        type: 'success',
+                        size: 'small'
+                      },
+                      style: {},
+                      on: {}
+                    },
+                    this.$t('t_import')
+                  )
+                ]
+              ),
+              h(
+                'Button',
+                {
+                  props: Object.assign(
+                    {},
+                    {
+                      type: 'primary',
+                      size: 'small'
+                    }
+                  ),
+                  style: {
+                    'margin-left': '8px'
+                  },
+                  on: {
+                    click: () => {
+                      this.downloadInstance(params.row)
+                    }
+                  }
+                },
+                this.$t('t_export')
+              )
+            ])
+          }
         }
       ],
-      tableData: []
+      tableData: [],
+      uploadUrl: ''
     }
   },
   mounted () {
@@ -102,6 +169,44 @@ export default {
     this.getInstanceData()
   },
   methods: {
+    handleUpload (file) {
+      if (file.name.endsWith('.gz') || file.name.endsWith('.zip')) {
+        return true
+      } else {
+        this.$Notice.warning({
+          title: 'Warning',
+          desc: 'Must be a .gz or .zip file'
+        })
+        return false
+      }
+    },
+    handleError (val) {
+      this.$Notice.error({
+        title: 'Error',
+        desc: 'Import Faild'
+      })
+    },
+    handleSuccess (val) {
+      this.$Notice.success({
+        title: 'Successful',
+        desc: 'Successful'
+      })
+      this.getInstanceData()
+    },
+    async downloadInstance (item) {
+      this.$Notice.success({
+        title: 'Info',
+        desc: 'Need 10s ……'
+      })
+      const { statusCode } = await instanceDataDownload(item.providerId)
+      if (statusCode === 'OK') {
+        this.$Notice.success({
+          title: 'Successful',
+          desc: 'Successful'
+        })
+        this.getInstanceData()
+      }
+    },
     async getInstanceData () {
       const { statusCode, data } = await getInstanceData()
       if (statusCode === 'OK') {
