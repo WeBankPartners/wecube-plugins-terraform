@@ -100,9 +100,13 @@ export default {
           key: 'secretKeyAttrName'
         },
         {
+          title: this.$t('t_initialized'),
+          key: 'initialized'
+        },
+        {
           title: this.$t('t_action'),
           key: 'action',
-          width: 230,
+          width: 231,
           align: 'center',
           render: (h, params) => {
             let action = [
@@ -151,6 +155,7 @@ export default {
                     props: {
                       type: 'select',
                       size: 'small',
+                      title: 'xxfsdfaslkfjsaldkjflk',
                       action: `/terraform/api/v1/providers/upload?id=${params.row.id}`,
                       'on-success': this.handleSuccess,
                       'on-error': this.handleError
@@ -162,39 +167,55 @@ export default {
                   },
                   [
                     h(
-                      'Button',
+                      'Tooltip',
                       {
-                        props: {
-                          type: 'success',
-                          size: 'small'
-                        },
-                        style: {},
-                        on: {}
+                        props: { placement: 'top', content: this.$t('t_local_upload_tip'), 'max-width': 115 }
                       },
-                      this.$t('t_local_upload')
+                      [
+                        h(
+                          'Button',
+                          {
+                            props: {
+                              type: 'success',
+                              size: 'small'
+                            },
+                            style: {},
+                            on: {}
+                          },
+                          this.$t('t_local_upload')
+                        )
+                      ]
                     )
                   ]
                 ),
                 h(
-                  'Button',
+                  'Tooltip',
                   {
-                    props: Object.assign(
-                      {},
-                      {
-                        type: 'warning',
-                        size: 'small'
-                      }
-                    ),
-                    style: {
-                      // 'margin-left': '8px'
-                    },
-                    on: {
-                      click: () => {
-                        this.downloadInstance(params.row)
-                      }
-                    }
+                    props: { placement: 'top', content: this.$t('t_online_download_tip'), 'max-width': 115 }
                   },
-                  this.$t('t_online_download')
+                  [
+                    h(
+                      'Button',
+                      {
+                        props: Object.assign(
+                          {},
+                          {
+                            type: 'warning',
+                            size: 'small'
+                          }
+                        ),
+                        style: {
+                          'margin-left': '8px'
+                        },
+                        on: {
+                          click: () => {
+                            this.downloadInstance(params.row)
+                          }
+                        }
+                      },
+                      this.$t('t_online_download')
+                    )
+                  ]
                 )
               ])
             }
