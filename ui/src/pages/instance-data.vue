@@ -1,7 +1,7 @@
 <template>
   <div>
     <tooltip content=""> </tooltip>
-    <Table border :columns="tableColumns" :data="tableData" :max-height="MODALHEIGHT"></Table>
+    <Table border size="small" :columns="tableColumns" :data="tableData" :max-height="MODALHEIGHT"></Table>
     <Modal v-model="dataDetail.isShow" :fullscreen="fullscreen" width="800" :mask-closable="false" footer-hide>
       <p slot="header">
         <span>{{ $t('t_detail') }}</span>

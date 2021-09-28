@@ -5,7 +5,7 @@
         <Button @click="addProvider" style="margin-left: 24px" type="primary">{{ $t('t_add') }}</Button>
       </FormItem>
     </Form>
-    <Table border :columns="tableColumns" :data="tableData"></Table>
+    <Table border size="small" :columns="tableColumns" :data="tableData"></Table>
     <Modal
       v-model="newProvider.isShow"
       :title="newProvider.isAdd ? $t('t_add') : $t('t_edit') + $t('t_provider')"
