@@ -49,7 +49,7 @@ func ProviderBatchCreate(user string, param []*models.ProviderTable) (rowData []
 		}
 		terraformProviderCommonPath := terraformFilePath + "providers/" + data.Name + "/" + data.Version
 		terraformProviderPath := terraformProviderCommonPath + "/" + models.Config.TerraformProviderOsArch
-		terraformLockHclPath :=  terraformProviderCommonPath + "/" + models.Config.TerraformProviderOsArch + "_hcl"
+		terraformLockHclPath := terraformProviderCommonPath + "/" + models.Config.TerraformProviderOsArch + "_hcl"
 
 		data.Initialized = "Y"
 		_, err = os.Stat(terraformProviderPath)
@@ -108,7 +108,7 @@ func ProviderBatchUpdate(user string, param []*models.ProviderTable) (err error)
 		}
 		terraformProviderCommonPath := terraformFilePath + "providers/" + param[i].Name + "/" + param[i].Version
 		terraformProviderPath := terraformProviderCommonPath + "/" + models.Config.TerraformProviderOsArch
-		terraformLockHclPath :=  terraformProviderCommonPath + "/" + models.Config.TerraformProviderOsArch + "_hcl"
+		terraformLockHclPath := terraformProviderCommonPath + "/" + models.Config.TerraformProviderOsArch + "_hcl"
 
 		param[i].Initialized = "Y"
 		_, err = os.Stat(terraformProviderPath)
@@ -175,6 +175,7 @@ func ProviderPluginExport(providerNameList, pluginNameList []string) (result mod
 	pluginIdFilterSql = fmt.Sprintf("('%s')", strings.Join(pluginIdList, "','"))
 	x.SQL("select * from interface where plugin in " + pluginIdFilterSql).Find(&result.Interface)
 	x.SQL("select * from `parameter` where interface in (select id from interface where plugin in " + pluginIdFilterSql + ")").Find(&result.Parameter)
+	x.SQL("select * from provider_template_value where provider in " + providerIdFilterSql).Find(&result.ProviderTemplateValue)
 	templateSql := "select * from template where id in (select template_value from provider_template_value where provider in " + providerIdFilterSql + ")"
 	templateSql += " union "
 	templateSql += "select * from template where id in (select template from `parameter` where interface in (select id from interface where plugin in " + pluginIdFilterSql + "))"
@@ -312,15 +313,15 @@ func ProviderDownload(providerId string, user string) (err error) {
 	}
 	terraformProviderCommonPath := terraformFilePath + "providers/" + providerData.Name + "/" + providerData.Version
 	// terraformProviderPath := terraformProviderCommonPath + "/" + models.Config.TerraformProviderOsArch
-	terraformLockHclPath :=  terraformProviderCommonPath + "/" + models.Config.TerraformProviderOsArch + "_hcl"
+	terraformLockHclPath := terraformProviderCommonPath + "/" + models.Config.TerraformProviderOsArch + "_hcl"
 
 	/*
-	err = GenDir(terraformProviderPath)
-	if err != nil {
-		err = fmt.Errorf("Gen terraformProviderPath : %s error: %s", terraformProviderPath, err.Error())
-		log.Logger.Error("Gen terraformProviderPath error", log.String("terraformProviderPath", terraformProviderPath), log.Error(err))
-		return
-	}
+		err = GenDir(terraformProviderPath)
+		if err != nil {
+			err = fmt.Errorf("Gen terraformProviderPath : %s error: %s", terraformProviderPath, err.Error())
+			log.Logger.Error("Gen terraformProviderPath error", log.String("terraformProviderPath", terraformProviderPath), log.Error(err))
+			return
+		}
 	*/
 
 	err = GenDir(terraformLockHclPath)
@@ -402,7 +403,7 @@ func ProviderUpload(providerId string, r *http.Request, user string) (err error)
 		terraformFilePath += "/"
 	}
 	terraformProviderCommonPath := terraformFilePath + "providers/" + providerData.Name + "/" + providerData.Version
-	terraformLockHclPath :=  terraformProviderCommonPath + "/" + models.Config.TerraformProviderOsArch + "_hcl"
+	terraformLockHclPath := terraformProviderCommonPath + "/" + models.Config.TerraformProviderOsArch + "_hcl"
 
 	err = GenDir(terraformLockHclPath)
 	if err != nil {
