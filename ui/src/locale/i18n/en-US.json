@@ -67,5 +67,6 @@
   "t_namespace": "Namespace",
   "t_format_parameter": "Format Parameter",
   "t_instance_data": "Instance Data",
-  "t_download": "Download"
+  "t_online_download": "Online Download",
+  "t_local_upload": "Local Upload"
 }
