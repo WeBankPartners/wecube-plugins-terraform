@@ -26,7 +26,9 @@ func ResourceDataList(paramsMap map[string]interface{}) (rowData []*models.Resou
 */
 
 func ResourceDataList(ids string) (rowData []*models.ResourceDataQuery, err error) {
-	sqlCmd := "SELECT t1.*,t2.name AS resource_title FROM resource_data t1 LEFT JOIN source t2 ON t1.resource=t2.id WHERE 1=1"
+	sqlCmd := "SELECT t1.*,t2.name AS resource_title,t3.id AS provider_id,t3.name AS provider_name,t3.version AS provider_version,t3.secret_id_attr_name " +
+		"AS provider_secret_id_attr_name,t3.secret_key_attr_name AS provider_secret_key_attr_name,t3.region_attr_name AS provider_region_attr_name,t3.Initialized " +
+		"AS provider_initialized,t3.name_space AS provider_namespace FROM resource_data t1 LEFT JOIN source t2 ON t1.resource=t2.id LEFT JOIN provider t3 ON t2.provider=t3.id WHERE 1=1"
 	if ids != "" {
 		sqlCmd += " AND t1.id IN ('" + ids + "')"
 	}

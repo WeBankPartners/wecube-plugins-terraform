@@ -4599,8 +4599,32 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 		// handle outPutArgs
 		outPutResultList, _ := handleOutPutArgs(outPutArgs, outPutParameterNameMap, tfstateAttrParamMap, reqParam, isInternalAction)
 
+		if action == "apply" {
+			isInternalAction = false
+		}
+
 		if !isInternalAction {
-			retOutput[models.TerraformOutPutPrefix] = outPutResultList
+			if action == "apply" {
+				if retOutput[models.TerraformOutPutPrefix] == nil {
+					retOutput[models.TerraformOutPutPrefix] = outPutResultList
+				} else {
+					if curRetOutput, ok := retOutput[models.TerraformOutPutPrefix].([]map[string]interface{}); ok {
+						if len(curRetOutput) > 0 {
+							if len(outPutResultList) > 0 {
+								for k, v := range outPutResultList[0] {
+									curRetOutput[0][k] = v
+								}
+							}
+						} else {
+							retOutput[models.TerraformOutPutPrefix] = outPutResultList
+						}
+					} else {
+						retOutput[models.TerraformOutPutPrefix] = outPutResultList
+					}
+				}
+			} else {
+				retOutput[models.TerraformOutPutPrefix] = outPutResultList
+			}
 		}
 
 		if action == "query" {
@@ -4698,8 +4722,33 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 			}
 
 		}
+
+		if action == "apply" {
+			isInternalAction = false
+		}
+
 		if !isInternalAction {
-			retOutput[models.TerraformOutPutPrefix] = outPutResultList
+			if action == "apply" {
+				if retOutput[models.TerraformOutPutPrefix] == nil {
+					retOutput[models.TerraformOutPutPrefix] = outPutResultList
+				} else {
+					if curRetOutput, ok := retOutput[models.TerraformOutPutPrefix].([]map[string]interface{}); ok {
+						if len(curRetOutput) > 0 {
+							if len(outPutResultList) > 0 {
+								for k, v := range outPutResultList[0] {
+									curRetOutput[0][k] = v
+								}
+							}
+						} else {
+							retOutput[models.TerraformOutPutPrefix] = outPutResultList
+						}
+					} else {
+						retOutput[models.TerraformOutPutPrefix] = outPutResultList
+					}
+				}
+			} else {
+				retOutput[models.TerraformOutPutPrefix] = outPutResultList
+			}
 		}
 		if action == "query" {
 			curRes := reqParam[models.SimulateResourceDataResult].(map[string][]map[string]interface{})
