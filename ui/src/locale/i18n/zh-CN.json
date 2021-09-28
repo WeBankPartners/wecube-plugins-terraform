@@ -67,5 +67,7 @@
   "t_namespace": "命名空间",
   "t_format_parameter": "格式化参数",
   "t_instance_data": "实例数据",
-  "t_download": "下载"
+  "t_download": "下载",
+  "t_online_download": "在线下载",
+  "t_local_upload": "本地上传"
 }

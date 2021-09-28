@@ -102,7 +102,7 @@ export default {
         {
           title: this.$t('t_action'),
           key: 'action',
-          width: 250,
+          width: 230,
           align: 'center',
           render: (h, params) => {
             let action = [
@@ -141,40 +141,40 @@ export default {
                   }
                 },
                 this.$t('t_delete')
-              ),
-              h(
-                'Upload',
-                {
-                  props: {
-                    type: 'select',
-                    size: 'small',
-                    action: `/terraform/api/v1/providers/upload?id=${params.row.id}`,
-                    'on-success': this.handleSuccess,
-                    'on-error': this.handleError
-                  },
-                  style: {
-                    display: 'inline-block'
-                  },
-                  on: {}
-                },
-                [
-                  h(
-                    'Button',
-                    {
-                      props: {
-                        type: 'success',
-                        size: 'small'
-                      },
-                      style: {},
-                      on: {}
-                    },
-                    this.$t('t_import')
-                  )
-                ]
               )
             ]
             if (params.row.initialized === 'N') {
-              action.push(
+              action.push([
+                h(
+                  'Upload',
+                  {
+                    props: {
+                      type: 'select',
+                      size: 'small',
+                      action: `/terraform/api/v1/providers/upload?id=${params.row.id}`,
+                      'on-success': this.handleSuccess,
+                      'on-error': this.handleError
+                    },
+                    style: {
+                      display: 'inline-block'
+                    },
+                    on: {}
+                  },
+                  [
+                    h(
+                      'Button',
+                      {
+                        props: {
+                          type: 'success',
+                          size: 'small'
+                        },
+                        style: {},
+                        on: {}
+                      },
+                      this.$t('t_local_upload')
+                    )
+                  ]
+                ),
                 h(
                   'Button',
                   {
@@ -186,7 +186,7 @@ export default {
                       }
                     ),
                     style: {
-                      'margin-left': '8px'
+                      // 'margin-left': '8px'
                     },
                     on: {
                       click: () => {
@@ -194,9 +194,9 @@ export default {
                       }
                     }
                   },
-                  this.$t('t_download')
+                  this.$t('t_online_download')
                 )
-              )
+              ])
             }
             return h(
               'div',

@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import { getInstanceData, instanceDataDownload } from '@/api/server'
+import { getInstanceData } from '@/api/server'
 export default {
   name: '',
   data () {
@@ -104,44 +104,6 @@ export default {
     this.getInstanceData()
   },
   methods: {
-    handleUpload (file) {
-      if (file.name.endsWith('.gz') || file.name.endsWith('.zip')) {
-        return true
-      } else {
-        this.$Notice.warning({
-          title: 'Warning',
-          desc: 'Must be a .gz or .zip file'
-        })
-        return false
-      }
-    },
-    handleError (val) {
-      this.$Notice.error({
-        title: 'Error',
-        desc: 'Import Faild'
-      })
-    },
-    handleSuccess (val) {
-      this.$Notice.success({
-        title: 'Successful',
-        desc: 'Successful'
-      })
-      this.getInstanceData()
-    },
-    async downloadInstance (item) {
-      this.$Notice.success({
-        title: 'Info',
-        desc: 'Need 10s ……'
-      })
-      const { statusCode } = await instanceDataDownload(item.providerId)
-      if (statusCode === 'OK') {
-        this.$Notice.success({
-          title: 'Successful',
-          desc: 'Successful'
-        })
-        this.getInstanceData()
-      }
-    },
     async getInstanceData () {
       const { statusCode, data } = await getInstanceData()
       if (statusCode === 'OK') {
