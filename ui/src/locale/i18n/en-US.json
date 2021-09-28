@@ -66,5 +66,6 @@
   "t_remark": "Remark",
   "t_namespace": "Namespace",
   "t_format_parameter": "Format Parameter",
-  "t_instance_data": "Instance Data"
+  "t_instance_data": "Instance Data",
+  "t_download": "Download"
 }
