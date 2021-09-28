@@ -66,5 +66,6 @@
   "t_remark": "备注",
   "t_namespace": "命名空间",
   "t_format_parameter": "格式化参数",
-  "t_instance_data": "实例数据"
+  "t_instance_data": "实例数据",
+  "t_download": "下载"
 }
