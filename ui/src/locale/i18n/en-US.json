@@ -38,6 +38,7 @@
   "t_region_attr_name": "Region Attr Name",
   "t_secretKey_attr_name": "Secret Key Attr Name",
   "t_secretId_attr_name": "Secret ID Attr Name",
+  "t_initialized": "Provider Initialized",
   "t_source": "Source",
   "t_resource_asset_id_Attribute": "Resource Asset Id Attribute",
   "t_import_export": "Import & Export",
@@ -68,6 +69,8 @@
   "t_format_parameter": "Format Parameter",
   "t_instance_data": "Instance Data",
   "t_download": "Download",
-  "t_online_download": "Online Download",
-  "t_local_upload": "Local Upload"
+  "t_online_download": "Download",
+  "t_local_upload": "Upload",
+  "t_online_download_tip": "In online scenarios, download the official provider file",
+  "t_local_upload_tip": "In offline scenarios, upload the locally made provider file"
 }
