@@ -3400,7 +3400,7 @@ func convertDirect(defaultValue string, reqParam map[string]interface{}, tfArgum
 
 		if _, ok := arg.(string); ok {
 			if strings.HasPrefix(arg.(string),"{cipher_a}") {
-				arg = nil
+				arg, err = cipher.AesDePasswordByGuid(reqParam["id"].(string), reqParam["seed"].(string), arg.(string))
 				return
 			}
 		}
