@@ -625,21 +625,29 @@ func handleOutPutArgs(outPutArgs map[string]interface{},
 					if _, ok := reqParam[k]; ok {
 						mapOutPutArgs[i][k] = reqParam[k]
 						if k == "password" {
-							enCodeStr, encodeErr := cipher.AesEnPasswordByGuid(models.PGuid, models.Config.Auth.PasswordSeed, reqParam[k].(string), "")
-							if encodeErr != nil {
-								log.Logger.Error("Try to encode failed", log.Error(encodeErr))
+							if _, tmpOk := reqParam["seed"]; !tmpOk {
+								log.Logger.Error("Try to get seed failed")
 							} else {
-								mapOutPutArgs[i][k] = enCodeStr
+								enCodeStr, encodeErr := cipher.AesEnPasswordByGuid(reqParam["id"].(string), reqParam["seed"].(string), reqParam[k].(string), "")
+								if encodeErr != nil {
+									log.Logger.Error("Try to encode failed", log.Error(encodeErr))
+								} else {
+									mapOutPutArgs[i][k] = enCodeStr
+								}
 							}
 						}
 					}
 				} else {
 					if v.Sensitive == "Y" {
-						enCodeStr, encodeErr := cipher.AesEnPasswordByGuid(models.PGuid, models.Config.Auth.PasswordSeed, mapOutPutArgs[i][k].(string), "")
-						if encodeErr != nil {
-							log.Logger.Error("Try to encode failed", log.Error(encodeErr))
+						if _, tmpOk := reqParam["seed"]; !tmpOk {
+							log.Logger.Error("Try to get seed failed")
 						} else {
-							mapOutPutArgs[i][k] = enCodeStr
+							enCodeStr, encodeErr := cipher.AesEnPasswordByGuid(reqParam["id"].(string), reqParam["seed"].(string), mapOutPutArgs[i][k].(string), "")
+							if encodeErr != nil {
+								log.Logger.Error("Try to encode failed", log.Error(encodeErr))
+							} else {
+								mapOutPutArgs[i][k] = enCodeStr
+							}
 						}
 					}
 				}
@@ -3377,6 +3385,23 @@ func convertDirect(defaultValue string, reqParam map[string]interface{}, tfArgum
 				arg = tmpInputArg
 			} else {
 				arg = tmpInputArg[0]
+			}
+		}
+	}
+
+	if parameterData.Sensitive == "Y" {
+		if _, tmpOk := reqParam["seed"]; !tmpOk {
+			err = fmt.Errorf("Parameter data: seed can not be found ")
+			return
+		} else if reqParam["seed"].(string) == "" {
+			err = fmt.Errorf("Parameter data: seed can not be empty ")
+			return
+		}
+
+		if _, ok := arg.(string); ok {
+			if strings.HasPrefix(arg.(string),"{cipher_a}") {
+				arg, err = cipher.AesDePasswordByGuid(reqParam["id"].(string), reqParam["seed"].(string), arg.(string))
+				return
 			}
 		}
 	}

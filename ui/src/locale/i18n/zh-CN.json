@@ -38,6 +38,7 @@
   "t_region_attr_name": "地域属性名称",
   "t_secretKey_attr_name": "秘钥Key属性名称",
   "t_secretId_attr_name": "秘钥Id属性名称",
+  "t_initialized": "是否初始化",
   "t_source": "资源",
   "t_resource_asset_id_Attribute": "资产ID属性",
   "t_import_export": "导入&导出",
@@ -66,5 +67,10 @@
   "t_remark": "备注",
   "t_namespace": "命名空间",
   "t_format_parameter": "格式化参数",
-  "t_instance_data": "实例数据"
+  "t_instance_data": "实例数据",
+  "t_download": "下载",
+  "t_online_download": "下载",
+  "t_local_upload": "上传",
+  "t_online_download_tip": "连网场景，下载官方提供的provider文件",
+  "t_local_upload_tip": "离线场景，上传本地制做的provider文件"
 }

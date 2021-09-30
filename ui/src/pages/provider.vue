@@ -38,7 +38,7 @@
 </template>
 
 <script>
-import { getProviders, addProvider, deleteProvider, editProvider } from '@/api/server'
+import { getProviders, addProvider, deleteProvider, instanceDataDownload, editProvider } from '@/api/server'
 export default {
   name: '',
   data () {
@@ -100,17 +100,21 @@ export default {
           key: 'secretKeyAttrName'
         },
         {
+          title: this.$t('t_initialized'),
+          key: 'initialized'
+        },
+        {
           title: this.$t('t_action'),
           key: 'action',
-          width: 150,
+          width: 231,
           align: 'center',
           render: (h, params) => {
-            return h('div', [
+            let action = [
               h(
                 'Button',
                 {
                   props: {
-                    type: 'success',
+                    type: 'primary',
                     size: 'small'
                   },
                   style: {
@@ -131,6 +135,9 @@ export default {
                     type: 'error',
                     size: 'small'
                   },
+                  style: {
+                    marginRight: '5px'
+                  },
                   on: {
                     click: () => {
                       this.deleteProvider(params.row)
@@ -139,7 +146,88 @@ export default {
                 },
                 this.$t('t_delete')
               )
-            ])
+            ]
+            if (params.row.initialized === 'N') {
+              action.push([
+                h(
+                  'Upload',
+                  {
+                    props: {
+                      type: 'select',
+                      size: 'small',
+                      title: 'xxfsdfaslkfjsaldkjflk',
+                      action: `/terraform/api/v1/providers/upload?id=${params.row.id}`,
+                      'on-success': this.handleSuccess,
+                      'on-error': this.handleError
+                    },
+                    style: {
+                      display: 'inline-block'
+                    },
+                    on: {}
+                  },
+                  [
+                    h(
+                      'Tooltip',
+                      {
+                        props: { placement: 'top', content: this.$t('t_local_upload_tip'), 'max-width': 115 }
+                      },
+                      [
+                        h(
+                          'Button',
+                          {
+                            props: {
+                              type: 'success',
+                              size: 'small'
+                            },
+                            style: {},
+                            on: {}
+                          },
+                          this.$t('t_local_upload')
+                        )
+                      ]
+                    )
+                  ]
+                ),
+                h(
+                  'Tooltip',
+                  {
+                    props: { placement: 'top', content: this.$t('t_online_download_tip'), 'max-width': 115 }
+                  },
+                  [
+                    h(
+                      'Button',
+                      {
+                        props: Object.assign(
+                          {},
+                          {
+                            type: 'warning',
+                            size: 'small'
+                          }
+                        ),
+                        style: {
+                          'margin-left': '8px'
+                        },
+                        on: {
+                          click: () => {
+                            this.downloadInstance(params.row)
+                          }
+                        }
+                      },
+                      this.$t('t_online_download')
+                    )
+                  ]
+                )
+              ])
+            }
+            return h(
+              'div',
+              {
+                style: {
+                  textAlign: 'left'
+                }
+              },
+              action
+            )
           }
         }
       ],
@@ -150,6 +238,43 @@ export default {
     this.getTableData()
   },
   methods: {
+    handleUpload (file) {
+      if (!file.name.endsWith('.gz')) {
+        this.$Notice.warning({
+          title: 'Warning',
+          desc: 'Must be a json file'
+        })
+        return false
+      }
+      return true
+    },
+    handleError (val) {
+      this.$Notice.error({
+        title: 'Error',
+        desc: 'Import Faild'
+      })
+    },
+    handleSuccess (val) {
+      this.$Notice.success({
+        title: 'Successful',
+        desc: 'Successful'
+      })
+      this.getTableData()
+    },
+    async downloadInstance (item) {
+      this.$Notice.success({
+        title: 'Info',
+        desc: 'Need 10s ……'
+      })
+      const { statusCode } = await instanceDataDownload(item.id)
+      if (statusCode === 'OK') {
+        this.$Notice.success({
+          title: 'Successful',
+          desc: 'Successful'
+        })
+        this.getTableData()
+      }
+    },
     editProvider (item) {
       this.newProvider.form = {
         ...item
