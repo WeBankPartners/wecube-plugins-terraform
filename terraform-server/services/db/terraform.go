@@ -4384,7 +4384,7 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 	tfstateAttrNameMap := make(map[string]*models.TfstateAttributeTable)
 	tfstateAttrIdMap := make(map[string]*models.TfstateAttributeTable)
 	for _, v := range tfstateAttributeList {
-		if v.Parameter == "" && v.ObjectName == "" {
+		if v.Parameter == "" && v.ObjectName == "" && len(tfstateAttributeList) > 1 {
 			tfstateObjectTypeAttribute = v
 		} else {
 			tfstateAttrParamMap[v.Parameter] = v
