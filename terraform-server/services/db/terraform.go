@@ -4196,6 +4196,36 @@ func handleConvertParams(action string,
 		}
 
 		if action == "query" {
+			// merge the input tfArgument
+			if tfArgumentList[i].ObjectName != "" {
+				relativeTfArgumentData := tfArgumentIdMap[tfArgumentList[i].ObjectName]
+				if relativeTfArgumentData != nil && relativeTfArgumentData.Type == "object" && relativeTfArgumentData.Parameter == "" {
+					// tmpVal := tfArguments[relativeTfArgumentData.Name].(map[string]interface{})
+					// tmpVal[tfArgumentList[i].Name] = arg
+					// tfArguments[relativeTfArgumentData.Name] = tmpVal
+					if tfArguments[relativeTfArgumentData.Name] != nil {
+						// fmt.Printf("%v, %v, %T ## ", tfArguments[relativeTfArgumentData.Name], tfArguments[relativeTfArgumentData.Name] == nil, tfArguments[relativeTfArgumentData.Name])
+						tmpVal := tfArguments[relativeTfArgumentData.Name].(map[string]interface{})
+						if len(tmpVal) == 0 {
+							tmpVal = make(map[string]interface{})
+						}
+						if arg != nil {
+							tmpVal[tfArgumentList[i].Name] = arg
+						}
+						tfArguments[relativeTfArgumentData.Name] = tmpVal
+					} else {
+						if arg != nil {
+							tmpVal := make(map[string]interface{})
+							tmpVal[tfArgumentList[i].Name] = arg
+							tfArguments[relativeTfArgumentData.Name] = tmpVal
+						}
+					}
+					continue
+				}
+			}
+		}
+
+		if action == "query" {
 			if arg == nil || arg == "" {
 				continue
 			}
