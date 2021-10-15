@@ -4169,7 +4169,7 @@ func handleConvertParams(action string,
 			// merge the input tfArgument
 			if tfArgumentList[i].ObjectName != "" {
 				relativeTfArgumentData := tfArgumentIdMap[tfArgumentList[i].ObjectName]
-				if relativeTfArgumentData != nil && relativeTfArgumentData.Type == "object" && relativeTfArgumentData.Name == "tags" {
+				if relativeTfArgumentData != nil && relativeTfArgumentData.Type == "object" && (relativeTfArgumentData.Name == "tags" || relativeTfArgumentData.Parameter == "") {
 					// tmpVal := tfArguments[relativeTfArgumentData.Name].(map[string]interface{})
 					// tmpVal[tfArgumentList[i].Name] = arg
 					// tfArguments[relativeTfArgumentData.Name] = tmpVal
@@ -4414,7 +4414,7 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 	tfstateAttrNameMap := make(map[string]*models.TfstateAttributeTable)
 	tfstateAttrIdMap := make(map[string]*models.TfstateAttributeTable)
 	for _, v := range tfstateAttributeList {
-		if v.Parameter == "" && v.ObjectName == "" && len(tfstateAttributeList) > 1 {
+		if v.Parameter == "" && v.ObjectName == "" && (v.Name != "ids" && v.Name != "root_block_device") {
 			tfstateObjectTypeAttribute = v
 		} else {
 			tfstateAttrParamMap[v.Parameter] = v
