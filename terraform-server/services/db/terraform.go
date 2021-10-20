@@ -3987,6 +3987,13 @@ func getSortedSourceList(sourceList []*models.SourceTable, interfaceData *models
 				return
 			}
 		}
+		
+		if len(initAllSourceListIdMap) == 1 {
+			for tmpk := range initAllSourceListIdMap {
+				sortedSourceList = append(sortedSourceList, initAllSourceListIdMap[tmpk])
+			}
+			return
+		}
 
 		// get the all tf_argument data of each remain source list
 		tfArgumentListSourceIdMap := make(map[string][]*models.TfArgumentTable)
