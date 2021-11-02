@@ -3988,6 +3988,13 @@ func getSortedSourceList(sourceList []*models.SourceTable, interfaceData *models
 			}
 		}
 
+		if len(initAllSourceListIdMap) == 1 {
+			for tmpk := range initAllSourceListIdMap {
+				sortedSourceList = append(sortedSourceList, initAllSourceListIdMap[tmpk])
+			}
+			return
+		}
+
 		// get the all tf_argument data of each remain source list
 		tfArgumentListSourceIdMap := make(map[string][]*models.TfArgumentTable)
 		for sourceId := range initAllSourceListIdMap {
@@ -4138,6 +4145,52 @@ func handleConvertParams(action string,
 			continue
 		}
 
+		if action == "apply" && convertWay == models.ConvertWay["Direct"] && arg != nil && tfArgumentList[i].Parameter != "" {
+			// 查询 tfArgument 对应的 parameter
+			/*
+			sqlCmd := `SELECT * FROM parameter WHERE id=?`
+			paramArgs := []interface{}{tfArgumentList[i].Parameter}
+			var parameterList []*models.ParameterTable
+			err = x.SQL(sqlCmd, paramArgs...).Find(&parameterList)
+			if err != nil {
+				err = fmt.Errorf("Get Parameter data by id:%s error:%s", tfArgumentList[i].Parameter, err.Error())
+				log.Logger.Error("Get parameter data by id error", log.String("id", tfArgumentList[i].Parameter), log.Error(err))
+				return
+			}
+			*/
+			if tfArgumentList[i].IsNull == "Y" {
+				// read tf_file and check if the tfArgument has the same key and val
+				// Get the resource_data list by resource_id and source and region_id
+				sqlCmd := `SELECT * FROM resource_data WHERE resource=? AND resource_id=? AND region_id=?`
+				if _, ok := reqParam[models.ResourceDataDebug]; ok {
+					sqlCmd = `SELECT * FROM resource_data_debug WHERE resource=? AND resource_id=? AND region_id=?`
+				}
+				resourceId := reqParam["id"].(string)
+				paramArgs := []interface{}{sourceData.Id, resourceId, regionData.RegionId}
+				var resourceDataList []*models.ResourceDataTable
+				err = x.SQL(sqlCmd, paramArgs...).Find(&resourceDataList)
+				if err != nil {
+					err = fmt.Errorf("Get resource data by resource:%s and resource_id:%s error: %s", sourceData.Id, resourceId, err.Error())
+					log.Logger.Error("Get resource data by resource and resource_id error", log.String("resource", sourceData.Id), log.String("resource_id", resourceId), log.Error(err))
+					return
+				}
+				if len(resourceDataList) > 0 {
+					resourceData := resourceDataList[0]
+					tmpTfFileArgument := make(map[string]map[string]map[string]map[string]interface{})
+					tmpTfFileArgument["resource"] = make(map[string]map[string]map[string]interface{})
+					tmpTfFileArgument["resource"][sourceData.Name] = make(map[string]map[string]interface{})
+					tmpTfFileArgument["resource"][sourceData.Name][resourceId] = make(map[string]interface{})
+					json.Unmarshal([]byte(resourceData.TfFile), &tmpTfFileArgument)
+					if tmpV, ok := tmpTfFileArgument["resource"][sourceData.Name][resourceId][tfArgumentList[i].Name]; ok {
+						if tmpV == arg {
+							arg = nil
+							continue
+						}
+					}
+				}
+			}
+		}
+
 		// handle tfArgument that is not in tf.json file
 		if action == "apply" {
 			if tfArgumentList[i].Name == sourceData.AssetIdAttribute {
@@ -4169,7 +4222,37 @@ func handleConvertParams(action string,
 			// merge the input tfArgument
 			if tfArgumentList[i].ObjectName != "" {
 				relativeTfArgumentData := tfArgumentIdMap[tfArgumentList[i].ObjectName]
-				if relativeTfArgumentData != nil && relativeTfArgumentData.Type == "object" && relativeTfArgumentData.Name == "tags" {
+				if relativeTfArgumentData != nil && relativeTfArgumentData.Type == "object" && (relativeTfArgumentData.Name == "tags" || relativeTfArgumentData.Parameter == "") {
+					// tmpVal := tfArguments[relativeTfArgumentData.Name].(map[string]interface{})
+					// tmpVal[tfArgumentList[i].Name] = arg
+					// tfArguments[relativeTfArgumentData.Name] = tmpVal
+					if tfArguments[relativeTfArgumentData.Name] != nil {
+						// fmt.Printf("%v, %v, %T ## ", tfArguments[relativeTfArgumentData.Name], tfArguments[relativeTfArgumentData.Name] == nil, tfArguments[relativeTfArgumentData.Name])
+						tmpVal := tfArguments[relativeTfArgumentData.Name].(map[string]interface{})
+						if len(tmpVal) == 0 {
+							tmpVal = make(map[string]interface{})
+						}
+						if arg != nil {
+							tmpVal[tfArgumentList[i].Name] = arg
+						}
+						tfArguments[relativeTfArgumentData.Name] = tmpVal
+					} else {
+						if arg != nil {
+							tmpVal := make(map[string]interface{})
+							tmpVal[tfArgumentList[i].Name] = arg
+							tfArguments[relativeTfArgumentData.Name] = tmpVal
+						}
+					}
+					continue
+				}
+			}
+		}
+
+		if action == "query" {
+			// merge the input tfArgument
+			if tfArgumentList[i].ObjectName != "" {
+				relativeTfArgumentData := tfArgumentIdMap[tfArgumentList[i].ObjectName]
+				if relativeTfArgumentData != nil && relativeTfArgumentData.Type == "object" && relativeTfArgumentData.Parameter == "" {
 					// tmpVal := tfArguments[relativeTfArgumentData.Name].(map[string]interface{})
 					// tmpVal[tfArgumentList[i].Name] = arg
 					// tfArguments[relativeTfArgumentData.Name] = tmpVal
@@ -4384,7 +4467,7 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 	tfstateAttrNameMap := make(map[string]*models.TfstateAttributeTable)
 	tfstateAttrIdMap := make(map[string]*models.TfstateAttributeTable)
 	for _, v := range tfstateAttributeList {
-		if v.Parameter == "" && v.ObjectName == "" {
+		if v.Parameter == "" && v.ObjectName == "" && (v.Name != "ids" && v.Name != "root_block_device") {
 			tfstateObjectTypeAttribute = v
 		} else {
 			tfstateAttrParamMap[v.Parameter] = v
@@ -4619,6 +4702,10 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 			curResourceData["assetIdAttribute"] = sourceData.AssetIdAttribute
 			curResourceData["tfstateFile"] = tfstateFileAttributes
 			curSimulateResourceData[sourceData.Id] = append(curSimulateResourceData[sourceData.Id], curResourceData)
+		}
+
+		if action == "apply" && sourceData.Name == "aws_db_instance" {
+			isInternalAction = false
 		}
 
 		// handle outPutArgs

@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import { getInstanceData } from '@/api/server'
+import { getDebugInfo } from '@/api/server'
 export default {
   name: '',
   data () {
@@ -99,11 +99,11 @@ export default {
   },
   mounted () {
     this.MODALHEIGHT = document.body.scrollHeight - 200
-    this.getInstanceData()
+    this.getDebugInfo()
   },
   methods: {
-    async getInstanceData () {
-      const { statusCode, data } = await getInstanceData()
+    async getDebugInfo () {
+      const { statusCode, data } = await getDebugInfo()
       if (statusCode === 'OK') {
         this.tableData = data
       }
