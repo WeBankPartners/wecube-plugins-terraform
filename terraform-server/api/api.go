@@ -148,7 +148,7 @@ func InitHttpServer() {
 	// const handler func
 	// r.POST(urlPrefix+"/api/v1/login", permission.Login)
 	// register handler func with auth
-	authRouter := r.Group(urlPrefix + "/api/v1")
+	authRouter := r.Group(urlPrefix+"/api/v1", middleware.AuthCoreRequestToken())
 	// authRouter.GET("/refresh-token", permission.RefreshToken)
 	for _, funcObj := range httpHandlerFuncList {
 		switch funcObj.Method {
@@ -192,7 +192,7 @@ func InitHttpServer() {
 		r.POST(urlPrefix+"/plugin/ci-data/attr-value", middleware.AuthCorePluginToken(), ci.PluginCiDataAttrValueHandle, ci.HandleOperationLog)
 	*/
 	// r.POST(urlPrefix + "/api/v1/:plugin/:action", middleware.AuthCoreRequestToken(), resource_data.TerraformOperation, log_operation.HandleOperationLog)
-	r.POST(urlPrefix+"/api/v1/terraform/:plugin/:action", resource_data.TerraformOperation, log_operation.HandleOperationLog)
+	r.POST(urlPrefix+"/api/v1/terraform/:plugin/:action", middleware.AuthCoreRequestToken(), resource_data.TerraformOperation, log_operation.HandleOperationLog)
 	r.Run(":" + models.Config.HttpServer.Port)
 }
 

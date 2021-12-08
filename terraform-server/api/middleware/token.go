@@ -25,8 +25,6 @@ func GetRequestRoles(c *gin.Context) []string {
 	return roles
 }
 
-
-
 func authRequest(c *gin.Context) error {
 	if !models.Config.Auth.Enable {
 		return nil
@@ -82,9 +80,6 @@ type pluginInterfaceResultOutput struct {
 }
 
 func authCoreRequest(c *gin.Context) error {
-	if !models.Config.Auth.Enable {
-		return nil
-	}
 	authHeader := c.GetHeader("Authorization")
 	if authHeader == "" {
 		return fmt.Errorf("Can not find Request Header Authorization ")
