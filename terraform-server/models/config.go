@@ -2,12 +2,10 @@ package models
 
 import (
 	"encoding/json"
-	"io/ioutil"
-	"os"
-	"strings"
-
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/common-lib/cipher"
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/common-lib/token"
+	"io/ioutil"
+	"os"
 )
 
 type HttpServerConfig struct {
@@ -111,7 +109,8 @@ func InitConfig(configFile string) (errMessage string) {
 	}
 	c.Database.Password = cipher.DecryptRsa(c.Database.Password, c.RsaKeyPath)
 	Config = &c
-	c.IsPluginMode = strings.ToLower(c.IsPluginMode)
+	// c.IsPluginMode = strings.ToLower(c.IsPluginMode)
+	c.IsPluginMode = "y"
 	if c.IsPluginMode == "yes" || c.IsPluginMode == "y" || c.IsPluginMode == "true" {
 		tmpCoreToken := token.CoreToken{}
 		PluginRunningMode = true
