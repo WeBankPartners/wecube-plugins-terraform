@@ -59,6 +59,7 @@
         <Upload
           style="float:right"
           :action="uploadUrl"
+          :headers="{ Authorization: authToken }"
           :before-upload="handleUpload"
           :show-upload-list="false"
           :max-size="10000"
@@ -76,6 +77,7 @@
 <script>
 import axios from 'axios'
 import { getPluginList, getProviderList } from '@/api/server'
+import { getCookie } from '../pages/util/cookie'
 export default {
   name: '',
   data () {
@@ -86,7 +88,8 @@ export default {
       pluginOptions: [],
       currentProvider: [],
       providerList: [],
-      uploadUrl: '/terraform/api/v1/provider_plugin_config/import'
+      uploadUrl: '/terraform/api/v1/provider_plugin_config/import',
+      authToken: 'Bearer ' + getCookie('accessToken')
     }
   },
   mounted () {
@@ -107,7 +110,10 @@ export default {
         method: 'GET',
         url: `/terraform/api/v1/provider_plugin_config/export?provider=${this.currentProvider.join(
           ','
-        )}&plugin=${this.plugin.join(',')}`
+        )}&plugin=${this.plugin.join(',')}`,
+        headers: {
+          Authorization: 'Bearer ' + getCookie('accessToken')
+        }
       })
         .then(response => {
           this.isExport = false

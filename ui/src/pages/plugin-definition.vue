@@ -401,6 +401,7 @@
 
 <script>
 import axios from 'axios'
+import { getCookie } from '../pages/util/cookie'
 import {
   getPluginList,
   getTemplate,
@@ -487,7 +488,10 @@ export default {
       this.isExport = true
       axios({
         method: 'GET',
-        url: `/terraform/api/v1/plugin_xml/export`
+        url: `/terraform/api/v1/plugin_xml/export`,
+        headers: {
+          Authorization: 'Bearer ' + getCookie('accessToken')
+        }
       })
         .then(response => {
           this.isExport = false
