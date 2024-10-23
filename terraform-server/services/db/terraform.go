@@ -20,6 +20,7 @@ import (
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/common-lib/cipher"
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/common-lib/guid"
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/common/log"
+	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/common/try"
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/models"
 )
 
@@ -1177,6 +1178,9 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 		if r := recover(); r != nil {
 			err = fmt.Errorf("TerraformOperation error: %v", r)
 			rowData["errorMessage"] = err.Error()
+
+			stackTraceInfo := try.PrintStackTrace(r)
+			log.Logger.Error(stackTraceInfo)
 		}
 		if rowData["errorMessage"].(string) != "" && rowData["errorCode"].(string) == "0" {
 			rowData["errorCode"] = "1"
@@ -2372,19 +2376,19 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 				}
 
 				/*
-				if tmpErr != nil {
-					err = fmt.Errorf("Handle Destroy error: %s", tmpErr.Error())
-					log.Logger.Error("Handle Destroy error", log.Error(err))
-					rowData["errorMessage"] = err.Error()
-					continue
-				}
-				 */
+					if tmpErr != nil {
+						err = fmt.Errorf("Handle Destroy error: %s", tmpErr.Error())
+						log.Logger.Error("Handle Destroy error", log.Error(err))
+						rowData["errorMessage"] = err.Error()
+						continue
+					}
+				*/
 
 				/*
-				for k, v := range retOutput {
-					rowData[k] = v
-				}
-				 */
+					for k, v := range retOutput {
+						rowData[k] = v
+					}
+				*/
 				// rowData["id"] = reqParam["id"].(string)
 			}
 			rowData["errorCode"] = "0"
@@ -3399,7 +3403,7 @@ func convertDirect(defaultValue string, reqParam map[string]interface{}, tfArgum
 		}
 
 		if _, ok := arg.(string); ok {
-			if strings.HasPrefix(arg.(string),"{cipher_a}") {
+			if strings.HasPrefix(arg.(string), "{cipher_a}") {
 				arg, err = cipher.AesDePasswordByGuid(reqParam["id"].(string), reqParam["seed"].(string), arg.(string))
 				return
 			}
@@ -4148,15 +4152,15 @@ func handleConvertParams(action string,
 		if action == "apply" && convertWay == models.ConvertWay["Direct"] && arg != nil && tfArgumentList[i].Parameter != "" {
 			// 查询 tfArgument 对应的 parameter
 			/*
-			sqlCmd := `SELECT * FROM parameter WHERE id=?`
-			paramArgs := []interface{}{tfArgumentList[i].Parameter}
-			var parameterList []*models.ParameterTable
-			err = x.SQL(sqlCmd, paramArgs...).Find(&parameterList)
-			if err != nil {
-				err = fmt.Errorf("Get Parameter data by id:%s error:%s", tfArgumentList[i].Parameter, err.Error())
-				log.Logger.Error("Get parameter data by id error", log.String("id", tfArgumentList[i].Parameter), log.Error(err))
-				return
-			}
+				sqlCmd := `SELECT * FROM parameter WHERE id=?`
+				paramArgs := []interface{}{tfArgumentList[i].Parameter}
+				var parameterList []*models.ParameterTable
+				err = x.SQL(sqlCmd, paramArgs...).Find(&parameterList)
+				if err != nil {
+					err = fmt.Errorf("Get Parameter data by id:%s error:%s", tfArgumentList[i].Parameter, err.Error())
+					log.Logger.Error("Get parameter data by id error", log.String("id", tfArgumentList[i].Parameter), log.Error(err))
+					return
+				}
 			*/
 			if tfArgumentList[i].IsNull == "Y" {
 				// read tf_file and check if the tfArgument has the same key and val
