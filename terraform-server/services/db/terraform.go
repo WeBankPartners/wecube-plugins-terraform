@@ -1187,6 +1187,12 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 			rowData["errorCode"] = "1"
 		}
 
+		// writeBack reqParam.id
+		if _, isIdExisted := rowData["id"]; !isIdExisted {
+			rowData["id"] = reqParam["id"]
+			log.Logger.Info(fmt.Sprintf("writeBack reqParam.id: %v for retOutput", rowData["id"]))
+		}
+
 		if _, ok := reqParam[models.ResourceDataDebug]; !ok {
 			// clear the workDirPath
 			for i := range curWorkDirPath {
@@ -4428,12 +4434,6 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("HandleTfstateOutPut error:%v", r)
-		}
-
-		// writeBack reqParam.id
-		if _, isIdExisted := retOutput["id"]; !isIdExisted {
-			retOutput["id"] = reqParam["id"]
-			log.Logger.Info(fmt.Sprintf("writeBack reqParam.id: %v for retOutput", retOutput["id"]))
 		}
 	}()
 
