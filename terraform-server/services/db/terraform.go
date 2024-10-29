@@ -55,6 +55,7 @@ func DelFile(filePath string) (err error) {
 	_, err = os.Stat(filePath)
 	if err != nil {
 		if os.IsNotExist(err) {
+			err = nil
 			return
 		} else {
 			err = fmt.Errorf("Os stat filePath: %s error: %s", filePath, err.Error())
@@ -4427,6 +4428,12 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("HandleTfstateOutPut error:%v", r)
+		}
+
+		// writeBack reqParam.id
+		if _, isIdExisted := retOutput["id"]; !isIdExisted {
+			retOutput["id"] = reqParam["id"]
+			log.Logger.Info(fmt.Sprintf("writeBack reqParam.id: %v for retOutput", retOutput["id"]))
 		}
 	}()
 
