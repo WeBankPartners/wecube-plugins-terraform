@@ -1422,7 +1422,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					} else if rootTfArgumentData.Parameter != "" {
 						convertedArgumentData, _, tmpErr := handleConvertParams(action, sortedSourceData, []*models.TfArgumentTable{rootTfArgumentData}, reqParam, providerData, regionData)
 						if tmpErr != nil {
-							err = fmt.Errorf("Handle convert params error:%s", err.Error())
+							err = fmt.Errorf("Handle convert params error:%s", tmpErr.Error())
 							log.Logger.Error("Handle convert params error", log.Error(err))
 							rowData["errorMessage"] = err.Error()
 							return
