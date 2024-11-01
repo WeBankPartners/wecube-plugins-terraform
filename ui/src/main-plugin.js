@@ -46,4 +46,4 @@ const implicitRoute = {
   }
 }
 window.addImplicitRoute(implicitRoute)
-window.addRoutes && window.addRoutes(router, 'dangerous')
+window.addRoutes && window.addRoutes(router, 'terraform')
