@@ -22,6 +22,7 @@ package: image
 	rm -rf plugin
 	cp build/register.xml ./
 	cp wiki/init.sql ./init.sql
+	cat wiki/terraform.sql >> ./init.sql
 	sed -i "s~{{PLUGIN_VERSION}}~$(version)~g" ./register.xml
 	sed -i "s~{{REPOSITORY}}~$(project_dir)~g" ./register.xml
 	docker save -o image.tar $(project_dir):$(version)
