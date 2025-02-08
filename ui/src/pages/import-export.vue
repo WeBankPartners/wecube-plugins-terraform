@@ -50,12 +50,10 @@
         </Card>
       </Col>
       <Col span="5" offset="1">
-        <Button
-          @click="exportData"
-          :disabled="plugin.length === 0 || currentProvider.length === 0 || isExport"
-          type="primary"
-          >{{ $t('t_export') }}</Button
-        >
+        <Button class="btn-upload" @click="exportData" :disabled="plugin.length === 0 || currentProvider.length === 0 || isExport">
+          <img src="@/styles/icon/DownloadOutlined.svg" class="upload-icon" />
+          {{ $t('t_export') }}
+        </Button>
         <Upload
           style="float:right"
           :action="uploadUrl"
@@ -67,7 +65,10 @@
           :on-success="uploadSucess"
           :on-error="uploadFailed"
         >
-          <Button type="success" icon="ios-cloud-upload-outline">{{ $t('t_import') }}</Button>
+          <Button class="btn-upload">
+            <img src="@/styles/icon/UploadOutlined.svg" class="upload-icon" />
+            {{ $t('t_import') }}
+          </Button>
         </Upload>
       </Col>
     </Row>
