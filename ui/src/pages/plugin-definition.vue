@@ -6,7 +6,7 @@
           $t('t_add')
         }}</Button>
         <Button class="btn-upload" :disabled="isExport" @click="exportPlugin" style="margin:0 1%;width: 40%;">
-          <img src="@/styles/icon/DownloadOutlined.svg" class="upload-icon" />
+          <img src="@/styles/icon/DownloadOutlined.png" class="upload-icon" />
           {{ $t('t_export') }}
         </Button>
         <div style="height: calc(100vh - 180px);overflow-y:auto;">

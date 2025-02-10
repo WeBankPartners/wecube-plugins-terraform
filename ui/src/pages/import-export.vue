@@ -51,7 +51,7 @@
       </Col>
       <Col span="5" offset="1">
         <Button class="btn-upload" @click="exportData" :disabled="plugin.length === 0 || currentProvider.length === 0 || isExport">
-          <img src="@/styles/icon/DownloadOutlined.svg" class="upload-icon" />
+          <img src="@/styles/icon/DownloadOutlined.png" class="upload-icon" />
           {{ $t('t_export') }}
         </Button>
         <Upload
@@ -66,7 +66,7 @@
           :on-error="uploadFailed"
         >
           <Button class="btn-upload">
-            <img src="@/styles/icon/UploadOutlined.svg" class="upload-icon" />
+            <img src="@/styles/icon/UploadOutlined.png" class="upload-icon" />
             {{ $t('t_import') }}
           </Button>
         </Upload>
