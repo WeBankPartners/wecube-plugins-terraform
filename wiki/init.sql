@@ -200,7 +200,7 @@ CREATE TABLE `template_value` (
 
 CREATE TABLE `tf_argument` (
   `id` varchar(32) NOT NULL,
-  `name` varchar(32) NOT NULL COMMENT '名称',
+  `name` varchar(64) NOT NULL COMMENT '名称',
   `source` varchar(32) NOT NULL,
   `parameter` varchar(32) DEFAULT NULL,
   `default_value` varchar(128) DEFAULT NULL COMMENT '默认值',

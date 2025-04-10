@@ -5,15 +5,10 @@
         <Button type="primary" @click="addPlugin" ghost size="small" style="margin-left:24px;width: 40%;">{{
           $t('t_add')
         }}</Button>
-        <Button
-          type="success"
-          :disabled="isExport"
-          @click="exportPlugin"
-          ghost
-          size="small"
-          style="margin:0 1%;width: 40%;"
-          >{{ $t('t_export') }}</Button
-        >
+        <Button class="btn-upload" :disabled="isExport" @click="exportPlugin" style="margin:0 1%;width: 40%;">
+          <img src="@/styles/icon/DownloadOutlined.png" class="upload-icon" />
+          {{ $t('t_export') }}
+        </Button>
         <div style="height: calc(100vh - 180px);overflow-y:auto;">
           <div style="">
             <Menu
@@ -27,19 +22,19 @@
                 <template slot="title">
                   <Icon type="md-grid" />
                   <span style="font-size: 15px;">{{ plugin.name }}</span>
-                  <div style="float:right;color: #2d8cf0;margin-right:30px">
+                  <div style="float:right;color: #5384FF;margin-right:30px">
                     <Tooltip :content="$t('t_add')" :delay="1000">
                       <Icon @click.stop.prevent="addInterface(plugin)" style="" type="md-add" />
                     </Tooltip>
                     <Tooltip :content="$t('t_add')" :delay="1000">
                       <Icon
                         @click.stop.prevent="editPlugin(plugin)"
-                        style="color: #19be6b;"
+                        style="color: #00CB91;"
                         type="ios-create-outline"
                       />
                     </Tooltip>
                     <Tooltip :content="$t('t_delete')" :delay="1000">
-                      <Icon @click.stop.prevent="deletePlugin(plugin)" style="color: #ed4014;" type="md-trash" />
+                      <Icon @click.stop.prevent="deletePlugin(plugin)" style="color: #FF4D4F;" type="md-trash" />
                     </Tooltip>
                   </div>
                 </template>
@@ -57,7 +52,7 @@
                     <Tooltip :content="$t('t_edit')" :delay="500">
                       <Icon
                         size="16"
-                        style="color: #19be6b;"
+                        style="color: #00CB91;"
                         @click.stop.prevent="editInterface(interfaceSingle)"
                         type="ios-create-outline"
                       />
@@ -65,7 +60,7 @@
                     <Tooltip :content="$t('t_delete')" :delay="500">
                       <Icon
                         size="16"
-                        style="color: #ed4014;"
+                        style="color: #FF4D4F;"
                         @click.stop.prevent="deleteInterface(interfaceSingle, plugin)"
                         type="ios-trash-outline"
                       />
@@ -814,7 +809,7 @@ export default {
     right: 0;
   }
   .ivu-menu-vertical .ivu-menu-opened > * > .ivu-menu-submenu-title-icon {
-    color: #2d8cf0;
+    color: #5384FF;
   }
   .ivu-menu-opened {
     .ivu-menu-submenu-title {

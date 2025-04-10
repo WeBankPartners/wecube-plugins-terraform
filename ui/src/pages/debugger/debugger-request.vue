@@ -38,7 +38,7 @@
           <Input style="width:845px" v-model="requestBody" type="textarea" :rows="6"></Input>
           <div style="height: 60px;width:100px;display:inline-block;">
             <Tooltip :content="$t('t_format_parameter')" :delay="1000">
-              <Icon @click="formatRequestBody" style="color: #19be6b;cursor: pointer" size="18" type="md-apps" />
+              <Icon @click="formatRequestBody" style="color: #00CB91;cursor: pointer" size="18" type="md-apps" />
             </Tooltip>
             <!-- @click.stop.prevent="editPlugin(plugin)" -->
             <Button

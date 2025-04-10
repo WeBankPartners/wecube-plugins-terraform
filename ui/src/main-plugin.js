@@ -1,9 +1,10 @@
 import 'regenerator-runtime/runtime'
 import router from './router-plugin'
-import 'view-design/dist/styles/iview.css'
-import './locale/i18n'
-import zhCN from '@/locale/i18n/zh-CN.json'
+// import 'view-design/dist/styles/iview.css'
 import enUS from '@/locale/i18n/en-US.json'
+import zhCN from '@/locale/i18n/zh-CN.json'
+import './locale/i18n'
+import './styles/index.less'
 
 window.locale('zh-CN', zhCN)
 window.locale('en-US', enUS)

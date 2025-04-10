@@ -1,12 +1,13 @@
 import 'regenerator-runtime/runtime'
+import ViewUI from 'view-design'
 import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
-import ViewUI from 'view-design'
-import 'view-design/dist/styles/iview.css'
-import VueI18n from 'vue-i18n'
+// import 'view-design/dist/styles/iview.css'
 import locale from 'view-design/dist/locale/en-US'
+import VueI18n from 'vue-i18n'
 import './locale/i18n'
+import './styles/index.less'
 
 Vue.config.productionTip = false
 

@@ -63,7 +63,7 @@
               type="success"
               ghost
               size="small"
-              style="color: #19be6b;"
+              style="color: #00CB91;"
               icon="ios-add"
             ></Button>
           </div>
@@ -149,7 +149,7 @@
                   type="info"
                   ghost
                   size="small"
-                  style="color: #19be6b;"
+                  style="color: #00CB91;"
                   icon="ios-create-outline"
                 ></Button>
                 <Button
@@ -157,7 +157,7 @@
                   type="error"
                   ghost
                   size="small"
-                  style="color: #ed4014;"
+                  style="color: #FF4D4F;"
                   icon="md-trash"
                 ></Button>
               </div>
@@ -174,7 +174,7 @@
                     type="success"
                     ghost
                     size="small"
-                    style="color: #19be6b;"
+                    style="color: #00CB91;"
                     icon="ios-add"
                   ></Button>
                 </div>
@@ -193,7 +193,7 @@
                     type="success"
                     ghost
                     size="small"
-                    style="color: #19be6b;"
+                    style="color: #00CB91;"
                     icon="ios-add"
                   ></Button>
                 </div>
