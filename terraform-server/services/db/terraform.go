@@ -110,7 +110,9 @@ func DelDir(dirPath string) (err error) {
 	dir, err := ioutil.ReadDir(dirPath)
 	for _, d := range dir {
 		tmpPath := path.Join([]string{dirPath, d.Name()}...)
-		os.RemoveAll(tmpPath)
+		if models.Config.Log.Level != "debug" {
+			os.RemoveAll(tmpPath)
+		}
 	}
 	return
 }
