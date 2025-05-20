@@ -2177,6 +2177,23 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					// continue
 				}
 
+				// apply完之后重新import下拿过tfstate文件
+				resourceAssetId, getTFErr := getTFStateAssetId(workDirPath, sortedSourceData.AssetIdAttribute)
+				if getTFErr != nil {
+					err = fmt.Errorf("Do Get TerraformApply AssetId error:%s ", err.Error())
+					log.Logger.Error("Do Get TerraformApply AssetId error", log.Error(err))
+					rowData["errorMessage"] = err.Error()
+					return
+				}
+				os.Remove(workDirPath + "/terraform.tfstate")
+				err = TerraformImport(workDirPath, sortedSourceData.Name+"."+resourceId, resourceAssetId)
+				if err != nil {
+					err = fmt.Errorf("Do TerraformApply Import new tfstate file error:%s ", err.Error())
+					log.Logger.Error("Do TerraformApply Import new tfstate file error", log.Error(err))
+					rowData["errorMessage"] = err.Error()
+					return
+				}
+
 				if _, ok := reqParam[models.ResourceDataDebug]; ok {
 					tfstateFilePath := workDirPath + "/terraform.tfstate"
 					tfstateFileData, err := ReadFile(tfstateFilePath)
@@ -5030,6 +5047,34 @@ func GenTerraformConfigFile(dirPath string, providerData *models.ProviderTable) 
 		err = fmt.Errorf("Gen providerFile: %s error: %s", providerFilePath, err.Error())
 		log.Logger.Error("Gen providerFile error", log.String("providerFilePath", providerFilePath), log.Error(err))
 		return
+	}
+	return
+}
+
+func getTFStateAssetId(workDirPath string, idAttrName string) (resourceDataResourceAssetId string, err error) {
+	// Read terraform.tfstate 文件
+	var tfstateFilePath string
+	tfstateFilePath = workDirPath + "/terraform.tfstate"
+	tfstateFileData, err := ReadFile(tfstateFilePath)
+	if err != nil {
+		err = fmt.Errorf("Read tfstate file error:%s", err.Error())
+		log.Logger.Error("Read tfstate file error", log.Error(err))
+		return
+	}
+	var unmarshalTfstateFileData models.TfstateFileData
+	err = json.Unmarshal(tfstateFileData, &unmarshalTfstateFileData)
+	if err != nil {
+		err = fmt.Errorf("Unmarshal tfstate file data error:%s", err.Error())
+		log.Logger.Error("Unmarshal tfstate file data error", log.Error(err))
+		return
+	}
+	var tfstateFileAttributes map[string]interface{}
+	tfstateFileAttributes = unmarshalTfstateFileData.Resources[0].Instances[0].Attributes
+	if v, b := tfstateFileAttributes[idAttrName]; b {
+		resourceDataResourceAssetId = v.(string)
+	}
+	if resourceDataResourceAssetId == "" {
+		err = fmt.Errorf("resource id is empty")
 	}
 	return
 }
