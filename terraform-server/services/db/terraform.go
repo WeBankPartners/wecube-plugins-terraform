@@ -2178,21 +2178,21 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 				}
 
 				// apply完之后重新import下拿过tfstate文件
-				resourceAssetId, getTFErr := getTFStateAssetId(workDirPath, sortedSourceData.AssetIdAttribute)
-				if getTFErr != nil {
-					err = fmt.Errorf("Do Get TerraformApply AssetId error:%s ", err.Error())
-					log.Logger.Error("Do Get TerraformApply AssetId error", log.Error(err))
-					rowData["errorMessage"] = err.Error()
-					return
-				}
-				os.Remove(workDirPath + "/terraform.tfstate")
-				err = TerraformImport(workDirPath, sortedSourceData.Name+"."+resourceId, resourceAssetId)
-				if err != nil {
-					err = fmt.Errorf("Do TerraformApply Import new tfstate file error:%s ", err.Error())
-					log.Logger.Error("Do TerraformApply Import new tfstate file error", log.Error(err))
-					rowData["errorMessage"] = err.Error()
-					return
-				}
+				// resourceAssetId, getTFErr := getTFStateAssetId(workDirPath, sortedSourceData.AssetIdAttribute)
+				// if getTFErr != nil {
+				// 	err = fmt.Errorf("Do Get TerraformApply AssetId error:%s ", err.Error())
+				// 	log.Logger.Error("Do Get TerraformApply AssetId error", log.Error(err))
+				// 	rowData["errorMessage"] = err.Error()
+				// 	return
+				// }
+				// os.Remove(workDirPath + "/terraform.tfstate")
+				// err = TerraformImport(workDirPath, sortedSourceData.Name+"."+resourceId, resourceAssetId)
+				// if err != nil {
+				// 	err = fmt.Errorf("Do TerraformApply Import new tfstate file error:%s ", err.Error())
+				// 	log.Logger.Error("Do TerraformApply Import new tfstate file error", log.Error(err))
+				// 	rowData["errorMessage"] = err.Error()
+				// 	return
+				// }
 
 				if _, ok := reqParam[models.ResourceDataDebug]; ok {
 					tfstateFilePath := workDirPath + "/terraform.tfstate"
