@@ -4984,8 +4984,8 @@ func compareObject(first, second map[string]interface{}) (result map[string]inte
 		}
 		if tmpSecV != tmpFirV {
 			if strings.HasPrefix(tmpSecV, "map") || strings.HasPrefix(tmpSecV, "[map") {
-				firtstFlatMap := FlattenJSON(first)
-				secondFlatMap := FlattenJSON(second)
+				firtstFlatMap := FlattenJSON(first[k])
+				secondFlatMap := FlattenJSON(v)
 				firBytes, _ := json.Marshal(firtstFlatMap)
 				secBytes, _ := json.Marshal(secondFlatMap)
 				if string(firBytes) != string(secBytes) {
@@ -5002,7 +5002,7 @@ func compareObject(first, second map[string]interface{}) (result map[string]inte
 	return
 }
 
-func FlattenJSON(input map[string]interface{}) map[string]string {
+func FlattenJSON(input interface{}) map[string]string {
 	flattened := make(map[string]string)
 	flattenRecursive(input, "", flattened)
 	return flattened
@@ -5031,6 +5031,9 @@ func flattenRecursive(data interface{}, prefix string, result map[string]string)
 		}
 		for i, val := range v {
 			newPrefix := fmt.Sprintf("%s[%d]", prefix, i)
+			if prefix == "" {
+				newPrefix = fmt.Sprintf("[%d]", i)
+			}
 			flattenRecursive(val, newPrefix, result)
 		}
 	case string:
@@ -5038,15 +5041,16 @@ func flattenRecursive(data interface{}, prefix string, result map[string]string)
 	case bool:
 		result[prefix] = strconv.FormatBool(v)
 	case float64: // JSON numbers are unmarshaled as float64
-		// Check if it's an integer by comparing to its integer representation
 		if float64(int64(v)) == v {
 			result[prefix] = strconv.FormatInt(int64(v), 10)
 		} else {
 			result[prefix] = strconv.FormatFloat(v, 'f', -1, 64)
 		}
+	case int, int8, int16, int32, int64:
+		result[prefix] = fmt.Sprintf("%d", v)
+	case float32: // Handle float32 if it somehow appears
+		result[prefix] = strconv.FormatFloat(float64(v), 'f', -1, 32)
 	default:
-		// Handle any other unexpected types, though map[string]interface{}
-		// usually covers most JSON primitives.
 		result[prefix] = fmt.Sprintf("%v", v)
 	}
 }
