@@ -4983,12 +4983,72 @@ func compareObject(first, second map[string]interface{}) (result map[string]inte
 			}
 		}
 		if tmpSecV != tmpFirV {
-			diff = 1
-			message += fmt.Sprintf("Key:%s is diff with record:%s, real:%s \n", k, tmpFirV, tmpSecV)
+			if strings.HasPrefix(tmpSecV, "map") || strings.HasPrefix(tmpSecV, "[map") {
+				firtstFlatMap := FlattenJSON(first)
+				secondFlatMap := FlattenJSON(second)
+				firBytes, _ := json.Marshal(firtstFlatMap)
+				secBytes, _ := json.Marshal(secondFlatMap)
+				if string(firBytes) != string(secBytes) {
+					diff = 1
+					message += fmt.Sprintf("Key:%s is diff with record:%s, real:%s \n", k, tmpFirV, tmpSecV)
+				}
+			} else {
+				diff = 1
+				message += fmt.Sprintf("Key:%s is diff with record:%s, real:%s \n", k, tmpFirV, tmpSecV)
+			}
 		}
 	}
 	message = strings.ReplaceAll(message, "<nil>", "null")
 	return
+}
+
+func FlattenJSON(input map[string]interface{}) map[string]string {
+	flattened := make(map[string]string)
+	flattenRecursive(input, "", flattened)
+	return flattened
+}
+
+func flattenRecursive(data interface{}, prefix string, result map[string]string) {
+	if data == nil {
+		return // Ignore null values
+	}
+
+	switch v := data.(type) {
+	case map[string]interface{}:
+		if len(v) == 0 {
+			return // Ignore empty objects
+		}
+		for key, val := range v {
+			newPrefix := key
+			if prefix != "" {
+				newPrefix = prefix + "." + key
+			}
+			flattenRecursive(val, newPrefix, result)
+		}
+	case []interface{}:
+		if len(v) == 0 {
+			return // Ignore empty arrays
+		}
+		for i, val := range v {
+			newPrefix := fmt.Sprintf("%s[%d]", prefix, i)
+			flattenRecursive(val, newPrefix, result)
+		}
+	case string:
+		result[prefix] = v
+	case bool:
+		result[prefix] = strconv.FormatBool(v)
+	case float64: // JSON numbers are unmarshaled as float64
+		// Check if it's an integer by comparing to its integer representation
+		if float64(int64(v)) == v {
+			result[prefix] = strconv.FormatInt(int64(v), 10)
+		} else {
+			result[prefix] = strconv.FormatFloat(v, 'f', -1, 64)
+		}
+	default:
+		// Handle any other unexpected types, though map[string]interface{}
+		// usually covers most JSON primitives.
+		result[prefix] = fmt.Sprintf("%v", v)
+	}
 }
 
 func getFileAttrContent(filename string) models.TfFileAttrFetchResult {
