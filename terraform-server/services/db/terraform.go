@@ -4990,7 +4990,7 @@ func compareObject(first, second map[string]interface{}) (result map[string]inte
 				secBytes, _ := json.Marshal(secondFlatMap)
 				if string(firBytes) != string(secBytes) {
 					diff = 1
-					message += fmt.Sprintf("Key:%s is diff with record:%s, real:%s \n", k, tmpFirV, tmpSecV)
+					message += fmt.Sprintf("Key:%s is diff with record:%s, real:%s and firstData:%s secondData:%s \n", k, tmpFirV, tmpSecV, string(firBytes), string(secBytes))
 				}
 			} else {
 				diff = 1
