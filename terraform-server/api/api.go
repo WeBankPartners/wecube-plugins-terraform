@@ -113,6 +113,7 @@ func init() {
 		&handlerFuncObj{Url: "/terraform_debug/:plugin/:action", Method: "POST", HandlerFunc: resource_data.TerraformOperationDebug, LogOperation: true},
 
 		// &handlerFuncObj{Url: "/terraform/:plugin/:action", Method: "POST", HandlerFunc: resource_data.TerraformOperation, LogOperation: true},
+		&handlerFuncObj{Url: "/resource_datas/resources", Method: "GET", HandlerFunc: resource_data.ResourceTypeList},
 	)
 
 	// export and import

@@ -8,23 +8,6 @@ import (
 	"time"
 )
 
-/*
-func ResourceDataList(paramsMap map[string]interface{}) (rowData []*models.ResourceDataTable, err error) {
-	sqlCmd := "SELECT * FROM resource_data WHERE 1=1"
-	paramArgs := []interface{}{}
-	for k, v := range paramsMap {
-		sqlCmd += " AND " + k + "=?"
-		paramArgs = append(paramArgs, v)
-	}
-	sqlCmd += " ORDER BY create_time DESC"
-	err = x.SQL(sqlCmd, paramArgs...).Find(&rowData)
-	if err != nil {
-		log.Logger.Error("Get resource_data list error", log.Error(err))
-	}
-	return
-}
-*/
-
 func ResourceDataList(ids string) (rowData []*models.ResourceDataQuery, err error) {
 	sqlCmd := "SELECT t1.*,t2.name AS resource_title,t3.id AS provider_id,t3.name AS provider_name,t3.version AS provider_version,t3.secret_id_attr_name " +
 		"AS provider_secret_id_attr_name,t3.secret_key_attr_name AS provider_secret_key_attr_name,t3.region_attr_name AS provider_region_attr_name,t3.Initialized " +
@@ -34,6 +17,33 @@ func ResourceDataList(ids string) (rowData []*models.ResourceDataQuery, err erro
 	}
 	sqlCmd += " ORDER BY t1.id DESC"
 	err = x.SQL(sqlCmd).Find(&rowData)
+	if err != nil {
+		log.Logger.Error("Get resource_data list error", log.Error(err))
+	}
+	return
+}
+
+func ResourceDataListWithPage(paramsMap map[string]interface{}, page, pageSize int) (rowData []*models.ResourceDataQuery, total int, err error) {
+	sqlCmd := "SELECT t1.*,t2.name AS resource_title,t3.id AS provider_id,t3.name AS provider_name,t3.version AS provider_version,t3.secret_id_attr_name " +
+		"AS provider_secret_id_attr_name,t3.secret_key_attr_name AS provider_secret_key_attr_name,t3.region_attr_name AS provider_region_attr_name,t3.Initialized " +
+		"AS provider_initialized,t3.name_space AS provider_namespace FROM resource_data t1 LEFT JOIN source t2 ON t1.resource=t2.id LEFT JOIN provider t3 ON t2.provider=t3.id WHERE 1=1"
+	countCmd := "SELECT count(1) FROM resource_data t1 LEFT JOIN source t2 ON t1.resource=t2.id LEFT JOIN provider t3 ON t2.provider=t3.id WHERE 1=1"
+	var paramArgs []interface{}
+	var countArgs []interface{}
+	for k, v := range paramsMap {
+		sqlCmd += " AND t1." + k + "=?"
+		countCmd += " AND t1." + k + "=?"
+		paramArgs = append(paramArgs, v)
+		countArgs = append(countArgs, v)
+	}
+	sqlCmd += " ORDER BY t1.id DESC LIMIT ? OFFSET ?"
+	paramArgs = append(paramArgs, pageSize, (page-1)*pageSize)
+	_, err = x.SQL(countCmd, countArgs...).Get(&total)
+	if err != nil {
+		log.Logger.Error("Get resource_data count error", log.Error(err))
+		return
+	}
+	err = x.SQL(sqlCmd, paramArgs...).Find(&rowData)
 	if err != nil {
 		log.Logger.Error("Get resource_data list error", log.Error(err))
 	}
@@ -117,6 +127,15 @@ func ResourceDataDebugList(ids string) (rowData []*models.ResourceDataQuery, err
 	err = x.SQL(sqlCmd).Find(&rowData)
 	if err != nil {
 		log.Logger.Error("Get resource_data_debug list error", log.Error(err))
+	}
+	return
+}
+
+func GetAllResourceTypes() (resourceList []string, err error) {
+	sqlCmd := "SELECT DISTINCT resource FROM resource_data"
+	err = x.SQL(sqlCmd).Find(&resourceList)
+	if err != nil {
+		log.Logger.Error("Get all resource types error", log.Error(err))
 	}
 	return
 }
