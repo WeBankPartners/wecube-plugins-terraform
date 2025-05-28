@@ -146,7 +146,7 @@ export default {
       tableData: [],
       tableLoading: false,
       pageable: {
-        pageSize: 10,
+        pageSize: 20,
         startIndex: 1,
         current: 1,
         total: 0
@@ -160,7 +160,7 @@ export default {
     }
   },
   mounted () {
-    this.MODALHEIGHT = document.body.scrollHeight - 200
+    this.MODALHEIGHT = document.body.scrollHeight - 280
     this.getInstanceData()
     this.getResourceList()
   },
