@@ -14,7 +14,6 @@
           {{ item.name }}
         </Option>
       </Select>
-      <!-- <Input v-model="serachParams.resource" :placeholder="$t('t_resource')" class="search-input" @on-change="handleSearch" clearable /> -->
       <Input
         v-model="serachParams.resource_id"
         :placeholder="$t('t_resource_id')"
@@ -23,7 +22,7 @@
         clearable
       />
       <Input
-        v-model="serachParams.resource_assets_id"
+        v-model="serachParams.resource_asset_id"
         :placeholder="$t('t_resource_asset_id')"
         class="search-input"
         @on-change="handleSearch"
@@ -155,7 +154,7 @@ export default {
       serachParams: {
         resource: '',
         resource_id: '',
-        resource_assets_id: ''
+        resource_asset_id: ''
       },
       uploadUrl: ''
     }
@@ -183,7 +182,7 @@ export default {
       this.serachParams = {
         resource: '',
         resource_id: '',
-        resource_assets_id: ''
+        resource_asset_id: ''
       }
       this.handleSearch()
     },
@@ -192,7 +191,7 @@ export default {
         params: {
           resource: this.serachParams.resource,
           resource_id: this.serachParams.resource_id,
-          resource_assets_id: this.serachParams.resource_assets_id,
+          resource_asset_id: this.serachParams.resource_asset_id,
           page: this.pageable.current,
           pageSize: this.pageable.pageSize
         }
