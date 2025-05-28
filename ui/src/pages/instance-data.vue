@@ -15,15 +15,15 @@
         </Option>
       </Select>
       <Input
-        v-model="serachParams.resource_id"
-        :placeholder="$t('t_resource_id')"
+        v-model="serachParams.resource_asset_id"
+        :placeholder="$t('t_resource_asset_id')"
         class="search-input"
         @on-change="handleSearch"
         clearable
       />
       <Input
-        v-model="serachParams.resource_asset_id"
-        :placeholder="$t('t_resource_asset_id')"
+        v-model="serachParams.resource_id"
+        :placeholder="$t('t_resource_id')"
         class="search-input"
         @on-change="handleSearch"
         clearable
