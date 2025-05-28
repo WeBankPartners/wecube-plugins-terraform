@@ -8,6 +8,15 @@ import (
 	"time"
 )
 
+var resourceDataFieldMap = map[string]struct {
+	Column    string
+	QueryType string // "eq" 或 "like"
+}{
+	"resource":          {"t1.resource", "eq"},
+	"resource_id":       {"t1.resource_id", "like"},
+	"resource_asset_id": {"t1.resource_asset_id", "like"},
+}
+
 func ResourceDataList(ids string) (rowData []*models.ResourceDataQuery, err error) {
 	sqlCmd := "SELECT t1.*,t2.name AS resource_title,t3.id AS provider_id,t3.name AS provider_name,t3.version AS provider_version,t3.secret_id_attr_name " +
 		"AS provider_secret_id_attr_name,t3.secret_key_attr_name AS provider_secret_key_attr_name,t3.region_attr_name AS provider_region_attr_name,t3.Initialized " +
@@ -31,10 +40,19 @@ func ResourceDataListWithPage(paramsMap map[string]interface{}, page, pageSize i
 	var paramArgs []interface{}
 	var countArgs []interface{}
 	for k, v := range paramsMap {
-		sqlCmd += " AND t1." + k + "=?"
-		countCmd += " AND t1." + k + "=?"
-		paramArgs = append(paramArgs, v)
-		countArgs = append(countArgs, v)
+		if field, ok := resourceDataFieldMap[k]; ok {
+			if field.QueryType == "eq" {
+				sqlCmd += " AND " + field.Column + "=?"
+				countCmd += " AND " + field.Column + "=?"
+				paramArgs = append(paramArgs, v)
+				countArgs = append(countArgs, v)
+			} else if field.QueryType == "like" {
+				sqlCmd += " AND " + field.Column + " LIKE ?"
+				countCmd += " AND " + field.Column + " LIKE ?"
+				paramArgs = append(paramArgs, "%"+fmt.Sprint(v)+"%")
+				countArgs = append(countArgs, "%"+fmt.Sprint(v)+"%")
+			}
+		}
 	}
 	sqlCmd += " ORDER BY t1.id DESC LIMIT ? OFFSET ?"
 	paramArgs = append(paramArgs, pageSize, (page-1)*pageSize)
@@ -131,8 +149,8 @@ func ResourceDataDebugList(ids string) (rowData []*models.ResourceDataQuery, err
 	return
 }
 
-func GetAllResourceTypes() (resourceList []string, err error) {
-	sqlCmd := "SELECT DISTINCT resource FROM resource_data"
+func GetAllResourceTypes() (resourceList []*models.SourceTable, err error) {
+	sqlCmd := "SELECT id, name FROM source"
 	err = x.SQL(sqlCmd).Find(&resourceList)
 	if err != nil {
 		log.Logger.Error("Get all resource types error", log.Error(err))

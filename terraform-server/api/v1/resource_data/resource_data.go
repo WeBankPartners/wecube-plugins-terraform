@@ -32,22 +32,6 @@ func ResourceDataBatchCreate(c *gin.Context) {
 	}
 }
 
-/*
-func ResourceDataList(c *gin.Context) {
-	paramsMap := make(map[string]interface{})
-	rowData, err := db.ResourceDataList(paramsMap)
-	if err != nil {
-		middleware.ReturnServerHandleError(c, err)
-	} else {
-		if len(rowData) == 0 {
-			rowData = []*models.ResourceDataTable{}
-		}
-		middleware.ReturnData(c, rowData)
-	}
-	return
-}
-*/
-
 func ResourceDataList(c *gin.Context) {
 	resource := c.Query("resource")
 	resourceId := c.Query("resource_id")
@@ -524,5 +508,20 @@ func ResourceTypeList(c *gin.Context) {
 		middleware.ReturnServerHandleError(c, err)
 		return
 	}
-	middleware.ReturnData(c, resourceList)
+
+	// 去重 name 字段
+	nameMap := make(map[string]bool)
+	result := make([]map[string]string, 0)
+	for _, r := range resourceList {
+		if _, exists := nameMap[r.Name]; exists {
+			continue
+		}
+		nameMap[r.Name] = true
+		result = append(result, map[string]string{
+			"id":   r.Id,
+			"name": r.Name,
+		})
+	}
+
+	middleware.ReturnData(c, result)
 }
