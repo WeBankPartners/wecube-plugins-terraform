@@ -267,5 +267,18 @@ CREATE TABLE `tfstate_attribute` (
   CONSTRAINT `tfstate_attribute_source` FOREIGN KEY (`source`) REFERENCES `source` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='记录 Terraform action 输出的参数字段';
 
+#@v0.5.4-begin@;
+ALTER TABLE provider
+  ADD COLUMN client_id_attr_name VARCHAR(32) COMMENT '应用ID属性',
+  ADD COLUMN client_secret_attr_name VARCHAR(32) COMMENT '应用密钥属性',
+  ADD COLUMN tenant_id_attr_name VARCHAR(32) COMMENT '租户ID属性',
+  ADD COLUMN subscription_id_attr_name VARCHAR(32) COMMENT '订阅ID属性';
+
+ALTER TABLE provider_info
+  ADD COLUMN client_id VARCHAR(512) COMMENT '应用ID',
+  ADD COLUMN client_secret VARCHAR(512) COMMENT '应用密钥',
+  ADD COLUMN tenant_id VARCHAR(512) COMMENT '租户ID',
+  ADD COLUMN subscription_id VARCHAR(512) COMMENT '订阅ID';
+#@v0.5.4-end@;
 
 SET FOREIGN_KEY_CHECKS=1;

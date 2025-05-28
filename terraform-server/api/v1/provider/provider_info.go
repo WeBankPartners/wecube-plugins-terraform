@@ -46,6 +46,15 @@ func ProviderInfoBatchCreate(c *gin.Context) {
 		}
 		param[i].SecretId = enCodeSecretId
 		param[i].SecretKey = enCodeSecretKey
+		// Azure client_secret 加密
+		if param[i].ClientSecret != "" {
+			enCodeClientSecret, encodeErr := cipher.AesEnPasswordByGuid(models.PGuid, models.Config.Auth.PasswordSeed, param[i].ClientSecret, "")
+			if encodeErr != nil {
+				err = fmt.Errorf("Try to encode clientSecret fail,%s ", encodeErr.Error())
+				return
+			}
+			param[i].ClientSecret = enCodeClientSecret
+		}
 	}
 	rowData, err := db.ProviderInfoBatchCreate(user, param)
 	if err != nil {
@@ -93,6 +102,15 @@ func ProviderInfoBatchUpdate(c *gin.Context) {
 		}
 		param[i].SecretId = enCodeSecretId
 		param[i].SecretKey = enCodeSecretKey
+		// Azure client_secret 加密
+		if param[i].ClientSecret != "" {
+			enCodeClientSecret, encodeErr := cipher.AesEnPasswordByGuid(models.PGuid, models.Config.Auth.PasswordSeed, param[i].ClientSecret, "")
+			if encodeErr != nil {
+				err = fmt.Errorf("Try to encode clientSecret fail,%s ", encodeErr.Error())
+				return
+			}
+			param[i].ClientSecret = enCodeClientSecret
+		}
 	}
 	err = db.ProviderInfoBatchUpdate(user, param)
 	if err != nil {
