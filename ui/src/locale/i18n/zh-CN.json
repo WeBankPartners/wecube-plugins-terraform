@@ -72,5 +72,6 @@
   "t_online_download": "下载",
   "t_local_upload": "上传",
   "t_online_download_tip": "连网场景，下载官方提供的provider文件",
-  "t_local_upload_tip": "离线场景，上传本地制做的provider文件"
+  "t_local_upload_tip": "离线场景，上传本地制做的provider文件",
+  "t_reset": "重置"
 }

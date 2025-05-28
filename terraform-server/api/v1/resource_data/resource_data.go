@@ -32,37 +32,46 @@ func ResourceDataBatchCreate(c *gin.Context) {
 	}
 }
 
-/*
 func ResourceDataList(c *gin.Context) {
-	paramsMap := make(map[string]interface{})
-	rowData, err := db.ResourceDataList(paramsMap)
-	if err != nil {
-		middleware.ReturnServerHandleError(c, err)
-	} else {
-		if len(rowData) == 0 {
-			rowData = []*models.ResourceDataTable{}
-		}
-		middleware.ReturnData(c, rowData)
+	resource := c.Query("resource")
+	resourceId := c.Query("resource_id")
+	resourceAssetId := c.Query("resource_asset_id")
+	pageStr := c.DefaultQuery("page", "1")
+	pageSizeStr := c.DefaultQuery("pageSize", "20")
+	page, _ := strconv.Atoi(pageStr)
+	pageSize, _ := strconv.Atoi(pageSizeStr)
+	if page < 1 {
+		page = 1
 	}
-	return
-}
-*/
+	if pageSize < 1 {
+		pageSize = 20
+	}
 
-func ResourceDataList(c *gin.Context) {
-	ids := c.Query("ids")
-	trimIds := strings.Trim(ids, ",")
-	queryIds := strings.Split(trimIds, ",")
-	queryIdsStr := strings.Join(queryIds, "','")
-	rowData, err := db.ResourceDataList(queryIdsStr)
+	paramsMap := map[string]interface{}{}
+	if resource != "" {
+		paramsMap["resource"] = resource
+	}
+	if resourceId != "" {
+		paramsMap["resource_id"] = resourceId
+	}
+	if resourceAssetId != "" {
+		paramsMap["resource_asset_id"] = resourceAssetId
+	}
+
+	rowData, total, err := db.ResourceDataListWithPage(paramsMap, page, pageSize)
 	if err != nil {
 		middleware.ReturnServerHandleError(c, err)
-	} else {
-		if len(rowData) == 0 {
-			rowData = []*models.ResourceDataQuery{}
-		}
-		middleware.ReturnData(c, rowData)
+		return
 	}
-	return
+	if len(rowData) == 0 {
+		rowData = []*models.ResourceDataQuery{}
+	}
+	pageInfo := models.PageInfo{
+		StartIndex: (page - 1) * pageSize,
+		PageSize:   pageSize,
+		TotalRows:  total,
+	}
+	middleware.ReturnPageData(c, pageInfo, rowData)
 }
 
 func ResourceDataBatchDelete(c *gin.Context) {
@@ -491,4 +500,28 @@ func operationDebugConsumer(ch chan int, done chan bool, request_param map[strin
 	}
 	done <- true
 	return
+}
+
+func ResourceTypeList(c *gin.Context) {
+	resourceList, err := db.GetAllResourceTypes()
+	if err != nil {
+		middleware.ReturnServerHandleError(c, err)
+		return
+	}
+
+	// 去重 name 字段
+	nameMap := make(map[string]bool)
+	result := make([]map[string]string, 0)
+	for _, r := range resourceList {
+		if _, exists := nameMap[r.Name]; exists {
+			continue
+		}
+		nameMap[r.Name] = true
+		result = append(result, map[string]string{
+			"id":   r.Id,
+			"name": r.Name,
+		})
+	}
+
+	middleware.ReturnData(c, result)
 }
