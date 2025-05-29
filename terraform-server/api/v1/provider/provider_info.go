@@ -1,11 +1,9 @@
 package provider
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/api/middleware"
-	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/common-lib/cipher"
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/models"
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/services/db"
 	"github.com/gin-gonic/gin"
@@ -33,29 +31,6 @@ func ProviderInfoBatchCreate(c *gin.Context) {
 		return
 	}
 	user := middleware.GetRequestUser(c)
-	for i := range param {
-		enCodeSecretId, encodeErr := cipher.AesEnPasswordByGuid(models.PGuid, models.Config.Auth.PasswordSeed, param[i].SecretId, "")
-		if encodeErr != nil {
-			err = fmt.Errorf("Try to encode secretId fail,%s ", encodeErr.Error())
-			return
-		}
-		enCodeSecretKey, encodeErr := cipher.AesEnPasswordByGuid(models.PGuid, models.Config.Auth.PasswordSeed, param[i].SecretKey, "")
-		if encodeErr != nil {
-			err = fmt.Errorf("Try to encode secretKey fail,%s ", encodeErr.Error())
-			return
-		}
-		param[i].SecretId = enCodeSecretId
-		param[i].SecretKey = enCodeSecretKey
-		// Azure client_secret 加密
-		if param[i].ClientSecret != "" {
-			enCodeClientSecret, encodeErr := cipher.AesEnPasswordByGuid(models.PGuid, models.Config.Auth.PasswordSeed, param[i].ClientSecret, "")
-			if encodeErr != nil {
-				err = fmt.Errorf("Try to encode clientSecret fail,%s ", encodeErr.Error())
-				return
-			}
-			param[i].ClientSecret = enCodeClientSecret
-		}
-	}
 	rowData, err := db.ProviderInfoBatchCreate(user, param)
 	if err != nil {
 		middleware.ReturnServerHandleError(c, err)
@@ -89,29 +64,6 @@ func ProviderInfoBatchUpdate(c *gin.Context) {
 		return
 	}
 	user := middleware.GetRequestUser(c)
-	for i := range param {
-		enCodeSecretId, encodeErr := cipher.AesEnPasswordByGuid(models.PGuid, models.Config.Auth.PasswordSeed, param[i].SecretId, "")
-		if encodeErr != nil {
-			err = fmt.Errorf("Try to encode secretId fail,%s ", encodeErr.Error())
-			return
-		}
-		enCodeSecretKey, encodeErr := cipher.AesEnPasswordByGuid(models.PGuid, models.Config.Auth.PasswordSeed, param[i].SecretKey, "")
-		if encodeErr != nil {
-			err = fmt.Errorf("Try to encode secretKey fail,%s ", encodeErr.Error())
-			return
-		}
-		param[i].SecretId = enCodeSecretId
-		param[i].SecretKey = enCodeSecretKey
-		// Azure client_secret 加密
-		if param[i].ClientSecret != "" {
-			enCodeClientSecret, encodeErr := cipher.AesEnPasswordByGuid(models.PGuid, models.Config.Auth.PasswordSeed, param[i].ClientSecret, "")
-			if encodeErr != nil {
-				err = fmt.Errorf("Try to encode clientSecret fail,%s ", encodeErr.Error())
-				return
-			}
-			param[i].ClientSecret = enCodeClientSecret
-		}
-	}
 	err = db.ProviderInfoBatchUpdate(user, param)
 	if err != nil {
 		middleware.ReturnServerHandleError(c, err)

@@ -6,8 +6,6 @@ type ProviderInfoTable struct {
 	Provider       string `json:"provider" xorm:"provider"`
 	SecretId       string `json:"secretId" xorm:"secret_id"`
 	SecretKey      string `json:"secretKey" xorm:"secret_key"`
-	ClientId       string `json:"clientId" xorm:"client_id"`
-	ClientSecret   string `json:"clientSecret" xorm:"client_secret"`
 	TenantId       string `json:"tenantId" xorm:"tenant_id"`
 	SubscriptionId string `json:"subscriptionId" xorm:"subscription_id"`
 	CreateTime     string `json:"createTime" xorm:"create_time"`
@@ -23,8 +21,6 @@ type ProviderInfoQuery struct {
 	ProviderTitle  string `json:"providerTitle" xorm:"provider_title"`
 	SecretId       string `json:"secretId" xorm:"secret_id"`
 	SecretKey      string `json:"secretKey" xorm:"secret_key"`
-	ClientId       string `json:"clientId" xorm:"client_id"`
-	ClientSecret   string `json:"clientSecret" xorm:"client_secret"`
 	TenantId       string `json:"tenantId" xorm:"tenant_id"`
 	SubscriptionId string `json:"subscriptionId" xorm:"subscription_id"`
 	CreateTime     string `json:"createTime" xorm:"create_time"`

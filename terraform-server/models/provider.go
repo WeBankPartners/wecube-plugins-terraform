@@ -7,8 +7,6 @@ type ProviderTable struct {
 	SecretIdAttrName       string `json:"secretIdAttrName" xorm:"secret_id_attr_name"`
 	SecretKeyAttrName      string `json:"secretKeyAttrName" xorm:"secret_key_attr_name"`
 	RegionAttrName         string `json:"regionAttrName" xorm:"region_attr_name"`
-	ClientIdAttrName       string `json:"clientIdAttrName" xorm:"client_id_attr_name"`
-	ClientSecretAttrName   string `json:"clientSecretAttrName" xorm:"client_secret_attr_name"`
 	TenantIdAttrName       string `json:"tenantIdAttrName" xorm:"tenant_id_attr_name"`
 	SubscriptionIdAttrName string `json:"subscriptionIdAttrName" xorm:"subscription_id_attr_name"`
 	CreateTime             string `json:"createTime" xorm:"create_time"`

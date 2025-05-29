@@ -149,17 +149,15 @@ func GenTfFile(dirPath string, sourceData *models.SourceTable, action string, re
 func GenProviderFile(dirPath string, providerData *models.ProviderTable, providerInfo *models.ProviderInfoTable, regionData *models.ResourceDataTable) (err error) {
 	providerContentData := make(map[string]map[string]interface{})
 	providerContentData[providerData.Name] = make(map[string]interface{})
-	if providerData.Name == "azurerm" {
+	if strings.TrimSpace(providerInfo.TenantId) != "" && strings.TrimSpace(providerInfo.SubscriptionId) != "" && strings.Contains(strings.ToLower(providerData.Name), "azure") {
 		providerContentData[providerData.Name]["features"] = map[string]interface{}{}
-		providerContentData[providerData.Name][providerData.ClientIdAttrName] = providerInfo.ClientId
-		providerContentData[providerData.Name][providerData.ClientSecretAttrName] = providerInfo.ClientSecret
 		providerContentData[providerData.Name][providerData.TenantIdAttrName] = providerInfo.TenantId
 		providerContentData[providerData.Name][providerData.SubscriptionIdAttrName] = providerInfo.SubscriptionId
 	} else {
-		providerContentData[providerData.Name][providerData.SecretIdAttrName] = providerInfo.SecretId
-		providerContentData[providerData.Name][providerData.SecretKeyAttrName] = providerInfo.SecretKey
 		providerContentData[providerData.Name][providerData.RegionAttrName] = regionData.ResourceAssetId
 	}
+	providerContentData[providerData.Name][providerData.SecretIdAttrName] = providerInfo.SecretId
+	providerContentData[providerData.Name][providerData.SecretKeyAttrName] = providerInfo.SecretKey
 
 	terraformData := make(map[string]map[string]map[string]interface{})
 	terraformData["required_providers"] = make(map[string]map[string]interface{})
@@ -1305,16 +1303,6 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	}
 	providerInfoData.SecretId = providerSecretId
 	providerInfoData.SecretKey = providerSecretKey
-
-	// 在 providerInfoData.SecretId/SecretKey 解密后，增加 client_secret 解密
-	providerClientSecret, decodeErr := cipher.AesDePasswordByGuid(models.PGuid, models.Config.Auth.PasswordSeed, providerInfoData.ClientSecret)
-	if decodeErr != nil {
-		err = fmt.Errorf("Try to decode clientSecret fail: %s", decodeErr.Error())
-		log.Logger.Error("Try to decode clientSecret fail", log.Error(decodeErr))
-		rowData["errorMessage"] = err.Error()
-		return
-	}
-	providerInfoData.ClientSecret = providerClientSecret
 
 	// Get provider data
 	providerId := providerInfoData.Provider
