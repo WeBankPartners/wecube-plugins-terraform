@@ -15,22 +15,22 @@
     >
       <Form inline :label-width="80">
         <FormItem :label="$t('t_name')">
-          <Input type="text" v-model="newProvider.form.name" style="width:400px"></Input>
+          <Input type="text" v-model="newProvider.form.name" style="width: 400px"></Input>
         </FormItem>
         <FormItem :label="$t('t_namespace')">
-          <Input type="text" v-model="newProvider.form.nameSpace" style="width:400px"></Input>
+          <Input type="text" v-model="newProvider.form.nameSpace" style="width: 400px"></Input>
         </FormItem>
         <FormItem :label="$t('t_version')">
-          <Input type="text" v-model="newProvider.form.version" :rows="4" style="width:400px"></Input>
+          <Input type="text" v-model="newProvider.form.version" :rows="4" style="width: 400px"></Input>
         </FormItem>
         <FormItem :label="$t('t_region_attr_name')">
-          <Input type="text" v-model="newProvider.form.regionAttrName" style="width:400px"></Input>
+          <Input type="text" v-model="newProvider.form.regionAttrName" style="width: 400px"></Input>
         </FormItem>
         <FormItem :label="$t('t_secretId_attr_name')">
-          <Input type="text" v-model="newProvider.form.secretIdAttrName" style="width:400px"></Input>
+          <Input type="text" v-model="newProvider.form.secretIdAttrName" style="width: 400px"></Input>
         </FormItem>
         <FormItem :label="$t('t_secretKey_attr_name')">
-          <Input type="text" v-model="newProvider.form.secretKeyAttrName" style="width:400px"></Input>
+          <Input type="text" v-model="newProvider.form.secretKeyAttrName" style="width: 400px"></Input>
         </FormItem>
       </Form>
     </Modal>
@@ -39,6 +39,7 @@
 
 <script>
 import { getProviders, addProvider, deleteProvider, instanceDataDownload, editProvider } from '@/api/server'
+import { getCookie } from '../pages/util/cookie'
 export default {
   name: '',
   data () {
@@ -157,6 +158,7 @@ export default {
                       size: 'small',
                       title: 'xxfsdfaslkfjsaldkjflk',
                       action: `/terraform/api/v1/providers/upload?id=${params.row.id}`,
+                      headers: { Authorization: 'Bearer ' + getCookie('accessToken') },
                       'on-success': this.handleSuccess,
                       'on-error': this.handleError
                     },
