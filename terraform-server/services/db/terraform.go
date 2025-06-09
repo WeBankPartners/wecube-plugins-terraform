@@ -363,7 +363,7 @@ func execRemoteWithTimeout(cmdStr []string, timeOut int) (out string, err error)
 }
 
 func TerraformImport(dirPath, address, resourceAssetId string) (err error) {
-	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " import -no-color " + address + " " + resourceAssetId
+	cmdStr := models.Config.TerraformCmdPath + " -chdir=\"" + dirPath + "\" import -no-color " + address + " " + resourceAssetId
 	/*
 		cmd := exec.Command(models.BashCmd, "-c", cmdStr)
 		var stdout, stderr bytes.Buffer
@@ -394,7 +394,7 @@ func TerraformImport(dirPath, address, resourceAssetId string) (err error) {
 
 func TerraformPlan(dirPath string) (destroyCnt int, err error) {
 	// cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " plan -input=false -out=" + dirPath + "/planfile"
-	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " plan -input=false -no-color"
+	cmdStr := models.Config.TerraformCmdPath + " -chdir=\"" + dirPath + "\" plan -input=false -no-color"
 	/*
 		cmd := exec.Command(models.BashCmd, "-c", cmdStr)
 		var stdout, stderr bytes.Buffer
@@ -478,7 +478,7 @@ func TerraformPlan(dirPath string) (destroyCnt int, err error) {
 }
 
 func TerraformApply(dirPath string) (err error) {
-	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " apply -auto-approve -no-color"
+	cmdStr := models.Config.TerraformCmdPath + " -chdir=\"" + dirPath + "\" apply -auto-approve -no-color"
 	/*
 		cmd := exec.Command(models.BashCmd, "-c", cmdStr)
 		var stdout, stderr bytes.Buffer
@@ -508,7 +508,7 @@ func TerraformApply(dirPath string) (err error) {
 }
 
 func TerraformDestroy(dirPath string) (err error) {
-	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " destroy -auto-approve -no-color"
+	cmdStr := models.Config.TerraformCmdPath + " -chdir=\"" + dirPath + "\" destroy -auto-approve -no-color"
 	/*
 		cmd := exec.Command(models.BashCmd, "-c", cmdStr)
 		var stdout, stderr bytes.Buffer
@@ -538,7 +538,7 @@ func TerraformDestroy(dirPath string) (err error) {
 }
 
 func TerraformInit(dirPath string) (err error) {
-	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " init -no-color" + " -plugin-dir=" + dirPath + "/.terraform/providers"
+	cmdStr := models.Config.TerraformCmdPath + " -chdir=\"" + dirPath + "\" init -no-color" + " -plugin-dir=" + dirPath + "/.terraform/providers"
 	/*
 		cmd := exec.Command(models.BashCmd, "-c", cmdStr)
 		var stdout, stderr bytes.Buffer
@@ -568,7 +568,7 @@ func TerraformInit(dirPath string) (err error) {
 }
 
 func DownloadProviderByTerraformInit(dirPath string) (err error) {
-	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " init -no-color"
+	cmdStr := models.Config.TerraformCmdPath + " -chdir=\"" + dirPath + "\" init -no-color"
 	_, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.DownloadProviderTimeOut)
 	if cmdErr != nil {
 		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
