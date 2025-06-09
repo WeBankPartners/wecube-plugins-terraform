@@ -1,6 +1,16 @@
 <template>
   <div>
-    <Table border size="small" :columns="tableColumns" :data="tableData" :max-height="MODALHEIGHT"></Table>
+    <div class="operate">
+      <Button type="primary" size="small" @click="getDebugInfo">刷新数据</Button>
+    </div>
+    <Table
+      :loading="loading"
+      border
+      size="small"
+      :columns="tableColumns"
+      :data="tableData"
+      :max-height="MODALHEIGHT"
+    ></Table>
     <Modal v-model="dataDetail.isShow" :fullscreen="fullscreen" width="800" :mask-closable="false" footer-hide>
       <p slot="header">
         <span>{{ $t('t_detail') }}</span>
@@ -26,6 +36,7 @@ export default {
         isShow: false,
         data: {}
       },
+      loading: false,
       tableColumns: [
         {
           title: this.$t('t_region'),
@@ -103,7 +114,9 @@ export default {
   },
   methods: {
     async getDebugInfo () {
+      this.loading = true
       const { statusCode, data } = await getDebugInfo()
+      this.loading = false
       if (statusCode === 'OK') {
         this.tableData = data
       }
@@ -119,6 +132,11 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.operate {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 5px;
+}
 .header-icon {
   float: right;
   margin: 3px 40px 0 0 !important;
