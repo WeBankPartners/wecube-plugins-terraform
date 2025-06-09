@@ -118,6 +118,7 @@ func DelDir(dirPath string) (err error) {
 }
 
 func GenTfFile(dirPath string, sourceData *models.SourceTable, action string, resourceId string, tfArguments map[string]interface{}) (tfFileContentStr string, err error) {
+	log.Logger.Debug("[GenTfFile] called", log.String("dirPath", dirPath), log.JsonObj("sourceData", sourceData), log.String("action", action), log.String("resourceId", resourceId), log.JsonObj("tfArguments", tfArguments))
 	var tfFilePath string
 	tfFilePath = dirPath + "/" + sourceData.Name + ".tf.json"
 
@@ -1329,13 +1330,10 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	}
 	simulateResourceData := make(map[string][]map[string]interface{})
 	if (action == "apply" || action == "query") && sourceList[0].TerraformUsed != "N" {
-		// fmt.Printf("%v\n", sortedSourceList)
 
 		resourceId := reqParam["id"].(string)
 		var rootResourceAssetId interface{}
 		rootResourceAssetId = ""
-		// resourceAssetId := reqParam["asset_id"].(string)
-		// fmt.Printf("%v\n", resourceAssetId)
 
 		reqParam[models.SimulateResourceDataResult] = make(map[string][]map[string]interface{})
 		toDestroyList := make(map[string]*models.ResourceDataTable)
@@ -1948,7 +1946,12 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 								}
 							} else {
 								// get tfstate file from resource_data table and gen it
-								tfstateFileContent := importObjectResourceData[i].TfStateFile
+								data := importObjectResourceData[i]
+								if data == nil {
+									log.Logger.Warn(fmt.Sprintf("No matching resource_data for conStructObject[%d], skip tfstate file generation", i))
+									continue
+								}
+								tfstateFileContent := data.TfStateFile
 								tfstateFilePath := workDirPath + "/terraform.tfstate"
 								GenFile([]byte(tfstateFileContent), tfstateFilePath)
 							}
@@ -2090,7 +2093,12 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 							}
 						} else {
 							// get tfstate file from resource_data table and gen it
-							tfstateFileContent := importObjectResourceData[i].TfStateFile
+							data := importObjectResourceData[i]
+							if data == nil {
+								log.Logger.Warn(fmt.Sprintf("No matching resource_data for conStructObject[%d], skip tfstate file generation", i))
+								continue
+							}
+							tfstateFileContent := data.TfStateFile
 							tfstateFilePath := workDirPath + "/terraform.tfstate"
 							GenFile([]byte(tfstateFileContent), tfstateFilePath)
 						}
