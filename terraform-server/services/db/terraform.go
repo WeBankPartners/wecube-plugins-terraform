@@ -137,6 +137,7 @@ func GenTfFile(dirPath string, sourceData *models.SourceTable, action string, re
 
 	tfFileContent, err := json.Marshal(tfFileData)
 	err = GenFile((tfFileContent), tfFilePath)
+	log.Logger.Debug("[GenTfFile] file generated", log.String("filePath", tfFilePath), log.String("content", string(tfFileContent)), log.Error(err))
 	if err != nil {
 		err = fmt.Errorf("Gen tfFile: %s error: %s", tfFilePath, err.Error())
 		log.Logger.Error("Gen tfFile error", log.String("tfFilePath", tfFilePath), log.Error(err))
@@ -364,14 +365,9 @@ func execRemoteWithTimeout(cmdStr []string, timeOut int) (out string, err error)
 
 func TerraformImport(dirPath, address, resourceAssetId string) (err error) {
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=\"" + dirPath + "\" import -no-color " + address + " " + resourceAssetId
-	/*
-		cmd := exec.Command(models.BashCmd, "-c", cmdStr)
-		var stdout, stderr bytes.Buffer
-		cmd.Stdout = &stdout
-		cmd.Stderr = &stderr
-		cmdErr := cmd.Run()
-	*/
-	_, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.CommandTimeOut)
+	log.Logger.Debug("[TerraformImport] cmd", log.String("cmdStr", cmdStr))
+	out, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.CommandTimeOut)
+	log.Logger.Debug("[TerraformImport] result", log.String("output", out), log.Error(cmdErr))
 	if cmdErr != nil {
 		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
 		// outPutStr := string(stderr.Bytes())
@@ -393,16 +389,10 @@ func TerraformImport(dirPath, address, resourceAssetId string) (err error) {
 }
 
 func TerraformPlan(dirPath string) (destroyCnt int, err error) {
-	// cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " plan -input=false -out=" + dirPath + "/planfile"
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=\"" + dirPath + "\" plan -input=false -no-color"
-	/*
-		cmd := exec.Command(models.BashCmd, "-c", cmdStr)
-		var stdout, stderr bytes.Buffer
-		cmd.Stdout = &stdout
-		cmd.Stderr = &stderr
-		cmdErr := cmd.Run()
-	*/
+	log.Logger.Debug("[TerraformPlan] cmd", log.String("cmdStr", cmdStr))
 	output, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.CommandTimeOut)
+	log.Logger.Debug("[TerraformPlan] result", log.String("output", output), log.Error(cmdErr))
 	if cmdErr != nil {
 		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
 		// outPutStr := string(stderr.Bytes())
@@ -479,14 +469,9 @@ func TerraformPlan(dirPath string) (destroyCnt int, err error) {
 
 func TerraformApply(dirPath string) (err error) {
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=\"" + dirPath + "\" apply -auto-approve -no-color"
-	/*
-		cmd := exec.Command(models.BashCmd, "-c", cmdStr)
-		var stdout, stderr bytes.Buffer
-		cmd.Stdout = &stdout
-		cmd.Stderr = &stderr
-		cmdErr := cmd.Run()
-	*/
-	_, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.CommandTimeOut)
+	log.Logger.Debug("[TerraformApply] cmd", log.String("cmdStr", cmdStr))
+	out, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.CommandTimeOut)
+	log.Logger.Debug("[TerraformApply] result", log.String("output", out), log.Error(cmdErr))
 	if cmdErr != nil {
 		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
 		// outPutStr := string(stderr.Bytes())
@@ -509,14 +494,9 @@ func TerraformApply(dirPath string) (err error) {
 
 func TerraformDestroy(dirPath string) (err error) {
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=\"" + dirPath + "\" destroy -auto-approve -no-color"
-	/*
-		cmd := exec.Command(models.BashCmd, "-c", cmdStr)
-		var stdout, stderr bytes.Buffer
-		cmd.Stdout = &stdout
-		cmd.Stderr = &stderr
-		cmdErr := cmd.Run()
-	*/
-	_, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.CommandTimeOut)
+	log.Logger.Debug("[TerraformDestroy] cmd", log.String("cmdStr", cmdStr))
+	out, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.CommandTimeOut)
+	log.Logger.Debug("[TerraformDestroy] result", log.String("output", out), log.Error(cmdErr))
 	if cmdErr != nil {
 		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
 		// outPutStr := string(stderr.Bytes())
@@ -539,14 +519,9 @@ func TerraformDestroy(dirPath string) (err error) {
 
 func TerraformInit(dirPath string) (err error) {
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=\"" + dirPath + "\" init -no-color" + " -plugin-dir=\"" + dirPath + "/.terraform/providers\""
-	/*
-		cmd := exec.Command(models.BashCmd, "-c", cmdStr)
-		var stdout, stderr bytes.Buffer
-		cmd.Stdout = &stdout
-		cmd.Stderr = &stderr
-		cmdErr := cmd.Run()
-	*/
-	_, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.CommandTimeOut)
+	log.Logger.Debug("[TerraformInit] cmd", log.String("cmdStr", cmdStr))
+	out, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.CommandTimeOut)
+	log.Logger.Debug("[TerraformInit] result", log.String("output", out), log.Error(cmdErr))
 	if cmdErr != nil {
 		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
 		// outPutStr := string(stderr.Bytes())
@@ -569,7 +544,9 @@ func TerraformInit(dirPath string) (err error) {
 
 func DownloadProviderByTerraformInit(dirPath string) (err error) {
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=\"" + dirPath + "\" init -no-color"
-	_, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.DownloadProviderTimeOut)
+	log.Logger.Debug("[DownloadProviderByTerraformInit] cmd", log.String("cmdStr", cmdStr))
+	out, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.DownloadProviderTimeOut)
+	log.Logger.Debug("[DownloadProviderByTerraformInit] result", log.String("output", out), log.Error(cmdErr))
 	if cmdErr != nil {
 		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
 		// outPutStr := string(stderr.Bytes())
@@ -1180,27 +1157,24 @@ func handleDestroy(workDirPath string,
 }
 
 func TerraformOperation(plugin string, action string, reqParam map[string]interface{}, debugFileContent *[]map[string]interface{}) (rowData map[string]interface{}, err error) {
+	log.Logger.Debug("[TerraformOperation] start", log.String("plugin", plugin), log.String("action", action), log.JsonObj("reqParam", reqParam))
 	var curWorkDirPath = []string{}
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("TerraformOperation error: %v", r)
 			rowData["errorMessage"] = err.Error()
-
+			log.Logger.Error("[TerraformOperation] panic", log.Error(err))
 			stackTraceInfo := try.PrintStackTrace(r)
 			log.Logger.Error(stackTraceInfo)
 		}
 		if rowData["errorMessage"].(string) != "" && rowData["errorCode"].(string) == "0" {
 			rowData["errorCode"] = "1"
 		}
-
-		// writeBack reqParam.id
 		if _, isIdExisted := rowData["id"]; !isIdExisted {
 			rowData["id"] = reqParam["id"]
 			log.Logger.Info(fmt.Sprintf("writeBack reqParam.id: %v for retOutput", rowData["id"]))
 		}
-
 		if _, ok := reqParam[models.ResourceDataDebug]; !ok {
-			// clear the workDirPath
 			for i := range curWorkDirPath {
 				DelDir(curWorkDirPath[i])
 			}
@@ -1212,6 +1186,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	rowData["errorCode"] = "1"
 	rowData["errorMessage"] = ""
 
+	log.Logger.Debug("[TerraformOperation] 获取接口信息", log.String("plugin", plugin), log.String("action", action))
 	// Get interface by plugin and action
 	var actionName string
 	actionName = action
@@ -1242,6 +1217,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 		return
 	}
 
+	log.Logger.Debug("[TerraformOperation] 获取 region/provider/source 等元数据", log.JsonObj("reqParam", reqParam))
 	// Get regionInfo by regionId
 	regionId := reqParam["region_id"].(string)
 	sqlCmd = `SELECT * FROM resource_data WHERE resource_id=? AND region_id=?`
