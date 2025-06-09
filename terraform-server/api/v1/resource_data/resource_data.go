@@ -378,62 +378,6 @@ func TerraformOperationDebug(c *gin.Context) {
 	for i := 0; i < consumerCnt; i++ {
 		<-doneChan
 	}
-	/*
-		var wg sync.WaitGroup
-		wg.Add(count)
-		for i := range params {
-			go func(i int) {
-				defer wg.Done()
-
-				if _, ok := request_param["operator"]; ok {
-					params[i]["operator_user"] = request_param["operator"]
-				} else {
-					params[i]["operator_user"] = "system"
-				}
-				params[i]["requestId"] = request_param["requestId"].(string) + "_" + strconv.Itoa(i+1)
-				params[i]["requestSn"] = strconv.Itoa(i + 1)
-				params[i][models.ResourceDataDebug] = true
-				debugFileContent := []map[string]interface{}{}
-				retData, _ := db.TerraformOperation(plugin, action, params[i], &debugFileContent)
-				if _, ok := retData["errorCode"]; ok && retData["errorCode"] != "0" {
-					rowData.ResultCode = "1"
-					rowData.ResultMessage = "fail"
-				}
-
-				// handle one input, many output
-				curResultOutputs := []map[string]interface{}{}
-				if v, ok := retData[models.TerraformOutPutPrefix]; ok {
-					tmpData, _ := json.Marshal(v)
-					var resultList []map[string]interface{}
-					json.Unmarshal(tmpData, &resultList)
-					for i := range resultList {
-						tmpRetData := make(map[string]interface{})
-						tmpRetData["callbackParameter"] = retData["callbackParameter"]
-						tmpRetData["errorCode"] = retData["errorCode"]
-						tmpRetData["errorMessage"] = retData["errorMessage"]
-						for k, v := range resultList[i] {
-							tmpRetData[k] = v
-						}
-						curResultOutputs = append(curResultOutputs, tmpRetData)
-					}
-					if len(resultList) == 0 {
-						delete(retData, models.TerraformOutPutPrefix)
-						curResultOutputs = append(curResultOutputs, retData)
-					}
-				} else {
-					curResultOutputs = append(curResultOutputs, retData)
-				}
-				curCombineResult := make(map[string]interface{})
-				curCombineResult["result_data"] = curResultOutputs
-
-				curCombineResult["resource_results"] = debugFileContent
-				resultChan<-curCombineResult
-			}(i)
-
-			// rowData.Results.Outputs = append(rowData.Results.Outputs, curCombineResult)
-		}
-		wg.Wait()
-	*/
 	close(resultChan)
 	for i := range resultChan {
 		curRes := i

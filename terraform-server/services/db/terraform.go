@@ -149,6 +149,7 @@ func GenTfFile(dirPath string, sourceData *models.SourceTable, action string, re
 }
 
 func GenProviderFile(dirPath string, providerData *models.ProviderTable, providerInfo *models.ProviderInfoTable, regionData *models.ResourceDataTable) (err error) {
+	log.Logger.Debug("[GenProviderFile] called", log.String("dirPath", dirPath), log.JsonObj("providerData", providerData), log.JsonObj("providerInfo", providerInfo), log.JsonObj("regionData", regionData))
 	providerContentData := make(map[string]map[string]interface{})
 	providerContentData[providerData.Name] = make(map[string]interface{})
 	if strings.TrimSpace(providerInfo.TenantId) != "" && strings.TrimSpace(providerInfo.SubscriptionId) != "" && strings.Contains(strings.ToLower(providerData.Name), "azure") {
@@ -177,6 +178,7 @@ func GenProviderFile(dirPath string, providerData *models.ProviderTable, provide
 		log.Logger.Error("Marshal providerFileData error", log.Error(err))
 		return
 	}
+	log.Logger.Debug("[GenProviderFile] generated provider.tf.json content", log.String("content", string(providerFileContent)))
 	providerFilePath := dirPath + "/provider.tf.json"
 	err = GenFile(providerFileContent, providerFilePath)
 	if err != nil {
@@ -4138,7 +4140,6 @@ func handleConvertParams(action string,
 	for i := range tfArgumentList {
 		errorTfArgument = tfArgumentList[i]
 		convertWay := tfArgumentList[i].ConvertWay
-		log.Logger.Debug("[handleConvertParams] start", log.String("tfArgument", tfArgumentList[i].Name), log.String("convertWay", convertWay), log.JsonObj("reqParam", reqParam))
 		var arg interface{}
 		var isDiscard = false
 		switch convertWay {
