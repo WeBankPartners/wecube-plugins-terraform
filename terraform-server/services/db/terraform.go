@@ -2408,6 +2408,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 }
 
 func convertData(relativeSourceId string, reqParam map[string]interface{}, regionData *models.ResourceDataTable, tfArgument *models.TfArgumentTable, sourceData *models.SourceTable) (arg interface{}, err error) {
+	log.Logger.Debug("[convertData] called", log.String("relativeSourceId", relativeSourceId), log.JsonObj("reqParam", reqParam), log.JsonObj("regionData", regionData), log.JsonObj("tfArgument", tfArgument), log.JsonObj("sourceData", sourceData))
 	if tfArgument.Parameter == "" {
 		if sourceData.SourceType == "data_resource" {
 			if _, ok := reqParam[models.SimulateResourceData]; ok {
@@ -2592,6 +2593,7 @@ func reverseConvertData(parameterData *models.ParameterTable, tfstateAttributeDa
 }
 
 func convertTemplate(providerData *models.ProviderTable, reqParam map[string]interface{}, tfArgument *models.TfArgumentTable) (arg interface{}, err error) {
+	log.Logger.Debug("[convertTemplate] called", log.JsonObj("providerData", providerData), log.JsonObj("reqParam", reqParam), log.JsonObj("tfArgument", tfArgument))
 	if tfArgument.Parameter == "" {
 		arg = tfArgument.DefaultValue
 		return
@@ -2679,6 +2681,7 @@ func reverseConvertTemplate(parameterData *models.ParameterTable, providerData *
 }
 
 func convertAttr(tfArgumentData *models.TfArgumentTable, reqParam map[string]interface{}, regionData *models.ResourceDataTable, tfArgument *models.TfArgumentTable, sourceData *models.SourceTable) (arg interface{}, err error) {
+	log.Logger.Debug("[convertAttr] called", log.JsonObj("tfArgumentData", tfArgumentData), log.JsonObj("reqParam", reqParam), log.JsonObj("regionData", regionData), log.JsonObj("tfArgument", tfArgument), log.JsonObj("sourceData", sourceData))
 	if tfArgument.Parameter == "" {
 		// arg = tfArgument.DefaultValue
 		if sourceData.SourceType == "data_resource" {
@@ -2958,6 +2961,7 @@ func reverseConvertAttr(parameterData *models.ParameterTable, tfstateAttributeDa
 }
 
 func convertContextData(tfArgumentData *models.TfArgumentTable, reqParam map[string]interface{}, regionData *models.ResourceDataTable, tfArgument *models.TfArgumentTable, sourceData *models.SourceTable) (arg interface{}, isDiscard bool, err error) {
+	log.Logger.Debug("[convertContextData] called", log.JsonObj("tfArgumentData", tfArgumentData), log.JsonObj("reqParam", reqParam), log.JsonObj("regionData", regionData), log.JsonObj("tfArgument", tfArgument), log.JsonObj("sourceData", sourceData))
 	if tfArgument.Parameter == "" {
 		arg = tfArgument.DefaultValue
 		return
@@ -3052,6 +3056,7 @@ func reverseConvertContextData(parameterData *models.ParameterTable,
 }
 
 func convertContextDirect(tfArgumentData *models.TfArgumentTable, reqParam map[string]interface{}, regionData *models.ResourceDataTable) (arg interface{}, isDiscard bool, err error) {
+	log.Logger.Debug("[convertContextDirect] called", log.JsonObj("tfArgumentData", tfArgumentData), log.JsonObj("reqParam", reqParam), log.JsonObj("regionData", regionData))
 	if tfArgumentData.Parameter == "" {
 		arg = tfArgumentData.DefaultValue
 		return
@@ -3144,6 +3149,7 @@ func reverseConvertContextDirect(parameterData *models.ParameterTable,
 }
 
 func convertContextAttr(tfArgumentData *models.TfArgumentTable, reqParam map[string]interface{}, regionData *models.ResourceDataTable, sourceData *models.SourceTable) (arg interface{}, isDiscard bool, err error) {
+	log.Logger.Debug("[convertContextAttr] called", log.JsonObj("tfArgumentData", tfArgumentData), log.JsonObj("reqParam", reqParam), log.JsonObj("regionData", regionData), log.JsonObj("sourceData", sourceData))
 	if tfArgumentData.Parameter == "" {
 		arg = tfArgumentData.DefaultValue
 		return
@@ -3329,6 +3335,7 @@ func reverseConvertContextTemplate(parameterData *models.ParameterTable,
 }
 
 func convertDirect(defaultValue string, reqParam map[string]interface{}, tfArgument *models.TfArgumentTable) (arg interface{}, err error) {
+	log.Logger.Debug("[convertDirect] called", log.String("defaultValue", defaultValue), log.JsonObj("reqParam", reqParam), log.JsonObj("tfArgument", tfArgument))
 	if tfArgument.Parameter == "" {
 		arg = tfArgument.DefaultValue
 		return
@@ -3432,6 +3439,7 @@ func convertDirect(defaultValue string, reqParam map[string]interface{}, tfArgum
 }
 
 func convertFunction(tfArgumentData *models.TfArgumentTable, reqParam map[string]interface{}, tfArgument *models.TfArgumentTable) (arg interface{}, err error) {
+	log.Logger.Debug("[convertFunction] called", log.JsonObj("tfArgumentData", tfArgumentData), log.JsonObj("reqParam", reqParam), log.JsonObj("tfArgument", tfArgument))
 	if tfArgument.Parameter == "" {
 		arg = tfArgument.DefaultValue
 		return
@@ -4122,29 +4130,37 @@ func handleConvertParams(action string,
 	for i := range tfArgumentList {
 		errorTfArgument = tfArgumentList[i]
 		convertWay := tfArgumentList[i].ConvertWay
+		log.Logger.Debug("[handleConvertParams] start", log.String("tfArgument", tfArgumentList[i].Name), log.String("convertWay", convertWay), log.JsonObj("reqParam", reqParam))
 		var arg interface{}
 		var isDiscard = false
 		switch convertWay {
 		case models.ConvertWay["Data"]:
-			// search resource_data table，get resource_asset_id by resource_id and resource(which is relative_source column in tf_argument table )
 			arg, err = convertData(tfArgumentList[i].RelativeSource, reqParam, regionData, tfArgumentList[i], sourceData)
+			log.Logger.Debug("[handleConvertParams] Data", log.String("tfArgument", tfArgumentList[i].Name), log.JsonObj("arg", arg), log.Error(err))
 		case models.ConvertWay["Template"]:
 			arg, err = convertTemplate(providerData, reqParam, tfArgumentList[i])
+			log.Logger.Debug("[handleConvertParams] Template", log.String("tfArgument", tfArgumentList[i].Name), log.JsonObj("arg", arg), log.Error(err))
 		case models.ConvertWay["ContextData"]:
 			arg, isDiscard, err = convertContextData(tfArgumentList[i], reqParam, regionData, tfArgumentList[i], sourceData)
+			log.Logger.Debug("[handleConvertParams] ContextData", log.String("tfArgument", tfArgumentList[i].Name), log.JsonObj("arg", arg), log.Bool("isDiscard", isDiscard), log.Error(err))
 		case models.ConvertWay["Attr"]:
-			// search resouce_data table by relative_source and 输入的值, 获取 tfstat_file 字段内容,找到relative_tfstate_attribute id(search tfstate_attribute table) 对应的 name, 获取其在 tfstate_file 中的值
 			arg, err = convertAttr(tfArgumentList[i], reqParam, regionData, tfArgumentList[i], sourceData)
+			log.Logger.Debug("[handleConvertParams] Attr", log.String("tfArgument", tfArgumentList[i].Name), log.JsonObj("arg", arg), log.Error(err))
 		case models.ConvertWay["Direct"]:
 			arg, err = convertDirect(tfArgumentList[i].DefaultValue, reqParam, tfArgumentList[i])
+			log.Logger.Debug("[handleConvertParams] Direct", log.String("tfArgument", tfArgumentList[i].Name), log.JsonObj("arg", arg), log.Error(err))
 		case models.ConvertWay["Function"]:
 			arg, err = convertFunction(tfArgumentList[i], reqParam, tfArgumentList[i])
+			log.Logger.Debug("[handleConvertParams] Function", log.String("tfArgument", tfArgumentList[i].Name), log.JsonObj("arg", arg), log.Error(err))
 		case models.ConvertWay["ContextDirect"]:
 			arg, isDiscard, err = convertContextDirect(tfArgumentList[i], reqParam, regionData)
+			log.Logger.Debug("[handleConvertParams] ContextDirect", log.String("tfArgument", tfArgumentList[i].Name), log.JsonObj("arg", arg), log.Bool("isDiscard", isDiscard), log.Error(err))
 		case models.ConvertWay["ContextAttr"]:
 			arg, isDiscard, err = convertContextAttr(tfArgumentList[i], reqParam, regionData, sourceData)
+			log.Logger.Debug("[handleConvertParams] ContextAttr", log.String("tfArgument", tfArgumentList[i].Name), log.JsonObj("arg", arg), log.Bool("isDiscard", isDiscard), log.Error(err))
 		case models.ConvertWay["ContextTemplate"]:
 			arg, isDiscard, err = convertContextTemplate(tfArgumentList[i], reqParam, regionData, providerData)
+			log.Logger.Debug("[handleConvertParams] ContextTemplate", log.String("tfArgument", tfArgumentList[i].Name), log.JsonObj("arg", arg), log.Bool("isDiscard", isDiscard), log.Error(err))
 		default:
 			err = fmt.Errorf("The convertWay:%s of tfArgument:%s is invalid", convertWay, tfArgumentList[i].Name)
 			log.Logger.Error("The convertWay of tfArgument is invalid", log.String("convertWay", convertWay), log.String("tfArgument", tfArgumentList[i].Name), log.Error(err))
@@ -4152,6 +4168,7 @@ func handleConvertParams(action string,
 		}
 
 		if isDiscard {
+			log.Logger.Debug("[handleConvertParams] Discarded", log.String("tfArgument", tfArgumentList[i].Name))
 			continue
 		}
 
