@@ -5162,94 +5162,79 @@ func getTFStateAssetId(workDirPath string, idAttrName string) (resourceDataResou
 	return
 }
 
-// ParseTfstateFileData 兼容 resources 为数组或对象，并兼容 instances 为对象或数组
 func ParseTfstateFileData(data []byte) (models.TfstateFileData, error) {
-	log.Logger.Debug("[ParseTfstateFileData] input", log.String("data", string(data)))
 	var result models.TfstateFileData
-	// 先尝试数组
-	type arrType struct {
-		Resources []models.TfstateFileResources `json:"resources"`
-	}
-	var arr arrType
-	if err := json.Unmarshal(data, &arr); err == nil && len(arr.Resources) > 0 {
-		for i, res := range arr.Resources {
-			if len(res.Instances) == 0 {
-				tmp := struct {
-					Instances map[string]models.TfstateFileAttributes `json:"instances"`
-				}{}
-				b, _ := json.Marshal(res)
-				if err2 := json.Unmarshal(b, &tmp); err2 == nil && len(tmp.Instances) > 0 {
-					for _, v := range tmp.Instances {
-						arr.Resources[i].Instances = append(arr.Resources[i].Instances, v)
-					}
-				}
-			}
-		}
-		result.Resources = arr.Resources
-		log.Logger.Debug("[ParseTfstateFileData] result", log.JsonObj("result", result))
+
+	// 1.标准数据格式解析
+	if err := json.Unmarshal(data, &result); err == nil && len(result.Resources) > 0 {
 		return result, nil
 	}
-	// 再尝试对象
-	type objType struct {
-		Resources map[string]models.TfstateFileResources `json:"resources"`
+
+	var directNested struct {
+		Resources struct {
+			Instances struct {
+				Attributes map[string]interface{} `json:"attributes"`
+			} `json:"instances"`
+		} `json:"resources"`
 	}
-	var obj objType
-	if err := json.Unmarshal(data, &obj); err == nil && len(obj.Resources) > 0 {
-		for _, v := range obj.Resources {
-			if len(v.Instances) == 0 {
-				tmp := struct {
-					Instances map[string]models.TfstateFileAttributes `json:"instances"`
-				}{}
-				b, _ := json.Marshal(v)
-				if err2 := json.Unmarshal(b, &tmp); err2 == nil && len(tmp.Instances) > 0 {
-					for _, vv := range tmp.Instances {
-						v.Instances = append(v.Instances, vv)
-					}
-				}
-			}
-			result.Resources = append(result.Resources, v)
-		}
-		log.Logger.Debug("[ParseTfstateFileData] result", log.JsonObj("result", result))
-		return result, nil
-	}
-	// 如果 resources 只有一层，且 instances 为空，但有 attributes，兜底
-	if len(result.Resources) == 0 {
-		type attrType struct {
-			Resources struct {
-				Instances struct {
-					Attributes map[string]interface{} `json:"attributes"`
-				} `json:"instances"`
-			} `json:"resources"`
-		}
-		var at attrType
-		if err := json.Unmarshal(data, &at); err == nil && len(at.Resources.Instances.Attributes) > 0 {
-			result.Resources = append(result.Resources, models.TfstateFileResources{
+
+	// 2.对象类型也需要解析出来  {\"resources\":{\"instances\":{\"attributes\":{\"name\":\"East Asia\"}}}}
+	if err := json.Unmarshal(data, &directNested); err == nil {
+		result.Resources = []models.TfstateFileResources{
+			{
 				Instances: []models.TfstateFileAttributes{
-					{Attributes: at.Resources.Instances.Attributes},
+					{
+						Attributes: directNested.Resources.Instances.Attributes,
+					},
 				},
-			})
-			log.Logger.Debug("[ParseTfstateFileData] result", log.JsonObj("result", result))
-			return result, nil
+			},
 		}
+		return result, nil
 	}
-	// 如果 resources 有内容但 instances 为空，且原始数据有 attributes，兜底
-	if len(result.Resources) == 1 && (result.Resources[0].Instances == nil || len(result.Resources[0].Instances) == 0) {
-		type attrType struct {
-			Resources struct {
-				Instances struct {
-					Attributes map[string]interface{} `json:"attributes"`
-				} `json:"instances"`
-			} `json:"resources"`
-		}
-		var at attrType
-		if err := json.Unmarshal(data, &at); err == nil && len(at.Resources.Instances.Attributes) > 0 {
-			result.Resources[0].Instances = []models.TfstateFileAttributes{
-				{Attributes: at.Resources.Instances.Attributes},
+
+	type compatResource struct {
+		Instances map[string]struct {
+			Attributes map[string]interface{} `json:"attributes"`
+		} `json:"instances"`
+	}
+
+	var compatMap struct {
+		Resources map[string]compatResource `json:"resources"`
+	}
+
+	if err := json.Unmarshal(data, &compatMap); err == nil && len(compatMap.Resources) > 0 {
+		for _, res := range compatMap.Resources {
+			r := models.TfstateFileResources{}
+			for _, inst := range res.Instances {
+				r.Instances = append(r.Instances, models.TfstateFileAttributes{
+					Attributes: inst.Attributes,
+				})
 			}
-			log.Logger.Debug("[ParseTfstateFileData] result (instances fallback)", log.JsonObj("result", result))
+			result.Resources = append(result.Resources, r)
+		}
+		return result, nil
+	}
+
+	var simplified struct {
+		Resources struct {
+			Instances map[string]interface{} `json:"instances"`
+		} `json:"resources"`
+	}
+
+	if err := json.Unmarshal(data, &simplified); err == nil {
+		if attrs, ok := simplified.Resources.Instances["attributes"].(map[string]interface{}); ok {
+			result.Resources = []models.TfstateFileResources{
+				{
+					Instances: []models.TfstateFileAttributes{
+						{
+							Attributes: attrs,
+						},
+					},
+				},
+			}
 			return result, nil
 		}
 	}
-	log.Logger.Debug("[ParseTfstateFileData] parse failed", log.String("input", string(data)))
-	return result, fmt.Errorf("resources is neither array nor object or is empty")
+
+	return result, fmt.Errorf("unsupported tfstate format")
 }
