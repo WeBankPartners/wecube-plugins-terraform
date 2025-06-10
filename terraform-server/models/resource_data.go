@@ -92,7 +92,7 @@ type TfFileAttrFetchResult struct {
 	EndIndex    int
 }
 
-// ParseTfstateFileData 兼容 resources 为数组或对象
+// ParseTfstateFileData 兼容 resources 为数组或对象，并兼容 instances 为对象或数组
 func ParseTfstateFileData(data []byte) (TfstateFileData, error) {
 	var result TfstateFileData
 	// 先尝试数组
@@ -101,6 +101,21 @@ func ParseTfstateFileData(data []byte) (TfstateFileData, error) {
 	}
 	var arr arrType
 	if err := json.Unmarshal(data, &arr); err == nil && len(arr.Resources) > 0 {
+		// 兼容 instances 为对象
+		for i, res := range arr.Resources {
+			if len(res.Instances) == 0 {
+				// 尝试解析为对象
+				tmp := struct {
+					Instances map[string]TfstateFileAttributes `json:"instances"`
+				}{}
+				b, _ := json.Marshal(res)
+				if err2 := json.Unmarshal(b, &tmp); err2 == nil && len(tmp.Instances) > 0 {
+					for _, v := range tmp.Instances {
+						arr.Resources[i].Instances = append(arr.Resources[i].Instances, v)
+					}
+				}
+			}
+		}
 		result.Resources = arr.Resources
 		return result, nil
 	}
@@ -111,6 +126,18 @@ func ParseTfstateFileData(data []byte) (TfstateFileData, error) {
 	var obj objType
 	if err := json.Unmarshal(data, &obj); err == nil && len(obj.Resources) > 0 {
 		for _, v := range obj.Resources {
+			// 兼容 instances 为对象
+			if len(v.Instances) == 0 {
+				tmp := struct {
+					Instances map[string]TfstateFileAttributes `json:"instances"`
+				}{}
+				b, _ := json.Marshal(v)
+				if err2 := json.Unmarshal(b, &tmp); err2 == nil && len(tmp.Instances) > 0 {
+					for _, vv := range tmp.Instances {
+						v.Instances = append(v.Instances, vv)
+					}
+				}
+			}
 			result.Resources = append(result.Resources, v)
 		}
 		return result, nil
