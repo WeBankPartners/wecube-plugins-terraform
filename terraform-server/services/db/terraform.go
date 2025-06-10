@@ -1336,12 +1336,13 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 		resourceId := reqParam["id"].(string)
 		var rootResourceAssetId interface{}
 		rootResourceAssetId = ""
-
+		reqParam[models.ResourceIdDataConvert] = resourceId
 		reqParam[models.SimulateResourceDataResult] = make(map[string][]map[string]interface{})
 		toDestroyList := make(map[string]*models.ResourceDataTable)
 		for sourceDataIdx, sortedSourceData := range sortedSourceList {
 			simulateResourceData[sortedSourceData.Id] = []map[string]interface{}{}
-			reqParam[models.SimulateResourceData] = simulateResourceData
+			// 去掉模拟数据场景,模拟数据 simulateResourceData 数据本来也为空
+			// reqParam[models.SimulateResourceData] = simulateResourceData
 			reqParam[models.SourceDataIdx] = sourceDataIdx
 
 			isInternalAction := false
