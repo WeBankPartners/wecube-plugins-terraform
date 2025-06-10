@@ -1,5 +1,10 @@
 package models
 
+import (
+	"encoding/json"
+	"fmt"
+)
+
 type ResourceDataTable struct {
 	Id              string `json:"id" xorm:"id"`
 	Resource        string `json:"resource" xorm:"resource"`
@@ -81,8 +86,34 @@ type FunctionDefineArgs struct {
 }
 
 type TfFileAttrFetchResult struct {
-	AttrBytes  []byte
+	AttrBytes   []byte
 	FileContent string
-	StartIndex int
-	EndIndex   int
+	StartIndex  int
+	EndIndex    int
+}
+
+// ParseTfstateFileData 兼容 resources 为数组或对象
+func ParseTfstateFileData(data []byte) (TfstateFileData, error) {
+	var result TfstateFileData
+	// 先尝试数组
+	type arrType struct {
+		Resources []TfstateFileResources `json:"resources"`
+	}
+	var arr arrType
+	if err := json.Unmarshal(data, &arr); err == nil && len(arr.Resources) > 0 {
+		result.Resources = arr.Resources
+		return result, nil
+	}
+	// 再尝试对象
+	type objType struct {
+		Resources map[string]TfstateFileResources `json:"resources"`
+	}
+	var obj objType
+	if err := json.Unmarshal(data, &obj); err == nil && len(obj.Resources) > 0 {
+		for _, v := range obj.Resources {
+			result.Resources = append(result.Resources, v)
+		}
+		return result, nil
+	}
+	return result, fmt.Errorf("resources is neither array nor object or is empty")
 }

@@ -1909,7 +1909,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 								} else if len(importObjectResourceData) > i {
 									oldTfstateFile := importObjectResourceData[i].TfStateFile
 									var oldTfstateFileObj models.TfstateFileData
-									err = json.Unmarshal([]byte(oldTfstateFile), &oldTfstateFileObj)
+									oldTfstateFileObj, err = models.ParseTfstateFileData([]byte(oldTfstateFile))
 									if err != nil {
 										err = fmt.Errorf("Unmarshal tfstate file data error:%s", err.Error())
 										log.Logger.Error("Unmarshal tfstate file data error", log.Error(err))
@@ -2062,7 +2062,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 								if len(importObjectResourceData) > i {
 									oldTfstateFile := importObjectResourceData[i].TfStateFile
 									var oldTfstateFileObj models.TfstateFileData
-									err = json.Unmarshal([]byte(oldTfstateFile), &oldTfstateFileObj)
+									oldTfstateFileObj, err = models.ParseTfstateFileData([]byte(oldTfstateFile))
 									if err != nil {
 										err = fmt.Errorf("Unmarshal tfstate file data error:%s", err.Error())
 										log.Logger.Error("Unmarshal tfstate file data error", log.Error(err))
@@ -2765,27 +2765,20 @@ func convertAttr(tfArgumentData *models.TfArgumentTable, reqParam map[string]int
 
 		tfstateFileData := resourceData.TfStateFile
 		var unmarshalTfstateFileData models.TfstateFileData
-		err = json.Unmarshal([]byte(tfstateFileData), &unmarshalTfstateFileData)
+		unmarshalTfstateFileData, err = models.ParseTfstateFileData([]byte(tfstateFileData))
 		if err != nil {
 			err = fmt.Errorf("Unmarshal tfstate file data error:%s", err.Error())
 			log.Logger.Error("Unmarshal tfstate file data error", log.Error(err))
 			return
 		}
+		if len(unmarshalTfstateFileData.Resources) == 0 || len(unmarshalTfstateFileData.Resources[0].Instances) == 0 {
+			err = fmt.Errorf("tfstate file data is empty: resources or instances is 0")
+			log.Logger.Error("tfstate file data is empty", log.Error(err))
+			return
+		}
 		var tfstateFileAttributes map[string]interface{}
 		tfstateFileAttributes = unmarshalTfstateFileData.Resources[0].Instances[0].Attributes
 		arg = tfstateFileAttributes[tfstateAttirbuteData.Name]
-		/*
-			if tfArgument.IsMulti == "Y" {
-				tmpRes := []interface{}{}
-				for i := range resourceDataList {
-					tmpRes = append(tmpRes, resourceDataList[i].ResourceAssetId)
-				}
-				arg = tmpRes
-			} else {
-				arg = resourceDataList[0].ResourceAssetId
-			}
-
-		*/
 		return
 	}
 	// 查询 tfArgument 对应的 parameter
@@ -2860,10 +2853,15 @@ func convertAttr(tfArgumentData *models.TfArgumentTable, reqParam map[string]int
 
 		tfstateFileData := resourceData.TfStateFile
 		var unmarshalTfstateFileData models.TfstateFileData
-		err = json.Unmarshal([]byte(tfstateFileData), &unmarshalTfstateFileData)
+		unmarshalTfstateFileData, err = models.ParseTfstateFileData([]byte(tfstateFileData))
 		if err != nil {
 			err = fmt.Errorf("Unmarshal tfstate file data error:%s", err.Error())
 			log.Logger.Error("Unmarshal tfstate file data error", log.Error(err))
+			return
+		}
+		if len(unmarshalTfstateFileData.Resources) == 0 || len(unmarshalTfstateFileData.Resources[0].Instances) == 0 {
+			err = fmt.Errorf("tfstate file data is empty: resources or instances is 0")
+			log.Logger.Error("tfstate file data is empty", log.Error(err))
 			return
 		}
 		var tfstateFileAttributes map[string]interface{}
@@ -2943,11 +2941,16 @@ func reverseConvertAttr(parameterData *models.ParameterTable, tfstateAttributeDa
 	for _, resourceData := range resourceDataList {
 		tfstateFileData := resourceData.TfStateFile
 		var unmarshalTfstateFileData models.TfstateFileData
-		err = json.Unmarshal([]byte(tfstateFileData), &unmarshalTfstateFileData)
+		unmarshalTfstateFileData, err = models.ParseTfstateFileData([]byte(tfstateFileData))
 		if err != nil {
 			err = fmt.Errorf("Unmarshal tfstate file data error:%s", err.Error())
 			log.Logger.Error("Unmarshal tfstate file data error", log.Error(err))
 			continue
+		}
+		if len(unmarshalTfstateFileData.Resources) == 0 || len(unmarshalTfstateFileData.Resources[0].Instances) == 0 {
+			err = fmt.Errorf("tfstate file data is empty: resources or instances is 0")
+			log.Logger.Error("tfstate file data is empty", log.Error(err))
+			return
 		}
 		var tfstateFileAttributes map[string]interface{}
 		tfstateFileAttributes = unmarshalTfstateFileData.Resources[0].Instances[0].Attributes
@@ -4593,6 +4596,11 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 		retOutput["errorMessage"] = err.Error()
 		return
 	}
+	if len(unmarshalTfstateFileData.Resources) == 0 || len(unmarshalTfstateFileData.Resources[0].Instances) == 0 {
+		err = fmt.Errorf("tfstate file data is empty: resources or instances is 0")
+		log.Logger.Error("tfstate file data is empty", log.Error(err))
+		return
+	}
 	var tfstateFileAttributes map[string]interface{}
 	tfstateFileAttributes = unmarshalTfstateFileData.Resources[0].Instances[0].Attributes
 
@@ -5139,6 +5147,11 @@ func getTFStateAssetId(workDirPath string, idAttrName string) (resourceDataResou
 		return
 	}
 	var tfstateFileAttributes map[string]interface{}
+	if len(unmarshalTfstateFileData.Resources) == 0 || len(unmarshalTfstateFileData.Resources[0].Instances) == 0 {
+		err = fmt.Errorf("tfstate file data is empty: resources or instances is 0")
+		log.Logger.Error("tfstate file data is empty", log.Error(err))
+		return
+	}
 	tfstateFileAttributes = unmarshalTfstateFileData.Resources[0].Instances[0].Attributes
 	if v, b := tfstateFileAttributes[idAttrName]; b {
 		resourceDataResourceAssetId = v.(string)
