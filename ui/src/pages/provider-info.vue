@@ -1,8 +1,8 @@
 <template>
-  <div class=" ">
+  <div class="terraform-provider-info">
     <Form inline>
       <FormItem prop="user">
-        <Input type="text" v-model="name" style="width:300px" :placeholder="$t('t_name')"> </Input>
+        <Input type="text" v-model="name" style="width: 300px" :placeholder="$t('t_name')"> </Input>
       </FormItem>
       <FormItem>
         <Button type="primary" @click="getTableData" style="margin-left: 24px">{{ $t('t_search') }}</Button>
@@ -19,20 +19,31 @@
     >
       <Form inline :label-width="80">
         <FormItem :label="$t('t_name')">
-          <Input type="text" v-model="newProviderInfo.form.name" style="width:400px"></Input>
+          <Input type="text" v-model="newProviderInfo.form.name" style="width: 400px"></Input>
         </FormItem>
         <FormItem :label="$t('t_provider')">
-          <Select v-model="newProviderInfo.form.provider" ref="selectProvider" style="width:400px">
+          <Select
+            v-model="newProviderInfo.form.provider"
+            ref="selectProvider"
+            @on-change="handleSelectProvider"
+            style="width: 400px"
+          >
             <Option v-for="provider in newProviderInfo.providerOptions" :value="provider.id" :key="provider.id"
               >{{ provider.name }}
             </Option>
           </Select>
         </FormItem>
         <FormItem :label="$t('t_secret_id')">
-          <Input type="textarea" v-model="newProviderInfo.form.secretId" :rows="4" style="width:400px"></Input>
+          <Input type="textarea" v-model="newProviderInfo.form.secretId" :rows="4" style="width: 400px"></Input>
         </FormItem>
         <FormItem :label="$t('t_secret_key')">
-          <Input type="textarea" v-model="newProviderInfo.form.secretKey" :rows="4" style="width:400px"></Input>
+          <Input type="textarea" v-model="newProviderInfo.form.secretKey" :rows="4" style="width: 400px"></Input>
+        </FormItem>
+        <FormItem v-if="newProviderInfo.providerItem.tenantIdAttrName" :label="$t('t_tenant_id')">
+          <Input type="text" v-model="newProviderInfo.form.tenantId" style="width: 400px"></Input>
+        </FormItem>
+        <FormItem v-if="newProviderInfo.providerItem.subscriptionIdAttrName" :label="$t('t_subscription_id')">
+          <Input type="text" v-model="newProviderInfo.form.subscriptionId" style="width: 400px"></Input>
         </FormItem>
       </Form>
     </Modal>
@@ -50,6 +61,7 @@ export default {
         isShow: false,
         isAdd: true,
         providerOptions: [],
+        providerItem: {},
         form: {
           createTime: '',
           createUser: '',
@@ -58,6 +70,8 @@ export default {
           provider: '',
           secretId: '',
           secretKey: '',
+          tenantId: '',
+          subscriptionId: '',
           updateTime: '',
           updateUser: ''
         }
@@ -70,6 +84,8 @@ export default {
         provider: '',
         secretId: '',
         secretKey: '',
+        tenantId: '',
+        subscriptionId: '',
         updateTime: '',
         updateUser: ''
       },
@@ -89,6 +105,14 @@ export default {
         {
           title: this.$t('t_secret_id'),
           key: 'secretId'
+        },
+        {
+          title: this.$t('t_tenant_id'),
+          key: 'tenantId'
+        },
+        {
+          title: this.$t('t_subscription_id'),
+          key: 'subscriptionId'
         },
         {
           title: this.$t('t_action'),
@@ -189,7 +213,9 @@ export default {
     async getProvider () {
       const { statusCode, data } = await getProviders()
       if (statusCode === 'OK') {
-        this.newProviderInfo.providerOptions = data
+        this.newProviderInfo.providerOptions = data || []
+        this.newProviderInfo.providerItem =
+          this.newProviderInfo.providerOptions.find(item => item.id === this.newProviderInfo.form.provider) || {}
       }
     },
     async getTableData () {
@@ -197,10 +223,18 @@ export default {
       if (statusCode === 'OK') {
         this.tableData = data
       }
+    },
+    handleSelectProvider (val) {
+      this.newProviderInfo.providerItem = this.newProviderInfo.providerOptions.find(item => item.id === val) || {}
     }
-  },
-  components: {}
+  }
 }
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.terraform-provider-info {
+  .ivu-form-inline .ivu-form-item {
+    margin-bottom: 10px;
+  }
+}
+</style>

@@ -73,5 +73,9 @@
   "t_local_upload": "上传",
   "t_online_download_tip": "连网场景，下载官方提供的provider文件",
   "t_local_upload_tip": "离线场景，上传本地制做的provider文件",
-  "t_reset": "重置"
+  "t_reset": "重置",
+  "t_tenant_id": "租户ID(微软云)",
+  "t_subscription_id": "订阅ID(微软云)",
+  "t_tenant_id_key": "租户ID属性名称(微软云)",
+  "t_subscription_id_key": "订阅ID属性名称(微软云)"
 }
