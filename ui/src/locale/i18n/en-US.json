@@ -73,5 +73,9 @@
   "t_local_upload": "Upload",
   "t_online_download_tip": "In online scenarios, download the official provider file",
   "t_local_upload_tip": "In offline scenarios, upload the locally made provider file",
-  "t_reset": "Reset"
+  "t_reset": "Reset",
+  "t_tenant_id": "Tenant ID(Azurerm)",
+  "t_subscription_id": "Subscription ID(Azurerm)",
+  "t_tenant_id_key": "Tenant ID Attr Name(Azurerm)",
+  "t_subscription_id_key": "Subscription ID Attr Name(Azurerm)"
 }

@@ -1,10 +1,6 @@
 <template>
   <div class=" ">
-    <Form inline>
-      <FormItem>
-        <Button @click="addProvider" style="margin-left: 24px" type="primary">{{ $t('t_add') }}</Button>
-      </FormItem>
-    </Form>
+    <Button @click="addProvider" style="margin-bottom: 10px" type="primary">{{ $t('t_add') }}</Button>
     <Table border size="small" :columns="tableColumns" :data="tableData"></Table>
     <Modal
       v-model="newProvider.isShow"
@@ -32,6 +28,12 @@
         <FormItem :label="$t('t_secretKey_attr_name')">
           <Input type="text" v-model="newProvider.form.secretKeyAttrName" style="width: 400px"></Input>
         </FormItem>
+        <FormItem :label="$t('t_tenant_id_key')">
+          <Input type="text" v-model="newProvider.form.tenantIdAttrName" style="width: 400px"></Input>
+        </FormItem>
+        <FormItem :label="$t('t_subscription_id_key')">
+          <Input type="text" v-model="newProvider.form.subscriptionIdAttrName" style="width: 400px"></Input>
+        </FormItem>
       </Form>
     </Modal>
   </div>
@@ -57,6 +59,8 @@ export default {
           regionAttrName: '',
           secretIdAttrName: '',
           secretKeyAttrName: '',
+          tenantIdAttrName: '',
+          subscriptionIdAttrName: '',
           updateTime: '',
           updateUser: '',
           version: ''
@@ -71,6 +75,8 @@ export default {
         regionAttrName: '',
         secretIdAttrName: '',
         secretKeyAttrName: '',
+        tenantIdAttrName: '',
+        subscriptionIdAttrName: '',
         updateTime: '',
         updateUser: '',
         version: ''
@@ -99,6 +105,14 @@ export default {
         {
           title: this.$t('t_secretKey_attr_name'),
           key: 'secretKeyAttrName'
+        },
+        {
+          title: this.$t('t_tenant_id_key'),
+          key: 'tenantIdAttrName'
+        },
+        {
+          title: this.$t('t_subscription_id_key'),
+          key: 'subscriptionIdAttrName'
         },
         {
           title: this.$t('t_initialized'),
