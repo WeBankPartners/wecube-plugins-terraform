@@ -5232,6 +5232,24 @@ func ParseTfstateFileData(data []byte) (models.TfstateFileData, error) {
 			return result, nil
 		}
 	}
+	// 如果 resources 有内容但 instances 为空，且原始数据有 attributes，兜底
+	if len(result.Resources) == 1 && (result.Resources[0].Instances == nil || len(result.Resources[0].Instances) == 0) {
+		type attrType struct {
+			Resources struct {
+				Instances struct {
+					Attributes map[string]interface{} `json:"attributes"`
+				} `json:"instances"`
+			} `json:"resources"`
+		}
+		var at attrType
+		if err := json.Unmarshal(data, &at); err == nil && len(at.Resources.Instances.Attributes) > 0 {
+			result.Resources[0].Instances = []models.TfstateFileAttributes{
+				{Attributes: at.Resources.Instances.Attributes},
+			}
+			log.Logger.Debug("[ParseTfstateFileData] result (instances fallback)", log.JsonObj("result", result))
+			return result, nil
+		}
+	}
 	log.Logger.Debug("[ParseTfstateFileData] parse failed", log.String("input", string(data)))
 	return result, fmt.Errorf("resources is neither array nor object or is empty")
 }
