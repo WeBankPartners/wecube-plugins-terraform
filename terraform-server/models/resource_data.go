@@ -3,6 +3,7 @@ package models
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/common/log"
 )
 
 type ResourceDataTable struct {
@@ -94,6 +95,7 @@ type TfFileAttrFetchResult struct {
 
 // ParseTfstateFileData 兼容 resources 为数组或对象，并兼容 instances 为对象或数组
 func ParseTfstateFileData(data []byte) (TfstateFileData, error) {
+	log.Logger.Debug("[ParseTfstateFileData] input", log.String("data", string(data)))
 	var result TfstateFileData
 	// 先尝试数组
 	type arrType struct {
@@ -101,10 +103,8 @@ func ParseTfstateFileData(data []byte) (TfstateFileData, error) {
 	}
 	var arr arrType
 	if err := json.Unmarshal(data, &arr); err == nil && len(arr.Resources) > 0 {
-		// 兼容 instances 为对象
 		for i, res := range arr.Resources {
 			if len(res.Instances) == 0 {
-				// 尝试解析为对象
 				tmp := struct {
 					Instances map[string]TfstateFileAttributes `json:"instances"`
 				}{}
@@ -117,6 +117,7 @@ func ParseTfstateFileData(data []byte) (TfstateFileData, error) {
 			}
 		}
 		result.Resources = arr.Resources
+		log.Logger.Debug("[ParseTfstateFileData] result", log.JsonObj("result", result))
 		return result, nil
 	}
 	// 再尝试对象
@@ -126,7 +127,6 @@ func ParseTfstateFileData(data []byte) (TfstateFileData, error) {
 	var obj objType
 	if err := json.Unmarshal(data, &obj); err == nil && len(obj.Resources) > 0 {
 		for _, v := range obj.Resources {
-			// 兼容 instances 为对象
 			if len(v.Instances) == 0 {
 				tmp := struct {
 					Instances map[string]TfstateFileAttributes `json:"instances"`
@@ -140,7 +140,29 @@ func ParseTfstateFileData(data []byte) (TfstateFileData, error) {
 			}
 			result.Resources = append(result.Resources, v)
 		}
+		log.Logger.Debug("[ParseTfstateFileData] result", log.JsonObj("result", result))
 		return result, nil
 	}
+	// 如果 resources 只有一层，且 instances 为空，但有 attributes，兜底
+	if len(result.Resources) == 0 {
+		type attrType struct {
+			Resources struct {
+				Instances struct {
+					Attributes map[string]interface{} `json:"attributes"`
+				} `json:"instances"`
+			} `json:"resources"`
+		}
+		var at attrType
+		if err := json.Unmarshal(data, &at); err == nil && len(at.Resources.Instances.Attributes) > 0 {
+			result.Resources = append(result.Resources, TfstateFileResources{
+				Instances: []TfstateFileAttributes{
+					{Attributes: at.Resources.Instances.Attributes},
+				},
+			})
+			log.Logger.Debug("[ParseTfstateFileData] result", log.JsonObj("result", result))
+			return result, nil
+		}
+	}
+	log.Logger.Debug("[ParseTfstateFileData] parse failed", log.String("input", string(data)))
 	return result, fmt.Errorf("resources is neither array nor object or is empty")
 }
