@@ -1,11 +1,5 @@
 package models
 
-import (
-	"encoding/json"
-	"fmt"
-	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/common/log"
-)
-
 type ResourceDataTable struct {
 	Id              string `json:"id" xorm:"id"`
 	Resource        string `json:"resource" xorm:"resource"`
@@ -91,78 +85,4 @@ type TfFileAttrFetchResult struct {
 	FileContent string
 	StartIndex  int
 	EndIndex    int
-}
-
-// ParseTfstateFileData 兼容 resources 为数组或对象，并兼容 instances 为对象或数组
-func ParseTfstateFileData(data []byte) (TfstateFileData, error) {
-	log.Logger.Debug("[ParseTfstateFileData] input", log.String("data", string(data)))
-	var result TfstateFileData
-	// 先尝试数组
-	type arrType struct {
-		Resources []TfstateFileResources `json:"resources"`
-	}
-	var arr arrType
-	if err := json.Unmarshal(data, &arr); err == nil && len(arr.Resources) > 0 {
-		for i, res := range arr.Resources {
-			if len(res.Instances) == 0 {
-				tmp := struct {
-					Instances map[string]TfstateFileAttributes `json:"instances"`
-				}{}
-				b, _ := json.Marshal(res)
-				if err2 := json.Unmarshal(b, &tmp); err2 == nil && len(tmp.Instances) > 0 {
-					for _, v := range tmp.Instances {
-						arr.Resources[i].Instances = append(arr.Resources[i].Instances, v)
-					}
-				}
-			}
-		}
-		result.Resources = arr.Resources
-		log.Logger.Debug("[ParseTfstateFileData] result", log.JsonObj("result", result))
-		return result, nil
-	}
-	// 再尝试对象
-	type objType struct {
-		Resources map[string]TfstateFileResources `json:"resources"`
-	}
-	var obj objType
-	if err := json.Unmarshal(data, &obj); err == nil && len(obj.Resources) > 0 {
-		for _, v := range obj.Resources {
-			if len(v.Instances) == 0 {
-				tmp := struct {
-					Instances map[string]TfstateFileAttributes `json:"instances"`
-				}{}
-				b, _ := json.Marshal(v)
-				if err2 := json.Unmarshal(b, &tmp); err2 == nil && len(tmp.Instances) > 0 {
-					for _, vv := range tmp.Instances {
-						v.Instances = append(v.Instances, vv)
-					}
-				}
-			}
-			result.Resources = append(result.Resources, v)
-		}
-		log.Logger.Debug("[ParseTfstateFileData] result", log.JsonObj("result", result))
-		return result, nil
-	}
-	// 如果 resources 只有一层，且 instances 为空，但有 attributes，兜底
-	if len(result.Resources) == 0 {
-		type attrType struct {
-			Resources struct {
-				Instances struct {
-					Attributes map[string]interface{} `json:"attributes"`
-				} `json:"instances"`
-			} `json:"resources"`
-		}
-		var at attrType
-		if err := json.Unmarshal(data, &at); err == nil && len(at.Resources.Instances.Attributes) > 0 {
-			result.Resources = append(result.Resources, TfstateFileResources{
-				Instances: []TfstateFileAttributes{
-					{Attributes: at.Resources.Instances.Attributes},
-				},
-			})
-			log.Logger.Debug("[ParseTfstateFileData] result", log.JsonObj("result", result))
-			return result, nil
-		}
-	}
-	log.Logger.Debug("[ParseTfstateFileData] parse failed", log.String("input", string(data)))
-	return result, fmt.Errorf("resources is neither array nor object or is empty")
 }
