@@ -18,4 +18,14 @@ then
   cp -r /data/terraform/providers_tpl/* /data/terraform/providers/
 fi
 
+if [ -n "$TERRAFORM_LOCAL_DNS_MAP" ]
+then
+  dns_map=${TERRAFORM_LOCAL_DNS_MAP}
+  set ${dns_map//,/ }
+  for v in "$@"
+  do
+    echo "${v//=/ }" >> /etc/hosts
+  done
+fi
+
 ./terraform-server
