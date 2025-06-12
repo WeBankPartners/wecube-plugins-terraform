@@ -20,7 +20,7 @@
     <systemParameters>
         <systemParameter name="TERRAFORM_LOG_LEVEL" scopeType="plugin" defaultValue="info"/>
         <systemParameter name="TERRAFORM_SECRET_KEY_SEED" scopeType="plugin" defaultValue="Abcdef123456"/>
-        <systemParameter name="TERRAFORM_HTTP_TIMEOUT" scopeType="plugin" defaultValue="15"/>
+        <systemParameter name="TERRAFORM_HTTP_TIMEOUT" scopeType="plugin" defaultValue="900"/>
         <systemParameter name="TERRAFORM_LOCAL_DNS_MAP" scopeType="global" defaultValue=""/>
     </systemParameters>
 
