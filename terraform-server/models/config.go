@@ -70,7 +70,7 @@ type GlobalConfig struct {
 	TerraformProviderOsArch string                        `json:"terraform_provider_os_arch"`
 	Version                 string                        `json:"version"`
 	RequestConsumerCount    int                           `json:"request_consumer_count"`
-	// default json
+	HttpTimeout             int                           `json:"terraform_http_timeout"`
 }
 
 type DefaultReportObjAttrConfig struct {

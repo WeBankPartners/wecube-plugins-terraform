@@ -369,7 +369,7 @@ func execRemoteWithTimeout(cmdStr []string, timeOut int) (out string, err error)
 func TerraformImport(dirPath, address, resourceAssetId string) (err error) {
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=\"" + dirPath + "\" import -no-color " + address + " " + resourceAssetId
 	log.Logger.Debug("[TerraformImport] cmd", log.String("cmdStr", cmdStr))
-	out, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.CommandTimeOut)
+	out, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.Config.RequestConsumerCount)
 	log.Logger.Debug("[TerraformImport] result", log.String("output", out), log.Error(cmdErr))
 	if cmdErr != nil {
 		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
@@ -394,7 +394,7 @@ func TerraformImport(dirPath, address, resourceAssetId string) (err error) {
 func TerraformPlan(dirPath string) (destroyCnt int, err error) {
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=\"" + dirPath + "\" plan -input=false -no-color"
 	log.Logger.Debug("[TerraformPlan] cmd", log.String("cmdStr", cmdStr))
-	output, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.CommandTimeOut)
+	output, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.Config.HttpTimeout)
 	log.Logger.Debug("[TerraformPlan] result", log.String("output", output), log.Error(cmdErr))
 	if cmdErr != nil {
 		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
@@ -473,11 +473,9 @@ func TerraformPlan(dirPath string) (destroyCnt int, err error) {
 func TerraformApply(dirPath string) (err error) {
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=\"" + dirPath + "\" apply -auto-approve -no-color"
 	log.Logger.Debug("[TerraformApply] cmd", log.String("cmdStr", cmdStr))
-	out, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.CommandTimeOut)
+	out, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.Config.HttpTimeout)
 	log.Logger.Debug("[TerraformApply] result", log.String("output", out), log.Error(cmdErr))
 	if cmdErr != nil {
-		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
-		// outPutStr := string(stderr.Bytes())
 		outPutStr := cmdErr.Error()
 		errorMsgRegx := regexp.MustCompile(`Error: ([\S\s]*)`)
 		errorMsg := errorMsgRegx.FindStringSubmatch(outPutStr)
@@ -498,7 +496,7 @@ func TerraformApply(dirPath string) (err error) {
 func TerraformDestroy(dirPath string) (err error) {
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=\"" + dirPath + "\" destroy -auto-approve -no-color"
 	log.Logger.Debug("[TerraformDestroy] cmd", log.String("cmdStr", cmdStr))
-	out, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.CommandTimeOut)
+	out, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.Config.HttpTimeout)
 	log.Logger.Debug("[TerraformDestroy] result", log.String("output", out), log.Error(cmdErr))
 	if cmdErr != nil {
 		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
@@ -523,7 +521,7 @@ func TerraformDestroy(dirPath string) (err error) {
 func TerraformInit(dirPath string) (err error) {
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=\"" + dirPath + "\" init -no-color" + " -plugin-dir=\"" + dirPath + "/.terraform/providers\""
 	log.Logger.Debug("[TerraformInit] cmd", log.String("cmdStr", cmdStr))
-	out, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.CommandTimeOut)
+	out, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.Config.HttpTimeout)
 	log.Logger.Debug("[TerraformInit] result", log.String("output", out), log.Error(cmdErr))
 	if cmdErr != nil {
 		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
@@ -4186,6 +4184,18 @@ func handleConvertParams(action string,
 		}
 
 		if action == "apply" && convertWay == models.ConvertWay["Direct"] && arg != nil && tfArgumentList[i].Parameter != "" {
+			// 查询 tfArgument 对应的 parameter
+			/*
+				sqlCmd := `SELECT * FROM parameter WHERE id=?`
+				paramArgs := []interface{}{tfArgumentList[i].Parameter}
+				var parameterList []*models.ParameterTable
+				err = x.SQL(sqlCmd, paramArgs...).Find(&parameterList)
+				if err != nil {
+					err = fmt.Errorf("Get Parameter data by id:%s error:%s", tfArgumentList[i].Parameter, err.Error())
+					log.Logger.Error("Get parameter data by id error", log.String("id", tfArgumentList[i].Parameter), log.Error(err))
+					return
+				}
+			*/
 			if tfArgumentList[i].IsNull == "Y" {
 				// read tf_file and check if the tfArgument has the same key and val
 				// Get the resource_data list by resource_id and source and region_id
@@ -4233,6 +4243,17 @@ func handleConvertParams(action string,
 						}
 					}
 				}
+				/*
+					if parameterData.Name == "id" {
+						// if arg != nil {
+						// 	resourceId = arg.(string)
+						// }
+					} else if parameterData.Name == "asset_id" {
+						if arg != nil {
+							resourceAssetId = arg.(string)
+						}
+					}
+				*/
 				continue
 			}
 
@@ -4421,33 +4442,7 @@ func handleConvertParams(action string,
 		// 	delete(tfArguments, tfArgumentList[i].Name)
 		// }
 	}
-	// 在返回 tfArguments 之前，处理点号转对象
-	tfArguments = ParseDotNotation(tfArguments)
 	return
-}
-
-// ParseDotNotation 将 map[string]interface{} 中带点号的 key 转为嵌套对象
-func ParseDotNotation(input map[string]interface{}) map[string]interface{} {
-	result := make(map[string]interface{})
-	for k, v := range input {
-		parts := strings.SplitN(k, ".", 2)
-		if len(parts) == 1 {
-			result[k] = v
-		} else {
-			if _, ok := result[parts[0]]; !ok {
-				result[parts[0]] = make(map[string]interface{})
-			}
-			subMap := result[parts[0]].(map[string]interface{})
-			subMap[parts[1]] = v
-		}
-	}
-	// 递归处理多级嵌套
-	for k, v := range result {
-		if subMap, ok := v.(map[string]interface{}); ok {
-			result[k] = ParseDotNotation(subMap)
-		}
-	}
-	return result
 }
 
 func handleTfstateOutPut(sourceData *models.SourceTable,

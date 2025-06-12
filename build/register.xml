@@ -20,6 +20,7 @@
     <systemParameters>
         <systemParameter name="TERRAFORM_LOG_LEVEL" scopeType="plugin" defaultValue="info"/>
         <systemParameter name="TERRAFORM_SECRET_KEY_SEED" scopeType="plugin" defaultValue="Abcdef123456"/>
+        <systemParameter name="TERRAFORM_HTTP_TIMEOUT" scopeType="plugin" defaultValue="15"/>
         <systemParameter name="TERRAFORM_LOCAL_DNS_MAP" scopeType="global" defaultValue=""/>
     </systemParameters>
 
@@ -38,7 +39,7 @@
                 containerName="{{REPOSITORY}}-{{PLUGIN_VERSION}}"
                 portBindings="{{ALLOCATE_PORT}}:8999"
                 volumeBindings="{{BASE_MOUNT_PATH}}/terraform/log:/app/terraform/logs,/etc/localtime:/etc/localtime,{{BASE_MOUNT_PATH}}/certs:/data/certs,{{BASE_MOUNT_PATH}}/terraform/providers:/data/terraform/providers"
-                envVariables="TERRAFORM_MYSQL_HOST={{DB_HOST}},TERRAFORM_MYSQL_PORT={{DB_PORT}},TERRAFORM_MYSQL_SCHEMA={{DB_SCHEMA}},TERRAFORM_MYSQL_USER={{DB_USER}},TERRAFORM_MYSQL_PWD={{DB_PWD}},JWT_SIGNING_KEY={{JWT_SIGNING_KEY}},GATEWAY_URL={{GATEWAY_URL}},SUB_SYSTEM_CODE={{SUB_SYSTEM_CODE}},SUB_SYSTEM_KEY={{SUB_SYSTEM_KEY}},TERRAFORM_LOG_LEVEL={{TERRAFORM_LOG_LEVEL}},PLUGIN_VERSION={{PLUGIN_VERSION}},TERRAFORM_SECRET_KEY_SEED={{TERRAFORM_SECRET_KEY_SEED}},TERRAFORM_LOCAL_DNS_MAP={{TERRAFORM_LOCAL_DNS_MAP}}"
+                envVariables="TERRAFORM_MYSQL_HOST={{DB_HOST}},TERRAFORM_MYSQL_PORT={{DB_PORT}},TERRAFORM_MYSQL_SCHEMA={{DB_SCHEMA}},TERRAFORM_MYSQL_USER={{DB_USER}},TERRAFORM_MYSQL_PWD={{DB_PWD}},JWT_SIGNING_KEY={{JWT_SIGNING_KEY}},GATEWAY_URL={{GATEWAY_URL}},SUB_SYSTEM_CODE={{SUB_SYSTEM_CODE}},SUB_SYSTEM_KEY={{SUB_SYSTEM_KEY}},TERRAFORM_LOG_LEVEL={{TERRAFORM_LOG_LEVEL}},PLUGIN_VERSION={{PLUGIN_VERSION}},TERRAFORM_SECRET_KEY_SEED={{TERRAFORM_SECRET_KEY_SEED}},TERRAFORM_LOCAL_DNS_MAP={{TERRAFORM_LOCAL_DNS_MAP}},TERRAFORM_HTTP_TIMEOUT={{TERRAFORM_HTTP_TIMEOUT}}"
         />
         <mysql schema="terraform" initFileName="init.sql" upgradeFileName="upgrade.sql"/>
     </resourceDependencies>
