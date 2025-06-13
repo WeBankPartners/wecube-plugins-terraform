@@ -37,7 +37,7 @@
   "t_version": "版本",
   "t_region_attr_name": "地域属性名称",
   "t_secretKey_attr_name": "秘钥Key属性名称",
-  "t_secretId_attr_name": "秘钥Id属性名称",
+  "t_secretId_attr_name": "秘钥ID属性名称",
   "t_initialized": "是否初始化",
   "t_source": "资源",
   "t_resource_asset_id_Attribute": "资产ID属性",

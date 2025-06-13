@@ -4,35 +4,36 @@
     <Table border size="small" :columns="tableColumns" :data="tableData"></Table>
     <Modal
       v-model="newProvider.isShow"
-      :title="newProvider.isAdd ? $t('t_add') : $t('t_edit') + $t('t_provider')"
+      :title="(newProvider.isAdd ? $t('t_add') : $t('t_edit')) + $t('t_provider')"
       :mask-closable="false"
+      :width="700"
       @on-ok="confirmProvider"
       @on-cancel="confirmProvider.isShow = false"
     >
-      <Form inline :label-width="80">
+      <Form inline :label-width="120">
         <FormItem :label="$t('t_name')">
-          <Input type="text" v-model="newProvider.form.name" style="width: 400px"></Input>
+          <Input type="text" v-model="newProvider.form.name" style="width: 520px"></Input>
         </FormItem>
         <FormItem :label="$t('t_namespace')">
-          <Input type="text" v-model="newProvider.form.nameSpace" style="width: 400px"></Input>
+          <Input type="text" v-model="newProvider.form.nameSpace" style="width: 520px"></Input>
         </FormItem>
         <FormItem :label="$t('t_version')">
-          <Input type="text" v-model="newProvider.form.version" :rows="4" style="width: 400px"></Input>
+          <Input type="text" v-model="newProvider.form.version" :rows="4" style="width: 520px"></Input>
         </FormItem>
         <FormItem :label="$t('t_region_attr_name')">
-          <Input type="text" v-model="newProvider.form.regionAttrName" style="width: 400px"></Input>
+          <Input type="text" v-model="newProvider.form.regionAttrName" style="width: 520px"></Input>
         </FormItem>
         <FormItem :label="$t('t_secretId_attr_name')">
-          <Input type="text" v-model="newProvider.form.secretIdAttrName" style="width: 400px"></Input>
+          <Input type="text" v-model="newProvider.form.secretIdAttrName" style="width: 520px"></Input>
         </FormItem>
         <FormItem :label="$t('t_secretKey_attr_name')">
-          <Input type="text" v-model="newProvider.form.secretKeyAttrName" style="width: 400px"></Input>
+          <Input type="text" v-model="newProvider.form.secretKeyAttrName" style="width: 520px"></Input>
         </FormItem>
         <FormItem :label="$t('t_tenant_id_key')">
-          <Input type="text" v-model="newProvider.form.tenantIdAttrName" style="width: 400px"></Input>
+          <Input type="text" v-model="newProvider.form.tenantIdAttrName" style="width: 520px"></Input>
         </FormItem>
         <FormItem :label="$t('t_subscription_id_key')">
-          <Input type="text" v-model="newProvider.form.subscriptionIdAttrName" style="width: 400px"></Input>
+          <Input type="text" v-model="newProvider.form.subscriptionIdAttrName" style="width: 520px"></Input>
         </FormItem>
       </Form>
     </Modal>
