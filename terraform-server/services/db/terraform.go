@@ -369,7 +369,7 @@ func execRemoteWithTimeout(cmdStr []string, timeOut int) (out string, err error)
 func TerraformImport(dirPath, address, resourceAssetId string) (err error) {
 	cmdStr := models.Config.TerraformCmdPath + " -chdir=\"" + dirPath + "\" import -no-color " + address + " " + resourceAssetId
 	log.Logger.Debug("[TerraformImport] cmd", log.String("cmdStr", cmdStr))
-	out, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.Config.RequestConsumerCount)
+	out, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.Config.HttpTimeout)
 	log.Logger.Debug("[TerraformImport] result", log.String("output", out), log.Error(cmdErr))
 	if cmdErr != nil {
 		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
