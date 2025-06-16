@@ -77,5 +77,9 @@
   "t_tenant_id": "Tenant ID(Azurerm)",
   "t_subscription_id": "Subscription ID(Azurerm)",
   "t_tenant_id_key": "Tenant ID Attr Name(Azurerm)",
-  "t_subscription_id_key": "Subscription ID Attr Name(Azurerm)"
+  "t_subscription_id_key": "Subscription ID Attr Name(Azurerm)",
+  "t_resource_placeholder": "Please Select Resources",
+  "t_refresh_success_tips": "Data Refresh Successful",
+  "t_select_plugin": "Please Select Plugin",
+  "t_select_interface": "Please Select Interface"
 }

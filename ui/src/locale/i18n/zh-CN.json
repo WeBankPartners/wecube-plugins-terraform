@@ -77,5 +77,9 @@
   "t_tenant_id": "租户ID(微软云)",
   "t_subscription_id": "订阅ID(微软云)",
   "t_tenant_id_key": "租户ID属性名称(微软云)",
-  "t_subscription_id_key": "订阅ID属性名称(微软云)"
+  "t_subscription_id_key": "订阅ID属性名称(微软云)",
+  "t_resource_placeholder": "请选择资源",
+  "t_refresh_success_tips": "调试数据刷新成功",
+  "t_select_plugin": "请选择插件",
+  "t_select_interface": "请选择接口"
 }
