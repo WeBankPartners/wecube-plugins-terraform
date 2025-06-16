@@ -1860,17 +1860,20 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					destroyAssetId := ""
 					totalDestroyCnt := len(toDestroyResource)
 					if len(toDestroyResource) > 0 {
+						log.Logger.Warn("Resources marked for destruction from toDestroyResource:",
+							log.Int("count", len(toDestroyResource)))
 						for _, resourceData := range toDestroyResource {
 							destroyAssetId += resourceData.ResourceAssetId + ", "
+							log.Logger.Warn("Resource to be destroyed:",
+								log.String("assetId", resourceData.ResourceAssetId),
+								log.String("resourceId", resourceData.ResourceId))
 						}
 					}
 
 					for i := range conStructObject {
-						curDebugFileContent := (*debugFileContent)[curDebugFileStartIdx+i]
 						// check if importObject needed to be destroy
 						if _, ok := importObject[i]; ok || (sourceDataIdx == 0 && rootResourceAssetId != "" && rootResourceAssetId != nil) {
 							// Gen tf.json file
-							// uuid := "_" + guid.CreateGuid()
 							_, err = GenTfFile(workDirPath, sortedSourceData, action, resourceId, conStructObject[i])
 							if err != nil {
 								err = fmt.Errorf("Gen tfFile error: %s", err.Error())
@@ -1884,7 +1887,6 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 								err = fmt.Errorf("Do TerraformInit error:%s", err.Error())
 								log.Logger.Error("Do TerraformInit error", log.Error(err))
 								rowData["errorMessage"] = err.Error()
-								// return
 								continue
 							}
 
@@ -1900,74 +1902,9 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 									if strings.Contains(errMsg, "Cannot import non-existent remote object") == false {
 										err = fmt.Errorf("Do TerraformImport error:%s", err.Error())
 										rowData["errorMessage"] = err.Error()
-										// return
 										continue
-									} else {
-										// deleteOldResourceData(sortedSourceData, regionData, resourceId, importObject[i], reqParam)
 									}
-								} else if len(importObjectResourceData) > i {
-									oldTfstateFile := importObjectResourceData[i].TfStateFile
-									var oldTfstateFileObj models.TfstateFileData
-									oldTfstateFileObj, err = ParseTfstateFileData([]byte(oldTfstateFile))
-									if err != nil {
-										err = fmt.Errorf("Unmarshal tfstate file data error:%s", err.Error())
-										log.Logger.Error("Unmarshal tfstate file data error", log.Error(err))
-										return
-									}
-
-									secondFileObj := getFileAttrContent(workDirPath + "/terraform.tfstate")
-									first, second := make(map[string]interface{}), make(map[string]interface{})
-									first = oldTfstateFileObj.Resources[0].Instances[0].Attributes
-									err = json.Unmarshal(secondFileObj.AttrBytes, &second)
-									if err != nil {
-										fmt.Printf("json unmarshal second file fail,%s \n", err.Error())
-										return
-									}
-
-									result, diff, message := compareObject(first, second)
-									if diff != 0 {
-										err = fmt.Errorf("Compare import_state file and old tfstate file error:%s. Please confirm again!", message)
-										log.Logger.Error("Compare import_state file and old tfstate file error", log.String("message", message), log.Error(err))
-										rowData["errorMessage"] = err.Error()
-										rowData["errorCode"] = "-1"
-										return
-									}
-									resultBytes, tmpErr := json.MarshalIndent(result, "        ", "\t")
-									if tmpErr != nil {
-										err = fmt.Errorf("json marshal result fail,%s \n", tmpErr.Error())
-										return
-									}
-
-									newFileBytes := []byte{}
-									newFileWriter := bytes.NewBuffer(newFileBytes)
-									newFileWriter.WriteString(secondFileObj.FileContent[:secondFileObj.StartIndex])
-									newFileWriter.Write(resultBytes)
-									newFileWriter.WriteString(secondFileObj.FileContent[secondFileObj.EndIndex:])
-									ioutil.WriteFile(workDirPath+"/terraform.tfstate", newFileWriter.Bytes(), 0644)
 								}
-							} else {
-								// get tfstate file from resource_data table and gen it
-								data := importObjectResourceData[i]
-								if data == nil {
-									log.Logger.Warn(fmt.Sprintf("No matching resource_data for conStructObject[%d], skip tfstate file generation", i))
-									continue
-								}
-								tfstateFileContent := data.TfStateFile
-								tfstateFilePath := workDirPath + "/terraform.tfstate"
-								GenFile([]byte(tfstateFileContent), tfstateFilePath)
-							}
-							if _, ok := reqParam[models.ResourceDataDebug]; ok {
-								// get import tfstate file
-								tfstateFilePath := workDirPath + "/terraform.tfstate"
-								tfstateImportFileData, tmpErr := ReadFile(tfstateFilePath)
-								if tmpErr != nil {
-									err = fmt.Errorf("Read tfstate import file error:%s", tmpErr.Error())
-									log.Logger.Error("Read tfstate import file error", log.Error(err))
-									rowData["errorMessage"] = err.Error()
-									// return
-								}
-								tfstateImportFileContentStr := string(tfstateImportFileData)
-								curDebugFileContent["tf_state_import"] = tfstateImportFileContentStr
 							}
 
 							destroyCnt, tmpErr := TerraformPlan(workDirPath)
@@ -1975,37 +1912,41 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 								err = fmt.Errorf("Do TerraformPlan error:%s", tmpErr.Error())
 								log.Logger.Error("Do TerraformPlan error", log.Error(err))
 								rowData["errorMessage"] = err.Error()
-								// return
+								continue
 							}
 
 							if destroyCnt > 0 {
-								// 二次确认
 								totalDestroyCnt += destroyCnt
-								destroyAssetId += importObject[i] + ", "
-							}
-
-							if _, ok := reqParam[models.ResourceDataDebug]; ok {
-								// get plan file
-								planFilePath := workDirPath + "/planfile"
-								planFileData, tmpErr := ReadFile(planFilePath)
-								if tmpErr != nil {
-									err = fmt.Errorf("Read tfstate import file error:%s", tmpErr.Error())
-									log.Logger.Error("Read tfstate import file error", log.Error(err))
-									rowData["errorMessage"] = err.Error()
-									// return
+								currentAssetId := ""
+								if sourceDataIdx == 0 && rootResourceAssetId != "" && rootResourceAssetId != nil {
+									currentAssetId = rootResourceAssetId.(string)
+								} else {
+									currentAssetId = importObject[i]
 								}
-								planFileContentStr := string(planFileData)
-								curDebugFileContent["plan_message"] = planFileContentStr
-							}
+								destroyAssetId += currentAssetId + ", "
 
-							DelTfstateFile(workDirPath)
+								log.Logger.Warn("Additional resources to be destroyed from Terraform plan:",
+									log.String("source", sortedSourceData.Name),
+									log.String("assetId", currentAssetId),
+									log.Int("destroyCount", destroyCnt))
+
+								// 读取并记录plan文件的详细信息
+								planContent, readErr := ReadFile(workDirPath + "/planfile")
+								if readErr == nil {
+									log.Logger.Warn("Terraform plan details:",
+										log.String("assetId", currentAssetId),
+										log.String("planDetails", string(planContent)))
+								}
+							}
 						}
 					}
-					// test
-					// totalDestroyCnt = 1
+
 					if totalDestroyCnt > 0 {
-						destroyCntStr := strconv.Itoa(totalDestroyCnt)
-						rowData["errorMessage"] = destroyCntStr + " resource(s) will be destroy: " + destroyAssetId + "please confirm again!"
+						destroyMsg := fmt.Sprintf("%d resource(s) will be destroyed: %s", totalDestroyCnt, destroyAssetId)
+						log.Logger.Warn("Total destruction summary:",
+							log.Int("totalCount", totalDestroyCnt),
+							log.String("allAssetIds", destroyAssetId))
+						rowData["errorMessage"] = destroyMsg + "please confirm again!"
 						rowData["errorCode"] = "-1"
 						return
 					}

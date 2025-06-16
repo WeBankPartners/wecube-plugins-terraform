@@ -212,7 +212,36 @@ func httpLogHandle() gin.HandlerFunc {
 		c.Request.Body.Close()
 		c.Request.Body = ioutil.NopCloser(bytes.NewReader(bodyBytes))
 		c.Set("requestBody", string(bodyBytes))
+
+		// Create a custom ResponseWriter to capture the response
+		blw := &bodyLogWriter{body: bytes.NewBufferString(""), ResponseWriter: c.Writer}
+		c.Writer = blw
+
 		c.Next()
-		log.AccessLogger.Info("request", log.String("url", c.Request.RequestURI), log.String("method", c.Request.Method), log.Int("code", c.Writer.Status()), log.String("operator", c.GetString("user")), log.String("ip", middleware.GetRemoteIp(c)), log.Float64("cost_ms", time.Now().Sub(start).Seconds()*1000), log.String("body", string(bodyBytes)))
+
+		// Get response body
+		responseBody := blw.body.String()
+
+		log.AccessLogger.Info("request",
+			log.String("url", c.Request.RequestURI),
+			log.String("method", c.Request.Method),
+			log.Int("code", c.Writer.Status()),
+			log.String("operator", c.GetString("user")),
+			log.String("ip", middleware.GetRemoteIp(c)),
+			log.Float64("cost_ms", time.Now().Sub(start).Seconds()*1000),
+			log.String("request_body", string(bodyBytes)),
+			log.String("response_body", responseBody))
 	}
+}
+
+// bodyLogWriter is a custom ResponseWriter that captures the response body
+type bodyLogWriter struct {
+	gin.ResponseWriter
+	body *bytes.Buffer
+}
+
+// Write captures the response body while writing it
+func (w *bodyLogWriter) Write(b []byte) (int, error) {
+	w.body.Write(b)
+	return w.ResponseWriter.Write(b)
 }
