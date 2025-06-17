@@ -2122,12 +2122,17 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 							// get tfstate file from resource_data table and gen it
 							data := importObjectResourceData[i]
 							if data == nil {
-								log.Logger.Warn(fmt.Sprintf("No matching resource_data for conStructObject[%d], skip tfstate file generation", i))
-								continue
+								if _, ok := newCreateObject[i]; ok {
+									log.Logger.Info(fmt.Sprintf("New resource creation for conStructObject[%d], proceeding without tfstate", i))
+								} else {
+									log.Logger.Info(fmt.Sprintf("No existing resource_data for conStructObject[%d], treating as new resource", i))
+									newCreateObject[i] = true
+								}
+							} else {
+								tfstateFileContent := data.TfStateFile
+								tfstateFilePath := workDirPath + "/terraform.tfstate"
+								GenFile([]byte(tfstateFileContent), tfstateFilePath)
 							}
-							tfstateFileContent := data.TfStateFile
-							tfstateFilePath := workDirPath + "/terraform.tfstate"
-							GenFile([]byte(tfstateFileContent), tfstateFilePath)
 						}
 						if _, ok := reqParam[models.ResourceDataDebug]; ok {
 							// resource_data debug mode, get the terraform.state file after terraform import
@@ -2149,14 +2154,37 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					}
 				}
 
-				// Gen tf.json file
+				// Gen tf.json file for all cases
 				tfFileContentStr, err = GenTfFile(workDirPath, sortedSourceData, action, resourceId, conStructObject[i])
 				if err != nil {
 					err = fmt.Errorf("Gen tfFile error: %s", err.Error())
 					log.Logger.Error("Gen tfFile error", log.Error(err))
 					rowData["errorMessage"] = err.Error()
-					// return
 					continue
+				}
+
+				// 执行 terraform init
+				err = TerraformInit(workDirPath)
+				if err != nil {
+					err = fmt.Errorf("Do TerraformInit error:%s", err.Error())
+					log.Logger.Error("Do TerraformInit error", log.Error(err))
+					rowData["errorMessage"] = err.Error()
+					return
+				}
+
+				// 执行 terraform apply
+				if action == "apply" {
+					// 对于新资源创建或已导入的资源，执行 apply
+					if _, ok := newCreateObject[i]; ok || importObject[i] != "" {
+						err = TerraformApply(workDirPath)
+						if err != nil {
+							err = fmt.Errorf("Do TerraformApply error:%s", err.Error())
+							log.Logger.Error("Do TerraformApply error", log.Error(err))
+							rowData["errorMessage"] = err.Error()
+							continue
+						}
+						log.Logger.Info(fmt.Sprintf("Successfully applied Terraform changes for object[%d]", i))
+					}
 				}
 
 				if action == "apply" {
