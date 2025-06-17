@@ -2163,30 +2163,6 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					continue
 				}
 
-				// 执行 terraform init
-				err = TerraformInit(workDirPath)
-				if err != nil {
-					err = fmt.Errorf("Do TerraformInit error:%s", err.Error())
-					log.Logger.Error("Do TerraformInit error", log.Error(err))
-					rowData["errorMessage"] = err.Error()
-					return
-				}
-
-				// 执行 terraform apply
-				if action == "apply" {
-					// 对于新资源创建或已导入的资源，执行 apply
-					if _, ok := newCreateObject[i]; ok || importObject[i] != "" {
-						err = TerraformApply(workDirPath)
-						if err != nil {
-							err = fmt.Errorf("Do TerraformApply error:%s", err.Error())
-							log.Logger.Error("Do TerraformApply error", log.Error(err))
-							rowData["errorMessage"] = err.Error()
-							continue
-						}
-						log.Logger.Info(fmt.Sprintf("Successfully applied Terraform changes for object[%d]", i))
-					}
-				}
-
 				if action == "apply" {
 					log.Logger.Info("Entering apply block",
 						log.String("workDirPath", workDirPath),
