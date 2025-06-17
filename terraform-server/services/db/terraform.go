@@ -110,9 +110,7 @@ func DelDir(dirPath string) (err error) {
 	dir, err := ioutil.ReadDir(dirPath)
 	for _, d := range dir {
 		tmpPath := path.Join([]string{dirPath, d.Name()}...)
-		if models.Config.Log.Level != "debug" {
-			os.RemoveAll(tmpPath)
-		}
+		os.RemoveAll(tmpPath)
 	}
 	return
 }
@@ -329,39 +327,52 @@ func execRemoteWithTimeout(cmdStr []string, timeOut int) (out string, err error)
 		err = fmt.Errorf("cmdStr can not be empty")
 		return
 	}
-	cmdStr = append([]string{"-c"}, cmdStr...)
-	doneChan := make(chan string)
-	// defer close(doneChan)
+	log.Logger.Info("Executing command with timeout",
+		log.JsonObj("cmdStr", cmdStr),
+		log.Int("timeout", timeOut))
 
+	cmdStr = append([]string{"-c"}, cmdStr...)
+	log.Logger.Info("Final command after adding -c",
+		log.JsonObj("cmdStr", cmdStr))
+
+	doneChan := make(chan string)
 	tmpCmd := exec.Command(models.BashCmd, cmdStr...)
 	tmpCmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+
 	go func(a chan string, ct *exec.Cmd) {
-		/*
-			b, err := ct.Output()
-			if err != nil {
-				a <- "error:" + err.Error()
-			}
-			a <- string(b)
-		*/
 		var stdout, stderr bytes.Buffer
 		ct.Stdout = &stdout
 		ct.Stderr = &stderr
 		cmdErr := ct.Run()
 		if cmdErr != nil {
+			log.Logger.Error("Command execution failed",
+				log.Error(cmdErr),
+				log.String("stderr", stderr.String()))
 			a <- "error:" + string(stderr.Bytes())
 		} else {
+			log.Logger.Info("Command executed successfully",
+				log.String("stdout", stdout.String()))
 			a <- string(stdout.Bytes())
 		}
 	}(doneChan, tmpCmd)
+
 	select {
 	case tmpVal := <-doneChan:
 		out = tmpVal
+		log.Logger.Info("Command completed",
+			log.String("output", out))
 	case <-time.After(time.Duration(timeOut) * time.Second):
 		out = fmt.Sprintf("error: %s timeout %d(s)", cmdStr, timeOut)
+		log.Logger.Error("Command timed out",
+			log.JsonObj("cmdStr", cmdStr),
+			log.Int("timeout", timeOut))
 		syscall.Kill(-tmpCmd.Process.Pid, syscall.SIGKILL)
 	}
+
 	if strings.HasPrefix(out, "error:") {
 		err = fmt.Errorf(out)
+		log.Logger.Error("Command returned error",
+			log.Error(err))
 	}
 	return
 }
@@ -471,25 +482,15 @@ func TerraformPlan(dirPath string) (destroyCnt int, err error) {
 }
 
 func TerraformApply(dirPath string) (err error) {
-	cmdStr := models.Config.TerraformCmdPath + " -chdir=\"" + dirPath + "\" apply -auto-approve -no-color"
-	log.Logger.Debug("[TerraformApply] cmd", log.String("cmdStr", cmdStr))
-	out, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.Config.HttpTimeout)
-	log.Logger.Debug("[TerraformApply] result", log.String("output", out), log.Error(cmdErr))
-	if cmdErr != nil {
-		outPutStr := cmdErr.Error()
-		errorMsgRegx := regexp.MustCompile(`Error: ([\S\s]*)`)
-		errorMsg := errorMsgRegx.FindStringSubmatch(outPutStr)
-		errMsg := "Error:"
-		for i := 1; i < len(errorMsg); i++ {
-			errMsg += " "
-			errMsg += errorMsg[i]
-		}
-		colorsCharRegx := regexp.MustCompile(`\[\d+m`)
-		outPutErrMsg := colorsCharRegx.ReplaceAllLiteralString(errMsg, "")
-		err = fmt.Errorf("Cmd:%s run failed: %s, ErrorMsg: %s", cmdStr, cmdErr.Error(), outPutErrMsg)
-		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.String("Error: ", outPutErrMsg), log.Error(cmdErr))
-		return
+	log.Logger.Info("Starting TerraformApply", log.String("dirPath", dirPath))
+	cmdStr := []string{models.Config.TerraformCmdPath, "-chdir=" + dirPath, "apply", "-auto-approve", "-no-color"}
+	log.Logger.Info("Running terraform apply command", log.JsonObj("cmdStr", cmdStr))
+	out, err := execRemoteWithTimeout(cmdStr, models.Config.HttpTimeout)
+	if err != nil {
+		log.Logger.Error("TerraformApply failed", log.Error(err), log.String("output", out))
+		return fmt.Errorf("TerraformApply error:%s", err.Error())
 	}
+	log.Logger.Info("TerraformApply completed successfully", log.String("output", out))
 	return
 }
 
@@ -1158,7 +1159,11 @@ func handleDestroy(workDirPath string,
 }
 
 func TerraformOperation(plugin string, action string, reqParam map[string]interface{}, debugFileContent *[]map[string]interface{}) (rowData map[string]interface{}, err error) {
-	log.Logger.Debug("[TerraformOperation] start", log.String("plugin", plugin), log.String("action", action), log.JsonObj("reqParam", reqParam))
+	log.Logger.Info("[TerraformOperation] Starting operation",
+		log.String("plugin", plugin),
+		log.String("action", action),
+		log.JsonObj("reqParam", reqParam))
+
 	var curWorkDirPath = []string{}
 	defer func() {
 		if r := recover(); r != nil {
@@ -1176,6 +1181,8 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 			log.Logger.Info(fmt.Sprintf("writeBack reqParam.id: %v for retOutput", rowData["id"]))
 		}
 		if _, ok := reqParam[models.ResourceDataDebug]; !ok {
+			log.Logger.Info("Cleaning up work directories",
+				log.JsonObj("directories", curWorkDirPath))
 			for i := range curWorkDirPath {
 				DelDir(curWorkDirPath[i])
 			}
@@ -1187,7 +1194,9 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	rowData["errorCode"] = "1"
 	rowData["errorMessage"] = ""
 
-	log.Logger.Debug("[TerraformOperation] 获取接口信息", log.String("plugin", plugin), log.String("action", action))
+	log.Logger.Info("[TerraformOperation] Getting interface info",
+		log.String("plugin", plugin),
+		log.String("action", action))
 	// Get interface by plugin and action
 	var actionName string
 	actionName = action
@@ -2098,6 +2107,10 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					}
 				}
 
+				log.Logger.Info("Preparing to execute TerraformApply",
+					log.String("workDirPath", workDirPath),
+					log.String("action", action))
+
 				err = TerraformApply(workDirPath)
 				if err != nil {
 					err = fmt.Errorf("Do TerraformApply error:%s", err.Error())
@@ -2106,6 +2119,9 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					return
 					// continue
 				}
+
+				log.Logger.Info("TerraformApply completed successfully",
+					log.String("workDirPath", workDirPath))
 
 				// apply完之后重新import下拿过tfstate文件
 				// resourceAssetId, getTFErr := getTFStateAssetId(workDirPath, sortedSourceData.AssetIdAttribute)
