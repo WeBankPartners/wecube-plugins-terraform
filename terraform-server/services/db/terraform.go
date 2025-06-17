@@ -2123,10 +2123,10 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					log.JsonObj("reqParam", reqParam))
 
 				// 检查目录是否存在
-				if _, err := os.Stat(workDirPath); os.IsNotExist(err) {
+				if _, err = os.Stat(workDirPath); os.IsNotExist(err) {
 					log.Logger.Error("Working directory does not exist before apply",
 						log.String("workDirPath", workDirPath))
-					return fmt.Errorf("Working directory does not exist: %s", workDirPath)
+					return
 				}
 
 				err = TerraformApply(workDirPath)
@@ -2135,28 +2135,10 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					log.Logger.Error("Do TerraformApply error", log.Error(err))
 					rowData["errorMessage"] = err.Error()
 					return
-					// continue
 				}
 
 				log.Logger.Info("TerraformApply completed successfully",
 					log.String("workDirPath", workDirPath))
-
-				// apply完之后重新import下拿过tfstate文件
-				// resourceAssetId, getTFErr := getTFStateAssetId(workDirPath, sortedSourceData.AssetIdAttribute)
-				// if getTFErr != nil {
-				// 	err = fmt.Errorf("Do Get TerraformApply AssetId error:%s ", err.Error())
-				// 	log.Logger.Error("Do Get TerraformApply AssetId error", log.Error(err))
-				// 	rowData["errorMessage"] = err.Error()
-				// 	return
-				// }
-				// os.Remove(workDirPath + "/terraform.tfstate")
-				// err = TerraformImport(workDirPath, sortedSourceData.Name+"."+resourceId, resourceAssetId)
-				// if err != nil {
-				// 	err = fmt.Errorf("Do TerraformApply Import new tfstate file error:%s ", err.Error())
-				// 	log.Logger.Error("Do TerraformApply Import new tfstate file error", log.Error(err))
-				// 	rowData["errorMessage"] = err.Error()
-				// 	return
-				// }
 
 				if _, ok := reqParam[models.ResourceDataDebug]; ok {
 					tfstateFilePath := workDirPath + "/terraform.tfstate"
