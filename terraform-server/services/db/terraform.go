@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"reflect"
 	"regexp"
 	"sort"
@@ -377,13 +378,26 @@ func execRemoteWithTimeout(cmdStr []string, timeOut int) (out string, err error)
 }
 
 func TerraformImport(dirPath, address, resourceAssetId string) (err error) {
-	cmdStr := models.Config.TerraformCmdPath + " -chdir=\"" + dirPath + "\" import -no-color " + address + " " + resourceAssetId
-	log.Logger.Debug("[TerraformImport] cmd", log.String("cmdStr", cmdStr))
-	out, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.Config.HttpTimeout)
+	// 确保目录存在
+	if err := os.MkdirAll(dirPath, 0755); err != nil {
+		return fmt.Errorf("failed to create directory: %w", err)
+	}
+
+	cmdArgs := []string{
+		models.Config.TerraformCmdPath,
+		"-chdir=" + dirPath,
+		"import",
+		"-no-color",
+		address,
+		resourceAssetId,
+	}
+
+	log.Logger.Debug("[TerraformImport] cmd", log.JsonObj("cmdArgs", cmdArgs))
+
+	out, cmdErr := execRemoteWithTimeout(cmdArgs, models.Config.HttpTimeout)
 	log.Logger.Debug("[TerraformImport] result", log.String("output", out), log.Error(cmdErr))
+
 	if cmdErr != nil {
-		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
-		// outPutStr := string(stderr.Bytes())
 		outPutStr := cmdErr.Error()
 		errorMsgRegx := regexp.MustCompile(`Error: ([\S\s]*)`)
 		errorMsg := errorMsgRegx.FindStringSubmatch(outPutStr)
@@ -394,21 +408,33 @@ func TerraformImport(dirPath, address, resourceAssetId string) (err error) {
 		}
 		colorsCharRegx := regexp.MustCompile(`\[\d+m`)
 		outPutErrMsg := colorsCharRegx.ReplaceAllLiteralString(errMsg, "")
-		err = fmt.Errorf("Cmd:%s run failed: %s, ErrorMsg: %s", cmdStr, cmdErr.Error(), outPutErrMsg)
-		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.String("Error: ", outPutErrMsg), log.Error(cmdErr))
+		err = fmt.Errorf("Cmd:%v run failed: %s, ErrorMsg: %s", cmdArgs, cmdErr.Error(), outPutErrMsg)
+		log.Logger.Error("Cmd run failed", log.JsonObj("cmd", cmdArgs), log.String("Error: ", outPutErrMsg), log.Error(cmdErr))
 		return
 	}
 	return
 }
 
 func TerraformPlan(dirPath string) (destroyCnt int, err error) {
-	cmdStr := models.Config.TerraformCmdPath + " -chdir=\"" + dirPath + "\" plan -input=false -no-color"
-	log.Logger.Debug("[TerraformPlan] cmd", log.String("cmdStr", cmdStr))
-	output, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.Config.HttpTimeout)
+	// 确保目录存在
+	if err := os.MkdirAll(dirPath, 0755); err != nil {
+		return 0, fmt.Errorf("failed to create directory: %w", err)
+	}
+
+	cmdArgs := []string{
+		models.Config.TerraformCmdPath,
+		"-chdir=" + dirPath,
+		"plan",
+		"-input=false",
+		"-no-color",
+	}
+
+	log.Logger.Debug("[TerraformPlan] cmd", log.JsonObj("cmdArgs", cmdArgs))
+
+	output, cmdErr := execRemoteWithTimeout(cmdArgs, models.Config.HttpTimeout)
 	log.Logger.Debug("[TerraformPlan] result", log.String("output", output), log.Error(cmdErr))
+
 	if cmdErr != nil {
-		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
-		// outPutStr := string(stderr.Bytes())
 		outPutStr := cmdErr.Error()
 		errorMsgRegx := regexp.MustCompile(`Error: ([\S\s]*)`)
 		errorMsg := errorMsgRegx.FindStringSubmatch(outPutStr)
@@ -419,11 +445,11 @@ func TerraformPlan(dirPath string) (destroyCnt int, err error) {
 		}
 		colorsCharRegx := regexp.MustCompile(`\[\d+m`)
 		outPutErrMsg := colorsCharRegx.ReplaceAllLiteralString(errMsg, "")
-		err = fmt.Errorf("Cmd:%s run failed: %s, ErrorMsg: %s", cmdStr, cmdErr.Error(), outPutErrMsg)
-		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.String("Error: ", outPutErrMsg), log.Error(cmdErr))
+		err = fmt.Errorf("Cmd:%v run failed: %s, ErrorMsg: %s", cmdArgs, cmdErr.Error(), outPutErrMsg)
+		log.Logger.Error("Cmd run failed", log.JsonObj("cmd", cmdArgs), log.String("Error: ", outPutErrMsg), log.Error(cmdErr))
 		return
 	}
-	// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
+
 	filePath := dirPath + "/planfile"
 	err = GenFile([]byte(output), filePath)
 	if err != nil {
@@ -481,26 +507,53 @@ func TerraformPlan(dirPath string) (destroyCnt int, err error) {
 }
 
 func TerraformApply(dirPath string) (err error) {
+	// 确保目录存在
+	if err := os.MkdirAll(dirPath, 0755); err != nil {
+		return fmt.Errorf("failed to create directory: %w", err)
+	}
+
 	log.Logger.Info("Starting TerraformApply", log.String("dirPath", dirPath))
-	cmdStr := []string{models.Config.TerraformCmdPath, "-chdir=" + dirPath, "apply", "-auto-approve", "-no-color"}
-	log.Logger.Info("Running terraform apply command", log.JsonObj("cmdStr", cmdStr))
-	out, err := execRemoteWithTimeout(cmdStr, models.Config.HttpTimeout)
+
+	cmdArgs := []string{
+		models.Config.TerraformCmdPath,
+		"-chdir=" + dirPath,
+		"apply",
+		"-auto-approve",
+		"-no-color",
+	}
+
+	log.Logger.Info("Running terraform apply command", log.JsonObj("cmdArgs", cmdArgs))
+
+	out, err := execRemoteWithTimeout(cmdArgs, models.Config.HttpTimeout)
 	if err != nil {
 		log.Logger.Error("TerraformApply failed", log.Error(err), log.String("output", out))
 		return fmt.Errorf("TerraformApply error:%s", err.Error())
 	}
+
 	log.Logger.Info("TerraformApply completed successfully", log.String("output", out))
 	return
 }
 
 func TerraformDestroy(dirPath string) (err error) {
-	cmdStr := models.Config.TerraformCmdPath + " -chdir=\"" + dirPath + "\" destroy -auto-approve -no-color"
-	log.Logger.Debug("[TerraformDestroy] cmd", log.String("cmdStr", cmdStr))
-	out, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.Config.HttpTimeout)
+	// 确保目录存在
+	if err := os.MkdirAll(dirPath, 0755); err != nil {
+		return fmt.Errorf("failed to create directory: %w", err)
+	}
+
+	cmdArgs := []string{
+		models.Config.TerraformCmdPath,
+		"-chdir=" + dirPath,
+		"destroy",
+		"-auto-approve",
+		"-no-color",
+	}
+
+	log.Logger.Debug("[TerraformDestroy] cmd", log.JsonObj("cmdArgs", cmdArgs))
+
+	out, cmdErr := execRemoteWithTimeout(cmdArgs, models.Config.HttpTimeout)
 	log.Logger.Debug("[TerraformDestroy] result", log.String("output", out), log.Error(cmdErr))
+
 	if cmdErr != nil {
-		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
-		// outPutStr := string(stderr.Bytes())
 		outPutStr := cmdErr.Error()
 		errorMsgRegx := regexp.MustCompile(`Error: ([\S\s]*)`)
 		errorMsg := errorMsgRegx.FindStringSubmatch(outPutStr)
@@ -511,21 +564,40 @@ func TerraformDestroy(dirPath string) (err error) {
 		}
 		colorsCharRegx := regexp.MustCompile(`\[\d+m`)
 		outPutErrMsg := colorsCharRegx.ReplaceAllLiteralString(errMsg, "")
-		err = fmt.Errorf("Cmd:%s run failed: %s, ErrorMsg: %s", cmdStr, cmdErr.Error(), outPutErrMsg)
-		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.String("Error: ", outPutErrMsg), log.Error(cmdErr))
+		err = fmt.Errorf("Cmd:%v run failed: %s, ErrorMsg: %s", cmdArgs, cmdErr.Error(), outPutErrMsg)
+		log.Logger.Error("Cmd run failed", log.JsonObj("cmd", cmdArgs), log.String("Error: ", outPutErrMsg), log.Error(cmdErr))
 		return
 	}
 	return
 }
 
 func TerraformInit(dirPath string) (err error) {
-	cmdStr := models.Config.TerraformCmdPath + " -chdir=\"" + dirPath + "\" init -no-color" + " -plugin-dir=\"" + dirPath + "/.terraform/providers\""
-	log.Logger.Debug("[TerraformInit] cmd", log.String("cmdStr", cmdStr))
-	out, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.Config.HttpTimeout)
+	// 确保目录存在
+	if err := os.MkdirAll(dirPath, 0755); err != nil {
+		return fmt.Errorf("failed to create directory: %w", err)
+	}
+
+	// 确保 providers 目录存在
+	providersDir := filepath.Join(dirPath, ".terraform", "providers")
+	if err := os.MkdirAll(providersDir, 0755); err != nil {
+		return fmt.Errorf("failed to create providers directory: %w", err)
+	}
+
+	// 构造命令参数
+	cmdArgs := []string{
+		models.Config.TerraformCmdPath,
+		"-chdir=" + dirPath,
+		"init",
+		"-no-color",
+		"-plugin-dir=" + providersDir,
+	}
+
+	log.Logger.Debug("[TerraformInit] cmd", log.JsonObj("cmdArgs", cmdArgs))
+
+	out, cmdErr := execRemoteWithTimeout(cmdArgs, models.Config.HttpTimeout)
 	log.Logger.Debug("[TerraformInit] result", log.String("output", out), log.Error(cmdErr))
+
 	if cmdErr != nil {
-		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
-		// outPutStr := string(stderr.Bytes())
 		outPutStr := cmdErr.Error()
 		errorMsgRegx := regexp.MustCompile(`Error: ([\S\s]*)`)
 		errorMsg := errorMsgRegx.FindStringSubmatch(outPutStr)
@@ -536,8 +608,8 @@ func TerraformInit(dirPath string) (err error) {
 		}
 		colorsCharRegx := regexp.MustCompile(`\[\d+m`)
 		outPutErrMsg := colorsCharRegx.ReplaceAllLiteralString(errMsg, "")
-		err = fmt.Errorf("Cmd:%s run failed: %s, ErrorMsg: %s", cmdStr, cmdErr.Error(), outPutErrMsg)
-		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.String("Error: ", outPutErrMsg), log.Error(cmdErr))
+		err = fmt.Errorf("Cmd:%v run failed: %s, ErrorMsg: %s", cmdArgs, cmdErr.Error(), outPutErrMsg)
+		log.Logger.Error("Cmd run failed", log.JsonObj("cmd", cmdArgs), log.String("Error: ", outPutErrMsg), log.Error(cmdErr))
 		return
 	}
 	return
