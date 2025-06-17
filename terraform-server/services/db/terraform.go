@@ -331,12 +331,11 @@ func execRemoteWithTimeout(cmdStr []string, timeOut int) (out string, err error)
 		log.JsonObj("cmdStr", cmdStr),
 		log.Int("timeout", timeOut))
 
-	cmdStr = append([]string{"-c"}, cmdStr...)
-	log.Logger.Info("Final command after adding -c",
-		log.JsonObj("cmdStr", cmdStr))
+	// 不再需要将整个命令作为一个字符串传递
+	// cmdStr = append([]string{"-c"}, cmdStr...)
 
 	doneChan := make(chan string)
-	tmpCmd := exec.Command(models.BashCmd, cmdStr...)
+	tmpCmd := exec.Command(cmdStr[0], cmdStr[1:]...)
 	tmpCmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 
 	go func(a chan string, ct *exec.Cmd) {
@@ -362,7 +361,7 @@ func execRemoteWithTimeout(cmdStr []string, timeOut int) (out string, err error)
 		log.Logger.Info("Command completed",
 			log.String("output", out))
 	case <-time.After(time.Duration(timeOut) * time.Second):
-		out = fmt.Sprintf("error: %s timeout %d(s)", cmdStr, timeOut)
+		out = fmt.Sprintf("error: command timed out after %d seconds", timeOut)
 		log.Logger.Error("Command timed out",
 			log.JsonObj("cmdStr", cmdStr),
 			log.Int("timeout", timeOut))
@@ -1181,10 +1180,15 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 			log.Logger.Info(fmt.Sprintf("writeBack reqParam.id: %v for retOutput", rowData["id"]))
 		}
 		if _, ok := reqParam[models.ResourceDataDebug]; !ok {
-			log.Logger.Info("Cleaning up work directories",
-				log.JsonObj("directories", curWorkDirPath))
-			for i := range curWorkDirPath {
-				DelDir(curWorkDirPath[i])
+			// 只在操作完成后清理目录
+			if rowData["errorCode"] == "0" || rowData["errorMessage"].(string) != "" {
+				log.Logger.Info("Cleaning up work directories",
+					log.JsonObj("directories", curWorkDirPath))
+				for i := range curWorkDirPath {
+					DelDir(curWorkDirPath[i])
+				}
+			} else {
+				log.Logger.Info("Skipping directory cleanup as operation is still in progress")
 			}
 		}
 	}()
@@ -2084,8 +2088,14 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 				}
 
 				if action == "apply" {
+					log.Logger.Info("Entering apply block",
+						log.String("workDirPath", workDirPath),
+						log.JsonObj("reqParam", reqParam))
+
 					destroyCnt, tmpErr := TerraformPlan(workDirPath)
-					fmt.Printf("%v\n", destroyCnt)
+					log.Logger.Info("TerraformPlan result",
+						log.Int("destroyCnt", destroyCnt))
+
 					if tmpErr != nil {
 						err = fmt.Errorf("Do TerraformPlan error:%s", tmpErr.Error())
 						log.Logger.Error("Do TerraformPlan error", log.Error(err))
@@ -2109,7 +2119,15 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 
 				log.Logger.Info("Preparing to execute TerraformApply",
 					log.String("workDirPath", workDirPath),
-					log.String("action", action))
+					log.String("action", action),
+					log.JsonObj("reqParam", reqParam))
+
+				// 检查目录是否存在
+				if _, err := os.Stat(workDirPath); os.IsNotExist(err) {
+					log.Logger.Error("Working directory does not exist before apply",
+						log.String("workDirPath", workDirPath))
+					return fmt.Errorf("Working directory does not exist: %s", workDirPath)
+				}
 
 				err = TerraformApply(workDirPath)
 				if err != nil {
