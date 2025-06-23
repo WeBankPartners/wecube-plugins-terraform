@@ -81,5 +81,8 @@
   "t_resource_placeholder": "Please Select Resources",
   "t_refresh_success_tips": "Data Refresh Successful",
   "t_select_plugin": "Please Select Plugin",
-  "t_select_interface": "Please Select Interface"
+  "t_select_interface": "Please Select Interface",
+  "t_delete_tips": "Data Cannot Be Recovered After Deletion, Confirm?",
+  "t_cloud_vendors": "Cloud Vendors",
+  "t_delete_success": "Delete Success"
 }

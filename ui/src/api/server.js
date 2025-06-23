@@ -69,3 +69,5 @@ export const getInstanceData = params => req.get(`/terraform/api/v1/resource_dat
 export const getResourceList = () => req.get(`/terraform/api/v1/resource_datas/resources`)
 
 export const instanceDataDownload = data => req.post(`/terraform/api/v1/providers/download?id=${data}`)
+
+export const deleteResourceData = ids => req.delete(`/terraform/api/v1/resource_datas?ids=${ids}`)

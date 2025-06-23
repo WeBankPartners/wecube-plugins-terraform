@@ -81,5 +81,8 @@
   "t_resource_placeholder": "请选择资源",
   "t_refresh_success_tips": "调试数据刷新成功",
   "t_select_plugin": "请选择插件",
-  "t_select_interface": "请选择接口"
+  "t_select_interface": "请选择接口",
+  "t_delete_tips": "删除数据将无法恢复,确认执行? ",
+  "t_cloud_vendors": "云厂商",
+  "t_delete_success": "删除成功"
 }
