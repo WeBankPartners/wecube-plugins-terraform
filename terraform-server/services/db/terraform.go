@@ -4241,7 +4241,8 @@ func handleConvertParams(action string,
 					tmpTfFileArgument["resource"][sourceData.Name][resourceId] = make(map[string]interface{})
 					json.Unmarshal([]byte(resourceData.TfFile), &tmpTfFileArgument)
 					if tmpV, ok := tmpTfFileArgument["resource"][sourceData.Name][resourceId][tfArgumentList[i].Name]; ok {
-						if tmpV == arg {
+						// Use reflect.DeepEqual to safely compare complex types like maps containing maps
+						if reflect.DeepEqual(tmpV, arg) {
 							arg = nil
 							continue
 						}
