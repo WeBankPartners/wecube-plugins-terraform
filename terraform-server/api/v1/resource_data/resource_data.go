@@ -38,6 +38,7 @@ func ResourceDataList(c *gin.Context) {
 	resourceAssetId := c.Query("resource_asset_id")
 	pageStr := c.DefaultQuery("page", "1")
 	pageSizeStr := c.DefaultQuery("pageSize", "20")
+	providerName := c.Query("provider_name")
 	page, _ := strconv.Atoi(pageStr)
 	pageSize, _ := strconv.Atoi(pageSizeStr)
 	if page < 1 {
@@ -56,6 +57,9 @@ func ResourceDataList(c *gin.Context) {
 	}
 	if resourceAssetId != "" {
 		paramsMap["resource_asset_id"] = resourceAssetId
+	}
+	if providerName != "" {
+		paramsMap["provider_name"] = providerName
 	}
 
 	rowData, total, err := db.ResourceDataListWithPage(paramsMap, page, pageSize)
