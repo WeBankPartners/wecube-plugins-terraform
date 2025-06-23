@@ -4338,7 +4338,22 @@ func handleConvertParams(action string,
 			return
 		}
 
+		if tfArgumentList[i].IsNull == "Y" {
+			tmpArgString := fmt.Sprintf("%v", arg)
+			log.Logger.Debug("handleConvertParams", log.String("name", tfArgumentList[i].Name), log.String("value", tmpArgString))
+			if tfArgumentList[i].IsMulti == "Y" {
+				if tmpArgString == "[]" {
+					continue
+				}
+			} else {
+				if tmpArgString == "{}" {
+					continue
+				}
+			}
+		}
+
 		if arg == nil || arg == "" {
+			log.Logger.Debug("handleConvertParams continue arg", log.String("name", tfArgumentList[i].Name))
 			continue
 		}
 
