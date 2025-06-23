@@ -96,18 +96,18 @@ func SourceBatchDelete(ids []string) (err error) {
 	tableName = "source"
 	tableName2 := "resource_data"
 	for i := range ids {
-		action, tmpErr := GetDeleteTableExecAction(tableName, "id", ids[i])
-		if tmpErr != nil {
-			err = fmt.Errorf("Try to delete source fail,%s ", tmpErr.Error())
-			return
-		}
-		actions = append(actions, action)
 		action2, tmpErr2 := GetDeleteTableExecAction(tableName2, "resource", ids[i])
 		if tmpErr2 != nil {
 			err = fmt.Errorf("Try to delete resource_data fail,%s ", tmpErr2.Error())
 			return
 		}
 		actions = append(actions, action2)
+		action, tmpErr := GetDeleteTableExecAction(tableName, "id", ids[i])
+		if tmpErr != nil {
+			err = fmt.Errorf("Try to delete source fail,%s ", tmpErr.Error())
+			return
+		}
+		actions = append(actions, action)
 	}
 	err = transaction(actions)
 	if err != nil {
