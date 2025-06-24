@@ -3412,10 +3412,24 @@ func convertDirect(defaultValue string, reqParam map[string]interface{}, tfArgum
 	}
 
 	if parameterData.DataType == "object" {
+		// 首先检查原始值是否为空字符串，如果是则直接返回nil
+		if reqArgStr, ok := reqParam[parameterData.Name].(string); ok && reqArgStr == "" {
+			log.Logger.Debug("convertDirect: ignoring empty string for object type", log.String("parameter", parameterData.Name))
+			arg = nil
+			return
+		}
+
 		if parameterData.Multiple == "N" {
 			var curArg map[string]interface{}
 			tmpMarshal, _ := json.Marshal(reqParam[parameterData.Name])
 			json.Unmarshal(tmpMarshal, &curArg)
+
+			// 检查是否为空对象，如果是则返回nil以便后续过滤
+			if len(curArg) == 0 {
+				log.Logger.Debug("convertDirect: ignoring empty object", log.String("parameter", parameterData.Name))
+				arg = nil
+				return
+			}
 
 			if tfArgument.IsMulti == "N" {
 				arg = curArg
@@ -3426,6 +3440,14 @@ func convertDirect(defaultValue string, reqParam map[string]interface{}, tfArgum
 			var curArg []map[string]interface{}
 			tmpMarshal, _ := json.Marshal(reqParam[parameterData.Name])
 			json.Unmarshal(tmpMarshal, &curArg)
+
+			// 检查是否为空数组，如果是则返回nil以便后续过滤
+			if len(curArg) == 0 {
+				log.Logger.Debug("convertDirect: ignoring empty object array", log.String("parameter", parameterData.Name))
+				arg = nil
+				return
+			}
+
 			if tfArgument.IsMulti == "Y" {
 				arg = curArg
 			} else {
@@ -4284,7 +4306,12 @@ func handleConvertParams(action string,
 						if arg != nil {
 							tmpVal[tfArgumentList[i].Name] = arg
 						}
-						tfArguments[relativeTfArgumentData.Name] = tmpVal
+						// 检查合并后的map是否为空，如果为空则删除该key
+						if len(tmpVal) == 0 {
+							delete(tfArguments, relativeTfArgumentData.Name)
+						} else {
+							tfArguments[relativeTfArgumentData.Name] = tmpVal
+						}
 					} else {
 						if arg != nil {
 							tmpVal := make(map[string]interface{})
@@ -4314,7 +4341,12 @@ func handleConvertParams(action string,
 						if arg != nil {
 							tmpVal[tfArgumentList[i].Name] = arg
 						}
-						tfArguments[relativeTfArgumentData.Name] = tmpVal
+						// 检查合并后的map是否为空，如果为空则删除该key
+						if len(tmpVal) == 0 {
+							delete(tfArguments, relativeTfArgumentData.Name)
+						} else {
+							tfArguments[relativeTfArgumentData.Name] = tmpVal
+						}
 					} else {
 						if arg != nil {
 							tmpVal := make(map[string]interface{})
@@ -4339,15 +4371,45 @@ func handleConvertParams(action string,
 			return
 		}
 
+		// 处理IsNull配置的逻辑
 		if tfArgumentList[i].IsNull == "Y" {
 			tmpArgString := fmt.Sprintf("%v", arg)
-			log.Logger.Debug("handleConvertParams", log.String("name", tfArgumentList[i].Name), log.String("value", tmpArgString))
+			log.Logger.Debug("handleConvertParams IsNull=Y", log.String("name", tfArgumentList[i].Name), log.String("value", tmpArgString))
 			if tfArgumentList[i].IsMulti == "Y" {
 				if tmpArgString == "[]" {
+					log.Logger.Debug("handleConvertParams: skipping empty array (IsNull=Y)", log.String("name", tfArgumentList[i].Name))
 					continue
 				}
 			} else {
-				if tmpArgString == "{}" {
+				if tmpArgString == "{}" || tmpArgString == "" {
+					log.Logger.Debug("handleConvertParams: skipping empty value (IsNull=Y)", log.String("name", tfArgumentList[i].Name))
+					continue
+				}
+			}
+		} else if tfArgumentList[i].IsNull == "N" {
+			// IsNull=N时，空字符串也需要忽略
+			if arg == "" || arg == nil {
+				log.Logger.Debug("handleConvertParams: skipping empty value (IsNull=N)", log.String("name", tfArgumentList[i].Name))
+				continue
+			}
+		}
+
+		// 处理空对象类型参数（如空的tags），无论IsNull状态如何都应该过滤掉
+		if tfArgumentList[i].Type == "object" {
+			tmpArgString := fmt.Sprintf("%v", arg)
+			if tfArgumentList[i].IsMulti == "Y" {
+				if tmpArgString == "[]" {
+					log.Logger.Debug("handleConvertParams: skipping empty object array", log.String("name", tfArgumentList[i].Name))
+					continue
+				}
+			} else {
+				if tmpArgString == "{}" || tmpArgString == "map[]" {
+					log.Logger.Debug("handleConvertParams: skipping empty object", log.String("name", tfArgumentList[i].Name))
+					continue
+				}
+				// 额外检查是否是空的map[string]interface{}
+				if argMap, ok := arg.(map[string]interface{}); ok && len(argMap) == 0 {
+					log.Logger.Debug("handleConvertParams: skipping empty map", log.String("name", tfArgumentList[i].Name))
 					continue
 				}
 			}
@@ -4470,6 +4532,15 @@ func handleConvertParams(action string,
 	}
 	// 在返回 tfArguments 之前，处理点号转对象
 	tfArguments = ParseDotNotation(tfArguments)
+
+	// 最终清理：移除所有空的对象类型参数
+	for key, value := range tfArguments {
+		if valueMap, ok := value.(map[string]interface{}); ok && len(valueMap) == 0 {
+			log.Logger.Debug("handleConvertParams: removing empty object from final output", log.String("key", key))
+			delete(tfArguments, key)
+		}
+	}
+
 	return
 }
 
