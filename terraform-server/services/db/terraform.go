@@ -616,9 +616,14 @@ func TerraformInit(dirPath string) (err error) {
 }
 
 func DownloadProviderByTerraformInit(dirPath string) (err error) {
-	cmdStr := models.Config.TerraformCmdPath + " -chdir=\"" + dirPath + "\" init -no-color"
-	log.Logger.Debug("[DownloadProviderByTerraformInit] cmd", log.String("cmdStr", cmdStr))
-	out, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.DownloadProviderTimeOut)
+	cmdArgs := []string{
+		models.Config.TerraformCmdPath,
+		"-chdir=" + dirPath,
+		"init",
+		"-no-color",
+	}
+	log.Logger.Debug("[DownloadProviderByTerraformInit] cmd", log.JsonObj("cmdArgs", cmdArgs))
+	out, cmdErr := execRemoteWithTimeout(cmdArgs, models.DownloadProviderTimeOut)
 	log.Logger.Debug("[DownloadProviderByTerraformInit] result", log.String("output", out), log.Error(cmdErr))
 	if cmdErr != nil {
 		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
@@ -633,8 +638,8 @@ func DownloadProviderByTerraformInit(dirPath string) (err error) {
 		}
 		colorsCharRegx := regexp.MustCompile(`\[\d+m`)
 		outPutErrMsg := colorsCharRegx.ReplaceAllLiteralString(errMsg, "")
-		err = fmt.Errorf("Cmd:%s run failed: %s, ErrorMsg: %s", cmdStr, cmdErr.Error(), outPutErrMsg)
-		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.String("Error: ", outPutErrMsg), log.Error(cmdErr))
+		err = fmt.Errorf("Cmd:%v run failed: %s, ErrorMsg: %s", cmdArgs, cmdErr.Error(), outPutErrMsg)
+		log.Logger.Error("Cmd run failed", log.JsonObj("cmd", cmdArgs), log.String("Error: ", outPutErrMsg), log.Error(cmdErr))
 		return
 	}
 	return
