@@ -4113,7 +4113,7 @@ func getSortedSourceList(sourceList []*models.SourceTable, interfaceData *models
 			for sourceId := range initAllSourceListIdMap {
 				isValid := true
 				for _, tmpTfArgument := range tfArgumentListSourceIdMap[sourceId] {
-					if tmpTfArgument.Parameter != "" {
+					if tmpTfArgument.Parameter != "" || tmpTfArgument.RelativeSource == "" {
 						continue
 					} else {
 						if _, ok := sortedSourceListIdMap[tmpTfArgument.RelativeSource]; ok {
