@@ -84,5 +84,9 @@
   "t_select_interface": "请选择接口",
   "t_delete_tips": "删除数据将无法恢复,确认执行? ",
   "t_cloud_vendors": "云厂商",
-  "t_delete_success": "删除成功"
+  "t_delete_success": "删除成功",
+  "t_validate_required": "请输入必填项",
+  "t_is_microsoft_cloud": "是否微软云",
+  "t_yes": "是",
+  "t_no": "否"
 }

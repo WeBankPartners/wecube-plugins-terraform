@@ -84,5 +84,9 @@
   "t_select_interface": "Please Select Interface",
   "t_delete_tips": "Data Cannot Be Recovered After Deletion, Confirm?",
   "t_cloud_vendors": "Cloud Vendors",
-  "t_delete_success": "Delete Success"
+  "t_delete_success": "Delete Success",
+  "t_validate_required": "Please Input Required Fields",
+  "t_is_microsoft_cloud": "Is it Azure",
+  "t_yes": "Yes",
+  "t_no": "No"
 }

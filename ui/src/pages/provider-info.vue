@@ -15,14 +15,12 @@
       :title="(newProviderInfo.isAdd ? $t('t_add') : $t('t_edit')) + $t('t_provider_info')"
       :mask-closable="false"
       :width="700"
-      @on-ok="confirmProviderInfo"
-      @on-cancel="confirmProviderInfo.isShow = false"
     >
       <Form inline :label-width="120">
-        <FormItem :label="$t('t_name')">
+        <FormItem required :label="$t('t_name')">
           <Input type="text" v-model="newProviderInfo.form.name" style="width: 520px"></Input>
         </FormItem>
-        <FormItem :label="$t('t_provider')">
+        <FormItem required :label="$t('t_provider')">
           <Select
             v-model="newProviderInfo.form.provider"
             ref="selectProvider"
@@ -34,19 +32,23 @@
             </Option>
           </Select>
         </FormItem>
-        <FormItem :label="$t('t_secret_id')">
+        <FormItem required :label="$t('t_secret_id')">
           <Input type="textarea" v-model="newProviderInfo.form.secretId" :rows="4" style="width: 520px"></Input>
         </FormItem>
-        <FormItem :label="$t('t_secret_key')">
+        <FormItem required :label="$t('t_secret_key')">
           <Input type="textarea" v-model="newProviderInfo.form.secretKey" :rows="4" style="width: 520px"></Input>
         </FormItem>
-        <FormItem v-if="newProviderInfo.providerItem.tenantIdAttrName" :label="$t('t_tenant_id')">
+        <FormItem required v-if="newProviderInfo.providerItem.tenantIdAttrName" :label="$t('t_tenant_id')">
           <Input type="text" v-model="newProviderInfo.form.tenantId" style="width: 520px"></Input>
         </FormItem>
-        <FormItem v-if="newProviderInfo.providerItem.subscriptionIdAttrName" :label="$t('t_subscription_id')">
+        <FormItem required v-if="newProviderInfo.providerItem.subscriptionIdAttrName" :label="$t('t_subscription_id')">
           <Input type="text" v-model="newProviderInfo.form.subscriptionId" style="width: 520px"></Input>
         </FormItem>
       </Form>
+      <div slot="footer">
+        <Button @click="newProviderInfo.isShow = false">{{ $t('t_cancle') }}</Button>
+        <Button type="primary" @click="confirmProviderInfo">{{ $t('t_save') }}</Button>
+      </div>
     </Modal>
   </div>
 </template>
@@ -199,9 +201,27 @@ export default {
       this.getProvider()
       this.newProviderInfo.isShow = true
     },
+    validRequired () {
+      if (
+        !this.newProviderInfo.form.name ||
+        !this.newProviderInfo.form.provider ||
+        !this.newProviderInfo.form.secretId ||
+        !this.newProviderInfo.form.secretKey ||
+        (this.newProviderInfo.providerItem.tenantIdAttrName && !this.newProviderInfo.form.tenantId) ||
+        (this.newProviderInfo.providerItem.subscriptionIdAttrName && !this.newProviderInfo.form.subscriptionId)
+      ) {
+        this.$Message.error(this.$t('t_validate_required'))
+        return false
+      } else {
+        return true
+      }
+    },
     async confirmProviderInfo () {
+      if (!this.validRequired()) {
+        return false
+      }
       const method = this.newProviderInfo.isAdd ? addProviderInfo : editProviderInfo
-      const { statusCode } = await method([this.newProviderInfo.form])
+      const { statusCode } = method([this.newProviderInfo.form])
       if (statusCode === 'OK') {
         this.$Notice.success({
           title: 'Successful',
