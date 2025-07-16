@@ -72,5 +72,6 @@
   "t_online_download": "Download",
   "t_local_upload": "Upload",
   "t_online_download_tip": "In online scenarios, download the official provider file",
-  "t_local_upload_tip": "In offline scenarios, upload the locally made provider file"
+  "t_local_upload_tip": "In offline scenarios, upload the locally made provider file",
+  "t_reset": "Reset"
 }

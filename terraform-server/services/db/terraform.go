@@ -110,7 +110,9 @@ func DelDir(dirPath string) (err error) {
 	dir, err := ioutil.ReadDir(dirPath)
 	for _, d := range dir {
 		tmpPath := path.Join([]string{dirPath, d.Name()}...)
-		os.RemoveAll(tmpPath)
+		if models.Config.Log.Level != "debug" {
+			os.RemoveAll(tmpPath)
+		}
 	}
 	return
 }
@@ -2174,6 +2176,23 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					return
 					// continue
 				}
+
+				// apply完之后重新import下拿过tfstate文件
+				// resourceAssetId, getTFErr := getTFStateAssetId(workDirPath, sortedSourceData.AssetIdAttribute)
+				// if getTFErr != nil {
+				// 	err = fmt.Errorf("Do Get TerraformApply AssetId error:%s ", err.Error())
+				// 	log.Logger.Error("Do Get TerraformApply AssetId error", log.Error(err))
+				// 	rowData["errorMessage"] = err.Error()
+				// 	return
+				// }
+				// os.Remove(workDirPath + "/terraform.tfstate")
+				// err = TerraformImport(workDirPath, sortedSourceData.Name+"."+resourceId, resourceAssetId)
+				// if err != nil {
+				// 	err = fmt.Errorf("Do TerraformApply Import new tfstate file error:%s ", err.Error())
+				// 	log.Logger.Error("Do TerraformApply Import new tfstate file error", log.Error(err))
+				// 	rowData["errorMessage"] = err.Error()
+				// 	return
+				// }
 
 				if _, ok := reqParam[models.ResourceDataDebug]; ok {
 					tfstateFilePath := workDirPath + "/terraform.tfstate"
@@ -4301,7 +4320,16 @@ func handleConvertParams(action string,
 			return
 		}
 
+		if tfArgumentList[i].IsMulti == "Y" && tfArgumentList[i].IsNull == "Y" {
+			tmpArgString := fmt.Sprintf("%v", arg)
+			log.Logger.Debug("handleConvertParams", log.String("name", tfArgumentList[i].Name), log.String("value", tmpArgString))
+			if tmpArgString == "[]" {
+				continue
+			}
+		}
+
 		if arg == nil || arg == "" {
+			log.Logger.Debug("handleConvertParams continue arg", log.String("name", tfArgumentList[i].Name))
 			continue
 		}
 
@@ -4964,12 +4992,76 @@ func compareObject(first, second map[string]interface{}) (result map[string]inte
 			}
 		}
 		if tmpSecV != tmpFirV {
-			diff = 1
-			message += fmt.Sprintf("Key:%s is diff with record:%s, real:%s \n", k, tmpFirV, tmpSecV)
+			if strings.HasPrefix(tmpSecV, "map") || strings.HasPrefix(tmpSecV, "[map") {
+				firtstFlatMap := FlattenJSON(first[k])
+				secondFlatMap := FlattenJSON(v)
+				firBytes, _ := json.Marshal(firtstFlatMap)
+				secBytes, _ := json.Marshal(secondFlatMap)
+				if string(firBytes) != string(secBytes) {
+					diff = 1
+					message += fmt.Sprintf("Key:%s is diff with record:%s, real:%s and firstData:%s secondData:%s \n", k, tmpFirV, tmpSecV, string(firBytes), string(secBytes))
+				}
+			} else {
+				diff = 1
+				message += fmt.Sprintf("Key:%s is diff with record:%s, real:%s \n", k, tmpFirV, tmpSecV)
+			}
 		}
 	}
 	message = strings.ReplaceAll(message, "<nil>", "null")
 	return
+}
+
+func FlattenJSON(input interface{}) map[string]string {
+	flattened := make(map[string]string)
+	flattenRecursive(input, "", flattened)
+	return flattened
+}
+
+func flattenRecursive(data interface{}, prefix string, result map[string]string) {
+	if data == nil {
+		return // Ignore null values
+	}
+
+	switch v := data.(type) {
+	case map[string]interface{}:
+		if len(v) == 0 {
+			return // Ignore empty objects
+		}
+		for key, val := range v {
+			newPrefix := key
+			if prefix != "" {
+				newPrefix = prefix + "." + key
+			}
+			flattenRecursive(val, newPrefix, result)
+		}
+	case []interface{}:
+		if len(v) == 0 {
+			return // Ignore empty arrays
+		}
+		for i, val := range v {
+			newPrefix := fmt.Sprintf("%s[%d]", prefix, i)
+			if prefix == "" {
+				newPrefix = fmt.Sprintf("[%d]", i)
+			}
+			flattenRecursive(val, newPrefix, result)
+		}
+	case string:
+		result[prefix] = v
+	case bool:
+		result[prefix] = strconv.FormatBool(v)
+	case float64: // JSON numbers are unmarshaled as float64
+		if float64(int64(v)) == v {
+			result[prefix] = strconv.FormatInt(int64(v), 10)
+		} else {
+			result[prefix] = strconv.FormatFloat(v, 'f', -1, 64)
+		}
+	case int, int8, int16, int32, int64:
+		result[prefix] = fmt.Sprintf("%d", v)
+	case float32: // Handle float32 if it somehow appears
+		result[prefix] = strconv.FormatFloat(float64(v), 'f', -1, 32)
+	default:
+		result[prefix] = fmt.Sprintf("%v", v)
+	}
 }
 
 func getFileAttrContent(filename string) models.TfFileAttrFetchResult {
@@ -5028,6 +5120,34 @@ func GenTerraformConfigFile(dirPath string, providerData *models.ProviderTable) 
 		err = fmt.Errorf("Gen providerFile: %s error: %s", providerFilePath, err.Error())
 		log.Logger.Error("Gen providerFile error", log.String("providerFilePath", providerFilePath), log.Error(err))
 		return
+	}
+	return
+}
+
+func getTFStateAssetId(workDirPath string, idAttrName string) (resourceDataResourceAssetId string, err error) {
+	// Read terraform.tfstate 文件
+	var tfstateFilePath string
+	tfstateFilePath = workDirPath + "/terraform.tfstate"
+	tfstateFileData, err := ReadFile(tfstateFilePath)
+	if err != nil {
+		err = fmt.Errorf("Read tfstate file error:%s", err.Error())
+		log.Logger.Error("Read tfstate file error", log.Error(err))
+		return
+	}
+	var unmarshalTfstateFileData models.TfstateFileData
+	err = json.Unmarshal(tfstateFileData, &unmarshalTfstateFileData)
+	if err != nil {
+		err = fmt.Errorf("Unmarshal tfstate file data error:%s", err.Error())
+		log.Logger.Error("Unmarshal tfstate file data error", log.Error(err))
+		return
+	}
+	var tfstateFileAttributes map[string]interface{}
+	tfstateFileAttributes = unmarshalTfstateFileData.Resources[0].Instances[0].Attributes
+	if v, b := tfstateFileAttributes[idAttrName]; b {
+		resourceDataResourceAssetId = v.(string)
+	}
+	if resourceDataResourceAssetId == "" {
+		err = fmt.Errorf("resource id is empty")
 	}
 	return
 }

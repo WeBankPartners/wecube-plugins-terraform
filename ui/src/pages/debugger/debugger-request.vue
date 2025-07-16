@@ -1,62 +1,65 @@
 <template>
   <!-- 'max-height': PAGEHEIGHT + 'px', 'overflow': 'auto' -->
   <div class="" :style="{ width: '1100px', margin: '0 auto' }">
-    <div>
+    <Form :label-width="120">
       <Row>
         <Col span="12">
-          <div style="width:80px;display: inline-block">{{ $t('t_plugin') }}</div>
-          <Select
-            v-model="plugin"
-            clearable
-            @on-clear="clearPlugin"
-            @on-change="currentInterface = ''"
-            @on-open-change="getPlugin"
-            filterable
-            style="width:400px"
-          >
-            <Option v-for="item in pluginOptions" :value="item.name" :key="item.name">{{ item.name }}</Option>
-          </Select>
+          <FormItem :label="$t('t_plugin')">
+            <Select
+              v-model="plugin"
+              clearable
+              @on-clear="clearPlugin"
+              @on-change="currentInterface = ''"
+              @on-open-change="getPlugin"
+              filterable
+              style="width: 100%"
+            >
+              <Option v-for="item in pluginOptions" :value="item.name" :key="item.name">{{ item.name }}</Option>
+            </Select>
+          </FormItem>
         </Col>
         <Col span="12">
-          <div style="width:80px;display: inline-block">{{ $t('t_interface') }}</div>
-          <Select
-            v-model="currentInterface"
-            clearable
-            @on-clear="clearInterface"
-            filterable
-            @on-open-change="getPluginInterface"
-            :disabled="!plugin"
-            style="width:400px"
-          >
-            <Option v-for="item in interfaceOptions" :value="item.name" :key="item.id">{{ item.name }}</Option>
-          </Select>
-        </Col>
-      </Row>
-      <Row style="margin: 24px 0">
-        <Col span="24">
-          <div style="width:80px;display: inline-block">{{ $t('t_request_body') }}</div>
-          <Input style="width:845px" v-model="requestBody" type="textarea" :rows="6"></Input>
-          <div style="height: 60px;width:100px;display:inline-block;">
-            <Tooltip :content="$t('t_format_parameter')" :delay="1000">
-              <Icon @click="formatRequestBody" style="color: #00CB91;cursor: pointer" size="18" type="md-apps" />
-            </Tooltip>
-            <!-- @click.stop.prevent="editPlugin(plugin)" -->
-            <Button
-              @click="debuggerRequest"
-              style="height: 60px;width:100px"
-              :disabled="!plugin || !currentInterface || !requestBody || disabledBtn"
-              type="primary"
-              >{{ $t('debugger') }}</Button
+          <FormItem :label="$t('t_interface')">
+            <Select
+              v-model="currentInterface"
+              clearable
+              @on-clear="clearInterface"
+              filterable
+              @on-open-change="getPluginInterface"
+              :disabled="!plugin"
+              style="width: 100%"
             >
-          </div>
+              <Option v-for="item in interfaceOptions" :value="item.name" :key="item.id">{{ item.name }}</Option>
+            </Select>
+          </FormItem>
         </Col>
       </Row>
-    </div>
+      <Row>
+        <Col span="24">
+          <FormItem :label="$t('t_request_body')">
+            <Input style="width: 100%" v-model="requestBody" type="textarea" :rows="25"></Input>
+            <div style="height: 50px; width: 100%; margin-top: 10px; display: flex; justify-content: flex-end">
+              <Tooltip :content="$t('t_format_parameter')" :delay="1000">
+                <Icon @click="formatRequestBody" style="color: #00cb91; cursor: pointer" :size="28" type="md-apps" />
+              </Tooltip>
+              <!-- @click.stop.prevent="editPlugin(plugin)" -->
+              <Button
+                @click="debuggerRequest"
+                style="height: 40px; width: 100px"
+                :disabled="!plugin || !currentInterface || !requestBody || disabledBtn"
+                type="primary"
+                >{{ $t('debugger') }}</Button
+              >
+            </div>
+          </FormItem>
+        </Col>
+      </Row>
+    </Form>
     <template v-if="showResult">
       <Table size="small" :columns="tableColums" :data="tableData" border></Table>
       <div style="margin: 24px 0">
         <span>{{ $t('debugger_result') }}</span>
-        <div style="background: #dcdee2; max-height:400px;overflow:auto">
+        <div style="background: #dcdee2; max-height: 400px; overflow: auto">
           <pre>{{ result }}</pre>
         </div>
       </div>
@@ -75,7 +78,7 @@
 </template>
 
 <script>
-import { getInterfaceByPlugin, debuggerRequest, getPluginList } from '@/api/server'
+import { getInterfaceByPlugin, debuggerRequest, getPluginList, getParamaByInterface } from '@/api/server'
 export default {
   name: '',
   data () {
@@ -342,6 +345,31 @@ export default {
       tableData: [],
       result: {},
       disabledBtn: false
+    }
+  },
+  watch: {
+    async currentInterface () {
+      // 获取插件入参，将入参自动填充到请求报文中
+      const interfaceItem = this.interfaceOptions.find(i => i.name === this.currentInterface)
+      const { statusCode, data } = await getParamaByInterface(interfaceItem.id)
+      if (statusCode === 'OK') {
+        const inputParams = (data && data.filter(item => item.type === 'input')) || []
+        let inputParamsObj = {}
+        inputParams.forEach(item => {
+          if (item.dataType === 'object') {
+            inputParamsObj[item.name] = {}
+          } else {
+            inputParamsObj[item.name] = ''
+          }
+        })
+        this.requestBody = JSON.stringify(this.emptyBody, null, 4)
+        const requestBody = JSON.parse(this.requestBody)
+        requestBody.inputs = requestBody.inputs.map(item => {
+          item = Object.assign({}, item, inputParamsObj)
+          return item
+        })
+        this.requestBody = JSON.stringify(requestBody, null, 4)
+      }
     }
   },
   mounted () {
