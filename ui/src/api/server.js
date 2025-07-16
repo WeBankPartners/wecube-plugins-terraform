@@ -1,15 +1,15 @@
-import { req as request } from './base'
-// import { pluginErrorMessage } from './base-plugin'
+import { req as request, baseURL } from './base'
+import { pluginErrorMessage } from './base-plugin'
 let req = request
-// if (window.request) {
-//   req = {
-//     post: (url, ...params) => pluginErrorMessage(window.request.post(baseURL + url, ...params)),
-//     get: (url, ...params) => pluginErrorMessage(window.request.get(baseURL + url, ...params)),
-//     delete: (url, ...params) => pluginErrorMessage(window.request.delete(baseURL + url, ...params)),
-//     put: (url, ...params) => pluginErrorMessage(window.request.put(baseURL + url, ...params)),
-//     patch: (url, ...params) => pluginErrorMessage(window.request.patch(baseURL + url, ...params))
-//   }
-// }
+if (window.request) {
+  req = {
+    post: (url, ...params) => pluginErrorMessage(window.request.post(baseURL + url, ...params)),
+    get: (url, ...params) => pluginErrorMessage(window.request.get(baseURL + url, ...params)),
+    delete: (url, ...params) => pluginErrorMessage(window.request.delete(baseURL + url, ...params)),
+    put: (url, ...params) => pluginErrorMessage(window.request.put(baseURL + url, ...params)),
+    patch: (url, ...params) => pluginErrorMessage(window.request.patch(baseURL + url, ...params))
+  }
+}
 
 export const getPluginList = () => req.get('/terraform/api/v1/plugins')
 export const getProviderList = () => req.get('/terraform/api/v1/providers')
@@ -60,7 +60,7 @@ export const deleteProviderInfo = id => req.delete(`/terraform/api/v1/provider_i
 export const getDebugInfo = () => req.get(`/terraform/api/v1/resource_data_debugs`)
 
 export const debuggerRequest = (plugin, action, data) =>
-  req.post(`/terraform/api/v1/terraform_debug/${plugin}/${action}`, data)
+  req.post(`/terraform/api/v1/terraform_debug/${plugin}/${action}`, data, { timeout: 1000 * 60 * 15 })
 
 export const terraformExport = (provider, plugin) =>
   req.get(`/terraform/api/v1/provider_plugin_config/export?provider=${provider}&plugin=${plugin}`)

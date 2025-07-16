@@ -307,6 +307,8 @@ export default {
       }
       if (this.newProvider.form.subscriptionIdAttrName) {
         this.isMicrosoftCloud = true
+      } else {
+        this.isMicrosoftCloud = false
       }
       this.newProvider.isAdd = false
       this.newProvider.isShow = true

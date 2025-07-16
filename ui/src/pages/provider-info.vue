@@ -221,7 +221,7 @@ export default {
         return false
       }
       const method = this.newProviderInfo.isAdd ? addProviderInfo : editProviderInfo
-      const { statusCode } = method([this.newProviderInfo.form])
+      const { statusCode } = await method([this.newProviderInfo.form])
       if (statusCode === 'OK') {
         this.$Notice.success({
           title: 'Successful',
