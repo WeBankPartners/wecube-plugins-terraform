@@ -9,7 +9,7 @@
         filterable
         @on-open-change="getPlugin"
         @on-clear="clearPlugin"
-        style="width:300px"
+        style="width: 300px; margin-left: 10px; margin-right: 10px"
       >
         <Option v-for="item in pluginOptions" :value="item.id" :key="item.id">{{ item.name }}</Option>
       </Select>
@@ -38,7 +38,7 @@
         </div>
       </div>
       <template v-for="(template, tIndex) in pluginTemplates">
-        <div style="font-size: 0;margin-top: -1px" :key="template.id">
+        <div style="font-size: 0; margin-top: -1px" :key="template.id">
           <div
             class="config-title"
             :style="{ 'vertical-align': 'bottom', height: template.templateValue.length * 40 + 'px' }"
@@ -48,14 +48,14 @@
             </span>
             <Button
               type="primary"
-              style="float:right"
+              style="float: right"
               @click="addTemplateValue(template, tIndex)"
               ghost
               icon="md-add"
               size="small"
             ></Button>
           </div>
-          <div style="display: inline-block;">
+          <div style="display: inline-block">
             <template v-for="(tv, tvIndex) in template.templateValue">
               <div :key="tv.key">
                 <div class="config-title">

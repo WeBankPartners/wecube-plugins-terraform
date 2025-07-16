@@ -10,15 +10,6 @@ import (
 )
 
 func ProviderInfoList(paramsMap map[string]interface{}) (rowData []*models.ProviderInfoQuery, err error) {
-	/*
-	sqlCmd := "SELECT * FROM provider_info WHERE 1=1"
-	paramArgs := []interface{}{}
-	for k, v := range paramsMap {
-		sqlCmd += " AND " + k + "=?"
-		paramArgs = append(paramArgs, v)
-	}
-	sqlCmd += " ORDER BY create_time DESC"
-	 */
 	sqlCmd := "SELECT t1.*,t2.name AS provider_title FROM provider_info t1 LEFT JOIN provider t2 ON t1.provider=t2.id"
 	sqlCmd += " ORDER BY t1.id DESC"
 	err = x.SQL(sqlCmd).Find(&rowData)
@@ -36,7 +27,7 @@ func ProviderInfoBatchCreate(user string, param []*models.ProviderInfoTable) (ro
 	for i := range param {
 		id := guid.CreateGuid()
 		data := &models.ProviderInfoTable{Id: id, Name: param[i].Name, Provider: param[i].Provider, SecretId: param[i].SecretId,
-			SecretKey: param[i].SecretKey, CreateUser: user, CreateTime: createTime, UpdateUser: user, UpdateTime: createTime}
+			SecretKey: param[i].SecretKey, TenantId: param[i].TenantId, SubscriptionId: param[i].SubscriptionId, CreateUser: user, CreateTime: createTime, UpdateUser: user, UpdateTime: createTime}
 		rowData = append(rowData, data)
 	}
 

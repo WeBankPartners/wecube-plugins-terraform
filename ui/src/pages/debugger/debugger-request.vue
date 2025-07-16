@@ -8,6 +8,7 @@
             <Select
               v-model="plugin"
               clearable
+              :placeholder="$t('t_select_plugin')"
               @on-clear="clearPlugin"
               @on-change="currentInterface = ''"
               @on-open-change="getPlugin"
@@ -27,6 +28,7 @@
               filterable
               @on-open-change="getPluginInterface"
               :disabled="!plugin"
+              :placeholder="$t('t_select_interface')"
               style="width: 100%"
             >
               <Option v-for="item in interfaceOptions" :value="item.name" :key="item.id">{{ item.name }}</Option>

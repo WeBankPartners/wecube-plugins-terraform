@@ -81,8 +81,8 @@ type FunctionDefineArgs struct {
 }
 
 type TfFileAttrFetchResult struct {
-	AttrBytes  []byte
+	AttrBytes   []byte
 	FileContent string
-	StartIndex int
-	EndIndex   int
+	StartIndex  int
+	EndIndex    int
 }

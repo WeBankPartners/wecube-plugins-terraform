@@ -1,8 +1,8 @@
 <template>
-  <div class=" ">
+  <div class="terraform-provider-info">
     <Form inline>
       <FormItem prop="user">
-        <Input type="text" v-model="name" style="width:300px" :placeholder="$t('t_name')"> </Input>
+        <Input type="text" v-model="name" style="width: 300px" :placeholder="$t('t_name')"> </Input>
       </FormItem>
       <FormItem>
         <Button type="primary" @click="getTableData" style="margin-left: 24px">{{ $t('t_search') }}</Button>
@@ -12,29 +12,43 @@
     <Table border size="small" :columns="tableColumns" :data="tableData"></Table>
     <Modal
       v-model="newProviderInfo.isShow"
-      :title="newProviderInfo.isAdd ? $t('t_add') : $t('t_edit') + $t('t_provider_info')"
+      :title="(newProviderInfo.isAdd ? $t('t_add') : $t('t_edit')) + $t('t_provider_info')"
       :mask-closable="false"
-      @on-ok="confirmProviderInfo"
-      @on-cancel="confirmProviderInfo.isShow = false"
+      :width="700"
     >
-      <Form inline :label-width="80">
-        <FormItem :label="$t('t_name')">
-          <Input type="text" v-model="newProviderInfo.form.name" style="width:400px"></Input>
+      <Form inline :label-width="120">
+        <FormItem required :label="$t('t_name')">
+          <Input type="text" v-model="newProviderInfo.form.name" style="width: 520px"></Input>
         </FormItem>
-        <FormItem :label="$t('t_provider')">
-          <Select v-model="newProviderInfo.form.provider" ref="selectProvider" style="width:400px">
+        <FormItem required :label="$t('t_provider')">
+          <Select
+            v-model="newProviderInfo.form.provider"
+            ref="selectProvider"
+            @on-change="handleSelectProvider"
+            style="width: 520px"
+          >
             <Option v-for="provider in newProviderInfo.providerOptions" :value="provider.id" :key="provider.id"
               >{{ provider.name }}
             </Option>
           </Select>
         </FormItem>
-        <FormItem :label="$t('t_secret_id')">
-          <Input type="textarea" v-model="newProviderInfo.form.secretId" :rows="4" style="width:400px"></Input>
+        <FormItem required :label="$t('t_secret_id')">
+          <Input type="textarea" v-model="newProviderInfo.form.secretId" :rows="4" style="width: 520px"></Input>
         </FormItem>
-        <FormItem :label="$t('t_secret_key')">
-          <Input type="textarea" v-model="newProviderInfo.form.secretKey" :rows="4" style="width:400px"></Input>
+        <FormItem required :label="$t('t_secret_key')">
+          <Input type="textarea" v-model="newProviderInfo.form.secretKey" :rows="4" style="width: 520px"></Input>
+        </FormItem>
+        <FormItem required v-if="newProviderInfo.providerItem.tenantIdAttrName" :label="$t('t_tenant_id')">
+          <Input type="text" v-model="newProviderInfo.form.tenantId" style="width: 520px"></Input>
+        </FormItem>
+        <FormItem required v-if="newProviderInfo.providerItem.subscriptionIdAttrName" :label="$t('t_subscription_id')">
+          <Input type="text" v-model="newProviderInfo.form.subscriptionId" style="width: 520px"></Input>
         </FormItem>
       </Form>
+      <div slot="footer">
+        <Button @click="newProviderInfo.isShow = false">{{ $t('t_cancle') }}</Button>
+        <Button type="primary" @click="confirmProviderInfo">{{ $t('t_save') }}</Button>
+      </div>
     </Modal>
   </div>
 </template>
@@ -50,6 +64,7 @@ export default {
         isShow: false,
         isAdd: true,
         providerOptions: [],
+        providerItem: {},
         form: {
           createTime: '',
           createUser: '',
@@ -58,6 +73,8 @@ export default {
           provider: '',
           secretId: '',
           secretKey: '',
+          tenantId: '',
+          subscriptionId: '',
           updateTime: '',
           updateUser: ''
         }
@@ -70,6 +87,8 @@ export default {
         provider: '',
         secretId: '',
         secretKey: '',
+        tenantId: '',
+        subscriptionId: '',
         updateTime: '',
         updateUser: ''
       },
@@ -89,6 +108,14 @@ export default {
         {
           title: this.$t('t_secret_id'),
           key: 'secretId'
+        },
+        {
+          title: this.$t('t_tenant_id'),
+          key: 'tenantId'
+        },
+        {
+          title: this.$t('t_subscription_id'),
+          key: 'subscriptionId'
         },
         {
           title: this.$t('t_action'),
@@ -174,7 +201,25 @@ export default {
       this.getProvider()
       this.newProviderInfo.isShow = true
     },
+    validRequired () {
+      if (
+        !this.newProviderInfo.form.name ||
+        !this.newProviderInfo.form.provider ||
+        !this.newProviderInfo.form.secretId ||
+        !this.newProviderInfo.form.secretKey ||
+        (this.newProviderInfo.providerItem.tenantIdAttrName && !this.newProviderInfo.form.tenantId) ||
+        (this.newProviderInfo.providerItem.subscriptionIdAttrName && !this.newProviderInfo.form.subscriptionId)
+      ) {
+        this.$Message.error(this.$t('t_validate_required'))
+        return false
+      } else {
+        return true
+      }
+    },
     async confirmProviderInfo () {
+      if (!this.validRequired()) {
+        return false
+      }
       const method = this.newProviderInfo.isAdd ? addProviderInfo : editProviderInfo
       const { statusCode } = await method([this.newProviderInfo.form])
       if (statusCode === 'OK') {
@@ -189,7 +234,9 @@ export default {
     async getProvider () {
       const { statusCode, data } = await getProviders()
       if (statusCode === 'OK') {
-        this.newProviderInfo.providerOptions = data
+        this.newProviderInfo.providerOptions = data || []
+        this.newProviderInfo.providerItem =
+          this.newProviderInfo.providerOptions.find(item => item.id === this.newProviderInfo.form.provider) || {}
       }
     },
     async getTableData () {
@@ -197,10 +244,18 @@ export default {
       if (statusCode === 'OK') {
         this.tableData = data
       }
+    },
+    handleSelectProvider (val) {
+      this.newProviderInfo.providerItem = this.newProviderInfo.providerOptions.find(item => item.id === val) || {}
     }
-  },
-  components: {}
+  }
 }
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.terraform-provider-info {
+  .ivu-form-inline .ivu-form-item {
+    margin-bottom: 10px;
+  }
+}
+</style>

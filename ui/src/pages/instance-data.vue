@@ -2,6 +2,19 @@
   <div>
     <div class="search">
       <Select
+        v-model="serachParams.provider_name"
+        filterable
+        clearable
+        :placeholder="$t('t_cloud_vendors')"
+        @on-change="handleSearch"
+        @on-clear="handleSearch"
+        class="search-input"
+      >
+        <Option v-for="name in cloudVendorsList" :value="name" :key="name" :label="name">
+          {{ name }}
+        </Option>
+      </Select>
+      <Select
         v-model="serachParams.resource"
         filterable
         clearable
@@ -29,6 +42,11 @@
         clearable
       />
       <Button @click="handleReset">{{ $t('t_reset') }}</Button>
+      <Poptip confirm transfer :title="$t('t_delete_tips')" placement="left-end" @on-ok="onResourceDataDelete">
+        <Button :disabled="selectedItems.length === 0" type="error" style="margin-left: 10px">{{
+          $t('t_delete')
+        }}</Button>
+      </Poptip>
     </div>
     <Table
       border
@@ -37,6 +55,7 @@
       :data="tableData"
       :max-height="MODALHEIGHT"
       :loading="tableLoading"
+      @on-selection-change="onResourceItemSelectedChange"
     ></Table>
     <Page
       style="float: right; margin-top: 16px"
@@ -62,7 +81,7 @@
 </template>
 
 <script>
-import { getInstanceData, getResourceList } from '@/api/server'
+import { getInstanceData, getResourceList, deleteResourceData } from '@/api/server'
 import { debounce } from '@/pages/util'
 export default {
   name: '',
@@ -76,6 +95,11 @@ export default {
       },
       resourceList: [],
       tableColumns: [
+        {
+          type: 'selection',
+          width: 60,
+          align: 'center'
+        },
         {
           title: this.$t('t_region'),
           key: 'regionId'
@@ -152,11 +176,14 @@ export default {
         total: 0
       },
       serachParams: {
+        provider_name: '',
         resource: '',
         resource_id: '',
         resource_asset_id: ''
       },
-      uploadUrl: ''
+      uploadUrl: '',
+      selectedItems: [],
+      cloudVendorsList: ['azurerm', 'aws', 'alicloud', 'tencentcloud']
     }
   },
   mounted () {
@@ -180,6 +207,7 @@ export default {
     }, 600),
     handleReset () {
       this.serachParams = {
+        provider_name: '',
         resource: '',
         resource_id: '',
         resource_asset_id: ''
@@ -189,6 +217,7 @@ export default {
     async getInstanceData () {
       const params = {
         params: {
+          provider_name: this.serachParams.provider_name,
           resource: this.serachParams.resource,
           resource_id: this.serachParams.resource_id,
           resource_asset_id: this.serachParams.resource_asset_id,
@@ -214,6 +243,19 @@ export default {
       if (statusCode === 'OK') {
         this.resourceList = data || []
       }
+    },
+    async onResourceDataDelete () {
+      if (this.selectedItems.length) {
+        const idsArr = this.selectedItems.map(item => item.id)
+        const res = await deleteResourceData(idsArr)
+        if (res.statusCode === 'OK') {
+          this.$Message.success(this.$t('t_delete_success'))
+        }
+        this.getInstanceData()
+      }
+    },
+    onResourceItemSelectedChange (selection) {
+      this.selectedItems = selection
     }
   },
   components: {}

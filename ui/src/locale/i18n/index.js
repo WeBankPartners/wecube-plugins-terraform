@@ -9,12 +9,18 @@ import EN from './en-US.json'
 
 Vue.use(VueI18n)
 
-Vue.locale('zh-CN', Object.assign(zh, ZH))
-Vue.locale('en-US', Object.assign(en, EN))
+const messages = {
+  'zh-CN': Object.assign({}, zh, ZH),
+  'en-US': Object.assign({}, en, EN)
+}
 
 const navLang = navigator.language
-
 const localLang = navLang === 'zh-CN' || navLang === 'en-US' ? navLang : false
-
 const lang = window.localStorage.getItem('lang') || localLang || 'en-US'
-Vue.config.lang = lang
+
+const i18n = new VueI18n({
+  locale: lang,
+  messages
+})
+
+export default i18n

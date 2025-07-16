@@ -31,15 +31,27 @@ func ProviderList(paramsMap map[string]interface{}) (rowData []*models.ProviderT
 }
 
 func ProviderBatchCreate(user string, param []*models.ProviderTable) (rowData []*models.ProviderTable, err error) {
-	actions := []*execAction{}
+	var actions []*execAction
 	tableName := "provider"
 	createTime := time.Now().Format(models.DateTimeFormat)
 
 	for i := range param {
 		id := guid.CreateGuid()
-		data := &models.ProviderTable{Id: id, Name: param[i].Name, Version: param[i].Version, SecretIdAttrName: param[i].SecretIdAttrName,
-			SecretKeyAttrName: param[i].SecretKeyAttrName, RegionAttrName: param[i].RegionAttrName, CreateUser: user, CreateTime: createTime,
-			UpdateUser: user, UpdateTime: createTime, NameSpace: param[i].NameSpace}
+		data := &models.ProviderTable{
+			Id:                     id,
+			Name:                   param[i].Name,
+			Version:                param[i].Version,
+			SecretIdAttrName:       param[i].SecretIdAttrName,
+			SecretKeyAttrName:      param[i].SecretKeyAttrName,
+			RegionAttrName:         param[i].RegionAttrName,
+			TenantIdAttrName:       param[i].TenantIdAttrName,
+			SubscriptionIdAttrName: param[i].SubscriptionIdAttrName,
+			CreateTime:             createTime,
+			CreateUser:             user,
+			UpdateTime:             createTime,
+			UpdateUser:             user,
+			NameSpace:              param[i].NameSpace,
+		}
 		rowData = append(rowData, data)
 
 		// check is initialized

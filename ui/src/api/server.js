@@ -60,7 +60,7 @@ export const deleteProviderInfo = id => req.delete(`/terraform/api/v1/provider_i
 export const getDebugInfo = () => req.get(`/terraform/api/v1/resource_data_debugs`)
 
 export const debuggerRequest = (plugin, action, data) =>
-  req.post(`/terraform/api/v1/terraform_debug/${plugin}/${action}`, data)
+  req.post(`/terraform/api/v1/terraform_debug/${plugin}/${action}`, data, { timeout: 1000 * 60 * 15 })
 
 export const terraformExport = (provider, plugin) =>
   req.get(`/terraform/api/v1/provider_plugin_config/export?provider=${provider}&plugin=${plugin}`)
@@ -69,3 +69,5 @@ export const getInstanceData = params => req.get(`/terraform/api/v1/resource_dat
 export const getResourceList = () => req.get(`/terraform/api/v1/resource_datas/resources`)
 
 export const instanceDataDownload = data => req.post(`/terraform/api/v1/providers/download?id=${data}`)
+
+export const deleteResourceData = ids => req.delete(`/terraform/api/v1/resource_datas?ids=${ids}`)
