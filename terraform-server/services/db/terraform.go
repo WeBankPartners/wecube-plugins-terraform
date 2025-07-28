@@ -29,6 +29,7 @@ import (
 var (
 	concurrentLocker   sync.Mutex
 	concurrentData     sync.Map
+	concurrentAssetIdMap = make(map[string]string)
 	concurrentWaittime time.Duration = 1200 * time.Second
 )
 
@@ -1260,10 +1261,13 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 			rowData["errorCode"] = "1"
 		}
 		if reqEntryIdInf, ok := reqParam["id"]; ok {
-			reqEntryId := reqEntryIdInf.(string)
+			reqEntryId := plugin + "__" + reqEntryIdInf.(string)
 			if reqEntryId != "" {
 				log.Logger.Info("[TerraformOperation] Lock released", log.String("id", reqEntryId))
 				concurrentData.Delete(reqEntryId)
+				if rowAssetIdResult,findAssetIdOk := rowData["asset_id"]; findAssetIdOk {
+					concurrentAssetIdMap[reqEntryId] = fmt.Sprintf("%s", rowAssetIdResult)
+				}
 			}
 		}
 		if _, isIdExisted := rowData["id"]; !isIdExisted {
@@ -1287,7 +1291,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	// 判断id是否在reqParam中
 	startWait := time.Now()
 	if reqEntryIdInf, ok := reqParam["id"]; ok {
-		reqEntryId := reqEntryIdInf.(string)
+		reqEntryId := plugin + "__" + reqEntryIdInf.(string)
 		if reqEntryId != "" {
 			log.Logger.Info("[TerraformOperation] Try to lock", log.String("id", reqEntryId))
 			// 获取锁
@@ -1300,7 +1304,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 			if loaded {
 				for time.Since(startWait) < concurrentWaittime {
 					log.Logger.Info("[TerraformOperation] Lock waiting for retry", log.String("id", reqEntryId))
-					time.Sleep(time.Second * 2)
+					time.Sleep(time.Second * time.Duration(rand.intn(3)+1))
 					_, loaded = concurrentData.Load(reqEntryId)
 					if !loaded {
 						break
@@ -1310,6 +1314,14 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 				concurrentLocker.Lock()
 				concurrentData.Store(reqEntryId, true)
 				concurrentLocker.Unlock()
+				// 如果已经等待过了，并且入参中的asset_id为空
+				reqParamAssetId := ""
+				if inputAssetId,findAssetIdOk := reqParam["asset_id"]; findAssetIdOk {
+					reqParamAssetId = inputAssetId.(string)
+				}
+				if reqParamAssetId == "" {
+					reqParam["asset_id"] = concurrentAssetIdMap[reqEntryId]
+				}
 			}
 			log.Logger.Info("[TerraformOperation] Lock acquired", log.String("id", reqEntryId))
 		}
