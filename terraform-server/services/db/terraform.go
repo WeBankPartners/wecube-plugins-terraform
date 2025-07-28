@@ -15,6 +15,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 
@@ -23,6 +24,12 @@ import (
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/common/log"
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/common/try"
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/models"
+)
+
+var (
+	concurrentLocker   sync.Mutex
+	concurrentData     sync.Map
+	concurrentWaittime time.Duration = 1200 * time.Second
 )
 
 func GenFile(content []byte, filePath string) (err error) {
@@ -1252,6 +1259,13 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 		if rowData["errorMessage"].(string) != "" && rowData["errorCode"].(string) == "0" {
 			rowData["errorCode"] = "1"
 		}
+		if reqEntryIdInf, ok := reqParam["id"]; ok {
+			reqEntryId := reqEntryIdInf.(string)
+			if reqEntryId != "" {
+				log.Logger.Info("[TerraformOperation] Lock released", log.String("id", reqEntryId))
+				concurrentData.Delete(reqEntryId)
+			}
+		}
 		if _, isIdExisted := rowData["id"]; !isIdExisted {
 			rowData["id"] = reqParam["id"]
 			log.Logger.Info(fmt.Sprintf("writeBack reqParam.id: %v for retOutput", rowData["id"]))
@@ -1269,6 +1283,37 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 			}
 		}
 	}()
+	// 检测处理的ID值，如果相同，则需要等待锁释放才能进行(防止terraform并发出现问题)
+	// 判断id是否在reqParam中
+	startWait := time.Now()
+	if reqEntryIdInf, ok := reqParam["id"]; ok {
+		reqEntryId := reqEntryIdInf.(string)
+		if reqEntryId != "" {
+			log.Logger.Info("[TerraformOperation] Try to lock", log.String("id", reqEntryId))
+			// 获取锁
+			concurrentLocker.Lock()
+			_, loaded := concurrentData.Load(reqEntryId)
+			if !loaded {
+				concurrentData.Store(reqEntryId, true)
+			}
+			concurrentLocker.Unlock()
+			if loaded {
+				for time.Since(startWait) < concurrentWaittime {
+					log.Logger.Info("[TerraformOperation] Lock waiting for retry", log.String("id", reqEntryId))
+					time.Sleep(time.Second * 2)
+					_, loaded = concurrentData.Load(reqEntryId)
+					if !loaded {
+						break
+					}
+				}
+				// 锁超时直接上锁
+				concurrentLocker.Lock()
+				concurrentData.Store(reqEntryId, true)
+				concurrentLocker.Unlock()
+			}
+			log.Logger.Info("[TerraformOperation] Lock acquired", log.String("id", reqEntryId))
+		}
+	}
 
 	rowData = make(map[string]interface{})
 	rowData["callbackParameter"] = reqParam["callbackParameter"].(string)
