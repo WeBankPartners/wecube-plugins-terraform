@@ -6,14 +6,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"reflect"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 
@@ -22,6 +25,13 @@ import (
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/common/log"
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/common/try"
 	"github.com/WeBankPartners/wecube-plugins-terraform/terraform-server/models"
+)
+
+var (
+	concurrentLocker     sync.Mutex
+	concurrentData       sync.Map
+	concurrentAssetIdMap               = make(map[string]string)
+	concurrentWaittime   time.Duration = 1200 * time.Second
 )
 
 func GenFile(content []byte, filePath string) (err error) {
@@ -110,14 +120,13 @@ func DelDir(dirPath string) (err error) {
 	dir, err := ioutil.ReadDir(dirPath)
 	for _, d := range dir {
 		tmpPath := path.Join([]string{dirPath, d.Name()}...)
-		if models.Config.Log.Level != "debug" {
-			os.RemoveAll(tmpPath)
-		}
+		os.RemoveAll(tmpPath)
 	}
 	return
 }
 
 func GenTfFile(dirPath string, sourceData *models.SourceTable, action string, resourceId string, tfArguments map[string]interface{}) (tfFileContentStr string, err error) {
+	log.Logger.Debug("[GenTfFile] called", log.String("dirPath", dirPath), log.JsonObj("sourceData", sourceData), log.String("action", action), log.String("resourceId", resourceId), log.JsonObj("tfArguments", tfArguments))
 	var tfFilePath string
 	tfFilePath = dirPath + "/" + sourceData.Name + ".tf.json"
 
@@ -137,6 +146,7 @@ func GenTfFile(dirPath string, sourceData *models.SourceTable, action string, re
 
 	tfFileContent, err := json.Marshal(tfFileData)
 	err = GenFile((tfFileContent), tfFilePath)
+	log.Logger.Debug("[GenTfFile] file generated", log.String("filePath", tfFilePath), log.String("content", string(tfFileContent)), log.Error(err))
 	if err != nil {
 		err = fmt.Errorf("Gen tfFile: %s error: %s", tfFilePath, err.Error())
 		log.Logger.Error("Gen tfFile error", log.String("tfFilePath", tfFilePath), log.Error(err))
@@ -147,14 +157,19 @@ func GenTfFile(dirPath string, sourceData *models.SourceTable, action string, re
 }
 
 func GenProviderFile(dirPath string, providerData *models.ProviderTable, providerInfo *models.ProviderInfoTable, regionData *models.ResourceDataTable) (err error) {
-	// provider
+	log.Logger.Debug("[GenProviderFile] called", log.String("dirPath", dirPath), log.JsonObj("providerData", providerData), log.JsonObj("providerInfo", providerInfo), log.JsonObj("regionData", regionData))
 	providerContentData := make(map[string]map[string]interface{})
 	providerContentData[providerData.Name] = make(map[string]interface{})
+	if strings.TrimSpace(providerInfo.TenantId) != "" && strings.TrimSpace(providerInfo.SubscriptionId) != "" && strings.Contains(strings.ToLower(providerData.Name), "azure") {
+		providerContentData[providerData.Name]["features"] = map[string]interface{}{}
+		providerContentData[providerData.Name][providerData.TenantIdAttrName] = providerInfo.TenantId
+		providerContentData[providerData.Name][providerData.SubscriptionIdAttrName] = providerInfo.SubscriptionId
+	} else {
+		providerContentData[providerData.Name][providerData.RegionAttrName] = regionData.ResourceAssetId
+	}
 	providerContentData[providerData.Name][providerData.SecretIdAttrName] = providerInfo.SecretId
 	providerContentData[providerData.Name][providerData.SecretKeyAttrName] = providerInfo.SecretKey
-	providerContentData[providerData.Name][providerData.RegionAttrName] = regionData.ResourceAssetId
 
-	// terraform
 	terraformData := make(map[string]map[string]map[string]interface{})
 	terraformData["required_providers"] = make(map[string]map[string]interface{})
 	terraformData["required_providers"][providerData.Name] = make(map[string]interface{})
@@ -171,6 +186,7 @@ func GenProviderFile(dirPath string, providerData *models.ProviderTable, provide
 		log.Logger.Error("Marshal providerFileData error", log.Error(err))
 		return
 	}
+	log.Logger.Debug("[GenProviderFile] generated provider.tf.json content", log.String("content", string(providerFileContent)))
 	providerFilePath := dirPath + "/provider.tf.json"
 	err = GenFile(providerFileContent, providerFilePath)
 	if err != nil {
@@ -321,56 +337,76 @@ func execRemoteWithTimeout(cmdStr []string, timeOut int) (out string, err error)
 		err = fmt.Errorf("cmdStr can not be empty")
 		return
 	}
-	cmdStr = append([]string{"-c"}, cmdStr...)
-	doneChan := make(chan string)
-	// defer close(doneChan)
+	log.Logger.Info("Executing command with timeout",
+		log.JsonObj("cmdStr", cmdStr),
+		log.Int("timeout", timeOut))
 
-	tmpCmd := exec.Command(models.BashCmd, cmdStr...)
+	// 不再需要将整个命令作为一个字符串传递
+	// cmdStr = append([]string{"-c"}, cmdStr...)
+
+	doneChan := make(chan string)
+	tmpCmd := exec.Command(cmdStr[0], cmdStr[1:]...)
 	tmpCmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+
 	go func(a chan string, ct *exec.Cmd) {
-		/*
-			b, err := ct.Output()
-			if err != nil {
-				a <- "error:" + err.Error()
-			}
-			a <- string(b)
-		*/
 		var stdout, stderr bytes.Buffer
 		ct.Stdout = &stdout
 		ct.Stderr = &stderr
 		cmdErr := ct.Run()
 		if cmdErr != nil {
+			log.Logger.Error("Command execution failed",
+				log.Error(cmdErr),
+				log.String("stderr", stderr.String()))
 			a <- "error:" + string(stderr.Bytes())
 		} else {
+			log.Logger.Info("Command executed successfully",
+				log.String("stdout", stdout.String()))
 			a <- string(stdout.Bytes())
 		}
 	}(doneChan, tmpCmd)
+
 	select {
 	case tmpVal := <-doneChan:
 		out = tmpVal
+		log.Logger.Info("Command completed",
+			log.String("output", out))
 	case <-time.After(time.Duration(timeOut) * time.Second):
-		out = fmt.Sprintf("error: %s timeout %d(s)", cmdStr, timeOut)
+		out = fmt.Sprintf("error: command timed out after %d seconds", timeOut)
+		log.Logger.Error("Command timed out",
+			log.JsonObj("cmdStr", cmdStr),
+			log.Int("timeout", timeOut))
 		syscall.Kill(-tmpCmd.Process.Pid, syscall.SIGKILL)
 	}
+
 	if strings.HasPrefix(out, "error:") {
 		err = fmt.Errorf(out)
+		log.Logger.Error("Command returned error",
+			log.Error(err))
 	}
 	return
 }
 
 func TerraformImport(dirPath, address, resourceAssetId string) (err error) {
-	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " import -no-color " + address + " " + resourceAssetId
-	/*
-		cmd := exec.Command(models.BashCmd, "-c", cmdStr)
-		var stdout, stderr bytes.Buffer
-		cmd.Stdout = &stdout
-		cmd.Stderr = &stderr
-		cmdErr := cmd.Run()
-	*/
-	_, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.CommandTimeOut)
+	// 确保目录存在
+	if err := os.MkdirAll(dirPath, 0755); err != nil {
+		return fmt.Errorf("failed to create directory: %w", err)
+	}
+
+	cmdArgs := []string{
+		models.Config.TerraformCmdPath,
+		"-chdir=" + dirPath,
+		"import",
+		"-no-color",
+		address,
+		resourceAssetId,
+	}
+
+	log.Logger.Debug("[TerraformImport] cmd", log.JsonObj("cmdArgs", cmdArgs))
+
+	out, cmdErr := execRemoteWithTimeout(cmdArgs, models.Config.HttpTimeout)
+	log.Logger.Debug("[TerraformImport] result", log.String("output", out), log.Error(cmdErr))
+
 	if cmdErr != nil {
-		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
-		// outPutStr := string(stderr.Bytes())
 		outPutStr := cmdErr.Error()
 		errorMsgRegx := regexp.MustCompile(`Error: ([\S\s]*)`)
 		errorMsg := errorMsgRegx.FindStringSubmatch(outPutStr)
@@ -381,27 +417,33 @@ func TerraformImport(dirPath, address, resourceAssetId string) (err error) {
 		}
 		colorsCharRegx := regexp.MustCompile(`\[\d+m`)
 		outPutErrMsg := colorsCharRegx.ReplaceAllLiteralString(errMsg, "")
-		err = fmt.Errorf("Cmd:%s run failed: %s, ErrorMsg: %s", cmdStr, cmdErr.Error(), outPutErrMsg)
-		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.String("Error: ", outPutErrMsg), log.Error(cmdErr))
+		err = fmt.Errorf("Cmd:%v run failed: %s, ErrorMsg: %s", cmdArgs, cmdErr.Error(), outPutErrMsg)
+		log.Logger.Error("Cmd run failed", log.JsonObj("cmd", cmdArgs), log.String("Error: ", outPutErrMsg), log.Error(cmdErr))
 		return
 	}
 	return
 }
 
 func TerraformPlan(dirPath string) (destroyCnt int, err error) {
-	// cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " plan -input=false -out=" + dirPath + "/planfile"
-	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " plan -input=false -no-color"
-	/*
-		cmd := exec.Command(models.BashCmd, "-c", cmdStr)
-		var stdout, stderr bytes.Buffer
-		cmd.Stdout = &stdout
-		cmd.Stderr = &stderr
-		cmdErr := cmd.Run()
-	*/
-	output, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.CommandTimeOut)
+	// 确保目录存在
+	if err := os.MkdirAll(dirPath, 0755); err != nil {
+		return 0, fmt.Errorf("failed to create directory: %w", err)
+	}
+
+	cmdArgs := []string{
+		models.Config.TerraformCmdPath,
+		"-chdir=" + dirPath,
+		"plan",
+		"-input=false",
+		"-no-color",
+	}
+
+	log.Logger.Debug("[TerraformPlan] cmd", log.JsonObj("cmdArgs", cmdArgs))
+
+	output, cmdErr := execRemoteWithTimeout(cmdArgs, models.Config.HttpTimeout)
+	log.Logger.Debug("[TerraformPlan] result", log.String("output", output), log.Error(cmdErr))
+
 	if cmdErr != nil {
-		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
-		// outPutStr := string(stderr.Bytes())
 		outPutStr := cmdErr.Error()
 		errorMsgRegx := regexp.MustCompile(`Error: ([\S\s]*)`)
 		errorMsg := errorMsgRegx.FindStringSubmatch(outPutStr)
@@ -412,11 +454,11 @@ func TerraformPlan(dirPath string) (destroyCnt int, err error) {
 		}
 		colorsCharRegx := regexp.MustCompile(`\[\d+m`)
 		outPutErrMsg := colorsCharRegx.ReplaceAllLiteralString(errMsg, "")
-		err = fmt.Errorf("Cmd:%s run failed: %s, ErrorMsg: %s", cmdStr, cmdErr.Error(), outPutErrMsg)
-		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.String("Error: ", outPutErrMsg), log.Error(cmdErr))
+		err = fmt.Errorf("Cmd:%v run failed: %s, ErrorMsg: %s", cmdArgs, cmdErr.Error(), outPutErrMsg)
+		log.Logger.Error("Cmd run failed", log.JsonObj("cmd", cmdArgs), log.String("Error: ", outPutErrMsg), log.Error(cmdErr))
 		return
 	}
-	// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
+
 	filePath := dirPath + "/planfile"
 	err = GenFile([]byte(output), filePath)
 	if err != nil {
@@ -474,48 +516,53 @@ func TerraformPlan(dirPath string) (destroyCnt int, err error) {
 }
 
 func TerraformApply(dirPath string) (err error) {
-	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " apply -auto-approve -no-color"
-	/*
-		cmd := exec.Command(models.BashCmd, "-c", cmdStr)
-		var stdout, stderr bytes.Buffer
-		cmd.Stdout = &stdout
-		cmd.Stderr = &stderr
-		cmdErr := cmd.Run()
-	*/
-	_, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.CommandTimeOut)
-	if cmdErr != nil {
-		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
-		// outPutStr := string(stderr.Bytes())
-		outPutStr := cmdErr.Error()
-		errorMsgRegx := regexp.MustCompile(`Error: ([\S\s]*)`)
-		errorMsg := errorMsgRegx.FindStringSubmatch(outPutStr)
-		errMsg := "Error:"
-		for i := 1; i < len(errorMsg); i++ {
-			errMsg += " "
-			errMsg += errorMsg[i]
-		}
-		colorsCharRegx := regexp.MustCompile(`\[\d+m`)
-		outPutErrMsg := colorsCharRegx.ReplaceAllLiteralString(errMsg, "")
-		err = fmt.Errorf("Cmd:%s run failed: %s, ErrorMsg: %s", cmdStr, cmdErr.Error(), outPutErrMsg)
-		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.String("Error: ", outPutErrMsg), log.Error(cmdErr))
-		return
+	// 确保目录存在
+	if err := os.MkdirAll(dirPath, 0755); err != nil {
+		return fmt.Errorf("failed to create directory: %w", err)
 	}
+
+	log.Logger.Info("Starting TerraformApply", log.String("dirPath", dirPath))
+
+	cmdArgs := []string{
+		models.Config.TerraformCmdPath,
+		"-chdir=" + dirPath,
+		"apply",
+		"-auto-approve",
+		"-no-color",
+	}
+
+	log.Logger.Info("Running terraform apply command", log.JsonObj("cmdArgs", cmdArgs))
+
+	out, err := execRemoteWithTimeout(cmdArgs, models.Config.HttpTimeout)
+	if err != nil {
+		log.Logger.Error("TerraformApply failed", log.Error(err), log.String("output", out))
+		return fmt.Errorf("TerraformApply error:%s", err.Error())
+	}
+
+	log.Logger.Info("TerraformApply completed successfully", log.String("output", out))
 	return
 }
 
 func TerraformDestroy(dirPath string) (err error) {
-	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " destroy -auto-approve -no-color"
-	/*
-		cmd := exec.Command(models.BashCmd, "-c", cmdStr)
-		var stdout, stderr bytes.Buffer
-		cmd.Stdout = &stdout
-		cmd.Stderr = &stderr
-		cmdErr := cmd.Run()
-	*/
-	_, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.CommandTimeOut)
+	// 确保目录存在
+	if err := os.MkdirAll(dirPath, 0755); err != nil {
+		return fmt.Errorf("failed to create directory: %w", err)
+	}
+
+	cmdArgs := []string{
+		models.Config.TerraformCmdPath,
+		"-chdir=" + dirPath,
+		"destroy",
+		"-auto-approve",
+		"-no-color",
+	}
+
+	log.Logger.Debug("[TerraformDestroy] cmd", log.JsonObj("cmdArgs", cmdArgs))
+
+	out, cmdErr := execRemoteWithTimeout(cmdArgs, models.Config.HttpTimeout)
+	log.Logger.Debug("[TerraformDestroy] result", log.String("output", out), log.Error(cmdErr))
+
 	if cmdErr != nil {
-		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
-		// outPutStr := string(stderr.Bytes())
 		outPutStr := cmdErr.Error()
 		errorMsgRegx := regexp.MustCompile(`Error: ([\S\s]*)`)
 		errorMsg := errorMsgRegx.FindStringSubmatch(outPutStr)
@@ -526,26 +573,40 @@ func TerraformDestroy(dirPath string) (err error) {
 		}
 		colorsCharRegx := regexp.MustCompile(`\[\d+m`)
 		outPutErrMsg := colorsCharRegx.ReplaceAllLiteralString(errMsg, "")
-		err = fmt.Errorf("Cmd:%s run failed: %s, ErrorMsg: %s", cmdStr, cmdErr.Error(), outPutErrMsg)
-		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.String("Error: ", outPutErrMsg), log.Error(cmdErr))
+		err = fmt.Errorf("Cmd:%v run failed: %s, ErrorMsg: %s", cmdArgs, cmdErr.Error(), outPutErrMsg)
+		log.Logger.Error("Cmd run failed", log.JsonObj("cmd", cmdArgs), log.String("Error: ", outPutErrMsg), log.Error(cmdErr))
 		return
 	}
 	return
 }
 
 func TerraformInit(dirPath string) (err error) {
-	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " init -no-color" + " -plugin-dir=" + dirPath + "/.terraform/providers"
-	/*
-		cmd := exec.Command(models.BashCmd, "-c", cmdStr)
-		var stdout, stderr bytes.Buffer
-		cmd.Stdout = &stdout
-		cmd.Stderr = &stderr
-		cmdErr := cmd.Run()
-	*/
-	_, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.CommandTimeOut)
+	// 确保目录存在
+	if err := os.MkdirAll(dirPath, 0755); err != nil {
+		return fmt.Errorf("failed to create directory: %w", err)
+	}
+
+	// 确保 providers 目录存在
+	providersDir := filepath.Join(dirPath, ".terraform", "providers")
+	if err := os.MkdirAll(providersDir, 0755); err != nil {
+		return fmt.Errorf("failed to create providers directory: %w", err)
+	}
+
+	// 构造命令参数
+	cmdArgs := []string{
+		models.Config.TerraformCmdPath,
+		"-chdir=" + dirPath,
+		"init",
+		"-no-color",
+		"-plugin-dir=" + providersDir,
+	}
+
+	log.Logger.Debug("[TerraformInit] cmd", log.JsonObj("cmdArgs", cmdArgs))
+
+	out, cmdErr := execRemoteWithTimeout(cmdArgs, models.Config.HttpTimeout)
+	log.Logger.Debug("[TerraformInit] result", log.String("output", out), log.Error(cmdErr))
+
 	if cmdErr != nil {
-		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
-		// outPutStr := string(stderr.Bytes())
 		outPutStr := cmdErr.Error()
 		errorMsgRegx := regexp.MustCompile(`Error: ([\S\s]*)`)
 		errorMsg := errorMsgRegx.FindStringSubmatch(outPutStr)
@@ -556,16 +617,23 @@ func TerraformInit(dirPath string) (err error) {
 		}
 		colorsCharRegx := regexp.MustCompile(`\[\d+m`)
 		outPutErrMsg := colorsCharRegx.ReplaceAllLiteralString(errMsg, "")
-		err = fmt.Errorf("Cmd:%s run failed: %s, ErrorMsg: %s", cmdStr, cmdErr.Error(), outPutErrMsg)
-		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.String("Error: ", outPutErrMsg), log.Error(cmdErr))
+		err = fmt.Errorf("Cmd:%v run failed: %s, ErrorMsg: %s", cmdArgs, cmdErr.Error(), outPutErrMsg)
+		log.Logger.Error("Cmd run failed", log.JsonObj("cmd", cmdArgs), log.String("Error: ", outPutErrMsg), log.Error(cmdErr))
 		return
 	}
 	return
 }
 
 func DownloadProviderByTerraformInit(dirPath string) (err error) {
-	cmdStr := models.Config.TerraformCmdPath + " -chdir=" + dirPath + " init -no-color"
-	_, cmdErr := execRemoteWithTimeout([]string{cmdStr}, models.DownloadProviderTimeOut)
+	cmdArgs := []string{
+		models.Config.TerraformCmdPath,
+		"-chdir=" + dirPath,
+		"init",
+		"-no-color",
+	}
+	log.Logger.Debug("[DownloadProviderByTerraformInit] cmd", log.JsonObj("cmdArgs", cmdArgs))
+	out, cmdErr := execRemoteWithTimeout(cmdArgs, models.DownloadProviderTimeOut)
+	log.Logger.Debug("[DownloadProviderByTerraformInit] result", log.String("output", out), log.Error(cmdErr))
 	if cmdErr != nil {
 		// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
 		// outPutStr := string(stderr.Bytes())
@@ -579,8 +647,8 @@ func DownloadProviderByTerraformInit(dirPath string) (err error) {
 		}
 		colorsCharRegx := regexp.MustCompile(`\[\d+m`)
 		outPutErrMsg := colorsCharRegx.ReplaceAllLiteralString(errMsg, "")
-		err = fmt.Errorf("Cmd:%s run failed: %s, ErrorMsg: %s", cmdStr, cmdErr.Error(), outPutErrMsg)
-		log.Logger.Error("Cmd run failed", log.String("cmd", cmdStr), log.String("Error: ", outPutErrMsg), log.Error(cmdErr))
+		err = fmt.Errorf("Cmd:%v run failed: %s, ErrorMsg: %s", cmdArgs, cmdErr.Error(), outPutErrMsg)
+		log.Logger.Error("Cmd run failed", log.JsonObj("cmd", cmdArgs), log.String("Error: ", outPutErrMsg), log.Error(cmdErr))
 		return
 	}
 	return
@@ -1176,38 +1244,105 @@ func handleDestroy(workDirPath string,
 }
 
 func TerraformOperation(plugin string, action string, reqParam map[string]interface{}, debugFileContent *[]map[string]interface{}) (rowData map[string]interface{}, err error) {
+	log.Logger.Info("[TerraformOperation] Starting operation",
+		log.String("plugin", plugin),
+		log.String("action", action),
+		log.JsonObj("reqParam", reqParam))
+
 	var curWorkDirPath = []string{}
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("TerraformOperation error: %v", r)
 			rowData["errorMessage"] = err.Error()
-
+			log.Logger.Error("[TerraformOperation] panic", log.Error(err))
 			stackTraceInfo := try.PrintStackTrace(r)
 			log.Logger.Error(stackTraceInfo)
 		}
 		if rowData["errorMessage"].(string) != "" && rowData["errorCode"].(string) == "0" {
 			rowData["errorCode"] = "1"
 		}
-
-		// writeBack reqParam.id
+		if reqEntryIdInf, ok := reqParam["id"]; ok {
+			reqEntryId := plugin + "__" + reqEntryIdInf.(string)
+			if reqEntryId != "" {
+				log.Logger.Info("[TerraformOperation] Lock released", log.String("id", reqEntryId))
+				if rowAssetIdResult, findAssetIdOk := rowData["asset_id"]; findAssetIdOk {
+					concurrentAssetIdMap[reqEntryId] = fmt.Sprintf("%s", rowAssetIdResult)
+				}
+				concurrentData.Delete(reqEntryId)
+			}
+		}
 		if _, isIdExisted := rowData["id"]; !isIdExisted {
 			rowData["id"] = reqParam["id"]
 			log.Logger.Info(fmt.Sprintf("writeBack reqParam.id: %v for retOutput", rowData["id"]))
 		}
-
 		if _, ok := reqParam[models.ResourceDataDebug]; !ok {
-			// clear the workDirPath
-			for i := range curWorkDirPath {
-				DelDir(curWorkDirPath[i])
+			// 只在操作完成后清理目录
+			if rowData["errorCode"] == "0" || rowData["errorMessage"].(string) != "" {
+				log.Logger.Info("Cleaning up work directories",
+					log.JsonObj("directories", curWorkDirPath))
+				for i := range curWorkDirPath {
+					DelDir(curWorkDirPath[i])
+				}
+			} else {
+				log.Logger.Info("Skipping directory cleanup as operation is still in progress")
 			}
 		}
 	}()
-
 	rowData = make(map[string]interface{})
 	rowData["callbackParameter"] = reqParam["callbackParameter"].(string)
 	rowData["errorCode"] = "1"
 	rowData["errorMessage"] = ""
+	// 检测处理的ID值，如果相同，则需要等待锁释放才能进行(防止terraform并发出现问题)
+	// 判断id是否在reqParam中
+	startWait := time.Now()
+	if reqEntryIdInf, ok := reqParam["id"]; ok {
+		reqEntryId := plugin + "__" + reqEntryIdInf.(string)
+		if reqEntryId != "" {
+			lockAcquired := false
+			log.Logger.Info("[TerraformOperation] Try to lock", log.String("id", reqEntryId))
+			// 获取锁
+			concurrentLocker.Lock()
+			_, loaded := concurrentData.Load(reqEntryId)
+			if !loaded {
+				concurrentData.Store(reqEntryId, true)
+				lockAcquired = true
+			}
+			concurrentLocker.Unlock()
+			if !lockAcquired {
+				for time.Since(startWait) < concurrentWaittime {
+					log.Logger.Info("[TerraformOperation] Lock waiting for retry", log.String("id", reqEntryId))
+					time.Sleep(time.Second * time.Duration(rand.Intn(3)+1))
+					concurrentLocker.Lock()
+					_, loaded = concurrentData.Load(reqEntryId)
+					if !loaded {
+						concurrentData.Store(reqEntryId, true)
+						lockAcquired = true
+						concurrentLocker.Unlock()
+						break
+					}
+					concurrentLocker.Unlock()
+				}
+				// 锁超时报错
+				if !lockAcquired {
+					err = fmt.Errorf("[TerraformOperation]try to get lock for %s error, timeout", reqEntryId)
+					return
+				}
+				// 如果已经等待过了，并且入参中的asset_id为空
+				reqParamAssetId := ""
+				if inputAssetId, findAssetIdOk := reqParam["asset_id"]; findAssetIdOk {
+					reqParamAssetId = inputAssetId.(string)
+				}
+				if reqParamAssetId == "" {
+					reqParam["asset_id"] = concurrentAssetIdMap[reqEntryId]
+				}
+			}
+			log.Logger.Info("[TerraformOperation] Lock acquired", log.String("id", reqEntryId))
+		}
+	}
 
+	log.Logger.Info("[TerraformOperation] Getting interface info",
+		log.String("plugin", plugin),
+		log.String("action", action))
 	// Get interface by plugin and action
 	var actionName string
 	actionName = action
@@ -1238,6 +1373,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 		return
 	}
 
+	log.Logger.Debug("[TerraformOperation] 获取 region/provider/source 等元数据", log.JsonObj("reqParam", reqParam))
 	// Get regionInfo by regionId
 	regionId := reqParam["region_id"].(string)
 	sqlCmd = `SELECT * FROM resource_data WHERE resource_id=? AND region_id=?`
@@ -1349,19 +1485,17 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 	}
 	simulateResourceData := make(map[string][]map[string]interface{})
 	if (action == "apply" || action == "query") && sourceList[0].TerraformUsed != "N" {
-		// fmt.Printf("%v\n", sortedSourceList)
 
 		resourceId := reqParam["id"].(string)
 		var rootResourceAssetId interface{}
 		rootResourceAssetId = ""
-		// resourceAssetId := reqParam["asset_id"].(string)
-		// fmt.Printf("%v\n", resourceAssetId)
-
+		reqParam[models.ResourceIdDataConvert] = resourceId
 		reqParam[models.SimulateResourceDataResult] = make(map[string][]map[string]interface{})
 		toDestroyList := make(map[string]*models.ResourceDataTable)
 		for sourceDataIdx, sortedSourceData := range sortedSourceList {
 			simulateResourceData[sortedSourceData.Id] = []map[string]interface{}{}
-			reqParam[models.SimulateResourceData] = simulateResourceData
+			// 去掉模拟数据场景,模拟数据 simulateResourceData 数据本来也为空
+			// reqParam[models.SimulateResourceData] = simulateResourceData
 			reqParam[models.SourceDataIdx] = sourceDataIdx
 
 			isInternalAction := false
@@ -1881,17 +2015,20 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					destroyAssetId := ""
 					totalDestroyCnt := len(toDestroyResource)
 					if len(toDestroyResource) > 0 {
+						log.Logger.Warn("Resources marked for destruction from toDestroyResource:",
+							log.Int("count", len(toDestroyResource)))
 						for _, resourceData := range toDestroyResource {
 							destroyAssetId += resourceData.ResourceAssetId + ", "
+							log.Logger.Warn("Resource to be destroyed:",
+								log.String("assetId", resourceData.ResourceAssetId),
+								log.String("resourceId", resourceData.ResourceId))
 						}
 					}
 
 					for i := range conStructObject {
-						curDebugFileContent := (*debugFileContent)[curDebugFileStartIdx+i]
 						// check if importObject needed to be destroy
 						if _, ok := importObject[i]; ok || (sourceDataIdx == 0 && rootResourceAssetId != "" && rootResourceAssetId != nil) {
 							// Gen tf.json file
-							// uuid := "_" + guid.CreateGuid()
 							_, err = GenTfFile(workDirPath, sortedSourceData, action, resourceId, conStructObject[i])
 							if err != nil {
 								err = fmt.Errorf("Gen tfFile error: %s", err.Error())
@@ -1905,7 +2042,6 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 								err = fmt.Errorf("Do TerraformInit error:%s", err.Error())
 								log.Logger.Error("Do TerraformInit error", log.Error(err))
 								rowData["errorMessage"] = err.Error()
-								// return
 								continue
 							}
 
@@ -1921,69 +2057,9 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 									if strings.Contains(errMsg, "Cannot import non-existent remote object") == false {
 										err = fmt.Errorf("Do TerraformImport error:%s", err.Error())
 										rowData["errorMessage"] = err.Error()
-										// return
 										continue
-									} else {
-										// deleteOldResourceData(sortedSourceData, regionData, resourceId, importObject[i], reqParam)
 									}
-								} else if len(importObjectResourceData) > i {
-									oldTfstateFile := importObjectResourceData[i].TfStateFile
-									var oldTfstateFileObj models.TfstateFileData
-									err = json.Unmarshal([]byte(oldTfstateFile), &oldTfstateFileObj)
-									if err != nil {
-										err = fmt.Errorf("Unmarshal tfstate file data error:%s", err.Error())
-										log.Logger.Error("Unmarshal tfstate file data error", log.Error(err))
-										return
-									}
-
-									secondFileObj := getFileAttrContent(workDirPath + "/terraform.tfstate")
-									first, second := make(map[string]interface{}), make(map[string]interface{})
-									first = oldTfstateFileObj.Resources[0].Instances[0].Attributes
-									err = json.Unmarshal(secondFileObj.AttrBytes, &second)
-									if err != nil {
-										fmt.Printf("json unmarshal second file fail,%s \n", err.Error())
-										return
-									}
-
-									result, diff, message := compareObject(first, second)
-									if diff != 0 {
-										err = fmt.Errorf("Compare import_state file and old tfstate file error:%s. Please confirm again!", message)
-										log.Logger.Error("Compare import_state file and old tfstate file error", log.String("message", message), log.Error(err))
-										rowData["errorMessage"] = err.Error()
-										rowData["errorCode"] = "-1"
-										return
-									}
-									resultBytes, tmpErr := json.MarshalIndent(result, "        ", "\t")
-									if tmpErr != nil {
-										err = fmt.Errorf("json marshal result fail,%s \n", tmpErr.Error())
-										return
-									}
-
-									newFileBytes := []byte{}
-									newFileWriter := bytes.NewBuffer(newFileBytes)
-									newFileWriter.WriteString(secondFileObj.FileContent[:secondFileObj.StartIndex])
-									newFileWriter.Write(resultBytes)
-									newFileWriter.WriteString(secondFileObj.FileContent[secondFileObj.EndIndex:])
-									ioutil.WriteFile(workDirPath+"/terraform.tfstate", newFileWriter.Bytes(), 0644)
 								}
-							} else {
-								// get tfstate file from resource_data table and gen it
-								tfstateFileContent := importObjectResourceData[i].TfStateFile
-								tfstateFilePath := workDirPath + "/terraform.tfstate"
-								GenFile([]byte(tfstateFileContent), tfstateFilePath)
-							}
-							if _, ok := reqParam[models.ResourceDataDebug]; ok {
-								// get import tfstate file
-								tfstateFilePath := workDirPath + "/terraform.tfstate"
-								tfstateImportFileData, tmpErr := ReadFile(tfstateFilePath)
-								if tmpErr != nil {
-									err = fmt.Errorf("Read tfstate import file error:%s", tmpErr.Error())
-									log.Logger.Error("Read tfstate import file error", log.Error(err))
-									rowData["errorMessage"] = err.Error()
-									// return
-								}
-								tfstateImportFileContentStr := string(tfstateImportFileData)
-								curDebugFileContent["tf_state_import"] = tfstateImportFileContentStr
 							}
 
 							destroyCnt, tmpErr := TerraformPlan(workDirPath)
@@ -1991,37 +2067,41 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 								err = fmt.Errorf("Do TerraformPlan error:%s", tmpErr.Error())
 								log.Logger.Error("Do TerraformPlan error", log.Error(err))
 								rowData["errorMessage"] = err.Error()
-								// return
+								continue
 							}
 
 							if destroyCnt > 0 {
-								// 二次确认
 								totalDestroyCnt += destroyCnt
-								destroyAssetId += importObject[i] + ", "
-							}
-
-							if _, ok := reqParam[models.ResourceDataDebug]; ok {
-								// get plan file
-								planFilePath := workDirPath + "/planfile"
-								planFileData, tmpErr := ReadFile(planFilePath)
-								if tmpErr != nil {
-									err = fmt.Errorf("Read tfstate import file error:%s", tmpErr.Error())
-									log.Logger.Error("Read tfstate import file error", log.Error(err))
-									rowData["errorMessage"] = err.Error()
-									// return
+								currentAssetId := ""
+								if sourceDataIdx == 0 && rootResourceAssetId != "" && rootResourceAssetId != nil {
+									currentAssetId = rootResourceAssetId.(string)
+								} else {
+									currentAssetId = importObject[i]
 								}
-								planFileContentStr := string(planFileData)
-								curDebugFileContent["plan_message"] = planFileContentStr
-							}
+								destroyAssetId += currentAssetId + ", "
 
-							DelTfstateFile(workDirPath)
+								log.Logger.Warn("Additional resources to be destroyed from Terraform plan:",
+									log.String("source", sortedSourceData.Name),
+									log.String("assetId", currentAssetId),
+									log.Int("destroyCount", destroyCnt))
+
+								// 读取并记录plan文件的详细信息
+								planContent, readErr := ReadFile(workDirPath + "/planfile")
+								if readErr == nil {
+									log.Logger.Warn("Terraform plan details:",
+										log.String("assetId", currentAssetId),
+										log.String("planDetails", string(planContent)))
+								}
+							}
 						}
 					}
-					// test
-					// totalDestroyCnt = 1
+
 					if totalDestroyCnt > 0 {
-						destroyCntStr := strconv.Itoa(totalDestroyCnt)
-						rowData["errorMessage"] = destroyCntStr + " resource(s) will be destroy: " + destroyAssetId + "please confirm again!"
+						destroyMsg := fmt.Sprintf("%d resource(s) will be destroyed: %s", totalDestroyCnt, destroyAssetId)
+						log.Logger.Warn("Total destruction summary:",
+							log.Int("totalCount", totalDestroyCnt),
+							log.String("allAssetIds", destroyAssetId))
+						rowData["errorMessage"] = destroyMsg + "please confirm again!"
 						rowData["errorCode"] = "-1"
 						return
 					}
@@ -2077,7 +2157,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 								if len(importObjectResourceData) > i {
 									oldTfstateFile := importObjectResourceData[i].TfStateFile
 									var oldTfstateFileObj models.TfstateFileData
-									err = json.Unmarshal([]byte(oldTfstateFile), &oldTfstateFileObj)
+									oldTfstateFileObj, err = ParseTfstateFileData([]byte(oldTfstateFile))
 									if err != nil {
 										err = fmt.Errorf("Unmarshal tfstate file data error:%s", err.Error())
 										log.Logger.Error("Unmarshal tfstate file data error", log.Error(err))
@@ -2110,9 +2190,19 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 							}
 						} else {
 							// get tfstate file from resource_data table and gen it
-							tfstateFileContent := importObjectResourceData[i].TfStateFile
-							tfstateFilePath := workDirPath + "/terraform.tfstate"
-							GenFile([]byte(tfstateFileContent), tfstateFilePath)
+							data := importObjectResourceData[i]
+							if data == nil {
+								if _, ok := newCreateObject[i]; ok {
+									log.Logger.Info(fmt.Sprintf("New resource creation for conStructObject[%d], proceeding without tfstate", i))
+								} else {
+									log.Logger.Info(fmt.Sprintf("No existing resource_data for conStructObject[%d], treating as new resource", i))
+									newCreateObject[i] = true
+								}
+							} else {
+								tfstateFileContent := data.TfStateFile
+								tfstateFilePath := workDirPath + "/terraform.tfstate"
+								GenFile([]byte(tfstateFileContent), tfstateFilePath)
+							}
 						}
 						if _, ok := reqParam[models.ResourceDataDebug]; ok {
 							// resource_data debug mode, get the terraform.state file after terraform import
@@ -2134,19 +2224,24 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					}
 				}
 
-				// Gen tf.json file
+				// Gen tf.json file for all cases
 				tfFileContentStr, err = GenTfFile(workDirPath, sortedSourceData, action, resourceId, conStructObject[i])
 				if err != nil {
 					err = fmt.Errorf("Gen tfFile error: %s", err.Error())
 					log.Logger.Error("Gen tfFile error", log.Error(err))
 					rowData["errorMessage"] = err.Error()
-					// return
 					continue
 				}
 
 				if action == "apply" {
+					log.Logger.Info("Entering apply block",
+						log.String("workDirPath", workDirPath),
+						log.JsonObj("reqParam", reqParam))
+
 					destroyCnt, tmpErr := TerraformPlan(workDirPath)
-					fmt.Printf("%v\n", destroyCnt)
+					log.Logger.Info("TerraformPlan result",
+						log.Int("destroyCnt", destroyCnt))
+
 					if tmpErr != nil {
 						err = fmt.Errorf("Do TerraformPlan error:%s", tmpErr.Error())
 						log.Logger.Error("Do TerraformPlan error", log.Error(err))
@@ -2168,31 +2263,28 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 					}
 				}
 
+				log.Logger.Info("Preparing to execute TerraformApply",
+					log.String("workDirPath", workDirPath),
+					log.String("action", action),
+					log.JsonObj("reqParam", reqParam))
+
+				// 检查目录是否存在
+				if _, err = os.Stat(workDirPath); os.IsNotExist(err) {
+					log.Logger.Error("Working directory does not exist before apply",
+						log.String("workDirPath", workDirPath))
+					return
+				}
+
 				err = TerraformApply(workDirPath)
 				if err != nil {
 					err = fmt.Errorf("Do TerraformApply error:%s", err.Error())
 					log.Logger.Error("Do TerraformApply error", log.Error(err))
 					rowData["errorMessage"] = err.Error()
 					return
-					// continue
 				}
 
-				// apply完之后重新import下拿过tfstate文件
-				// resourceAssetId, getTFErr := getTFStateAssetId(workDirPath, sortedSourceData.AssetIdAttribute)
-				// if getTFErr != nil {
-				// 	err = fmt.Errorf("Do Get TerraformApply AssetId error:%s ", err.Error())
-				// 	log.Logger.Error("Do Get TerraformApply AssetId error", log.Error(err))
-				// 	rowData["errorMessage"] = err.Error()
-				// 	return
-				// }
-				// os.Remove(workDirPath + "/terraform.tfstate")
-				// err = TerraformImport(workDirPath, sortedSourceData.Name+"."+resourceId, resourceAssetId)
-				// if err != nil {
-				// 	err = fmt.Errorf("Do TerraformApply Import new tfstate file error:%s ", err.Error())
-				// 	log.Logger.Error("Do TerraformApply Import new tfstate file error", log.Error(err))
-				// 	rowData["errorMessage"] = err.Error()
-				// 	return
-				// }
+				log.Logger.Info("TerraformApply completed successfully",
+					log.String("workDirPath", workDirPath))
 
 				if _, ok := reqParam[models.ResourceDataDebug]; ok {
 					tfstateFilePath := workDirPath + "/terraform.tfstate"
@@ -2428,6 +2520,7 @@ func TerraformOperation(plugin string, action string, reqParam map[string]interf
 }
 
 func convertData(relativeSourceId string, reqParam map[string]interface{}, regionData *models.ResourceDataTable, tfArgument *models.TfArgumentTable, sourceData *models.SourceTable) (arg interface{}, err error) {
+	log.Logger.Debug("[convertData] called", log.String("relativeSourceId", relativeSourceId), log.JsonObj("reqParam", reqParam), log.JsonObj("regionData", regionData), log.JsonObj("tfArgument", tfArgument), log.JsonObj("sourceData", sourceData))
 	if tfArgument.Parameter == "" {
 		if sourceData.SourceType == "data_resource" {
 			if _, ok := reqParam[models.SimulateResourceData]; ok {
@@ -2612,6 +2705,7 @@ func reverseConvertData(parameterData *models.ParameterTable, tfstateAttributeDa
 }
 
 func convertTemplate(providerData *models.ProviderTable, reqParam map[string]interface{}, tfArgument *models.TfArgumentTable) (arg interface{}, err error) {
+	log.Logger.Debug("[convertTemplate] called", log.JsonObj("providerData", providerData), log.JsonObj("reqParam", reqParam), log.JsonObj("tfArgument", tfArgument))
 	if tfArgument.Parameter == "" {
 		arg = tfArgument.DefaultValue
 		return
@@ -2699,6 +2793,7 @@ func reverseConvertTemplate(parameterData *models.ParameterTable, providerData *
 }
 
 func convertAttr(tfArgumentData *models.TfArgumentTable, reqParam map[string]interface{}, regionData *models.ResourceDataTable, tfArgument *models.TfArgumentTable, sourceData *models.SourceTable) (arg interface{}, err error) {
+	log.Logger.Debug("[convertAttr] called", log.JsonObj("tfArgumentData", tfArgumentData), log.JsonObj("reqParam", reqParam), log.JsonObj("regionData", regionData), log.JsonObj("tfArgument", tfArgument), log.JsonObj("sourceData", sourceData))
 	if tfArgument.Parameter == "" {
 		// arg = tfArgument.DefaultValue
 		if sourceData.SourceType == "data_resource" {
@@ -2772,27 +2867,20 @@ func convertAttr(tfArgumentData *models.TfArgumentTable, reqParam map[string]int
 
 		tfstateFileData := resourceData.TfStateFile
 		var unmarshalTfstateFileData models.TfstateFileData
-		err = json.Unmarshal([]byte(tfstateFileData), &unmarshalTfstateFileData)
+		unmarshalTfstateFileData, err = ParseTfstateFileData([]byte(tfstateFileData))
 		if err != nil {
 			err = fmt.Errorf("Unmarshal tfstate file data error:%s", err.Error())
 			log.Logger.Error("Unmarshal tfstate file data error", log.Error(err))
 			return
 		}
+		if len(unmarshalTfstateFileData.Resources) == 0 || len(unmarshalTfstateFileData.Resources[0].Instances) == 0 {
+			err = fmt.Errorf("tfstate file data is empty: resources or instances is 0")
+			log.Logger.Error("tfstate file data is empty", log.Error(err))
+			return
+		}
 		var tfstateFileAttributes map[string]interface{}
 		tfstateFileAttributes = unmarshalTfstateFileData.Resources[0].Instances[0].Attributes
 		arg = tfstateFileAttributes[tfstateAttirbuteData.Name]
-		/*
-			if tfArgument.IsMulti == "Y" {
-				tmpRes := []interface{}{}
-				for i := range resourceDataList {
-					tmpRes = append(tmpRes, resourceDataList[i].ResourceAssetId)
-				}
-				arg = tmpRes
-			} else {
-				arg = resourceDataList[0].ResourceAssetId
-			}
-
-		*/
 		return
 	}
 	// 查询 tfArgument 对应的 parameter
@@ -2867,10 +2955,15 @@ func convertAttr(tfArgumentData *models.TfArgumentTable, reqParam map[string]int
 
 		tfstateFileData := resourceData.TfStateFile
 		var unmarshalTfstateFileData models.TfstateFileData
-		err = json.Unmarshal([]byte(tfstateFileData), &unmarshalTfstateFileData)
+		unmarshalTfstateFileData, err = ParseTfstateFileData([]byte(tfstateFileData))
 		if err != nil {
 			err = fmt.Errorf("Unmarshal tfstate file data error:%s", err.Error())
 			log.Logger.Error("Unmarshal tfstate file data error", log.Error(err))
+			return
+		}
+		if len(unmarshalTfstateFileData.Resources) == 0 || len(unmarshalTfstateFileData.Resources[0].Instances) == 0 {
+			err = fmt.Errorf("tfstate file data is empty: resources or instances is 0")
+			log.Logger.Error("tfstate file data is empty", log.Error(err))
 			return
 		}
 		var tfstateFileAttributes map[string]interface{}
@@ -2950,11 +3043,16 @@ func reverseConvertAttr(parameterData *models.ParameterTable, tfstateAttributeDa
 	for _, resourceData := range resourceDataList {
 		tfstateFileData := resourceData.TfStateFile
 		var unmarshalTfstateFileData models.TfstateFileData
-		err = json.Unmarshal([]byte(tfstateFileData), &unmarshalTfstateFileData)
+		unmarshalTfstateFileData, err = ParseTfstateFileData([]byte(tfstateFileData))
 		if err != nil {
 			err = fmt.Errorf("Unmarshal tfstate file data error:%s", err.Error())
 			log.Logger.Error("Unmarshal tfstate file data error", log.Error(err))
 			continue
+		}
+		if len(unmarshalTfstateFileData.Resources) == 0 || len(unmarshalTfstateFileData.Resources[0].Instances) == 0 {
+			err = fmt.Errorf("tfstate file data is empty: resources or instances is 0")
+			log.Logger.Error("tfstate file data is empty", log.Error(err))
+			return
 		}
 		var tfstateFileAttributes map[string]interface{}
 		tfstateFileAttributes = unmarshalTfstateFileData.Resources[0].Instances[0].Attributes
@@ -2978,6 +3076,7 @@ func reverseConvertAttr(parameterData *models.ParameterTable, tfstateAttributeDa
 }
 
 func convertContextData(tfArgumentData *models.TfArgumentTable, reqParam map[string]interface{}, regionData *models.ResourceDataTable, tfArgument *models.TfArgumentTable, sourceData *models.SourceTable) (arg interface{}, isDiscard bool, err error) {
+	log.Logger.Debug("[convertContextData] called", log.JsonObj("tfArgumentData", tfArgumentData), log.JsonObj("reqParam", reqParam), log.JsonObj("regionData", regionData), log.JsonObj("tfArgument", tfArgument), log.JsonObj("sourceData", sourceData))
 	if tfArgument.Parameter == "" {
 		arg = tfArgument.DefaultValue
 		return
@@ -3072,6 +3171,7 @@ func reverseConvertContextData(parameterData *models.ParameterTable,
 }
 
 func convertContextDirect(tfArgumentData *models.TfArgumentTable, reqParam map[string]interface{}, regionData *models.ResourceDataTable) (arg interface{}, isDiscard bool, err error) {
+	log.Logger.Debug("[convertContextDirect] called", log.JsonObj("tfArgumentData", tfArgumentData), log.JsonObj("reqParam", reqParam), log.JsonObj("regionData", regionData))
 	if tfArgumentData.Parameter == "" {
 		arg = tfArgumentData.DefaultValue
 		return
@@ -3164,6 +3264,7 @@ func reverseConvertContextDirect(parameterData *models.ParameterTable,
 }
 
 func convertContextAttr(tfArgumentData *models.TfArgumentTable, reqParam map[string]interface{}, regionData *models.ResourceDataTable, sourceData *models.SourceTable) (arg interface{}, isDiscard bool, err error) {
+	log.Logger.Debug("[convertContextAttr] called", log.JsonObj("tfArgumentData", tfArgumentData), log.JsonObj("reqParam", reqParam), log.JsonObj("regionData", regionData), log.JsonObj("sourceData", sourceData))
 	if tfArgumentData.Parameter == "" {
 		arg = tfArgumentData.DefaultValue
 		return
@@ -3349,6 +3450,7 @@ func reverseConvertContextTemplate(parameterData *models.ParameterTable,
 }
 
 func convertDirect(defaultValue string, reqParam map[string]interface{}, tfArgument *models.TfArgumentTable) (arg interface{}, err error) {
+	log.Logger.Debug("[convertDirect] called", log.String("defaultValue", defaultValue), log.JsonObj("reqParam", reqParam), log.JsonObj("tfArgument", tfArgument))
 	if tfArgument.Parameter == "" {
 		arg = tfArgument.DefaultValue
 		return
@@ -3380,10 +3482,24 @@ func convertDirect(defaultValue string, reqParam map[string]interface{}, tfArgum
 	}
 
 	if parameterData.DataType == "object" {
+		// 首先检查原始值是否为空字符串，如果是则直接返回nil
+		if reqArgStr, ok := reqParam[parameterData.Name].(string); ok && reqArgStr == "" {
+			log.Logger.Debug("convertDirect: ignoring empty string for object type", log.String("parameter", parameterData.Name))
+			arg = nil
+			return
+		}
+
 		if parameterData.Multiple == "N" {
 			var curArg map[string]interface{}
 			tmpMarshal, _ := json.Marshal(reqParam[parameterData.Name])
 			json.Unmarshal(tmpMarshal, &curArg)
+
+			// 检查是否为空对象，如果是则返回nil以便后续过滤
+			if len(curArg) == 0 {
+				log.Logger.Debug("convertDirect: ignoring empty object", log.String("parameter", parameterData.Name))
+				arg = nil
+				return
+			}
 
 			if tfArgument.IsMulti == "N" {
 				arg = curArg
@@ -3394,6 +3510,14 @@ func convertDirect(defaultValue string, reqParam map[string]interface{}, tfArgum
 			var curArg []map[string]interface{}
 			tmpMarshal, _ := json.Marshal(reqParam[parameterData.Name])
 			json.Unmarshal(tmpMarshal, &curArg)
+
+			// 检查是否为空数组，如果是则返回nil以便后续过滤
+			if len(curArg) == 0 {
+				log.Logger.Debug("convertDirect: ignoring empty object array", log.String("parameter", parameterData.Name))
+				arg = nil
+				return
+			}
+
 			if tfArgument.IsMulti == "Y" {
 				arg = curArg
 			} else {
@@ -3452,6 +3576,7 @@ func convertDirect(defaultValue string, reqParam map[string]interface{}, tfArgum
 }
 
 func convertFunction(tfArgumentData *models.TfArgumentTable, reqParam map[string]interface{}, tfArgument *models.TfArgumentTable) (arg interface{}, err error) {
+	log.Logger.Debug("[convertFunction] called", log.JsonObj("tfArgumentData", tfArgumentData), log.JsonObj("reqParam", reqParam), log.JsonObj("tfArgument", tfArgument))
 	if tfArgument.Parameter == "" {
 		arg = tfArgument.DefaultValue
 		return
@@ -4053,7 +4178,7 @@ func getSortedSourceList(sourceList []*models.SourceTable, interfaceData *models
 			for sourceId := range initAllSourceListIdMap {
 				isValid := true
 				for _, tmpTfArgument := range tfArgumentListSourceIdMap[sourceId] {
-					if tmpTfArgument.Parameter != "" {
+					if tmpTfArgument.Parameter != "" || tmpTfArgument.RelativeSource == "" {
 						continue
 					} else {
 						if _, ok := sortedSourceListIdMap[tmpTfArgument.RelativeSource]; ok {
@@ -4146,25 +4271,32 @@ func handleConvertParams(action string,
 		var isDiscard = false
 		switch convertWay {
 		case models.ConvertWay["Data"]:
-			// search resource_data table，get resource_asset_id by resource_id and resource(which is relative_source column in tf_argument table )
 			arg, err = convertData(tfArgumentList[i].RelativeSource, reqParam, regionData, tfArgumentList[i], sourceData)
+			log.Logger.Debug("[handleConvertParams] Data", log.String("tfArgument", tfArgumentList[i].Name), log.JsonObj("arg", arg), log.Error(err))
 		case models.ConvertWay["Template"]:
 			arg, err = convertTemplate(providerData, reqParam, tfArgumentList[i])
+			log.Logger.Debug("[handleConvertParams] Template", log.String("tfArgument", tfArgumentList[i].Name), log.JsonObj("arg", arg), log.Error(err))
 		case models.ConvertWay["ContextData"]:
 			arg, isDiscard, err = convertContextData(tfArgumentList[i], reqParam, regionData, tfArgumentList[i], sourceData)
+			log.Logger.Debug("[handleConvertParams] ContextData", log.String("tfArgument", tfArgumentList[i].Name), log.JsonObj("arg", arg), log.Bool("isDiscard", isDiscard), log.Error(err))
 		case models.ConvertWay["Attr"]:
-			// search resouce_data table by relative_source and 输入的值, 获取 tfstat_file 字段内容,找到relative_tfstate_attribute id(search tfstate_attribute table) 对应的 name, 获取其在 tfstate_file 中的值
 			arg, err = convertAttr(tfArgumentList[i], reqParam, regionData, tfArgumentList[i], sourceData)
+			log.Logger.Debug("[handleConvertParams] Attr", log.String("tfArgument", tfArgumentList[i].Name), log.JsonObj("arg", arg), log.Error(err))
 		case models.ConvertWay["Direct"]:
 			arg, err = convertDirect(tfArgumentList[i].DefaultValue, reqParam, tfArgumentList[i])
+			log.Logger.Debug("[handleConvertParams] Direct", log.String("tfArgument", tfArgumentList[i].Name), log.JsonObj("arg", arg), log.Error(err))
 		case models.ConvertWay["Function"]:
 			arg, err = convertFunction(tfArgumentList[i], reqParam, tfArgumentList[i])
+			log.Logger.Debug("[handleConvertParams] Function", log.String("tfArgument", tfArgumentList[i].Name), log.JsonObj("arg", arg), log.Error(err))
 		case models.ConvertWay["ContextDirect"]:
 			arg, isDiscard, err = convertContextDirect(tfArgumentList[i], reqParam, regionData)
+			log.Logger.Debug("[handleConvertParams] ContextDirect", log.String("tfArgument", tfArgumentList[i].Name), log.JsonObj("arg", arg), log.Bool("isDiscard", isDiscard), log.Error(err))
 		case models.ConvertWay["ContextAttr"]:
 			arg, isDiscard, err = convertContextAttr(tfArgumentList[i], reqParam, regionData, sourceData)
+			log.Logger.Debug("[handleConvertParams] ContextAttr", log.String("tfArgument", tfArgumentList[i].Name), log.JsonObj("arg", arg), log.Bool("isDiscard", isDiscard), log.Error(err))
 		case models.ConvertWay["ContextTemplate"]:
 			arg, isDiscard, err = convertContextTemplate(tfArgumentList[i], reqParam, regionData, providerData)
+			log.Logger.Debug("[handleConvertParams] ContextTemplate", log.String("tfArgument", tfArgumentList[i].Name), log.JsonObj("arg", arg), log.Bool("isDiscard", isDiscard), log.Error(err))
 		default:
 			err = fmt.Errorf("The convertWay:%s of tfArgument:%s is invalid", convertWay, tfArgumentList[i].Name)
 			log.Logger.Error("The convertWay of tfArgument is invalid", log.String("convertWay", convertWay), log.String("tfArgument", tfArgumentList[i].Name), log.Error(err))
@@ -4172,22 +4304,11 @@ func handleConvertParams(action string,
 		}
 
 		if isDiscard {
+			log.Logger.Debug("[handleConvertParams] Discarded", log.String("tfArgument", tfArgumentList[i].Name))
 			continue
 		}
 
 		if action == "apply" && convertWay == models.ConvertWay["Direct"] && arg != nil && tfArgumentList[i].Parameter != "" {
-			// 查询 tfArgument 对应的 parameter
-			/*
-				sqlCmd := `SELECT * FROM parameter WHERE id=?`
-				paramArgs := []interface{}{tfArgumentList[i].Parameter}
-				var parameterList []*models.ParameterTable
-				err = x.SQL(sqlCmd, paramArgs...).Find(&parameterList)
-				if err != nil {
-					err = fmt.Errorf("Get Parameter data by id:%s error:%s", tfArgumentList[i].Parameter, err.Error())
-					log.Logger.Error("Get parameter data by id error", log.String("id", tfArgumentList[i].Parameter), log.Error(err))
-					return
-				}
-			*/
 			if tfArgumentList[i].IsNull == "Y" {
 				// read tf_file and check if the tfArgument has the same key and val
 				// Get the resource_data list by resource_id and source and region_id
@@ -4212,7 +4333,8 @@ func handleConvertParams(action string,
 					tmpTfFileArgument["resource"][sourceData.Name][resourceId] = make(map[string]interface{})
 					json.Unmarshal([]byte(resourceData.TfFile), &tmpTfFileArgument)
 					if tmpV, ok := tmpTfFileArgument["resource"][sourceData.Name][resourceId][tfArgumentList[i].Name]; ok {
-						if tmpV == arg {
+						// Use reflect.DeepEqual to safely compare complex types like maps containing maps
+						if reflect.DeepEqual(tmpV, arg) {
 							arg = nil
 							continue
 						}
@@ -4235,17 +4357,6 @@ func handleConvertParams(action string,
 						}
 					}
 				}
-				/*
-					if parameterData.Name == "id" {
-						// if arg != nil {
-						// 	resourceId = arg.(string)
-						// }
-					} else if parameterData.Name == "asset_id" {
-						if arg != nil {
-							resourceAssetId = arg.(string)
-						}
-					}
-				*/
 				continue
 			}
 
@@ -4265,7 +4376,12 @@ func handleConvertParams(action string,
 						if arg != nil {
 							tmpVal[tfArgumentList[i].Name] = arg
 						}
-						tfArguments[relativeTfArgumentData.Name] = tmpVal
+						// 检查合并后的map是否为空，如果为空则删除该key
+						if len(tmpVal) == 0 {
+							delete(tfArguments, relativeTfArgumentData.Name)
+						} else {
+							tfArguments[relativeTfArgumentData.Name] = tmpVal
+						}
 					} else {
 						if arg != nil {
 							tmpVal := make(map[string]interface{})
@@ -4295,7 +4411,12 @@ func handleConvertParams(action string,
 						if arg != nil {
 							tmpVal[tfArgumentList[i].Name] = arg
 						}
-						tfArguments[relativeTfArgumentData.Name] = tmpVal
+						// 检查合并后的map是否为空，如果为空则删除该key
+						if len(tmpVal) == 0 {
+							delete(tfArguments, relativeTfArgumentData.Name)
+						} else {
+							tfArguments[relativeTfArgumentData.Name] = tmpVal
+						}
 					} else {
 						if arg != nil {
 							tmpVal := make(map[string]interface{})
@@ -4320,11 +4441,47 @@ func handleConvertParams(action string,
 			return
 		}
 
-		if tfArgumentList[i].IsMulti == "Y" && tfArgumentList[i].IsNull == "Y" {
+		// 处理IsNull配置的逻辑
+		if tfArgumentList[i].IsNull == "Y" {
 			tmpArgString := fmt.Sprintf("%v", arg)
-			log.Logger.Debug("handleConvertParams", log.String("name", tfArgumentList[i].Name), log.String("value", tmpArgString))
-			if tmpArgString == "[]" {
+			log.Logger.Debug("handleConvertParams IsNull=Y", log.String("name", tfArgumentList[i].Name), log.String("value", tmpArgString))
+			if tfArgumentList[i].IsMulti == "Y" {
+				if tmpArgString == "[]" {
+					log.Logger.Debug("handleConvertParams: skipping empty array (IsNull=Y)", log.String("name", tfArgumentList[i].Name))
+					continue
+				}
+			} else {
+				if tmpArgString == "{}" || tmpArgString == "" {
+					log.Logger.Debug("handleConvertParams: skipping empty value (IsNull=Y)", log.String("name", tfArgumentList[i].Name))
+					continue
+				}
+			}
+		} else if tfArgumentList[i].IsNull == "N" {
+			// IsNull=N时，空字符串也需要忽略
+			if arg == "" || arg == nil {
+				log.Logger.Debug("handleConvertParams: skipping empty value (IsNull=N)", log.String("name", tfArgumentList[i].Name))
 				continue
+			}
+		}
+
+		// 处理空对象类型参数（如空的tags），无论IsNull状态如何都应该过滤掉
+		if tfArgumentList[i].Type == "object" {
+			tmpArgString := fmt.Sprintf("%v", arg)
+			if tfArgumentList[i].IsMulti == "Y" {
+				if tmpArgString == "[]" {
+					log.Logger.Debug("handleConvertParams: skipping empty object array", log.String("name", tfArgumentList[i].Name))
+					continue
+				}
+			} else {
+				if tmpArgString == "{}" || tmpArgString == "map[]" {
+					log.Logger.Debug("handleConvertParams: skipping empty object", log.String("name", tfArgumentList[i].Name))
+					continue
+				}
+				// 额外检查是否是空的map[string]interface{}
+				if argMap, ok := arg.(map[string]interface{}); ok && len(argMap) == 0 {
+					log.Logger.Debug("handleConvertParams: skipping empty map", log.String("name", tfArgumentList[i].Name))
+					continue
+				}
 			}
 		}
 
@@ -4443,7 +4600,42 @@ func handleConvertParams(action string,
 		// 	delete(tfArguments, tfArgumentList[i].Name)
 		// }
 	}
+	// 在返回 tfArguments 之前，处理点号转对象
+	tfArguments = ParseDotNotation(tfArguments)
+
+	// 最终清理：移除所有空的对象类型参数
+	for key, value := range tfArguments {
+		if valueMap, ok := value.(map[string]interface{}); ok && len(valueMap) == 0 {
+			log.Logger.Debug("handleConvertParams: removing empty object from final output", log.String("key", key))
+			delete(tfArguments, key)
+		}
+	}
+
 	return
+}
+
+// ParseDotNotation 将 map[string]interface{} 中带点号的 key 转为嵌套对象
+func ParseDotNotation(input map[string]interface{}) map[string]interface{} {
+	result := make(map[string]interface{})
+	for k, v := range input {
+		parts := strings.SplitN(k, ".", 2)
+		if len(parts) == 1 {
+			result[k] = v
+		} else {
+			if _, ok := result[parts[0]]; !ok {
+				result[parts[0]] = make(map[string]interface{})
+			}
+			subMap := result[parts[0]].(map[string]interface{})
+			subMap[parts[1]] = v
+		}
+	}
+	// 递归处理多级嵌套
+	for k, v := range result {
+		if subMap, ok := v.(map[string]interface{}); ok {
+			result[k] = ParseDotNotation(subMap)
+		}
+	}
+	return result
 }
 
 func handleTfstateOutPut(sourceData *models.SourceTable,
@@ -4594,6 +4786,11 @@ func handleTfstateOutPut(sourceData *models.SourceTable,
 		err = fmt.Errorf("Unmarshal tfstate file data error:%s", err.Error())
 		log.Logger.Error("Unmarshal tfstate file data error", log.Error(err))
 		retOutput["errorMessage"] = err.Error()
+		return
+	}
+	if len(unmarshalTfstateFileData.Resources) == 0 || len(unmarshalTfstateFileData.Resources[0].Instances) == 0 {
+		err = fmt.Errorf("tfstate file data is empty: resources or instances is 0")
+		log.Logger.Error("tfstate file data is empty", log.Error(err))
 		return
 	}
 	var tfstateFileAttributes map[string]interface{}
@@ -5142,6 +5339,11 @@ func getTFStateAssetId(workDirPath string, idAttrName string) (resourceDataResou
 		return
 	}
 	var tfstateFileAttributes map[string]interface{}
+	if len(unmarshalTfstateFileData.Resources) == 0 || len(unmarshalTfstateFileData.Resources[0].Instances) == 0 {
+		err = fmt.Errorf("tfstate file data is empty: resources or instances is 0")
+		log.Logger.Error("tfstate file data is empty", log.Error(err))
+		return
+	}
 	tfstateFileAttributes = unmarshalTfstateFileData.Resources[0].Instances[0].Attributes
 	if v, b := tfstateFileAttributes[idAttrName]; b {
 		resourceDataResourceAssetId = v.(string)
@@ -5150,4 +5352,81 @@ func getTFStateAssetId(workDirPath string, idAttrName string) (resourceDataResou
 		err = fmt.Errorf("resource id is empty")
 	}
 	return
+}
+
+func ParseTfstateFileData(data []byte) (models.TfstateFileData, error) {
+	var result models.TfstateFileData
+
+	// 1.标准数据格式解析
+	if err := json.Unmarshal(data, &result); err == nil && len(result.Resources) > 0 {
+		return result, nil
+	}
+
+	var directNested struct {
+		Resources struct {
+			Instances struct {
+				Attributes map[string]interface{} `json:"attributes"`
+			} `json:"instances"`
+		} `json:"resources"`
+	}
+
+	// 2.对象类型也需要解析出来  {\"resources\":{\"instances\":{\"attributes\":{\"name\":\"East Asia\"}}}}
+	if err := json.Unmarshal(data, &directNested); err == nil {
+		result.Resources = []models.TfstateFileResources{
+			{
+				Instances: []models.TfstateFileAttributes{
+					{
+						Attributes: directNested.Resources.Instances.Attributes,
+					},
+				},
+			},
+		}
+		return result, nil
+	}
+
+	type compatResource struct {
+		Instances map[string]struct {
+			Attributes map[string]interface{} `json:"attributes"`
+		} `json:"instances"`
+	}
+
+	var compatMap struct {
+		Resources map[string]compatResource `json:"resources"`
+	}
+
+	if err := json.Unmarshal(data, &compatMap); err == nil && len(compatMap.Resources) > 0 {
+		for _, res := range compatMap.Resources {
+			r := models.TfstateFileResources{}
+			for _, inst := range res.Instances {
+				r.Instances = append(r.Instances, models.TfstateFileAttributes{
+					Attributes: inst.Attributes,
+				})
+			}
+			result.Resources = append(result.Resources, r)
+		}
+		return result, nil
+	}
+
+	var simplified struct {
+		Resources struct {
+			Instances map[string]interface{} `json:"instances"`
+		} `json:"resources"`
+	}
+
+	if err := json.Unmarshal(data, &simplified); err == nil {
+		if attrs, ok := simplified.Resources.Instances["attributes"].(map[string]interface{}); ok {
+			result.Resources = []models.TfstateFileResources{
+				{
+					Instances: []models.TfstateFileAttributes{
+						{
+							Attributes: attrs,
+						},
+					},
+				},
+			}
+			return result, nil
+		}
+	}
+
+	return result, fmt.Errorf("unsupported tfstate format")
 }

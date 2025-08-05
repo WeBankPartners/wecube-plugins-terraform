@@ -7,7 +7,7 @@ export const baseURL = ''
 export const req = axios.create({
   withCredentials: false,
   baseURL,
-  timeout: 500000
+  timeout: 1500000
 })
 
 const throwError = res => {
@@ -146,7 +146,7 @@ req.interceptors.response.use(
         // return response
       }
     }
-
+    console.log('response error', err)
     return new Promise((resolve, reject) => {
       resolve({
         data: throwError(response)

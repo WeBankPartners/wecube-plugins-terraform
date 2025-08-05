@@ -61,6 +61,10 @@ func String(k, v string) zap.Field {
 	return zap.String(k, v)
 }
 
+func Bool(k string, v bool) zap.Field {
+	return zap.Bool(k, v)
+}
+
 func Int(k string, v int) zap.Field {
 	return zap.Int(k, v)
 }

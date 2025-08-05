@@ -1,5 +1,5 @@
 <template>
-  <div style="width: 100%;overflow: auto">
+  <div style="width: 100%; overflow: auto">
     <!-- 搜索区 -->
     <div>
       <Row>
@@ -12,7 +12,7 @@
             @on-change="currentInterface = ''"
             @on-open-change="getPlugin"
             filterable
-            style="width:200px"
+            style="width: 200px"
           >
             <Option v-for="item in pluginOptions" :value="item.id" :key="item.id">{{ item.name }}</Option>
           </Select>
@@ -25,14 +25,14 @@
             filterable
             @on-open-change="getPluginInterface"
             :disabled="!plugin"
-            style="width:200px"
+            style="width: 200px"
           >
             <Option v-for="item in interfaceOptions" :value="item.id" :key="item.id">{{ item.name }}</Option>
           </Select>
         </Col>
         <Col span="5">
           <span>{{ $t('t_provider') }}</span>
-          <Select v-model="currentProvider" clearable filterable @click="getProviderList" style="width:200px">
+          <Select v-model="currentProvider" clearable filterable @click="getProviderList" style="width: 200px">
             <Option v-for="item in providerList" :value="item.id" :key="item.id">{{ item.name }}</Option>
           </Select>
         </Col>
@@ -63,7 +63,7 @@
               type="success"
               ghost
               size="small"
-              style="color: #00CB91;"
+              style="color: #00cb91"
               icon="ios-add"
             ></Button>
           </div>
@@ -91,11 +91,11 @@
           <div class="table-title title-width-level0">
             {{ $t('key_argument') }}
           </div>
-          <div class="table-title title-width-level3" style="vertical-align: top;">
-            <div style="line-height:40px">
+          <div class="table-title title-width-level3" style="vertical-align: top">
+            <div style="line-height: 40px">
               {{ $t('t_conversion') }}
             </div>
-            <div style="font-size: 0;margin-top: -1px;margin-left:-1px">
+            <div style="font-size: 0; margin-top: -1px; margin-left: -1px">
               <div class="table-title title-width-level1 title-style">
                 {{ $t('t_conversion_type') }}
               </div>
@@ -105,9 +105,7 @@
               <div class="table-title title-width-level1 title-style">
                 {{ $t('t_related_value') }}
               </div>
-              <div class="table-title title-width-level1 title-style">
-                关联source
-              </div>
+              <div class="table-title title-width-level1 title-style">关联source</div>
               <div class="table-title title-width-level1 title-style">
                 {{ $t('t_related_attr') }}
               </div>
@@ -116,7 +114,7 @@
               </div>
             </div>
           </div>
-          <div class="table-title title-width-level1" style="margin-left: 0px;position: relative;left: -1px;">
+          <div class="table-title title-width-level1" style="margin-left: 0px; position: relative; left: -1px">
             {{ $t('t_action') }}
           </div>
         </div>
@@ -125,9 +123,9 @@
         <div
           v-for="(source, sourceIndex) in sourceInfo"
           :key="source.id"
-          style="font-size: 0;margin-top:-1px;margin-left:-4px;"
+          style="font-size: 0; margin-top: -1px; margin-left: -4px"
         >
-          <div class="style-widthout-height" style="font-size: 0;margin-left:-6px">
+          <div class="style-widthout-height" style="font-size: 0; margin-left: -6px">
             <div
               class="style-widthout-height"
               :style="{
@@ -149,7 +147,7 @@
                   type="info"
                   ghost
                   size="small"
-                  style="color: #00CB91;"
+                  style="color: #00cb91"
                   icon="ios-create-outline"
                 ></Button>
                 <Button
@@ -157,13 +155,13 @@
                   type="error"
                   ghost
                   size="small"
-                  style="color: #FF4D4F;"
+                  style="color: #ff4d4f"
                   icon="md-trash"
                 ></Button>
               </div>
             </div>
-            <div class="style-widthout-height" style="width:120px;vertical-align: top;border:none">
-              <div class="style-widthout-height" style="font-size: 0;margin-left:0px;border:none">
+            <div class="style-widthout-height" style="width: 120px; vertical-align: top; border: none">
+              <div class="style-widthout-height" style="font-size: 0; margin-left: 0px; border: none">
                 <div
                   class="style-widthout-height"
                   :style="{ width: '120px', 'line-height': source.args.length * 39 - 1 + 'px', border: 'none' }"
@@ -174,7 +172,7 @@
                     type="success"
                     ghost
                     size="small"
-                    style="color: #00CB91;"
+                    style="color: #00cb91"
                     icon="ios-add"
                   ></Button>
                 </div>
@@ -193,22 +191,22 @@
                     type="success"
                     ghost
                     size="small"
-                    style="color: #00CB91;"
+                    style="color: #00cb91"
                     icon="ios-add"
                   ></Button>
                 </div>
               </div>
             </div>
           </div>
-          <div style="display:inline-block;vertical-align: top;margin-top:1px;margin-left:-1px;">
+          <div style="display: inline-block; vertical-align: top; margin-top: 1px; margin-left: -1px">
             <div>
-              <div style="margin-top: -1px;" v-for="(item, argIndex) in source.args" :key="argIndex">
+              <div style="margin-top: -1px" v-for="(item, argIndex) in source.args" :key="argIndex">
                 <template>
                   <div class="table-col title-width-level1" style="margin-left: -1px">
-                    <!-- <Tooltip :content="item.name" :delay="500" placement="right">
+                    <Tooltip :content="item.name" :delay="500" placement="right">
                       <Input v-model="item.name" size="small" />
-                    </Tooltip> -->
-                    <Input v-model="item.name" size="small" />
+                    </Tooltip>
+                    <!-- <Input v-model="item.name" size="small" /> -->
                   </div>
                   <div class="table-col title-width-level1">
                     <!-- <Tooltip :content="item.type" :delay="500" placement="right">
@@ -225,7 +223,7 @@
                     </Select>
                   </div>
                   <div class="table-col title-width-level1">
-                    <!-- <Tooltip :content="item.parameter" :delay="500" placement="right">
+                    <Tooltip :content="item.parameterTitle" :delay="500" placement="right">
                       <Select
                         v-model="item.parameter"
                         size="small"
@@ -246,8 +244,8 @@
                           >
                         </template>
                       </Select>
-                    </Tooltip> -->
-                    <Select
+                    </Tooltip>
+                    <!-- <Select
                       v-model="item.parameter"
                       size="small"
                       clearable
@@ -263,7 +261,7 @@
                           item.name
                         }}</Option>
                       </template>
-                    </Select>
+                    </Select> -->
                   </div>
                   <div class="table-col title-width-level1">
                     <!-- <Tooltip :content="item.defaultValue" :delay="500" placement="right">
@@ -366,7 +364,7 @@
                     </Select>
                   </div>
 
-                  <div class="table-col title-width-level1" style="margin-left: -1px;">
+                  <div class="table-col title-width-level1" style="margin-left: -1px">
                     <!-- <Tooltip :content="item.convertWay" :delay="500" placement="right">
                       <Select
                         v-model="item.convertWay"
@@ -386,7 +384,7 @@
                     </Tooltip> -->
                     <Select
                       v-model="item.convertWay"
-                      style="width:100px"
+                      style="width: 100px"
                       @on-change="changeConverWay(item)"
                       size="small"
                     >
@@ -508,7 +506,7 @@
                   </div>
                   <div class="table-col title-width-level1">
                     <Tooltip
-                      :content="getTipContent(item.relativeSource, item.sourceWithFilter)"
+                      :content="getTipContent(item.relativeSource, item.sourceWithFilter, item)"
                       :delay="500"
                       placement="right"
                     >
@@ -529,7 +527,11 @@
                           }}</Option>
                         </template>
                         <template v-else>
-                          <Option v-for="item in item.sourceWithFilter" :value="item.id" :key="item.id"
+                          <Option
+                            v-for="item in item.sourceWithFilter"
+                            :value="item.id"
+                            :key="item.id"
+                            :label="item.name"
                             >{{ item.name }}({{ item.sourceType }})</Option
                           >
                         </template>
@@ -557,7 +559,7 @@
                     </Select> -->
                   </div>
                   <div class="table-col title-width-level1">
-                    <!-- <Tooltip :content="item.remark" :delay="500" placement="right">
+                    <!-- <Tooltip :content="item.relativeTfstateAttributeTitle" :delay="500" placement="right">
                       <Select
                         v-model="item.relativeTfstateAttribute"
                         :disabled="!['attribute', 'context_attribute'].includes(item.convertWay)"
@@ -615,9 +617,14 @@
                     />
                   </div>
                   <div class="table-col title-width-level1">
-                    <Button type="primary" @click="updateArg(item, argIndex)" ghost size="small">{{
-                      $t('t_save')
-                    }}</Button>
+                    <Button
+                      type="primary"
+                      style="margin-right: 4px"
+                      @click="updateArg(item, argIndex)"
+                      ghost
+                      size="small"
+                      >{{ $t('t_save') }}</Button
+                    >
                     <Button type="error" @click="deleteArg(source.args, item, argIndex)" ghost size="small">{{
                       $t('t_delete')
                     }}</Button>
@@ -626,7 +633,7 @@
               </div>
             </div>
             <div>
-              <div style="margin-top: -1px;" v-for="(item, attrIndex) in source.attrs" :key="attrIndex">
+              <div style="margin-top: -1px" v-for="(item, attrIndex) in source.attrs" :key="attrIndex">
                 <template>
                   <div class="table-col title-width-level1" style="margin-left: 0px">
                     <!-- <Tooltip :content="item.name" :delay="500" placement="right">
@@ -648,7 +655,7 @@
                       }}</Option>
                     </Select>
                   </div>
-                  <div class="table-col title-width-level1" style="margin-left: -1px;">
+                  <div class="table-col title-width-level1" style="margin-left: -1px">
                     <!-- <Tooltip :content="item.parameter" :delay="500" placement="right">
                       <Select
                         v-model="item.parameter"
@@ -791,7 +798,7 @@
                     </Select>
                   </div>
 
-                  <div class="table-col title-width-level1" style="margin-left: -1px;">
+                  <div class="table-col title-width-level1" style="margin-left: -1px">
                     <!-- <Tooltip :content="item.convertWay" :delay="500" placement="right">
                       <Select
                         v-model="item.convertWay"
@@ -812,7 +819,7 @@
                     </Tooltip> -->
                     <Select
                       v-model="item.convertWay"
-                      style="width:100px"
+                      style="width: 100px"
                       @on-change="changeConverWay(item)"
                       size="small"
                     >
@@ -935,7 +942,7 @@
                   </div>
                   <div class="table-col title-width-level1">
                     <Tooltip
-                      :content="getTipContent(item.relativeSource, item.sourceWithFilter)"
+                      :content="getTipContent(item.relativeSource, item.sourceWithFilter, item)"
                       :delay="500"
                       placement="right"
                     >
@@ -1042,9 +1049,14 @@
                     />
                   </div>
                   <div class="table-col title-width-level1">
-                    <Button type="primary" @click="updateAttr(item, sourceIndex, attrIndex)" ghost size="small">{{
-                      $t('t_save')
-                    }}</Button>
+                    <Button
+                      type="primary"
+                      style="margin-right: 4px"
+                      @click="updateAttr(item, sourceIndex, attrIndex)"
+                      ghost
+                      size="small"
+                      >{{ $t('t_save') }}</Button
+                    >
                     <Button type="error" @click="deleteAttr(source.attrs, item, attrIndex)" ghost size="small">{{
                       $t('t_delete')
                     }}</Button>
@@ -1065,31 +1077,31 @@
     >
       <Form inline :label-width="100">
         <FormItem :label="$t('t_name')">
-          <Input type="text" v-model="newSource.form.name" style="width:350px"></Input>
+          <Input type="text" v-model="newSource.form.name" style="width: 350px"></Input>
         </FormItem>
         <FormItem :label="$t('t_resource_asset_id_Attribute')">
-          <Input type="text" v-model="newSource.form.assetIdAttribute" style="width:350px"></Input>
+          <Input type="text" v-model="newSource.form.assetIdAttribute" style="width: 350px"></Input>
         </FormItem>
         <FormItem :label="$t('terraform_used')">
-          <Select v-model="newSource.form.terraformUsed" style="width:350px">
+          <Select v-model="newSource.form.terraformUsed" style="width: 350px">
             <Option value="Y">Y</Option>
             <Option value="N">N</Option>
           </Select>
         </FormItem>
         <FormItem :label="$t('import_support')">
-          <Select v-model="newSource.form.importSupport" style="width:350px">
+          <Select v-model="newSource.form.importSupport" style="width: 350px">
             <Option value="Y">Y</Option>
             <Option value="N">N</Option>
           </Select>
         </FormItem>
         <FormItem :label="$t('source_type')">
-          <Select v-model="newSource.form.sourceType" style="width:350px">
+          <Select v-model="newSource.form.sourceType" style="width: 350px">
             <Option value="resource">resource</Option>
             <Option value="data_resource">data_resource</Option>
           </Select>
         </FormItem>
         <FormItem :label="$t('t_remark')">
-          <Input type="text" v-model="newSource.form.remark" style="width:350px"></Input>
+          <Input type="text" v-model="newSource.form.remark" style="width: 350px"></Input>
         </FormItem>
       </Form>
     </Modal>
@@ -1199,12 +1211,12 @@ export default {
     this.MODALHEIGHT = document.body.scrollHeight - 200
   },
   methods: {
-    getTipContent (id, options) {
+    getTipContent (id, options, item) {
       const find = options.find(item => item.id === id)
       if (find) {
-        return find.remark
+        return find.name + '(' + find.sourceType + ')'
       } else {
-        return ''
+        return item ? item.relativeSourceTitle : ''
       }
     },
     changeConverWay (item) {

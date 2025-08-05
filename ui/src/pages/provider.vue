@@ -1,38 +1,49 @@
 <template>
   <div class=" ">
-    <Form inline>
-      <FormItem>
-        <Button @click="addProvider" style="margin-left: 24px" type="primary">{{ $t('t_add') }}</Button>
-      </FormItem>
-    </Form>
+    <Button @click="addProvider" style="margin-bottom: 10px" type="primary">{{ $t('t_add') }}</Button>
     <Table border size="small" :columns="tableColumns" :data="tableData"></Table>
     <Modal
       v-model="newProvider.isShow"
-      :title="newProvider.isAdd ? $t('t_add') : $t('t_edit') + $t('t_provider')"
+      :title="(newProvider.isAdd ? $t('t_add') : $t('t_edit')) + $t('t_provider')"
       :mask-closable="false"
-      @on-ok="confirmProvider"
-      @on-cancel="confirmProvider.isShow = false"
+      :width="700"
     >
-      <Form inline :label-width="80">
-        <FormItem :label="$t('t_name')">
-          <Input type="text" v-model="newProvider.form.name" style="width: 400px"></Input>
+      <Form inline :label-width="120">
+        <FormItem required :label="$t('t_name')">
+          <Input type="text" v-model="newProvider.form.name" style="width: 520px"></Input>
         </FormItem>
-        <FormItem :label="$t('t_namespace')">
-          <Input type="text" v-model="newProvider.form.nameSpace" style="width: 400px"></Input>
+        <FormItem required :label="$t('t_namespace')">
+          <Input type="text" v-model="newProvider.form.nameSpace" style="width: 520px"></Input>
         </FormItem>
-        <FormItem :label="$t('t_version')">
-          <Input type="text" v-model="newProvider.form.version" :rows="4" style="width: 400px"></Input>
+        <FormItem required :label="$t('t_version')">
+          <Input type="text" v-model="newProvider.form.version" :rows="4" style="width: 520px"></Input>
         </FormItem>
-        <FormItem :label="$t('t_region_attr_name')">
-          <Input type="text" v-model="newProvider.form.regionAttrName" style="width: 400px"></Input>
+        <FormItem :label="$t('t_is_microsoft_cloud')">
+          <i-switch v-model="isMicrosoftCloud" style="width: 52px">
+            <span slot="open">{{ $t('t_yes') }}</span>
+            <span slot="close">{{ $t('t_no') }}</span>
+          </i-switch>
         </FormItem>
-        <FormItem :label="$t('t_secretId_attr_name')">
-          <Input type="text" v-model="newProvider.form.secretIdAttrName" style="width: 400px"></Input>
+        <FormItem required v-if="!isMicrosoftCloud" :label="$t('t_region_attr_name')">
+          <Input type="text" v-model="newProvider.form.regionAttrName" style="width: 520px"></Input>
         </FormItem>
-        <FormItem :label="$t('t_secretKey_attr_name')">
-          <Input type="text" v-model="newProvider.form.secretKeyAttrName" style="width: 400px"></Input>
+        <FormItem required :label="$t('t_secretId_attr_name')">
+          <Input type="text" v-model="newProvider.form.secretIdAttrName" style="width: 520px"></Input>
+        </FormItem>
+        <FormItem required :label="$t('t_secretKey_attr_name')">
+          <Input type="text" v-model="newProvider.form.secretKeyAttrName" style="width: 520px"></Input>
+        </FormItem>
+        <FormItem required v-if="isMicrosoftCloud" :label="$t('t_tenant_id_key')">
+          <Input type="text" v-model="newProvider.form.tenantIdAttrName" style="width: 520px"></Input>
+        </FormItem>
+        <FormItem required v-if="isMicrosoftCloud" :label="$t('t_subscription_id_key')">
+          <Input type="text" v-model="newProvider.form.subscriptionIdAttrName" style="width: 520px"></Input>
         </FormItem>
       </Form>
+      <div slot="footer">
+        <Button @click="newProvider.isShow = false">{{ $t('t_cancle') }}</Button>
+        <Button type="primary" @click="confirmProvider">{{ $t('t_save') }}</Button>
+      </div>
     </Modal>
   </div>
 </template>
@@ -45,6 +56,7 @@ export default {
   data () {
     return {
       name: '',
+      isMicrosoftCloud: false,
       newProvider: {
         isShow: false,
         isAdd: true,
@@ -57,6 +69,8 @@ export default {
           regionAttrName: '',
           secretIdAttrName: '',
           secretKeyAttrName: '',
+          tenantIdAttrName: '',
+          subscriptionIdAttrName: '',
           updateTime: '',
           updateUser: '',
           version: ''
@@ -71,6 +85,8 @@ export default {
         regionAttrName: '',
         secretIdAttrName: '',
         secretKeyAttrName: '',
+        tenantIdAttrName: '',
+        subscriptionIdAttrName: '',
         updateTime: '',
         updateUser: '',
         version: ''
@@ -99,6 +115,14 @@ export default {
         {
           title: this.$t('t_secretKey_attr_name'),
           key: 'secretKeyAttrName'
+        },
+        {
+          title: this.$t('t_tenant_id_key'),
+          key: 'tenantIdAttrName'
+        },
+        {
+          title: this.$t('t_subscription_id_key'),
+          key: 'subscriptionIdAttrName'
         },
         {
           title: this.$t('t_initialized'),
@@ -281,6 +305,11 @@ export default {
       this.newProvider.form = {
         ...item
       }
+      if (this.newProvider.form.subscriptionIdAttrName) {
+        this.isMicrosoftCloud = true
+      } else {
+        this.isMicrosoftCloud = false
+      }
       this.newProvider.isAdd = false
       this.newProvider.isShow = true
     },
@@ -306,9 +335,30 @@ export default {
     addProvider () {
       this.newProvider.isAdd = true
       this.newProvider.form = JSON.parse(JSON.stringify(this.emptyForm))
+      this.isMicrosoftCloud = false
       this.newProvider.isShow = true
     },
+    validRequired () {
+      if (
+        !this.newProvider.form.name ||
+        !this.newProvider.form.nameSpace ||
+        !this.newProvider.form.version ||
+        !this.newProvider.form.secretIdAttrName ||
+        !this.newProvider.form.secretKeyAttrName ||
+        (this.isMicrosoftCloud &&
+          (!this.newProvider.form.tenantIdAttrName || !this.newProvider.form.subscriptionIdAttrName)) ||
+        (!this.isMicrosoftCloud && !this.newProvider.form.regionAttrName)
+      ) {
+        this.$Message.error(this.$t('t_validate_required'))
+        return false
+      } else {
+        return true
+      }
+    },
     async confirmProvider () {
+      if (!this.validRequired()) {
+        return false
+      }
       const method = this.newProvider.isAdd ? addProvider : editProvider
       const { statusCode } = await method([this.newProvider.form])
       if (statusCode === 'OK') {
@@ -317,7 +367,7 @@ export default {
           desc: 'Successful'
         })
         this.getTableData()
-        this.confirmProvider.isShow = false
+        this.newProvider.isShow = false
       }
     },
     async getTableData () {

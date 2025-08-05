@@ -266,6 +266,4 @@ CREATE TABLE `tfstate_attribute` (
   CONSTRAINT `tfstate_attribute_relative_source` FOREIGN KEY (`relative_source`) REFERENCES `source` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `tfstate_attribute_source` FOREIGN KEY (`source`) REFERENCES `source` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='记录 Terraform action 输出的参数字段';
-
-
 SET FOREIGN_KEY_CHECKS=1;

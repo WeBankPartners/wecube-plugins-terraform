@@ -38,5 +38,6 @@
   "terraform_cmd_path": "/usr/local/bin/terraform",
   "terraform_provider_os_arch": "linux_amd64",
   "version": "{{PLUGIN_VERSION}}",
+  "terraform_http_timeout":{{TERRAFORM_HTTP_TIMEOUT}},
   "request_consumer_count": 6
 }

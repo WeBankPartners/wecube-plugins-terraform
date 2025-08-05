@@ -1,6 +1,25 @@
 <template>
   <div>
-    <Table border size="small" :columns="tableColumns" :data="tableData" :max-height="MODALHEIGHT"></Table>
+    <div class="operate">
+      <Select
+        v-model="selectedResourceNames"
+        clearable
+        filterable
+        :placeholder="$t('t_resource_placeholder')"
+        style="width: 300px"
+      >
+        <Option v-for="name in resourceNames" :value="name" :key="name">{{ name }}</Option>
+      </Select>
+      <Button type="primary" size="small" @click="getDebugInfo">刷新数据</Button>
+    </div>
+    <Table
+      :loading="loading"
+      border
+      size="small"
+      :columns="tableColumns"
+      :data="finallyTableData"
+      :max-height="MODALHEIGHT"
+    ></Table>
     <Modal v-model="dataDetail.isShow" :fullscreen="fullscreen" width="800" :mask-closable="false" footer-hide>
       <p slot="header">
         <span>{{ $t('t_detail') }}</span>
@@ -26,6 +45,7 @@ export default {
         isShow: false,
         data: {}
       },
+      loading: false,
       tableColumns: [
         {
           title: this.$t('t_region'),
@@ -94,31 +114,67 @@ export default {
           }
         }
       ],
-      tableData: []
+      tableData: [],
+      resourceNames: [],
+      selectedResourceNames: '',
+      intervalId: null
+    }
+  },
+  computed: {
+    finallyTableData () {
+      if (this.selectedResourceNames) {
+        return this.tableData.filter(item => item.resourceTitle === this.selectedResourceNames)
+      }
+      return this.tableData
     }
   },
   mounted () {
     this.MODALHEIGHT = document.body.scrollHeight - 200
     this.getDebugInfo()
+    this.intervalId = setInterval(() => {
+      this.getIntervalDebugInfo()
+      this.$Notice.success({
+        title: this.$t('t_refresh_success_tips'),
+        duration: 3
+      })
+    }, 3 * 60 * 1000)
   },
   methods: {
     async getDebugInfo () {
+      this.loading = true
       const { statusCode, data } = await getDebugInfo()
+      this.loading = false
       if (statusCode === 'OK') {
-        this.tableData = data
+        this.tableData = data || []
+        this.resourceNames = Array.from(new Set(data.map(item => item.resourceTitle)))
       }
     },
     showInfo (data) {
       this.dataDetail.data = ''
       this.dataDetail.isShow = true
       this.dataDetail.data = JSON.parse(data)
+    },
+    async getIntervalDebugInfo () {
+      const { statusCode, data } = await getDebugInfo()
+      if (statusCode === 'OK') {
+        this.tableData = data || []
+        this.resourceNames = Array.from(new Set(data.map(item => item.resourceTitle)))
+      }
     }
+  },
+  beforeDestroy () {
+    clearInterval(this.intervalId)
   },
   components: {}
 }
 </script>
 
 <style scoped lang="scss">
+.operate {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
 .header-icon {
   float: right;
   margin: 3px 40px 0 0 !important;

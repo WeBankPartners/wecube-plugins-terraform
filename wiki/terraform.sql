@@ -2411,7 +2411,11 @@ INSERT INTO `tfstate_attribute` (`id`, `name`, `source`, `parameter`, `default_v
 INSERT INTO `tfstate_attribute` (`id`, `name`, `source`, `parameter`, `default_value`, `is_null`, `type`, `object_name`, `is_multi`, `convert_way`, `relative_source`, `relative_tfstate_attribute`, `relative_parameter`, `relative_parameter_value`, `function_define`, `create_time`, `create_user`, `update_time`, `update_user`) VALUES ('61693dea08c2cfed6eae4591caf4325f','password','61665651b9e5d4e373d2a2e7c2076a9c','60fbfa1dc616a3063bc7cba985355a1c','','N','string',NULL,'N','direct',NULL,NULL,NULL,NULL,'','2021-10-15 16:38:02','admin','2021-10-29 11:41:21','admin');
 INSERT INTO `tfstate_attribute` (`id`, `name`, `source`, `parameter`, `default_value`, `is_null`, `type`, `object_name`, `is_multi`, `convert_way`, `relative_source`, `relative_tfstate_attribute`, `relative_parameter`, `relative_parameter_value`, `function_define`, `create_time`, `create_user`, `update_time`, `update_user`) VALUES ('617bca363ea049004ad01bbf9cc1265f','instance_name','60fbc3ade37210da6daed785526c5773','60f82debf6f889917949a4acf7b5c846',NULL,'N','string','60fbc41d7a5ecb8cb2ac6d59ad8f4d66','N','direct',NULL,NULL,NULL,NULL,'','0000-00-00 00:00:00','','2021-10-29 18:20:55','admin');
 /*!40000 ALTER TABLE `tfstate_attribute` ENABLE KEYS */;
+
 UNLOCK TABLES;
 
 SET FOREIGN_KEY_CHECKS=1;
-
+#@v0.5.6-begin@;
+ALTER TABLE provider ADD COLUMN tenant_id_attr_name VARCHAR(32) COMMENT '租户ID属性',ADD COLUMN subscription_id_attr_name VARCHAR(32) COMMENT '订阅ID属性';
+ALTER TABLE provider_info ADD COLUMN tenant_id VARCHAR(512) COMMENT '租户ID',ADD COLUMN subscription_id VARCHAR(512) COMMENT '订阅ID';
+#@v0.5.6-end@;
