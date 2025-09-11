@@ -13,6 +13,12 @@ import (
 
 func ProviderInfoList(c *gin.Context) {
 	paramsMap := make(map[string]interface{})
+
+	// Extract name parameter for fuzzy matching
+	if name := c.Query("name"); name != "" {
+		paramsMap["name"] = name
+	}
+
 	rowData, err := db.ProviderInfoList(paramsMap)
 	if err != nil {
 		middleware.ReturnServerHandleError(c, err)

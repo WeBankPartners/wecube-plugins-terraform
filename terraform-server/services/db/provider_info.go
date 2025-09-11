@@ -11,8 +11,17 @@ import (
 
 func ProviderInfoList(paramsMap map[string]interface{}) (rowData []*models.ProviderInfoQuery, err error) {
 	sqlCmd := "SELECT t1.*,t2.name AS provider_title FROM provider_info t1 LEFT JOIN provider t2 ON t1.provider=t2.id"
-	sqlCmd += " ORDER BY t1.id DESC"
-	err = x.SQL(sqlCmd).Find(&rowData)
+
+	// Add WHERE clause for name fuzzy matching if provided
+	if name, exists := paramsMap["name"]; exists && name != "" {
+		sqlCmd += " WHERE t1.name LIKE ?"
+		sqlCmd += " ORDER BY t1.id DESC"
+		err = x.SQL(sqlCmd, "%"+name.(string)+"%").Find(&rowData)
+	} else {
+		sqlCmd += " ORDER BY t1.id DESC"
+		err = x.SQL(sqlCmd).Find(&rowData)
+	}
+
 	if err != nil {
 		log.Logger.Error("Get providerInfo list error", log.Error(err))
 	}
