@@ -18,55 +18,47 @@
     <!-- 配置区 -->
     <div
       v-if="showOperateZone"
-      :style="{ 'margin-top': '36px', 'max-height': pageHeight + 'px', overflow: 'auto', 'text-align': 'center' }"
+      :style="{ 'margin-top': '36px', 'max-height': pageHeight + 'px', overflow: 'auto' }"
+      class="template-data-container"
     >
-      <!-- 表头 -->
-      <div style="font-size: 0">
-        <div class="config-title">
-          {{ $t('t_template') }}
-        </div>
-        <div class="config-title">
-          {{ $t('t_template_value') }}
-        </div>
-        <template v-for="provider in providerList">
-          <div class="config-title" :key="provider.id">
-            {{ provider.name }}
-          </div>
-        </template>
-        <div class="config-title action-width">
-          {{ $t('t_action') }}
-        </div>
-      </div>
-      <template v-for="(template, tIndex) in pluginTemplates">
-        <div style="font-size: 0; margin-top: -1px" :key="template.id">
-          <div
-            class="config-title"
-            :style="{ 'vertical-align': 'bottom', height: template.templateValue.length * 40 + 'px' }"
-          >
-            <span>
-              {{ template.name }}
-            </span>
-            <Button
-              type="primary"
-              style="float: right"
-              @click="addTemplateValue(template, tIndex)"
-              ghost
-              icon="md-add"
-              size="small"
-            ></Button>
-          </div>
-          <div style="display: inline-block">
-            <template v-for="(tv, tvIndex) in template.templateValue">
-              <div :key="tv.key">
-                <div class="config-title">
-                  <Input v-model="tv.value" size="small" />
+      <table class="template-data-table">
+        <!-- 表头 -->
+        <thead>
+          <tr>
+            <th class="template-name-header">{{ $t('t_template') }}</th>
+            <th class="template-value-header">{{ $t('t_template_value') }}</th>
+            <th v-for="provider in providerList" :key="provider.id" class="provider-header">{{ provider.name }}</th>
+            <th class="action-header">{{ $t('t_action') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template v-for="(template, tIndex) in pluginTemplates">
+            <tr v-for="(tv, tvIndex) in template.templateValue" :key="`${template.id}-${tvIndex}`">
+              <!-- 模板名称列 -->
+              <td class="template-name-cell" v-if="tvIndex === 0" :rowspan="template.templateValue.length">
+                <div class="template-name-content">
+                  <span class="template-name-text">{{ template.name }}</span>
+                  <Button
+                    type="primary"
+                    @click="addTemplateValue(template, tIndex)"
+                    ghost
+                    icon="md-add"
+                    size="small"
+                    class="add-button"
+                  ></Button>
                 </div>
-                <template v-for="provider in providerList">
-                  <div class="config-title" :key="provider.id">
-                    <Input v-model="tv.providerTemplateValueInfo[provider.name].value" size="small" />
-                  </div>
-                </template>
-                <div class="config-title action-width">
+              </td>
+              <!-- 模板值列 -->
+              <td class="template-value-cell">
+                <Input v-model="tv.value" size="small" />
+              </td>
+              <!-- 云厂商列 -->
+              <td v-for="provider in providerList" :key="provider.id" class="provider-cell">
+                <Input v-model="tv.providerTemplateValueInfo[provider.name].value" size="small" />
+              </td>
+              <!-- 操作列 -->
+              <td class="action-cell">
+                <div class="action-buttons">
                   <Button type="primary" @click="saveTemplateValue(tv, tIndex, tvIndex)" ghost size="small">{{
                     $t('t_save')
                   }}</Button>
@@ -79,11 +71,11 @@
                     >{{ $t('t_delete') }}</Button
                   >
                 </div>
-              </div>
-            </template>
-          </div>
-        </div>
-      </template>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>
@@ -251,19 +243,133 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.config-title {
-  display: inline-block;
-  border: 1px solid #e9e9e9;
-  font-size: 12px;
-  margin-left: -1px;
-  height: 40px;
-  width: 250px;
-  padding: 8px 4px;
-  font-weight: bold;
-  color: #515a6e;
-  font-size: 14px;
+.template-data-container {
+  width: 100%;
+  overflow-x: auto;
 }
-.action-width {
-  width: 150px;
+
+.template-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #e9e9e9;
+  font-size: 14px;
+
+  th,
+  td {
+    border: 1px solid #e9e9e9;
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  th {
+    background-color: #fafafa;
+    font-weight: bold;
+    color: #515a6e;
+    text-align: center;
+  }
+
+  .template-name-header {
+    width: 200px;
+    min-width: 200px;
+  }
+
+  .template-value-header {
+    width: 200px;
+    min-width: 200px;
+  }
+
+  .provider-header {
+    width: 150px;
+    min-width: 150px;
+  }
+
+  .action-header {
+    width: 150px;
+    min-width: 150px;
+  }
+
+  .template-name-cell {
+    background-color: #fafafa;
+    vertical-align: top;
+    text-align: center;
+  }
+
+  .template-name-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .template-name-text {
+    font-weight: bold;
+    color: #515a6e;
+    word-break: break-all;
+  }
+
+  .add-button {
+    margin-top: 4px;
+  }
+
+  .template-value-cell,
+  .provider-cell {
+    padding: 4px 8px;
+  }
+
+  .action-cell {
+    text-align: center;
+    padding: 4px 8px;
+  }
+
+  .action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .action-buttons .ivu-btn {
+    width: 60px;
+    font-size: 12px;
+  }
+
+  // 响应式设计
+  @media (max-width: 1200px) {
+    .template-name-header,
+    .template-name-cell {
+      width: 150px;
+      min-width: 150px;
+    }
+
+    .template-value-header,
+    .template-value-cell {
+      width: 150px;
+      min-width: 150px;
+    }
+
+    .provider-header,
+    .provider-cell {
+      width: 120px;
+      min-width: 120px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .template-data-container {
+      font-size: 12px;
+    }
+
+    th,
+    td {
+      padding: 4px 6px;
+    }
+
+    .action-buttons .ivu-btn {
+      width: 50px;
+      font-size: 11px;
+      padding: 2px 4px;
+    }
+  }
 }
 </style>
