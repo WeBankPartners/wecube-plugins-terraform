@@ -1,5 +1,5 @@
 <template>
-  <div class=" ">
+  <div class="template-data-page">
     <!-- 搜索区 -->
     <div>
       <span>{{ $t('t_plugin') }}</span>
@@ -16,11 +16,7 @@
       <Button type="primary" @click="getTemplates" :disabled="!plugin">{{ $t('t_search') }}</Button>
     </div>
     <!-- 配置区 -->
-    <div
-      v-if="showOperateZone"
-      :style="{ 'margin-top': '36px', 'max-height': pageHeight + 'px', overflow: 'auto' }"
-      class="template-data-container"
-    >
+    <div v-if="showOperateZone" :style="{ 'margin-top': '24px' }" class="template-data-container">
       <table class="template-data-table">
         <!-- 表头 -->
         <thead>
@@ -243,9 +239,15 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.template-data-page {
+  max-height: 100vh;
+  overflow: hidden;
+}
+
 .template-data-container {
   width: 100%;
-  overflow-x: auto;
+  overflow: auto;
+  max-height: calc(100vh - 160px);
 }
 
 .template-data-table {
@@ -257,7 +259,7 @@ export default {
   th,
   td {
     border: 1px solid #e9e9e9;
-    padding: 8px 12px;
+    padding: 2px 8px;
     text-align: left;
     vertical-align: middle;
   }
@@ -299,7 +301,7 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
   }
 
   .template-name-text {
@@ -314,24 +316,25 @@ export default {
 
   .template-value-cell,
   .provider-cell {
-    padding: 4px 8px;
+    padding: 6px 6px;
   }
 
   .action-cell {
     text-align: center;
-    padding: 4px 8px;
+    padding: 6px 6px;
   }
 
   .action-buttons {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
     align-items: center;
+    justify-content: center;
+    gap: 8px;
   }
 
   .action-buttons .ivu-btn {
-    width: 60px;
+    width: 54px;
     font-size: 12px;
+    padding: 0 6px;
   }
 
   // 响应式设计
@@ -355,6 +358,16 @@ export default {
     }
   }
 
+  .action-header {
+    width: 110px;
+    min-width: 110px;
+  }
+
+  :deep(.ivu-input-small) {
+    height: 26px;
+    line-height: 26px;
+  }
+
   @media (max-width: 768px) {
     .template-data-container {
       font-size: 12px;
@@ -362,13 +375,13 @@ export default {
 
     th,
     td {
-      padding: 4px 6px;
+      padding: 2px 4px;
     }
 
     .action-buttons .ivu-btn {
-      width: 50px;
+      width: 48px;
       font-size: 11px;
-      padding: 2px 4px;
+      padding: 0 4px;
     }
   }
 }
